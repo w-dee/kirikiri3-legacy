@@ -142,6 +142,9 @@ void tALBuffer::FreeTempBuffers()
 		RenderBuffers[i].Samples = 0;
 		RenderBuffers[i].SegmentQueue.Clear();
 	}
+	RenderBufferReadIndex.reset();
+	RenderBufferWriteIndex.reset();
+	RenderBufferRemain.reset();
 
 	FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 	ConvertBufferSize = 0;
@@ -323,10 +326,15 @@ bool tALBuffer::FillRenderBuffer()
 	volatile tCriticalSection::tLocker render_lock(*RenderCS);
 
 	// ここから下は、異なるスレッドが同時にアクセスすることはない(すべてアトミック)
+	if(!Streaming) return false; // ストリーミングの際のみ
 
-	if((long)RenderBufferRemain >= (long)MAX_NUM_RENDERBUFFERS) return false;
+	if((long)RenderBufferRemain >= (long)MAX_NUM_RENDERBUFFERS -1) return false; // すでにバッファはいっぱいだ
+		// MAX_NUM_RENDERBUFFERS -1 と比較しているが、最後の一個は残しておく。
+		// こうしないと現在 OpenAL バッファに転送している部分を上書きしてしまう
+		// 可能性があるから。
 
-	long index = (++RenderBufferWriteIndex + 1) & (MAX_NUM_RENDERBUFFERS - 1);
+	// 書き込むバッファを見つける
+	long index = (++RenderBufferWriteIndex - 1) & (MAX_NUM_RENDERBUFFERS - 1);
 
 	risse_uint samples = ALOneBufferRenderUnit;
 	if(Render(RenderBuffers[index].Buffer, RenderBuffers[index].Size, samples, RenderBuffers[index].SegmentQueue))
@@ -351,6 +359,8 @@ bool tALBuffer::FillRenderBuffer()
 //---------------------------------------------------------------------------
 tALBuffer::tRenderBuffer * tALBuffer::GetRenderBuffer()
 {
+fprintf(stderr, "buffer remain : %ld\n", (long)RenderBufferRemain);
+
 	int retry_count = 2;
 	while(retry_count --)
 	{

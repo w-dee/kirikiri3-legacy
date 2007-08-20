@@ -175,6 +175,10 @@ public:
 	ALuint GetSource() const { if(Source) return Source->Source; else return 0; } //!< Source を得る
 
 private: //---- queue/buffer management
+	//! @brief		レンダリング(デコード)を行う
+	//! @note		残り容量が少ないと偽を返す
+	bool Render();
+
 	//! @brief		バッファのデータを埋める
 	void FillBuffer();
 

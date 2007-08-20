@@ -120,18 +120,21 @@ void tWaveDecodeThread::Execute(void)
 				// ソースが割り当てられている
 				risse_uint64 start_tick = tTickCount::instance()->Get();
 
-				source->FillBuffer();
+				bool buffer_repletion = source->Render();
 					// デコードを行う(このメソッドは、本来呼び出されるべきで
 					// ない場合に呼び出されても単に無視するはず)
 
 				// 眠るべき時間を計算する
 				// ここでは大まかに FillBuffer が tALBuffer::STREAMING_CHECK_SLEEP_MS
-				// 周期で実行されるように調整する。
+				// 周期で実行されるように調整する。バッファの残りが少ない場合は
+				// すぐに次のバッファを埋める。
 				// 楽観的なアルゴリズムなので Sleep 精度は問題にはならない。
 				risse_uint64 end_tick = tTickCount::instance()->Get();
 				sleep_ms = 
-					tALBuffer::STREAMING_CHECK_SLEEP_MS -
-						static_cast<int>(end_tick - start_tick);
+					buffer_repletion ? 
+						(tALBuffer::STREAMING_CHECK_SLEEP_MS -
+							static_cast<int>(end_tick - start_tick))
+						: 1;
 				if(sleep_ms < 0) sleep_ms = 1; // 0 を指定すると無限に待ってしまうので
 				if(static_cast<unsigned int>(sleep_ms ) > tALBuffer::STREAMING_CHECK_SLEEP_MS)
 					sleep_ms = tALBuffer::STREAMING_CHECK_SLEEP_MS;
@@ -520,8 +523,27 @@ void tALSource::DeleteSource()
 
 
 //---------------------------------------------------------------------------
+bool tALSource::Render()
+{
+	// ロックは行わない
+	// このメソッドは、比較的プライオリティの低いスレッドから呼ばれる可能性がある
+	Buffer->FillRenderBuffer(); // 先行してデコードを進める
+
+	if(Buffer->GetRenderBufferRemain() < (long)tALBuffer::STREAMING_BUFFER_HZ )
+	{
+		// 約一秒を切った場合は偽を返す
+		return false;
+	}
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tALSource::FillBuffer()
 {
+	// このメソッドは、比較的プライオリティの高いスレッドから呼ばれる可能性がある
+
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	RecheckStatus();
@@ -680,6 +702,7 @@ void tALSource::WatchCallback()
 	volatile tCriticalSection::tLocker cs_holder(*CS);
 
 	RecheckStatus();
+	FillBuffer();
 }
 //---------------------------------------------------------------------------
 

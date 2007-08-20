@@ -99,11 +99,17 @@ private:
 		risse_uint & samples,
 		tWaveSegmentQueue & segmentqueue);
 
+public:
+	//! @brief		RenderBuffer の現在の残りバッファ個数を得る
+	//! @note		まれに負の数が帰ることがあるので注意。この数値は参考値程度にみるべき。
+	long GetRenderBufferRemain() const { return (long) RenderBufferRemain; }
+
 	//! @brief		RenderBuffers を一つ埋める
 	//! @return		バッファがいっぱいで埋まらなかった、あるいはデコードする物がないなどの理由で
 	//!				デコードに失敗した場合は偽、埋まった場合は真
 	bool FillRenderBuffer();
 
+private:
 	//! @brief		RenderBuffers からバッファを一つ盗ってくる
 	//! @return		バッファが埋まればそのバッファへのポインタ、
 	//!				埋まらなければリトライして、それでも駄目ならば NULL を返す

@@ -16,6 +16,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include "sound/WaveFilter.h"
+#include "sound/WaveSegmentQueue.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -30,7 +31,7 @@ public:
 	static const risse_uint STREAMING_BUFFER_HZ = 8; //!< ストリーミング時の1/(一つのバッファの時間)(調整可)
 	static const risse_uint STREAMING_CHECK_SLEEP_MS = 70; //!< ストリーミング時のバッファをチェックする間隔(調整可)
 	static const risse_uint MAX_NUM_BUFFERS = 4; //!< 一つの tALBuffer が保持する最大のバッファ数
-	static const risse_uint MAX_NUM_RENDERBUFFERS = 16; //!< RenderBuffer の数
+	static const risse_uint MAX_NUM_RENDERBUFFERS = 16; //!< RenderBuffer の数(2の累乗である必要がある)
 
 private:
 	struct tInternalBuffers : public tDestructee
@@ -43,6 +44,7 @@ private:
 
 
 	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
+	tCriticalSection * RenderCS; //!< レンダリング(デコード)を保護するためのクリティカルセクション
 	tInternalBuffers * Buffers; //!< バッファ
 	ALuint FreeBuffers[MAX_NUM_BUFFERS]; //!< フリーのバッファ
 	risse_uint FreeBufferCount; //!< フリーのバッファの数
@@ -53,11 +55,22 @@ private:
 	risse_uint ALSampleGranuleBytes; //!< OpenAL バッファのbytes/sg
 	risse_uint ALOneBufferRenderUnit; //!< ストリーミング時の一つのバッファのサンプル数
 
-	risse_uint8 * RenderBuffer; //!< レンダリング用のテンポラリバッファ
-	size_t RenderBufferSize; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
+	//! @brief		デコードしたPCMを一時的に格納するための構造体
+	struct tRenderBuffer
+	{
+		risse_uint8 * Buffer; //!< レンダリング用のテンポラリバッファ
+		size_t Size; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
+		risse_uint Samples; //!< バッファに入っているサンプルグラニュール数
+		tWaveSegmentQueue SegmentQueue; //!< セグメントキュー
+	};
 
-	risse_uint8 * ConvertBuffer; //!< レンダリング用のテンポラリバッファ
-	size_t ConvertBufferSize; //!< RenderBuffer に割り当てられたサイズ(バイト単位)
+	tRenderBuffer RenderBuffers[MAX_NUM_RENDERBUFFERS]; //!< デコードしたPCMを一時的に格納するためのバッファ
+	tAtomicCounter RenderBufferReadIndex; //!< RenderBuffer の読み込み用インデックス
+	tAtomicCounter RenderBufferWriteIndex; //!< RenderBuffer の書き込み用インデックス
+	tAtomicCounter RenderBufferRemain; //!< RenderBuffer の残りサイズ
+
+	risse_uint8 * ConvertBuffer; //!< レンダリング用のPCM形式変換用のテンポラリバッファ
+	size_t ConvertBufferSize; //!< ConvertBuffer に割り当てられたサイズ(バイト単位)
 
 public:
 	//! @brief		コンストラクタ
@@ -74,24 +87,33 @@ private:
 	//! @brief		一時的に割り当てられたバッファの解放
 	void FreeTempBuffers();
 
-	//! @brief		レンダリング用のテンポラリバッファにデータを詰める
+	//! @brief		レンダリング(デコード)を行う
 	//! @param		render_buffer	レンダリング用のテンポラリバッファ
 	//! @param		render_buffer_size	レンダリング用のテンポラリバッファのサイズ
 	//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
 	//!							戻り値trueで関数が戻ればここには実際にデコードされたサンプル数が入っている
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		バッファにデータが入ったら真
-	bool FillRenderBuffer(
+	bool Render(
 		risse_uint8 * & render_buffer, size_t & render_buffer_size,
 		risse_uint & samples,
 		tWaveSegmentQueue & segmentqueue);
 
+	//! @brief		RenderBuffers を一つ埋める
+	//! @return		バッファがいっぱいで埋まらなかった、あるいはデコードする物がないなどの理由で
+	//!				デコードに失敗した場合は偽、埋まった場合は真
+	bool FillRenderBuffer();
+
+	//! @brief		RenderBuffers からバッファを一つ盗ってくる
+	//! @return		バッファが埋まればそのバッファへのポインタ、
+	//!				埋まらなければリトライして、それでも駄目ならば NULL を返す
+	tRenderBuffer * GetRenderBuffer();
+
 	//! @brief		OpenALバッファにデータを詰める
 	//! @param		buffer		対象とする OpenAL バッファ
-	//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
 	//! @return		バッファにデータが入ったら真
-	bool FillALBuffer(ALuint buffer, risse_uint samples,
+	bool FillALBuffer(ALuint buffer,
 		tWaveSegmentQueue & segmentqueue);
 
 public:

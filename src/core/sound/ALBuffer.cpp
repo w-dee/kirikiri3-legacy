@@ -49,15 +49,23 @@ tALBuffer::tALBuffer(tWaveFilter * filter, bool streaming)
 {
 	// フィールドの初期化
 	CS = new tCriticalSection();
+	RenderCS = new tCriticalSection();
 	Buffers = NULL;
 	FreeBufferCount = 0;
-	RenderBuffer = NULL;
-	RenderBufferSize = 0;
 	ConvertBuffer = NULL;
 	ConvertBufferSize = 0;
 	Streaming = streaming;
 	Filter = filter;
 	ALFormat = 0;
+
+	// RenderBuffer のクリア
+	for(risse_uint i= 0; i < MAX_NUM_RENDERBUFFERS; i++)
+	{
+		RenderBuffers[i].Buffer = NULL;
+		RenderBuffers[i].Size = 0;
+		RenderBuffers[i].Samples = 0;
+		RenderBuffers[i].SegmentQueue.Clear();
+	}
 
 	// filter のチェック
 	// tALBuffer は常に 16bit の OpenAL バッファを使う
@@ -108,12 +116,17 @@ tALBuffer::tALBuffer(tWaveFilter * filter, bool streaming)
 //---------------------------------------------------------------------------
 void tALBuffer::Clear()
 {
-	volatile tOpenAL::tCriticalSectionHolder cs_holder;
+	volatile tCriticalSection::tLocker lock(*CS);
 
-	delete Buffers, Buffers = NULL;
-	FreeBufferCount = 0;
+	{
+		volatile tCriticalSection::tLocker render_lock(*RenderCS);
 
-	FreeTempBuffers();
+
+		delete Buffers, Buffers = NULL;
+		FreeBufferCount = 0;
+
+		FreeTempBuffers();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -121,8 +134,15 @@ void tALBuffer::Clear()
 //---------------------------------------------------------------------------
 void tALBuffer::FreeTempBuffers()
 {
-	FreeCollectee(RenderBuffer), RenderBuffer = NULL;
-	RenderBufferSize = 0;
+	// RenderBuffer のクリア
+	for(risse_uint i= 0; i < MAX_NUM_RENDERBUFFERS; i++)
+	{
+		RenderBuffers[i].Buffer = NULL;
+		RenderBuffers[i].Size = 0;
+		RenderBuffers[i].Samples = 0;
+		RenderBuffers[i].SegmentQueue.Clear();
+	}
+
 	FreeCollectee(ConvertBuffer), ConvertBuffer = NULL;
 	ConvertBufferSize = 0;
 }
@@ -130,10 +150,12 @@ void tALBuffer::FreeTempBuffers()
 
 
 //---------------------------------------------------------------------------
-bool tALBuffer::FillRenderBuffer(risse_uint8 * & render_buffer, size_t & render_buffer_size,
+bool tALBuffer::Render(risse_uint8 * & render_buffer, size_t & render_buffer_size,
 	risse_uint & samples,
 	tWaveSegmentQueue & segmentqueue)
 {
+	volatile tCriticalSection::tLocker render_lock(*RenderCS);
+
 	// バッファにデータをレンダリングする
 	segmentqueue.Clear(); // queue はここでクリアされるので注意
 
@@ -294,20 +316,115 @@ bool tALBuffer::FillRenderBuffer(risse_uint8 * & render_buffer, size_t & render_
 
 
 //---------------------------------------------------------------------------
-bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
+bool tALBuffer::FillRenderBuffer()
+{
+	// FillRenderBuffer は違うスレッドから同時に呼ばれることを考慮している
+
+	volatile tCriticalSection::tLocker render_lock(*RenderCS);
+
+	// ここから下は、異なるスレッドが同時にアクセスすることはない(すべてアトミック)
+
+	if((long)RenderBufferRemain >= (long)MAX_NUM_RENDERBUFFERS) return false;
+
+	long index = (++RenderBufferWriteIndex + 1) & (MAX_NUM_RENDERBUFFERS - 1);
+
+	risse_uint samples = ALOneBufferRenderUnit;
+	if(Render(RenderBuffers[index].Buffer, RenderBuffers[index].Size, samples, RenderBuffers[index].SegmentQueue))
+	{
+		RenderBuffers[index].Samples = samples;
+
+		++RenderBufferRemain;
+
+		return true;
+	}
+
+	RenderBuffers[index].Samples = 0;
+
+	++RenderBufferRemain; // いずれにせよ、RenderBufferRemain はインクリメントする
+
+	return false;
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tALBuffer::tRenderBuffer * tALBuffer::GetRenderBuffer()
+{
+	int retry_count = 2;
+	while(retry_count --)
+	{
+		// このりバッファはあるか？
+		if(--RenderBufferRemain >= 0)
+		{
+			// すでにレンダリングされた物があるのでそれを返そう
+			long index = (++RenderBufferReadIndex - 1) & (MAX_NUM_RENDERBUFFERS - 1);
+
+			if(RenderBuffers[index].Samples == 0)
+			{
+				// バッファは埋まっていたがサンプルが入ってない
+				return NULL; // NULL を返す
+			}
+
+			return RenderBuffers + index;
+		}
+
+		// バッファの残りが 0 を切ってしまっていた場合
+		++RenderBufferRemain; // 元に戻しておく
+
+		// いったん RenderCS の中に入り、そのまま出てみる
+		// もし デコード中ならば、デコードが終わるとこの RenderCSにはいり、
+		// そのまま出てくることが出来るはずである
+		{ volatile tCriticalSection::tLocker render_lock(*RenderCS); }
+
+		// このりバッファはあるか？
+		if(--RenderBufferRemain >= 0)
+		{
+			// すでにレンダリングされた物があるのでそれを返そう
+			long index = (++RenderBufferReadIndex - 1) & (MAX_NUM_RENDERBUFFERS - 1);
+
+			if(RenderBuffers[index].Samples == 0)
+			{
+				// バッファは埋まっていたがサンプルが入ってない
+				return NULL; // NULL を返す
+			}
+
+			return RenderBuffers + index;
+		}
+
+		// バッファの残りが 0 を切ってしまっていた場合
+		++RenderBufferRemain; // 元に戻しておく
+
+
+		// すでにレンダリングされた物はないようであるから、レンダリングを試みる
+		FillRenderBuffer();
+
+		// FillRenderBuffer 内では、バッファに残りがあれば(デコードする残りサンプルがある・ないに関わらず)
+		// かならず RenderBufferRemain をインクリメントするはず
+	}
+
+	// なのでリトライ2回目は必ず成功するはずなのでここにはこないはず
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tALBuffer::FillALBuffer(ALuint buffer,
 	tWaveSegmentQueue & segmentqueue)
 {
-	if(FillRenderBuffer(RenderBuffer, RenderBufferSize, samples, segmentqueue))
+	tRenderBuffer * render_buffer = tALBuffer::GetRenderBuffer();
+
+	if(render_buffer)
 	{
 		// バッファにデータを割り当てる
-
 		volatile tOpenAL::tCriticalSectionHolder cs_holder;
 
-	//	wxPrintf(wxT("alBufferData: buffer %u, format %d, size %d, freq %d\n"), buffer,
-	//			ALFormat, ALSampleGranuleBytes * rendered, ALFrequency);
-		alBufferData(buffer, ALFormat, RenderBuffer,
-			samples * ALSampleGranuleBytes, ALFrequency);
+		alBufferData(buffer, ALFormat,render_buffer->Buffer,
+			render_buffer->Samples * ALSampleGranuleBytes, ALFrequency);
 		tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
+
+		segmentqueue = render_buffer->SegmentQueue;
 
 		return true;
 	}
@@ -315,7 +432,6 @@ bool tALBuffer::FillALBuffer(ALuint buffer, risse_uint samples,
 	return false;
 }
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------
@@ -352,7 +468,7 @@ bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueu
 
 	// バッファにデータを流し込む
 	buffer = FreeBuffers[FreeBufferCount - 1];
-	bool filled = FillALBuffer(buffer, ALOneBufferRenderUnit, segmentqueue);
+	bool filled = FillALBuffer(buffer, segmentqueue);
 
 	// FreeBufferCount を減らす
 	if(filled) FreeBufferCount --;
@@ -367,9 +483,15 @@ void tALBuffer::FreeAllBuffers()
 {
 	volatile tCriticalSection::tLocker lock(*CS);
 
-	// すべてのバッファを解放したことにする
-	memcpy(FreeBuffers, Buffers->Buffers, sizeof(ALuint) * Buffers->BufferAllocatedCount);
-	FreeBufferCount = Buffers->BufferAllocatedCount;
+	{
+		volatile tCriticalSection::tLocker render_lock(*RenderCS);
+
+		// すべてのバッファを解放したことにする
+		memcpy(FreeBuffers, Buffers->Buffers, sizeof(ALuint) * Buffers->BufferAllocatedCount);
+		FreeBufferCount = Buffers->BufferAllocatedCount;
+
+		FreeTempBuffers();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -391,7 +513,7 @@ void tALBuffer::Load()
 
 	risse_uint samples = 0;
 
-	if(FillRenderBuffer(render_buffer, render_buffer_size, samples, segmentqueue))
+	if(Render(render_buffer, render_buffer_size, samples, segmentqueue))
 	{
 		// バッファにデータを割り当てる
 

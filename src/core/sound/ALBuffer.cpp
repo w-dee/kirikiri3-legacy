@@ -359,8 +359,6 @@ bool tALBuffer::FillRenderBuffer()
 //---------------------------------------------------------------------------
 tALBuffer::tRenderBuffer * tALBuffer::GetRenderBuffer()
 {
-fprintf(stderr, "buffer remain : %ld\n", (long)RenderBufferRemain);
-
 	int retry_count = 2;
 	while(retry_count --)
 	{

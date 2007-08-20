@@ -270,6 +270,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 			//! @brief		long へのキャスト
 			operator long() const { return ::InterlockedExchangeAdd(&v, 0); }
+
+			//! @brief		0 にする (注意: non-atomic)
+			void reset() { static_cast<long volatile &>(v) = 0; }
 		};
 
 	#elif defined(__GLIBCPP__) || defined(__GLIBCXX__)
@@ -304,6 +307,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 			//! @brief		long へのキャスト
 			operator long() const { return __exchange_and_add(&v, 0); }
+
+			//! @brief		0 にする (注意: non-atomic)
+			void reset() { static_cast<long volatile &>(v) = 0; }
 		};
 
 	#else

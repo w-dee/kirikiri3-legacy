@@ -118,9 +118,10 @@ private:
 	//! @brief		OpenALバッファにデータを詰める
 	//! @param		buffer		対象とする OpenAL バッファ
 	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
+	//! @param		samples		書き込まれたサンプルグラニュール数
 	//! @return		バッファにデータが入ったら真
 	bool FillALBuffer(ALuint buffer,
-		tWaveSegmentQueue & segmentqueue);
+		tWaveSegmentQueue & segmentqueue, risse_uint & samples);
 
 public:
 	//! @brief		フリーになったバッファを FreeBuffers に push する
@@ -133,8 +134,9 @@ public:
 	//! @brief		空きバッファにデータをfillして返す
 	//! @param		buffer バッファ番号を格納する変数
 	//! @param		segmentqueue セグメントキュー
+	//! @param		samples		書き込まれたサンプルグラニュール数
 	//! @return		fill に成功したか
-	bool PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue);
+	bool PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue, risse_uint & samples);
 
 	//! @brief		全てのバッファを解放する
 	void FreeAllBuffers();

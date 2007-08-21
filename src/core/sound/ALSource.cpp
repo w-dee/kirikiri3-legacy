@@ -195,6 +195,7 @@ public:
 	tWaveDecodeThread * Acquire(tALSource * source);
 	void Unacquire(tWaveDecodeThread * buffer);
 	bool CallWatchCallbacks();
+	risse_int32 FireLabelEvents();
 };
 //---------------------------------------------------------------------------
 
@@ -334,6 +335,36 @@ bool tWaveDecodeThreadPool::CallWatchCallbacks()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+risse_int32 tWaveDecodeThreadPool::FireLabelEvents()
+{
+	// ここで使用している pointer_list は自分でスレッド保護を行うので
+	// 明示的なロックはここでは必要ない。
+	risse_int32 nearest_next = -1;
+	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
+	size_t count = UsingThreads.get_locked_count();
+	for(size_t i = 0; i < count; i++)
+	{
+		tWaveDecodeThread * th = UsingThreads.get_locked(i);
+		if(th)
+		{
+			tALSource * source = th->GetSource();
+			if(source)
+			{
+				risse_int32 next = source->FireLabelEvents();
+				// この中で Unacquire が呼ばれる可能性があるので注意
+				// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+				if(next != -1)
+				{
+					if(nearest_next == -1 || nearest_next > next) nearest_next = next;
+				}
+			}
+		}
+	}
+
+	return nearest_next;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -390,6 +421,111 @@ void tWaveWatchThread::Execute(void)
 	}
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ラベルイベントタイミング発生用スレッド
+//---------------------------------------------------------------------------
+class tWaveLabelTimingThread : public tThread,
+			public singleton_base<tWaveLabelTimingThread>,
+			manual_start<tWaveLabelTimingThread>,
+			protected depends_on<tTickCount>
+{
+	tThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+
+public:
+	tWaveLabelTimingThread();
+	~tWaveLabelTimingThread();
+
+	void Reschedule();
+
+protected:
+	void Execute(void);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		コンストラクタ
+//---------------------------------------------------------------------------
+tWaveLabelTimingThread::tWaveLabelTimingThread()
+{
+	Run(); // スレッドの実行を開始
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		デストラクタ
+//---------------------------------------------------------------------------
+tWaveLabelTimingThread::~tWaveLabelTimingThread()
+{
+	Terminate(); // スレッドの終了を伝える
+	Event.Signal(); // スレッドをたたき起こす
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		リスケジュールを行う
+//---------------------------------------------------------------------------
+void tWaveLabelTimingThread::Reschedule()
+{
+	Event.Signal(); // スレッドをたたき起こす
+	// スレッドをたたき起こすとすぐにリスケジュールが行われる
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		スレッドのエントリーポイント
+//---------------------------------------------------------------------------
+void tWaveLabelTimingThread::Execute(void)
+{
+	while(!ShouldTerminate())
+	{
+		risse_int32 sleep_time = tWaveDecodeThreadPool::instance()->FireLabelEvents();
+		if(sleep_time < 0) sleep_time = 0x100000; // 次のイベントがみつからなかったので適当な時間を待つ
+		else if(sleep_time == 0) sleep_time = 0;
+		Event.Wait(sleep_time); // 次のラベルイベントまでまつ
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -475,10 +611,14 @@ void tALSource::Init(tALBuffer * buffer)
 	DecodeThread = NULL;
 	Status = PrevStatus = ssStop;
 	NeedRewind = false;
+	DecodePosition = 0;
 	Buffer = buffer; // 一応再設定
 
 	// スレッドプールを作成
 	tWaveDecodeThreadPool::ensure();
+
+	// ラベルイベントタイミング発生用スレッドを作成
+//	tWaveLabelTimingThread::ensure();
 }
 //---------------------------------------------------------------------------
 
@@ -599,6 +739,7 @@ void tALSource::UnqueueAllBuffers()
 
 	// セグメントキューもクリア
 	SegmentQueues.clear();
+	DecodePosition = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -648,9 +789,10 @@ void tALSource::QueueBuffer()
 	{
 		// データが流し込まれたバッファを得る
 		// TODO: segments と events のハンドリング
-		tWaveSegmentQueue segmentqueue;
+		tSegmentInfo info;
+		risse_uint samples;
 		ALuint  buffer = 0;
-		bool filled = Buffer->PopFilledBuffer(buffer, segmentqueue);
+		bool filled = Buffer->PopFilledBuffer(buffer, info.SegmentQueue, samples);
 
 		// バッファにデータを割り当て、キューする
 		if(filled)
@@ -663,9 +805,14 @@ void tALSource::QueueBuffer()
 		// セグメントキューに追加
 		if(filled)
 		{
-			SegmentQueues.push_back(segmentqueue);
-//			fprintf(stderr, "queue : ");
-//			segmentqueue.Dump();
+			info.DecodePosition = DecodePosition;
+			SegmentQueues.push_back(info);
+			DecodePosition += samples;
+
+			// ラベルが一つ以上入っていたら、ラベルイベントのタイミングの
+			// リスケジュールを行う
+			if(info.SegmentQueue.GetEvents().size() > 0)
+				tWaveLabelTimingThread::instance()->Reschedule();
 		}
 	}
 }
@@ -860,17 +1007,15 @@ void tALSource::Pause()
 
 
 //---------------------------------------------------------------------------
-risse_uint64 tALSource::GetPosition()
+risse_size tALSource::GetBufferPlayingPosition()
 {
-	volatile tCriticalSection::tLocker cs_holder(*CS);
-
 	RecheckStatus();
 
 	EnsureSource();
 
-	// 再生中や一時停止中でない場合は 0 を返す
-	if(Status != ssPlay && Status != ssPause) return 0;
-	if(SegmentQueues.size() == 0) return 0;
+	// 再生中や一時停止中でない場合は risse_size_max を返す
+	if(Status != ssPlay && Status != ssPause) return risse_size_max;
+	if(SegmentQueues.size() == 0) return risse_size_max;
 
 	unsigned int unit = Buffer->GetOneBufferRenderUnit();
 
@@ -884,9 +1029,6 @@ risse_uint64 tALSource::GetPosition()
 		fprintf(stderr, "segment count does not match (al %d risa %d)\n", (int)queued, (int)SegmentQueues.size());
 }
 /*---- debug ----*/
-
-	unsigned int queue_index;
-	unsigned int queue_offset;
 
 	// 再生位置を取得する
 	ALint pos = 0;
@@ -906,16 +1048,33 @@ risse_uint64 tALSource::GetPosition()
 	ALint size_max = (unsigned int)SegmentQueues.size() * unit;
 	while(pos >= size_max) pos -= size_max;
 
+	return (risse_size)pos;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint64 tALSource::GetPosition()
+{
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	risse_size pos = GetBufferPlayingPosition();
+
+	// 再生中や一時停止中でない場合は 0 を返す
+	if(pos == risse_size_max) return 0;
+
 	// 返された値は キューの先頭からの再生オフセットなので、該当する
 	// キューを探す
-	queue_index  = pos / unit;
-	queue_offset = pos % unit;
+	unsigned int unit = Buffer->GetOneBufferRenderUnit();
+
+	risse_size queue_index  = pos / unit;
+	risse_size queue_offset = pos % unit;
 
 //	fprintf(stderr, "get position queue in offset %d at queue index %d : ", queue_offset, queue_index);
 //	SegmentQueues[queue_index].Dump();
 
 	// 得られたのはフィルタ後の位置なのでフィルタ前のデコード位置に変換してから返す
-	return SegmentQueues[queue_index].FilteredPositionToDecodePosition(queue_offset);
+	return SegmentQueues[queue_index].SegmentQueue.FilteredPositionToDecodePosition(queue_offset);
 }
 //---------------------------------------------------------------------------
 
@@ -987,6 +1146,72 @@ void tALSource::SetPosition(risse_uint64 pos)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+risse_int32 tALSource::FireLabelEvents()
+{
+	// キュー中のイベントのうち、現在再生されているポイント以前の物に対して
+	// イベントを発生させる。また、現在再生されているポイントより後の物に対しては
+	// 最も近いイベントをさがして、それまでの時間を帰す。
+	volatile tCriticalSection::tLocker cs_holder(*CS);
+
+	// そもそもイベントがキュー中にあるか？
+	gc_deque<tSegmentInfo>::iterator i;
+	for(i = SegmentQueues.begin();
+		i != SegmentQueues.end(); i++)
+	{
+		if(i->SegmentQueue.GetEvents().size() > 0) break;
+	}
+
+	if(i == SegmentQueues.end()) return -1; // イベントは何もない
+
+	// 現在の再生位置を得る
+	risse_size pos = GetBufferPlayingPosition();
+	if(pos == risse_size_max) return -1; // 情報が得られなかった
+
+	unsigned int unit = Buffer->GetOneBufferRenderUnit();
+
+	risse_size queue_index  = pos / unit;
+	risse_size queue_offset = pos % unit;
+
+	// 得られたのはフィルタ後の位置なのでフィルタ前のデコード位置に変換してから返す
+	risse_uint64 current_pos = SegmentQueues[queue_index].DecodePosition + queue_offset;
+
+	// イベントキューを順にみていき、目的のイベントを探す
+	risse_int64 nearest_next = (risse_int64)-1;
+	for(i = SegmentQueues.begin();
+		i != SegmentQueues.end(); i++)
+	{
+		gc_deque<tWaveEvent> & events = i->SegmentQueue.GetEvents();
+		for(gc_deque<tWaveEvent>::iterator ei = events.begin(); ei != events.end(); ei++)
+		{
+			risse_uint64 event_pos = i->DecodePosition + ei->Offset;
+			if(event_pos <= current_pos)
+			{
+				// fire event
+				wxFprintf(stderr, wxT("label event %s\n"), ei->Name.AsWxString().c_str());
+				fflush(stderr);
+			}
+			else
+			{
+				if(nearest_next == (risse_int64)-1 || (risse_uint64)nearest_next > event_pos - current_pos)
+					nearest_next = event_pos - current_pos;
+			}
+		}
+	}
+
+	// 時間に変換
+	if(nearest_next != (risse_int64)-1)
+		nearest_next = nearest_next * 1000 / LoopManager->GetFormat().Frequency;
+
+
+	// あまりに大きな数値は適当にまとめる(問題ない)
+	if(nearest_next > 0x10000000) nearest_next = 0x10000000; // あまりに大きい
+
+
+	return (risse_int32)nearest_next;
+}
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

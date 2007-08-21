@@ -419,7 +419,7 @@ tALBuffer::tRenderBuffer * tALBuffer::GetRenderBuffer()
 
 //---------------------------------------------------------------------------
 bool tALBuffer::FillALBuffer(ALuint buffer,
-	tWaveSegmentQueue & segmentqueue)
+	tWaveSegmentQueue & segmentqueue, risse_uint & samples)
 {
 	tRenderBuffer * render_buffer = tALBuffer::GetRenderBuffer();
 
@@ -431,7 +431,7 @@ bool tALBuffer::FillALBuffer(ALuint buffer,
 		alBufferData(buffer, ALFormat,render_buffer->Buffer,
 			render_buffer->Samples * ALSampleGranuleBytes, ALFrequency);
 		tOpenAL::instance()->ThrowIfError(RISSE_WS("alBufferData"));
-
+		samples = render_buffer->Samples;
 		segmentqueue = render_buffer->SegmentQueue;
 
 		return true;
@@ -464,7 +464,8 @@ bool tALBuffer::HasFreeBuffer()
 
 
 //---------------------------------------------------------------------------
-bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue)
+bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue,
+							risse_uint & samples)
 {
 	volatile tCriticalSection::tLocker lock(*CS);
 
@@ -476,7 +477,7 @@ bool tALBuffer::PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueu
 
 	// バッファにデータを流し込む
 	buffer = FreeBuffers[FreeBufferCount - 1];
-	bool filled = FillALBuffer(buffer, segmentqueue);
+	bool filled = FillALBuffer(buffer, segmentqueue, samples);
 
 	// FreeBufferCount を減らす
 	if(filled) FreeBufferCount --;

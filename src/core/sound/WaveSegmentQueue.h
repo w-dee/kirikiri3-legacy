@@ -117,6 +117,10 @@ public:
 	//! @note		デコード位置
 	risse_int64 FilteredPositionToDecodePosition(risse_int64 pos) const;
 
+	//! @brief		イベント配列を得る
+	//! @return		イベント配列
+	gc_deque<tWaveEvent> & GetEvents() { return Events; }
+
 	//! @brief		内容を標準エラー出力にダンプする(デバッグ用)
 	void Dump() const;
 };

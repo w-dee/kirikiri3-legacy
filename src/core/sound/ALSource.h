@@ -145,7 +145,16 @@ private:
 	tWaveDecodeThread * DecodeThread; //!< デコードスレッド
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
-	gc_deque<tWaveSegmentQueue> SegmentQueues; //!< セグメントキューの配列
+
+	//! @brief		一つの OpenAL バッファに対応するセグメントの情報
+	struct tSegmentInfo
+	{
+		tWaveSegmentQueue SegmentQueue; //!< セグメントキュー
+		risse_uint64 DecodePosition; //!< デコードを開始した任意の原点からの相対デコード位置(サンプルグラニュール単位)
+	};
+	gc_deque<tSegmentInfo> SegmentQueues; //!< セグメントキューの配列
+
+	risse_uint64 DecodePosition; //!< デコードした総サンプル数
 
 public:
 	//! @brief		コンストラクタ
@@ -199,6 +208,10 @@ public:
 	//! @brief		監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
 	void WatchCallback();
 
+	//! @brief		現在再生位置までに発生したイベントをすべて発生させる
+	//! @return		もっとも近い次のラベルイベントまでの時間を ms で返す
+	
+
 private:
 	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
 	//! @param		async		非同期イベントかどうか
@@ -225,6 +238,14 @@ public:
 	//! @brief		再生の一時停止
 	void Pause();
 
+private:
+	//! @brief		再生中のバッファ内の位置を得る
+	//! @return		再生中のバッファ内の位置 (キューの先頭からのサンプルグラニュール数単位)
+	//! @note		現在位置を得られなかった場合は risse_size_max が帰る。このメソッドは
+	//!				スレッド保護を行わないので注意
+	risse_size GetBufferPlayingPosition();
+
+public:
 	//! @brief		再生位置を得る
 	//! @return		再生位置   (デコーダ出力時におけるサンプルグラニュール数単位)
 	//! @note		返される値は、デコーダ上(つまり元のメディア上での)サンプルグラニュール数
@@ -236,6 +257,11 @@ public:
 	//! @brief		再生位置を設定する
 	//! @param		pos  再生位置 (デコーダ出力におけるサンプルグラニュール数単位)
 	void SetPosition(risse_uint64 pos);
+
+public:
+	//! @brief		現在の再生位置までのラベルイベントを発生させ、次のラベルイベントまでの時間を帰す
+	//! @return		次のラベルイベントまでの時間(ms) ラベルイベントが見つからない場合は -1 を帰す
+	risse_int32 FireLabelEvents();
 
 public:
 	//! @brief		ステータスの変更を通知する

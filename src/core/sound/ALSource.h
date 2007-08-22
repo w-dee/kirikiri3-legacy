@@ -153,6 +153,7 @@ private:
 		risse_uint64 DecodePosition; //!< デコードを開始した任意の原点からの相対デコード位置(サンプルグラニュール単位)
 	};
 	gc_deque<tSegmentInfo> SegmentQueues; //!< セグメントキューの配列
+	gc_deque<tWaveEvent> SegmentEvents; //!< イベントの配列
 
 	risse_uint64 DecodePosition; //!< デコードした総サンプル数
 
@@ -283,6 +284,12 @@ public:
 	//!				OnStatusChangedAsync は OnStatusChanged を呼んだ
 	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
 	virtual void OnStatusChangedAsync(tStatus status) {;}
+
+	//! @brief		ラベルイベントの発生を通知する
+	//! @param		name		ラベル名
+	//! @note		このイベントは常に非同期イベントとなるはず。
+	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	virtual void OnLabel(const tString & name) {;}
 };
 //---------------------------------------------------------------------------
 

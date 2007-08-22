@@ -505,7 +505,7 @@ void tWaveLabelTimingThread::Execute(void)
 	{
 		risse_int32 sleep_time = tWaveDecodeThreadPool::instance()->FireLabelEvents();
 		if(sleep_time < 0) sleep_time = 0x100000; // 次のイベントがみつからなかったので適当な時間を待つ
-		else if(sleep_time == 0) sleep_time = 0;
+		else if(sleep_time == 0) sleep_time = 1;
 		Event.Wait(sleep_time); // 次のラベルイベントまでまつ
 	}
 }
@@ -739,6 +739,7 @@ void tALSource::UnqueueAllBuffers()
 
 	// セグメントキューもクリア
 	SegmentQueues.clear();
+	SegmentEvents.clear();
 	DecodePosition = 0;
 }
 //---------------------------------------------------------------------------
@@ -807,12 +808,26 @@ void tALSource::QueueBuffer()
 		{
 			info.DecodePosition = DecodePosition;
 			SegmentQueues.push_back(info);
-			DecodePosition += samples;
 
 			// ラベルが一つ以上入っていたら、ラベルイベントのタイミングの
 			// リスケジュールを行う
 			if(info.SegmentQueue.GetEvents().size() > 0)
+			{
+				// ラベルは SegmentEvents に移す
+				gc_deque<tWaveEvent> & events = info.SegmentQueue.GetEvents();
+				for(gc_deque<tWaveEvent>::iterator i = events.begin();
+					i != events.end(); i++)
+				{
+					i->Offset += DecodePosition;
+					SegmentEvents.push_back(*i);
+				}
+
+				// リスケジュールを行わせる
 				tWaveLabelTimingThread::instance()->Reschedule();
+			}
+
+
+			DecodePosition += samples;
 		}
 	}
 }
@@ -920,6 +935,11 @@ void tALSource::Play()
 		alSourcePlay(Source->Source);
 		tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
+
+	// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
+	// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
+	// 念のためリスケジュールを行う
+	tWaveLabelTimingThread::instance()->Reschedule();
 
 	// ステータスの変更を通知
 	Status = ssPlay;
@@ -1178,33 +1198,44 @@ risse_int32 tALSource::FireLabelEvents()
 	risse_uint64 current_pos = SegmentQueues[queue_index].DecodePosition + queue_offset;
 
 	// イベントキューを順にみていき、目的のイベントを探す
+	// いちおうイベントはもっとも速い物から順にキューに入っているはずだが、
+	// イベントがそんなに大量になることもないので、いまのところ念のため
+	// すべてのイベントを見る
+/*
+tString nearest_label;
+*/
 	risse_int64 nearest_next = (risse_int64)-1;
-	for(i = SegmentQueues.begin();
-		i != SegmentQueues.end(); i++)
+	for(gc_deque<tWaveEvent>::iterator ei = SegmentEvents.begin(); ei != SegmentEvents.end(); /**/)
 	{
-		gc_deque<tWaveEvent> & events = i->SegmentQueue.GetEvents();
-		for(gc_deque<tWaveEvent>::iterator ei = events.begin(); ei != events.end(); ei++)
+		risse_uint64 event_pos = ei->Offset;
+		if(event_pos <= current_pos)
 		{
-			risse_uint64 event_pos = i->DecodePosition + ei->Offset;
-			if(event_pos <= current_pos)
-			{
-				// fire event
-				wxFprintf(stderr, wxT("label event %s\n"), ei->Name.AsWxString().c_str());
-				fflush(stderr);
-			}
-			else
-			{
-				if(nearest_next == (risse_int64)-1 || (risse_uint64)nearest_next > event_pos - current_pos)
-					nearest_next = event_pos - current_pos;
-			}
+			// fire event
+			wxFprintf(stderr, wxT("label event %s\n"), ei->Name.AsWxString().c_str());
+			fflush(stderr);
+			ei = SegmentEvents.erase(ei); // イベントは削除する
+		}
+		else
+		{
+			if(nearest_next == (risse_int64)-1 || (risse_uint64)nearest_next > event_pos - current_pos)
+				nearest_next = event_pos - current_pos/*, nearest_label = ei->Name*/;
+			ei ++;
 		}
 	}
 
 	// 時間に変換
 	if(nearest_next != (risse_int64)-1)
-		nearest_next = nearest_next * 1000 / LoopManager->GetFormat().Frequency;
+		nearest_next = nearest_next  * 1000 / LoopManager->GetFormat().Frequency + 1;
+		// 1 を足しているのは誤差を丸めるため。
+		// ぴったりだと、次回ここが呼ばれたときにはわずかにタイミングが早すぎる場合がある。
 
-
+/*
+	if(nearest_next != (risse_int64)-1)
+	{
+	wxFprintf(stderr, wxT("nearest event %s, after %d ms (at %d), current %d\n"),
+		nearest_label.AsWxString().c_str(), (int)nearest_next, (int)(nearest_next + current_pos), (int)current_pos);
+	}
+*/
 	// あまりに大きな数値は適当にまとめる(問題ない)
 	if(nearest_next > 0x10000000) nearest_next = 0x10000000; // あまりに大きい
 

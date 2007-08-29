@@ -1150,6 +1150,11 @@ void tALSource::SetPosition(risse_uint64 pos)
 
 		if(Status == ssPlay)
 		{
+			// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
+			// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
+			// 念のためリスケジュールを行う
+			tWaveLabelTimingThread::instance()->Reschedule();
+
 			// 再生を開始する
 			{
 				volatile tOpenAL::tCriticalSectionHolder al_cs_holder;

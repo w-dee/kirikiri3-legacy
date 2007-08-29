@@ -56,6 +56,13 @@ void tSoundALSource::OnStatusChangedAsync(tStatus status)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tSoundALSource::OnLabel(const tString & name)
+{
+	Owner->OnLabel(name);
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -109,6 +116,9 @@ void tSoundInstance::Clear()
 
 	// ステータスを unload に
 	OnStatusChanged(ssUnload);
+
+	// PendingLabelQueue をクリア
+	PendingLabelQueue.clear();
 }
 //---------------------------------------------------------------------------
 
@@ -266,6 +276,8 @@ void tSoundInstance::SetSamplePosition(risse_uint64 pos)
 	volatile tSynchronizer sync(this); // sync
 
 	if(!Source) return; // ソースがないので再生位置を変更できない
+
+	GetDestEventQueueInstance()->CancelEvents(&LabelEventSource); // まだ配信されていないラベルイベントは削除する
 	Source->SetPosition(pos);
 }
 //---------------------------------------------------------------------------
@@ -277,6 +289,8 @@ void tSoundInstance::SetTimePosition(double pos)
 	volatile tSynchronizer sync(this); // sync
 
 	if(!Source) return; // ソースがないので再生位置を変更できない
+
+	GetDestEventQueueInstance()->CancelEvents(&LabelEventSource); // まだ配信されていないラベルイベントは削除する
 	Source->SetPosition(static_cast<risse_uint64>(pos *  LoopManager->GetFormat().Frequency / 1000));
 }
 //---------------------------------------------------------------------------
@@ -305,14 +319,68 @@ void tSoundInstance::OnStatusChanged(tStatus status)
 
 	if(Status != status)
 	{
-		Status = status;
+		GetDestEventQueueInstance()->CancelEvents(&StatusEventSource);
 
-		// 以前に発生させた非同期イベントのうち、配信されていないイベントはすべて削除する
-		GetDestEventQueueInstance()->CancelEvents(this);
+		// tALSource はイベントを発生すべきタイミングでメソッドを
+		// 呼び出しはするが、Risa のイベントシステムに関わる作業はしない。
+		// ここではイベントシステムに関わる処理を行う。
+		// tALSource の状態を常に tSoundInstance でも知っておかなければ
+		// ならないと言うことでもあり、ミスをしやすいところと思われるので注意。
+		bool post_pending_label_events = false;
+
+		switch(status)
+		{
+		case tALSourceStatus::ssUnload:
+		case tALSourceStatus::ssStop:
+			// この場合はラベルイベントをすべて破棄する
+			GetDestEventQueueInstance()->CancelEvents(&LabelEventSource);
+			break;
+
+		case tALSourceStatus::ssPlay:
+			if(Status == tALSourceStatus::ssPause)
+			{
+				// 直前が Pause だったばあい、PendingLabelQueue をすべてキューに投げる
+				post_pending_label_events = true;
+			}
+			else
+			{
+				// そうでない場合はラベルイベントをすべて破棄する
+				GetDestEventQueueInstance()->CancelEvents(&LabelEventSource);
+			}
+			break;
+
+		case tALSourceStatus::ssPause:
+			if(Status == tALSourceStatus::ssPlay)
+			{
+				// 直前が Playだった場合、イベントキューにあるラベルイベントを
+				// すべて PendingLabelQueue に待避する
+				PendingLabelQueue.clear();
+				GetDestEventQueueInstance()->CancelEvents(&LabelEventSource, PendingLabelQueue);
+			}
+			else
+			{
+				// そうでない場合はラベルイベントをすべて破棄する
+				GetDestEventQueueInstance()->CancelEvents(&LabelEventSource);
+			}
+			break;
+		}
+
+		Status = status;
 
 		// onStatusChanged を呼ぶ
 		Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
 				0, tMethodArgument::New((risse_int64)(int)status));
+
+
+		if(post_pending_label_events)
+		{
+			// PendingLabelQueue をすべてキューに投げる
+			for(tEventQueueInstance::tQueue::iterator i = PendingLabelQueue.begin();
+				i != PendingLabelQueue.end(); i++)
+				GetDestEventQueueInstance()->PostEvent(*i);
+			PendingLabelQueue.clear();
+		}
+
 	}
 }
 //---------------------------------------------------------------------------
@@ -329,10 +397,21 @@ void tSoundInstance::OnStatusChangedAsync(tStatus status)
 		GetDestEventQueueInstance()->PostEvent(
 			new tEventInfo(
 				(int)status, // id
-				this, // source
+				&StatusEventSource, // source
 				this // destination
 				) );
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSoundInstance::OnLabel(const tString & name)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	GetDestEventQueueInstance()->PostEvent(
+		new tLabelEventInfo(this, name));
 }
 //---------------------------------------------------------------------------
 
@@ -342,10 +421,20 @@ void tSoundInstance::OnEvent(tEventInfo * info)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	// onStatusChanged イベント
-	// onStatusChanged を呼ぶ
-	Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
-			0, tMethodArgument::New((risse_int64)info->GetId()));
+	if(info->GetSource() == &StatusEventSource)
+	{
+		// onStatusChanged イベント
+		// onStatusChanged を呼ぶ
+		Operate(ocFuncCall, NULL, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
+				0, tMethodArgument::New((risse_int64)info->GetId()));
+	}
+	else if(info->GetSource() == &LabelEventSource)
+	{
+		// ラベルイベント
+		// onLabel を呼ぶ
+		Operate(ocFuncCall, NULL, tSS<'o','n','L','a','b','e','l'>(),
+				0, tMethodArgument::New(reinterpret_cast<tLabelEventInfo*>(info)->Name));
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -446,6 +535,8 @@ void tSoundClass::RegisterMembers()
 	BindProperty(this, tSS<'s','t','a','t','u','s'>(), &tSoundInstance::get_status);
 	BindFunction(this, tSS<'o','n','S','t','a','t','u','s','C','h','a','n','g','e','d'>(),
 			&tSoundInstance::onStatusChanged);
+	BindFunction(this, tSS<'o','n','L','a','b','e','l'>(),
+			&tSoundInstance::onLabel);
 }
 //---------------------------------------------------------------------------
 

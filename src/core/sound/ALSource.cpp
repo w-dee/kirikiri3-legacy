@@ -1211,8 +1211,9 @@ tString nearest_label;
 		if(event_pos <= current_pos)
 		{
 			// fire event
-			wxFprintf(stderr, wxT("label event %s\n"), ei->Name.AsWxString().c_str());
-			fflush(stderr);
+			OnLabel(ei->Name);
+//			wxFprintf(stderr, wxT("label event %s\n"), ei->Name.AsWxString().c_str());
+//			fflush(stderr);
 			ei = SegmentEvents.erase(ei); // イベントは削除する
 		}
 		else

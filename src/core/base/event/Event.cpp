@@ -320,9 +320,11 @@ size_t tEventQueueInstance::CountEventsInQueue(
 
 
 //---------------------------------------------------------------------------
-void tEventQueueInstance::CancelEvents(void * source)
+void tEventQueueInstance::InternalCancelEvents(void * source, tQueue * dest)
 {
 	volatile tSynchronizer sync(this); // sync
+
+	// dest の内容はクリアしないので注意
 
 	for(int n = tEventInfo::epMin; n <= tEventInfo::epMax; n++)
 	{
@@ -333,7 +335,7 @@ void tEventQueueInstance::CancelEvents(void * source)
 			{
 				tEventInfo * ev = *i;
 				i = queue.erase(i);
-				delete ev;
+				if(dest) dest->push_back(ev); else delete ev;
 			}
 			else
 			{
@@ -343,6 +345,7 @@ void tEventQueueInstance::CancelEvents(void * source)
 	}
 }
 //---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

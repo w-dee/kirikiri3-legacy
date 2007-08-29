@@ -207,8 +207,9 @@ public:
 		etSingle = 2 //!< シングルイベント
 	};
 
-private:
 	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef
+
+private:
 	tQueue Queues[tEventInfo::epMax + 1]; //!< イベント用キュー
 	bool HasPendingEvents; //!< post してから処理されていないイベントが存在する場合に真
 	bool QuitEventFound; //!< Quit イベントが見つかった場合に真
@@ -266,9 +267,21 @@ public:
 	size_t CountEventsInQueue(int id,
 		void * source, tEventInfo::tPriority prio, size_t limit = 1);
 
+private:
+	//! @brief		イベントをキャンセルし、かつキャンセルしたイベントを得る(内部関数)
+	//! @param		source		キャンセルしたいイベントの発生元
+	//! @param		dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	void InternalCancelEvents(void * source, tQueue * dest);
+
+public:
 	//! @brief		イベントをキャンセルする
 	//! @param		source		キャンセルしたいイベントの発生元
-	void CancelEvents(void * source);
+	void CancelEvents(void * source) { InternalCancelEvents(source, NULL); }
+
+	//! @brief		イベントをキャンセルし、かつキャンセルしたイベントを得る
+	//! @param		source		キャンセルしたいイベントの発生元
+	//! @param		dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	void CancelEvents(void * source, tQueue & dest) { InternalCancelEvents(source, &dest); }
 
 	//! @brief		イベントループに入る
 	//! @note		メインのイベントキューの場合は例外が発生する。

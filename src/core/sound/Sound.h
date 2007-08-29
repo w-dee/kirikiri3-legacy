@@ -66,6 +66,10 @@ protected:
 	//! @brief		ステータスの変更を非同期に通知する
 	//! @param		status		ステータス
 	virtual void OnStatusChangedAsync(tStatus status);
+
+	//! @brief		ラベルイベントの発生を通知する
+	//! @param		name		ラベル名
+	virtual void OnLabel(const tString & name);
 };
 //---------------------------------------------------------------------------
 
@@ -94,6 +98,24 @@ class tSoundInstance :
 	tVariant Filters; //!< フィルタ配列
 	tWaveLoopManager * LoopManager; //!< ループマネージャ
 	tWaveDecoder * Decoder; //!< デコーダ
+	tEventQueueInstance::tQueue PendingLabelQueue; //!< ペンディングとなったラベルイベントのキュー
+
+	char StatusEventSource; //!< ステータス変更イベントを識別するためのマーカー
+	char LabelEventSource; //!< ラベルイベントを識別するためのマーカー
+		// ↑ いずれも、値の内容は関係なく、そのアドレスが異なることで互いを識別するために用いる
+
+	class tLabelEventInfo : public tEventInfo
+	{
+	public:
+		tString Name;
+		tLabelEventInfo(tSoundInstance * instance, const tString & name)
+			: tEventInfo(100 /*←イベントID*/,
+				&instance->LabelEventSource, instance), Name(name)
+		{
+		}
+	};
+
+	friend class tLabelEventInfo;
 
 public:
 	//! @brief		コンストラクタ
@@ -154,6 +176,10 @@ public:
 	//! @param		このメソッドは非同期に別スレッドから呼ばれることがあるので注意。
 	virtual void OnStatusChangedAsync(tStatus status);
 
+	//! @brief		ラベルイベントの発生を通知する
+	//! @param		name		ラベル名
+	virtual void OnLabel(const tString & name);
+
 protected:
 	//! @brief	イベントが配信されるとき
 	//! @param	info イベント情報
@@ -178,6 +204,7 @@ public: // Risse用メソッドなど
 	const tVariant & get_filters() { return GetFilters(); }
 	tStatus get_status() { return GetStatus(); }
 	void onStatusChanged(tStatus status) {;}
+	void onLabel(const tString & name) {;}
 };
 //---------------------------------------------------------------------------
 

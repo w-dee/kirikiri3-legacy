@@ -31,6 +31,24 @@
 	配列の要素の削除や追加に対して常に安全なイテレーションの機構を提供する。
 	特定アイテムの削除にはいまのところ線形検索を用いているので大量の削除を行い
 	たい場合は注意が必要。
+
+	これ自身を保護するためのクリティカルセクションはこれ自身がもっている。
+	しかし、
+
+	volatile pointer_list<tA>::scoped_lock lock(A);
+	size_t count = A.get_locked_count();
+	for(size_t i = 0; i < count; i++)
+	{
+		tA * th = A.get_locked(i);
+		(* ... *)
+	}
+
+	のようなコードとremove メソッドが同時に呼ばれたとき、th を取得した直後に
+	他のスレッドが A からそれをremoveしてしまうと、A のリストには既に存在しない
+	th にアクセスすることになる。
+
+	このような状態を避けるためには、イテレーションは常に一つのスレッドが行う
+	ようにすること。
 */
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -70,7 +88,7 @@ public:
 template <typename CST>
 class void_pointer_list : public tDestructee
 {
-	CST CS; //!< クリティカルセクション
+	mutable CST CS; //!< クリティカルセクション
 	gc_vector<void *> m_list; //!< ポインタリスト
 	gc_vector<void *> *m_shadow_list; //!< シャドーリスト
 	size_t m_lock_count; //!< ロックカウント
@@ -114,6 +132,10 @@ private:
 	void operator = (const void_pointer_list<CST> & ref);
 
 public:
+	//! @brief		クリティカルセクションオブジェクトを得る
+	CST & GetCS() const { return CS; }
+
+public:
 	//! @brief		配列のサイズを得る
 	//! @note		配列は NULL を含む場合があるが、ここではそれは考慮せず
 	//!				NULL を含んだサイズを返す
@@ -125,14 +147,13 @@ public:
 
 	//! @brief		配列のロックされたサイズを得る
 	//! @note		ロックされていない状態で呼び出さないこと
+	//! @note		配列は NULL を含む場合があるが、ここではそれは考慮せず
+	//!				NULL を含んだサイズを返す
 	size_t get_locked_count() const
 	{
 		assert(m_lock_count > 0);
 		volatile typename CST::tLocker lock(CST);
-		if(m_shadow_list)
-			return m_shadow_list->size();
-		else
-			return m_locked_item_count;
+		return m_locked_item_count;
 	}
 
 	//! @brief		指定位置の要素を得る
@@ -214,18 +235,13 @@ public:
 		make_shadow();
 		gc_vector<void *>::iterator d_it = m_list.begin();
 		for(gc_vector<void *>::iterator it = d_it;
-			it != m_list.end(); /**/)
+			it != m_list.end(); it++)
 		{
 			// NULL をスキップしながら d_it にコピー
 			if(*it != NULL)
 			{
 				if(d_it != it) *d_it = *it;
 				d_it ++;
-				it ++;
-			}
-			else
-			{
-				it ++;
 			}
 		}
 		m_list.resize(d_it - m_list.begin());
@@ -273,7 +289,6 @@ private:
 	//! @brief		配列のシャドー化
 	void make_shadow()
 	{
-		volatile typename CST::tLocker lock(CST);
 		if(m_lock_count == 0) return; // ロック中でない場合はなにもしない
 		if(m_shadow_list) return;
 		m_shadow_list = new gc_vector<void*>();
@@ -305,6 +320,10 @@ public:
 	//! @brief コンストラクタ
 	pointer_list() {;}
 
+public:
+	//! @brief		クリティカルセクションオブジェクトを得る
+	tCriticalSection & GetCS() const { return m_list.GetCS(); }
+
 private:
 	// 今のところこれらはコピー不可
 	pointer_list(const pointer_list<T> & ref);
@@ -330,7 +349,7 @@ public:
 	//! @param		index インデックス
 	T * get(size_t index) const
 	{
-		return reinterpret_cast<T*>(m_list.get(index));
+		return static_cast<T*>(m_list.get(index));
 	}
 
 	//! @brief		指定位置のロックされた要素を得る
@@ -338,7 +357,7 @@ public:
 	//! @note		ロックされていない状態で呼び出さないこと
 	T * get_locked(size_t index) const
 	{
-		return reinterpret_cast<T*>(m_list.get_locked(index));
+		return static_cast<T*>(m_list.get_locked(index));
 	}
 
 	//! @brief		指定位置の要素をセットする
@@ -346,24 +365,25 @@ public:
 	//! @param		item 要素
 	void set(size_t index, T * item)
 	{
-		m_list.set(index, reinterpret_cast<void*>(item));
+		m_list.set(index, static_cast<void*>(item));
 	}
 
 	//! @brief		配列に要素を追加する
 	//! @param		item 要素
 	void add(T * item)
 	{
-		m_list.add(reinterpret_cast<void*>(item));
+		m_list.add(static_cast<void*>(item));
 	}
 
 	//! @brief		配列から要素を削除する
 	//! @param		item 要素
 	//! @note		実際には要素の削除はその要素にNULLを代入すること
 	//!				になる。NULL を含んだ状態の配列の NULL を削除するには
-	//!				compact() を呼ぶこと
+	//!				compact() を呼ぶこと(compact() は scoped_lock を抜ける
+	//!				際には暗黙的に呼び出される)。
 	void remove(T * item)
 	{
-		m_list.remove(reinterpret_cast<void*>(item));
+		m_list.remove(static_cast<void*>(item));
 	}
 
 	//! @brief		配列に要素を挿入する
@@ -372,7 +392,7 @@ public:
 	//! @note		挿入は一般的に高価な操作なので使用には気をつけること
 	void insert(size_t index, T * item)
 	{
-		m_list.insert(index, reinterpret_cast<void*>(item));
+		m_list.insert(index, static_cast<void*>(item));
 	}
 
 	//! @brief		配列中の NULL 要素を削除する
@@ -386,7 +406,7 @@ public:
 	//! @return		要素のインデックス (static_cast<size_t>(-1L) の場合は要素が見つからなかった)
 	size_t find(T * item) const
 	{
-		return m_list.find(reinterpret_cast<void*>(item));
+		return m_list.find(static_cast<void*>(item));
 	}
 
 };

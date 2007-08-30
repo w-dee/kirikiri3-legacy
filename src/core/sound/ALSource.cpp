@@ -214,22 +214,27 @@ tWaveDecodeThreadPool::tWaveDecodeThreadPool()
 //---------------------------------------------------------------------------
 tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 {
-	volatile tCriticalSection::tLocker cs_holder(CS);
 
-	// FreeThreads を解放する
-	for(gc_vector<tWaveDecodeThread*>::iterator i = FreeThreads.begin();
-		i != FreeThreads.end(); i++)
-		delete (*i);
-
-	// すべての UsingThreads の Source を stop する
-
-	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
-	size_t count = UsingThreads.get_locked_count();
-	for(size_t i = 0; i < count; i++)
 	{
-		tWaveDecodeThread * th = UsingThreads.get_locked(i);
-		if(th) th->GetSource()->Stop(false);
+		volatile tCriticalSection::tLocker p_cs_holder(UsingThreads.GetCS());
+		// すべての UsingThreads の Source を stop する
+		volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
+		size_t count = UsingThreads.get_locked_count();
+		for(size_t i = 0; i < count; i++)
+		{
+			tWaveDecodeThread * th = UsingThreads.get_locked(i);
+			if(th) th->GetSource()->Stop(false);
+		}
 	}
+
+	{
+		volatile tCriticalSection::tLocker cs_holder(CS);
+		// FreeThreads を解放する
+		for(gc_vector<tWaveDecodeThread*>::iterator i = FreeThreads.begin();
+			i != FreeThreads.end(); i++)
+			delete (*i);
+	}
+
 }
 //---------------------------------------------------------------------------
 
@@ -244,9 +249,6 @@ void tWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 	if(level >= clSlowBeat)
 	{
 		// FreeThreads を解放する
-		for(gc_vector<tWaveDecodeThread*>::iterator i = FreeThreads.begin();
-			i != FreeThreads.end(); i++)
-			delete (*i);
 		FreeThreads.clear();
 	}
 }
@@ -315,22 +317,28 @@ void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 bool tWaveDecodeThreadPool::CallWatchCallbacks()
 {
 	// ここで使用している pointer_list は自分でスレッド保護を行うので
-	// 明示的なロックはここでは必要ない。
+	// 明示的なスレッドに対するロックはここでは必要ない。
+	// ↓このscoped_lockは、ロックされている間にシャドー配列を作成して
+	// そこにアクセスすることにより、add や remove などの影響を受けない
+	// イテレーションができるようにするための物
+	volatile tCriticalSection::tLocker p_cs_holder(UsingThreads.GetCS());
 
-	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
-	size_t count = UsingThreads.get_locked_count();
-	for(size_t i = 0; i < count; i++)
 	{
-		tWaveDecodeThread * th = UsingThreads.get_locked(i);
-		if(th)
+		volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
+		size_t count = UsingThreads.get_locked_count();
+		for(size_t i = 0; i < count; i++)
 		{
-			tALSource * source = th->GetSource();
-			if(source) source->WatchCallback();
-			// この中で Unacquire が呼ばれる可能性があるので注意
-			// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+			tWaveDecodeThread * th = UsingThreads.get_locked(i);
+			if(th)
+			{
+				tALSource * source = th->GetSource();
+				if(source) source->WatchCallback();
+				// この中で Unacquire が呼ばれる可能性があるので注意
+				// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+			}
 		}
+		return count != 0;
 	}
-	return count != 0;
 }
 //---------------------------------------------------------------------------
 
@@ -340,29 +348,37 @@ risse_int32 tWaveDecodeThreadPool::FireLabelEvents()
 {
 	// ここで使用している pointer_list は自分でスレッド保護を行うので
 	// 明示的なロックはここでは必要ない。
+	// ↓このscoped_lockは、ロックされている間にシャドー配列を作成して
+	// そこにアクセスすることにより、add や remove などの影響を受けない
+	// イテレーションができるようにするための物
+	volatile tCriticalSection::tLocker p_cs_holder(UsingThreads.GetCS());
+
 	risse_int32 nearest_next = -1;
-	volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
-	size_t count = UsingThreads.get_locked_count();
-	for(size_t i = 0; i < count; i++)
+
 	{
-		tWaveDecodeThread * th = UsingThreads.get_locked(i);
-		if(th)
+		volatile pointer_list<tWaveDecodeThread>::scoped_lock lock(UsingThreads);
+		size_t count = UsingThreads.get_locked_count();
+		for(size_t i = 0; i < count; i++)
 		{
-			tALSource * source = th->GetSource();
-			if(source)
+			tWaveDecodeThread * th = UsingThreads.get_locked(i);
+			if(th)
 			{
-				risse_int32 next = source->FireLabelEvents();
-				// この中で Unacquire が呼ばれる可能性があるので注意
-				// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
-				if(next != -1)
+				tALSource * source = th->GetSource();
+				if(source)
 				{
-					if(nearest_next == -1 || nearest_next > next) nearest_next = next;
+					risse_int32 next = source->FireLabelEvents();
+					// この中で Unacquire が呼ばれる可能性があるので注意
+					// (pointer_list はそういう状況でもうまく扱うことができるので問題ない)
+					if(next != -1)
+					{
+						if(nearest_next == -1 || nearest_next > next) nearest_next = next;
+					}
 				}
 			}
 		}
-	}
 
-	return nearest_next;
+		return nearest_next;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -618,7 +634,7 @@ void tALSource::Init(tALBuffer * buffer)
 	tWaveDecodeThreadPool::ensure();
 
 	// ラベルイベントタイミング発生用スレッドを作成
-//	tWaveLabelTimingThread::ensure();
+	tWaveLabelTimingThread::ensure();
 }
 //---------------------------------------------------------------------------
 
@@ -936,14 +952,16 @@ void tALSource::Play()
 		tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 	}
 
-	// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
-	// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
-	// 念のためリスケジュールを行う
-	tWaveLabelTimingThread::instance()->Reschedule();
-
 	// ステータスの変更を通知
 	Status = ssPlay;
 	CallStatusChanged(false);
+
+	// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
+	// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
+	// 念のためリスケジュールを行う
+	// これは再生を開始するよりも前に呼ばないこと (中で RecheckStatus() を
+	// (別スレッドから)呼んでいるので、タイミングが悪いと再生を停止させてしまう)
+	tWaveLabelTimingThread::instance()->Reschedule();
 }
 //---------------------------------------------------------------------------
 
@@ -1150,11 +1168,6 @@ void tALSource::SetPosition(risse_uint64 pos)
 
 		if(Status == ssPlay)
 		{
-			// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
-			// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
-			// 念のためリスケジュールを行う
-			tWaveLabelTimingThread::instance()->Reschedule();
-
 			// 再生を開始する
 			{
 				volatile tOpenAL::tCriticalSectionHolder al_cs_holder;
@@ -1162,6 +1175,13 @@ void tALSource::SetPosition(risse_uint64 pos)
 				alSourcePlay(Source->Source);
 				tOpenAL::instance()->ThrowIfError(RISSE_WS("alSourcePlay"));
 			}
+
+			// 初期サンプルの queue 中にラベルイベントのリスケジュールが行われない
+			// 可能性があるので(なぜならばその時点ではまだ再生が開始されていないから)
+			// 念のためリスケジュールを行う
+			// これは再生を開始するよりも前に呼ばないこと (中で RecheckStatus() を
+			// (別スレッドから)呼んでいるので、タイミングが悪いと再生を停止させてしまう)
+			tWaveLabelTimingThread::instance()->Reschedule();
 		}
 	}
 	else

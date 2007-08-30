@@ -43,4 +43,4 @@ th.join();
 
 assert(c.label_sum == 1234);
 
-System::stdout.print("ok"); //=> "ok"
+System::stdout.print("ok"); //=> ok

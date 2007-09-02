@@ -184,6 +184,12 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
 	// φ関数を除去
 	RemovePhiStatements();
 

@@ -134,21 +134,10 @@ void tCompilerFunction::GenerateVMCode()
 					RISSE_WS("\n")).c_str());
 	FPrint(stderr, (RISSE_WS("######################################\n")));
 
-
 	// 最適化とSSA形式からの逆変換
 	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
 		i != SSAForms.end(); i++)
 		(*i)->OptimizeAndUnSSA();
-
-	// SSA 形式のダンプ
-	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();
-		i != SSAForms.end(); i++)
-	{
-		FPrint(stderr,(	RISSE_WS("========== SSA (") + (*i)->GetName() +
-								RISSE_WS(") ==========\n")).c_str());
-		str = (*i)->Dump();
-		FPrint(stderr, str.c_str());
-	}
 
 	// コードジェネレータの生成
 	for(gc_vector<tSSAForm *>::iterator i = SSAForms.begin();

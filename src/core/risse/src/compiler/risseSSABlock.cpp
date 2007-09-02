@@ -629,6 +629,17 @@ void tSSABlock::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::TraceCoalescable()
+{
+	// すべての文で定義された変数を見る
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->TraceCoalescable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::SetOrder(risse_size & order)
 {
 	tSSAStatement *stmt;

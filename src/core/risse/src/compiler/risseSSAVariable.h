@@ -37,6 +37,8 @@ class tSSAVariable : public tCollectee
 	tSSAStatement * Declared; //!< この変数が定義された文
 	gc_vector<tSSAStatement*> Used; //!< この変数が使用されている文のリスト
 
+	gc_vector<tSSAVariable*> * CoalescableList; //!< 合併可能な場合はそのリストを指す
+
 	tSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
 	tSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
 
@@ -114,6 +116,17 @@ public:
 	//! @return		文の通し番号順で最後にこの変数が使用された文
 	tSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
 
+	//! @brief		合併可能な変数のリストがまだ作成されていないようならば作成する
+	//! @note		新規作成の際は、自分自身をリストの先頭に追加する
+	void EnsureCoalescableList();
+
+	//! @brief		合併可能な変数リスト同士を合併する
+	//! @param		with		合併する変数
+	void CoalesceCoalescableList(tSSAVariable * with);
+
+	//! @brief		合併可能な変数のリストを得る
+	gc_vector<tSSAVariable*> * GetCoalescableList() { return CoalescableList; }
+
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
 	//! @note		ValueType も、この value にあわせて設定される
@@ -181,6 +194,9 @@ public:
 
 	//! @brief		この変数の型や定数に関するコメントを得る
 	tString GetTypeComment() const;
+
+	//! @brief		各文のダンプの後ろにつけられるようなコメントを生成して返す
+	tString GetComment() const;
 };
 //---------------------------------------------------------------------------
 

@@ -33,6 +33,7 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	// フィールドの初期化
 	Form = form;
 	Declared = stmt;
+	CoalescableList = NULL;
 	FirstUsedStatement = NULL;
 	LastUsedStatement = NULL;
 	Value = NULL;
@@ -86,6 +87,35 @@ void tSSAVariable::DeleteUsed(tSSAStatement * stmt)
 	gc_vector<tSSAStatement*>::iterator it =
 		std::find(Used.begin(), Used.end(), stmt);
 	if(it != Used.end()) Used.erase(it);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAVariable::EnsureCoalescableList()
+{
+	if(!CoalescableList)
+	{
+		CoalescableList = new gc_vector<tSSAVariable*>();
+		CoalescableList->push_back(this);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAVariable::CoalesceCoalescableList(tSSAVariable * with)
+{
+	EnsureCoalescableList();
+	if(with->CoalescableList)
+	{
+		// with が CoalescableList を持っていれば
+		// 自分の CoalescableList にそれを追加する
+		CoalescableList->insert(CoalescableList->end(),
+			with->CoalescableList->begin(), with->CoalescableList->end());
+	}
+	// 自分と with の両方に同じ CoalescableList を設定する
+	with->CoalescableList = CoalescableList;
 }
 //---------------------------------------------------------------------------
 
@@ -198,6 +228,25 @@ tString tSSAVariable::GetTypeComment() const
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tString tSSAVariable::GetComment() const
+{
+	tString comment = GetTypeComment();
+	if(!comment.IsEmpty())
+		comment = RISSE_WS(" // ") +Dump() + RISSE_WS(" = ") + comment;
+	if(CoalescableList)
+	{
+		if(comment.IsEmpty())
+			comment = RISSE_WS(" //");
+		else
+			comment += RISSE_WS(",");
+		risse_char tmp[25];
+		pointer_to_str(CoalescableList, tmp);
+		comment += tString(RISSE_WS(" coalescable to id 0x")) + tmp;
+	}
+	return comment;
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

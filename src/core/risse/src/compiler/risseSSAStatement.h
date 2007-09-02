@@ -148,6 +148,9 @@ public:
 	//! @brief		この文で使用されている変数のリストを得る
 	const gc_vector<tSSAVariable *> & GetUsed() const { return Used; }
 
+	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
+	void TraceCoalescable();
+
 	//! @brief		コード先頭からの通し番号を設定する
 	//! @param		order	コード先頭からの通し番号
 	void SetOrder(risse_size order) { Order = order; }

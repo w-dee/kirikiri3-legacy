@@ -77,6 +77,30 @@ void tSSAStatement::DeleteUsed()
 
 
 //---------------------------------------------------------------------------
+void tSSAStatement::TraceCoalescable()
+{
+	switch(Code)
+	{
+	case ocAssign: // 単純代入
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		Declared->CoalesceCoalescableList(Used[0]); // 合併リストにくわえる
+		break;
+
+	case ocPhi: // phi関数
+		RISSE_ASSERT(Declared != NULL);
+		for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
+			i != Used.end(); i++)
+		{
+			Declared->CoalesceCoalescableList(*i); // 合併リストにくわえる
+		}
+		break;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAStatement::SetTrueBranch(tSSABlock * block)
 {
 	RISSE_ASSERT(Code == ocBranch);
@@ -634,12 +658,8 @@ tString tSSAStatement::Dump() const
 
 			ret += used + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignNewRegExp: // 新しい正規表現オブジェクト
@@ -651,12 +671,8 @@ tString tSSAStatement::Dump() const
 			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
 					Used[1]->Dump() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignNewFunction: // 新しい関数インスタンス
@@ -667,12 +683,8 @@ tString tSSAStatement::Dump() const
 
 			ret +=	Used[0]->Dump() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignNewProperty: // 新しいプロパティインスタンス
@@ -684,12 +696,8 @@ tString tSSAStatement::Dump() const
 			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
 					Used[1]->Dump() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignNewClass: // 新しいクラスインスタンス
@@ -701,12 +709,8 @@ tString tSSAStatement::Dump() const
 			ret +=	Used[0]->Dump() + RISSE_WS(", ") +
 					Used[1]->Dump() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignNewModule: // 新しいモジュールインスタンス
@@ -717,12 +721,8 @@ tString tSSAStatement::Dump() const
 
 			ret +=	Used[0]->Dump() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAssignParam:
@@ -799,12 +799,8 @@ tString tSSAStatement::Dump() const
 
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocParentWrite: // 親名前空間への書き込み
@@ -825,12 +821,8 @@ tString tSSAStatement::Dump() const
 
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocChildWrite: // 子名前空間への書き込み
@@ -853,12 +845,8 @@ tString tSSAStatement::Dump() const
 			ret += RISSE_WS(".ChildRead(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocWrite: // 共有変数領域への書き込み
@@ -881,12 +869,8 @@ tString tSSAStatement::Dump() const
 			ret += RISSE_WS("Read(");
 			ret +=	Name->AsHumanReadable() + RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocSync: // synchronized
@@ -900,12 +884,8 @@ tString tSSAStatement::Dump() const
 			ret += RISSE_WS(" Synchronized(") + Used[1]->Dump() + 
 				RISSE_WS(")");
 
-			// 変数のコメントを追加
-			tString comment = Declared->GetTypeComment();
-			if(!comment.IsEmpty())
-				ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-
-			return ret;
+			// 定義された変数のコメントを追加して返す
+			return ret + Declared->GetComment();
 		}
 
 	case ocAddBindingMap: // ローカル変数のバインディング情報を追加
@@ -984,11 +964,7 @@ tString tSSAStatement::Dump() const
 
 			// 変数の宣言に関してコメントがあればそれを追加
 			if(Declared)
-			{
-				tString comment = Declared->GetTypeComment();
-				if(!comment.IsEmpty())
-					ret += RISSE_WS(" // ") + Declared->Dump() + RISSE_WS(" = ") + comment;
-			}
+				ret += Declared->GetComment();
 
 			// DSet あるいは DGet についてフラグがあればそれを追加
 			if(Code == ocDGet || Code == ocDSet)

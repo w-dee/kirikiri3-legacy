@@ -184,6 +184,9 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
+	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	TraceCoalescable();
+
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
@@ -1060,6 +1063,21 @@ void tSSAForm::RemovePhiStatements()
 	// それぞれのブロックにつき処理
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->RemovePhiStatements();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::TraceCoalescable()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// 変数の合併を行う
+	// phi関数、単純代入をトレースし、関連する変数をすべて一つにまとめる
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->TraceCoalescable();
 }
 //---------------------------------------------------------------------------
 

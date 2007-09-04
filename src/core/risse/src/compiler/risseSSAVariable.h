@@ -124,6 +124,11 @@ public:
 	//! @param		with		合併する変数
 	void CoalesceCoalescableList(tSSAVariable * with);
 
+	//! @brief		合併が可能かどうかを判断する
+	//! @param		with		合併したい変数(コピー元)
+	//! @return		合併が可能かどうか
+	bool CheckCoalescableWith(tSSAVariable * with);
+
 	//! @brief		合併可能な変数のリストを得る
 	gc_vector<tSSAVariable*> * GetCoalescableList() { return CoalescableList; }
 

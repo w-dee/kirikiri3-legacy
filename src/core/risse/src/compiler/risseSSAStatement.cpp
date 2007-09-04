@@ -82,19 +82,27 @@ void tSSAStatement::TraceCoalescable()
 	switch(Code)
 	{
 	case ocAssign: // 単純代入
-		RISSE_ASSERT(Declared != NULL);
-		RISSE_ASSERT(Used.size() == 1);
-		Declared->CoalesceCoalescableList(Used[0]); // 合併リストにくわえる
-		break;
-
 	case ocPhi: // phi関数
-		RISSE_ASSERT(Declared != NULL);
+
+		// Used を一つずつみていき、
+		// Used の変数の生存範囲に Declared の変数の定義が
+		// 入っていれば、生存範囲が重なっているので合併できないとする。
+		// そうでなければ合併を行う。
+		Declared->EnsureCoalescableList();
+
 		for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
 			i != Used.end(); i++)
 		{
-			Declared->CoalesceCoalescableList(*i); // 合併リストにくわえる
+			if(Declared->CheckCoalescableWith(*i))
+			{
+				// 合併可能
+				Declared->CoalesceCoalescableList(*i);
+			}
 		}
+
 		break;
+
+	default: ;
 	}
 }
 //---------------------------------------------------------------------------
@@ -241,6 +249,97 @@ const tString & tSSAStatement::GetName() const
 			Code == ocDefineLazyBlock || Code == ocDefineClass || Code == ocAddBindingMap);
 	RISSE_ASSERT(Name != NULL);
 	return *Name;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tSSAStatement::IsLivingIn(tSSAVariable * var)
+{
+	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること
+
+	// この文が宣言されているブロックの始まりと終わりにこの変数が生存している
+	// かどうかを得る
+	bool livein  = Block->GetLiveness(var, false);
+	bool liveout = Block->GetLiveness(var, true);
+
+	// もし始まり、終わりともに生存していないならば、この変数はこのブロックと
+	// 全然関係ないか、あるいはこのブロック内でのみ生存しているかのどちらか
+	if(!livein && !liveout)
+	{
+		if(var->GetDeclared()->Block != Block) return false;
+			// この変数が宣言されたブロックがこのブロックではない場合は全然関係がない
+			// ということ
+	}
+
+	// 注意: livein && liveout の時であっても、このブロックの全域でその変数が生存
+	// しているという保証はない (ブロックの最後で変数が宣言されて、ブロックの最初で
+	// 使用が終わっている可能性があるため)
+	if(livein && liveout)
+	{
+		if(var->GetDeclared()->Block != Block) return true;
+			// ただし、このブロック内で変数が宣言されていないならば、
+			// ブロック全域を通じて生存していると言うこと
+	}
+
+	// このブロック内での、その変数の最初の使用と最後の使用の、それぞれの通し番号を得る
+	risse_size use_start = risse_size_max;
+	risse_size use_end = risse_size_max;
+
+	if(var->GetDeclared()->Block == Block)
+		use_start = var->GetDeclared()->GetOrder();
+
+	const gc_vector<tSSAStatement *> & used_list = var->GetUsed();
+	for(gc_vector<tSSAStatement *>::const_iterator i = used_list.begin();
+		i != used_list.end(); i++)
+	{
+		if((*i)->Block == Block)
+		{
+			risse_size order = (*i)->GetOrder();
+			if(use_end == risse_size_max || use_end < order)
+				use_end = order;
+		}
+	}
+
+	// 条件にしたがって分岐
+	if(use_start != risse_size_max)
+	{
+		// 最初の使用がこのブロック内に見つかった
+		if(use_end != risse_size_max)
+		{
+			// 最後の使用もこのブロック内に見つかったとき
+			if(use_end > use_start)
+			{
+				if(Order < use_end && Order >= use_start) return true;
+			}
+			else
+			{
+				if(Order >= use_start || Order < use_end) return true;
+			}
+		}
+		else
+		{
+			// 最後の使用はこのブロック内に見つからなかった
+			if(Order >= use_start) return true;
+		}
+	}
+	else
+	{
+		// 最初の使用がこのブロック内に見つからなかった
+		if(use_end == risse_size_max)
+		{
+			// 最後の使用もこのブロック内に見つからなかった
+			// それはおかしい
+			RISSE_ASSERT(!"logic error at tSSAStatement::IsLivingIn()");
+		}
+		else
+		{
+			// 最後の使用だけはこのブロック内に見つかった
+			if(Order < use_end) return true;
+		}
+	}
+
+	return false;
 }
 //---------------------------------------------------------------------------
 

@@ -184,6 +184,9 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
+	// 文に通し番号を振る
+	SetStatementOrder();
+
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
 
@@ -1068,6 +1071,21 @@ void tSSAForm::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
+void tSSAForm::SetStatementOrder()
+{
+	// EntryBlock から到達可能なすべての基本ブロックを得る
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべての基本ブロック内の文に通し番号を設定する
+	risse_size order = 0;
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetOrder(order);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAForm::TraceCoalescable()
 {
 	// 基本ブロックのリストを取得
@@ -1085,14 +1103,12 @@ void tSSAForm::TraceCoalescable()
 //---------------------------------------------------------------------------
 void tSSAForm::AnalyzeVariableStatementLiveness()
 {
-	// EntryBlock から到達可能なすべての基本ブロックを得る
+	// すべての文に通し番号を振る
+	SetStatementOrder();
+
+	// 基本ブロックのリストを取得
 	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
-
-	// すべての基本ブロック内の文に通し番号を設定する
-	risse_size order = 0;
-	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->SetOrder(order);
 
 	// 変数の詳細な生存範囲解析を行う
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)

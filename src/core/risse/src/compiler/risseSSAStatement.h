@@ -276,6 +276,12 @@ public:
 	//! @return		メンバ属性
 	tOperateFlags GetAccessFlags() const { return tOperateFlags(OperateFlagsValue); }
 
+	//! @brief		この文が、指定された変数の生存期間内に存在するかどうかを得る
+	//! @param		var		変数
+	//! @return		varの生存期間内にこの文が入っていれば真、そうでなければ偽。
+	//!				この文で生存期間が終わっている場合は偽が帰る
+	bool IsLivingIn(tSSAVariable * var);
+
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();
 

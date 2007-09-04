@@ -527,6 +527,9 @@ public:
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
 
+	//! @brief		文の前後関係を高速に判断するため、文に通し番号を振る
+	void SetStatementOrder();
+
 	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	void TraceCoalescable();
 

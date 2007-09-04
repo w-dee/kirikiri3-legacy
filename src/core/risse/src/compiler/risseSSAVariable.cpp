@@ -107,15 +107,49 @@ void tSSAVariable::EnsureCoalescableList()
 void tSSAVariable::CoalesceCoalescableList(tSSAVariable * with)
 {
 	EnsureCoalescableList();
-	if(with->CoalescableList)
-	{
-		// with が CoalescableList を持っていれば
-		// 自分の CoalescableList にそれを追加する
-		CoalescableList->insert(CoalescableList->end(),
-			with->CoalescableList->begin(), with->CoalescableList->end());
-	}
+	with->EnsureCoalescableList();
+
+	// with の CoalescableList に登録されている変数の CoalescableList を
+	// 自分の CoalescableList に変更し、
+	// 自分の CoalescableList に with->CoalescableList を追加する
+	gc_vector<tSSAVariable *> * list = with->CoalescableList;
+	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
+		i != list->end(); i++)
+		(*i)->CoalescableList = CoalescableList;
+	CoalescableList->insert(CoalescableList->end(),
+		list->begin(), list->end());
+
 	// 自分と with の両方に同じ CoalescableList を設定する
 	with->CoalescableList = CoalescableList;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tSSAVariable::CheckCoalescableWith(tSSAVariable * with)
+{
+	EnsureCoalescableList();
+	with->EnsureCoalescableList();
+
+	// with の変数の生存範囲に this の変数の定義が
+	// 入っていれば、生存範囲が重なっているので合併できないとする。
+	// そうでなければ合併ができるものとする。
+
+	gc_vector<tSSAVariable *> * list = with->CoalescableList;
+	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
+		i != list->end(); i++)
+	{
+		// 二重ループ ... orz
+		// 多くの場合、with 側の要素数は1個だけなのでこれはたいした問題にならないと思う
+		for(gc_vector<tSSAVariable *>::iterator j = CoalescableList->begin();
+			j != CoalescableList->end(); j++)
+		{
+			if((*j)->Declared->IsLivingIn(*i)) return false; // 生存範囲が重なっている
+		}
+	}
+
+	// すべての組み合わせをチェックした。生存範囲は重なっていない。
+	return true;
 }
 //---------------------------------------------------------------------------
 

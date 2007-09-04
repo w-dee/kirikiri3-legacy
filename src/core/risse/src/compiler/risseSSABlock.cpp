@@ -544,7 +544,7 @@ void tSSABlock::AnalyzeVariableBlockLiveness()
 void tSSABlock::AnalyzeVariableStatementLiveness()
 {
 	// すべての文で宣言された変数について文単位の有効範囲解析を行う
-	// この時点では状態はすでにSSAではない; phi関数の削除などにより、
+	// この時点では状態はすでにSSAではない可能性がある; phi関数の削除などにより、
 	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
 	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())

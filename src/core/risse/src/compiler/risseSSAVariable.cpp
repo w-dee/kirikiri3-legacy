@@ -155,6 +155,42 @@ bool tSSAVariable::CheckCoalescableWith(tSSAVariable * with)
 
 
 //---------------------------------------------------------------------------
+void tSSAVariable::Coalesce()
+{
+	// この変数を合併する
+	if(!CoalescableList) return; // 情報を持っていないので何もしない
+
+	gc_vector<tSSAVariable *> * list = CoalescableList;
+	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
+		i != list->end(); i++)
+	{
+		// グループに属するすべての変数の宣言と使用を this に置き換える
+		tSSAVariable * var = *i;
+		(*i)->CoalescableList = NULL; // CoalescableList は NULL にする (もう処理し終えたよということ)
+
+		if(var == this) continue; // 自分自身は除外
+
+		// Declared の置き換え
+		tSSAStatement * decl_stmt = var->Declared;
+		decl_stmt->SetDeclared(this);
+
+		// Used の置き換え
+		gc_vector<tSSAStatement *> & used = var->Used;
+
+		for(gc_vector<tSSAStatement *>::iterator i = used.begin();
+			i != used.end(); i++)
+		{
+			(*i)->OverwriteUsed(var, this);
+			AddUsed(*i); // SSA性は保持しないので必要ないのかもしれないが、念のため。
+		}
+	}
+
+	RISSE_ASSERT(CoalescableList == NULL);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tSSAVariable * tSSAVariable::GenerateFuncCall(risse_size pos, const tString & name,
 			tSSAVariable * param1,
 			tSSAVariable * param2,

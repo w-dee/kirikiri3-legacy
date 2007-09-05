@@ -229,6 +229,9 @@ public:
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();
 
+	//! @brief		変数の合併を行う
+	void Coalesce();
+
 	//! @brief		すべての文に通し番号を設定する
 	//! @param		order		通し番号の開始値 (終了時には文の数が加算されている)
 	void SetOrder(risse_size & order);

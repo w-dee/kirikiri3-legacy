@@ -63,6 +63,17 @@ void tSSAStatement::DeleteUsed(risse_size index)
 
 
 //---------------------------------------------------------------------------
+void tSSAStatement::OverwriteUsed(tSSAVariable * old_var, tSSAVariable * new_var)
+{
+	gc_vector<tSSAVariable*>::iterator i = std::find(Used.begin(), Used.end(), old_var);
+	RISSE_ASSERT(i != Used.end());
+
+	*i = new_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAStatement::DeleteUsed()
 {
 	risse_size i = Used.size();
@@ -104,6 +115,16 @@ void tSSAStatement::TraceCoalescable()
 
 	default: ;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::Coalesce()
+{
+	// Declared に対して合併を実行する
+	// これにより SSA 性は破壊される
+	if(Declared) Declared->Coalesce();
 }
 //---------------------------------------------------------------------------
 
@@ -300,6 +321,14 @@ bool tSSAStatement::IsLivingIn(tSSAVariable * var)
 				use_end = order;
 		}
 	}
+
+	// このブロック内で使用が開始され、かつ liveout している場合は
+	if(use_start != risse_size_max && liveout)
+		use_end = risse_size_max - 1; // ブロックの最後まで生存していると見なす
+
+	// このブロック内で使用がみつかり、かつlivein している場合は
+	if(use_end != risse_size_max && livein)
+		use_start = 0; // ブロックの最初から生存していると見なす
 
 	// 条件にしたがって分岐
 	if(use_start != risse_size_max)

@@ -190,6 +190,9 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
 
+	// 変数の合併を行う
+	Coalesce();
+
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
@@ -1057,20 +1060,6 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 
 
 //---------------------------------------------------------------------------
-void tSSAForm::RemovePhiStatements()
-{
-	// 基本ブロックのリストを取得
-	gc_vector<tSSABlock *> blocks;
-	EntryBlock->Traverse(blocks);
-
-	// それぞれのブロックにつき処理
-	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->RemovePhiStatements();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tSSAForm::SetStatementOrder()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
@@ -1078,7 +1067,7 @@ void tSSAForm::SetStatementOrder()
 	EntryBlock->Traverse(blocks);
 
 	// すべての基本ブロック内の文に通し番号を設定する
-	risse_size order = 0;
+	risse_size order = 1;
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->SetOrder(order);
 }
@@ -1092,10 +1081,38 @@ void tSSAForm::TraceCoalescable()
 	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
-	// 変数の合併を行う
+	// 変数の合併を行うためのトレースを行う
 	// phi関数、単純代入をトレースし、関連する変数をすべて一つにまとめる
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->TraceCoalescable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::Coalesce()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// 変数の合併を行う
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->Coalesce();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::RemovePhiStatements()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// それぞれのブロックにつき処理
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->RemovePhiStatements();
 }
 //---------------------------------------------------------------------------
 

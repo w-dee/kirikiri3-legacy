@@ -640,6 +640,17 @@ void tSSABlock::TraceCoalescable()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::Coalesce()
+{
+	// すべての文で定義された変数に対して合併を実行する
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->Coalesce();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::SetOrder(risse_size & order)
 {
 	tSSAStatement *stmt;

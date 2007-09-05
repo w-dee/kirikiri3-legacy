@@ -129,6 +129,9 @@ public:
 	//! @return		合併が可能かどうか
 	bool CheckCoalescableWith(tSSAVariable * with);
 
+	//! @brief		合併を行う
+	void Coalesce();
+
 	//! @brief		合併可能な変数のリストを得る
 	gc_vector<tSSAVariable*> * GetCoalescableList() { return CoalescableList; }
 

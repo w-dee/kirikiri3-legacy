@@ -145,11 +145,21 @@ public:
 	//! @brief		この文の使用変数リストをすべて解放する
 	void DeleteUsed();
 
+	//! @brief		この文で使用されている変数を書き換える
+	//! @param		old_var		置き換える前の変数
+	//! @param		new_var		置き換えた後の変数
+	//! @note		変数が見つからない場合は ASSERTION ERROR になる。
+	//!				置き換える前の変数の Used からは、この文は削除されない。
+	void OverwriteUsed(tSSAVariable * old_var, tSSAVariable * new_var);
+
 	//! @brief		この文で使用されている変数のリストを得る
 	const gc_vector<tSSAVariable *> & GetUsed() const { return Used; }
 
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();
+
+	//! @brief		変数の合併を行う
+	void Coalesce();
 
 	//! @brief		コード先頭からの通し番号を設定する
 	//! @param		order	コード先頭からの通し番号

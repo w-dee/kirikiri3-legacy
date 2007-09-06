@@ -214,7 +214,7 @@ tSSAVariable * tSSABlock::AddPhiFunction(
 	tSSAVariable *ret_var;
 	// φ関数を追加する
 	tSSAStatement * phi_stmt = new tSSAStatement(Form, pos, ocPhi);
-	// 戻りの変数を作成し、*var に入れる
+	// 戻りの変数を作成する
 	ret_var = new tSSAVariable(Form, phi_stmt, name);
 	ret_var->SetNumberedName(n_name);
 	// φ関数は必ずブロックの先頭に追加される

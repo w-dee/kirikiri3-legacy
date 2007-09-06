@@ -124,10 +124,10 @@ public:
 	//! @param		with		合併する変数
 	void CoalesceCoalescableList(tSSAVariable * with);
 
-	//! @brief		合併が可能かどうかを判断する
+	//! @brief		変数の干渉があるかどうかをチェックする
 	//! @param		with		合併したい変数(コピー元)
-	//! @return		合併が可能かどうか
-	bool CheckCoalescableWith(tSSAVariable * with);
+	//! @return		with の生存範囲内に this の定義がある場合は干渉があると見なす
+	bool CheckInterferenceWith(tSSAVariable * with);
 
 	//! @brief		合併を行う
 	void Coalesce();

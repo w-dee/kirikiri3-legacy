@@ -92,9 +92,56 @@ void tSSAStatement::TraceCoalescable()
 {
 	switch(Code)
 	{
-	case ocAssign: // 単純代入
 	case ocPhi: // phi関数
+		if(Used.size() > 1)
+		{
+			RISSE_ASSERT(Declared != NULL);
+			// Used を一つずつみていき、Declared の生存範囲内に
+			// Used の定義がある場合(変数が干渉している場合)は
+			// 干渉を除去する。 Sreedhar らによる方法。
+			bool interference_found = false;
+			for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
+				i != Used.end(); i++)
+			{
+				if((*i)->CheckInterferenceWith(Declared))
+				{
+					interference_found = true;
+					break;
+				}
+			}
 
+			if(interference_found)
+			{
+				RISSE_ASSERT(!"interference_found !! report to the auther");
+				// TODO: どうも Risse の SSA 形式はここに引っかかるような
+				// (干渉を起こすような) コードにはならないようである。
+				// 一応 assert コードを置いておくので、 ここで引っかかったら
+				// 気をつけること。
+				// ・合併のための情報を置くことはまだやっていない。
+				// ・ここで一時的に作成するコピー文は合併してはいけない。
+				// ・ここで挿入する文には通し番号が付いていない。
+				// ・文をブロックにまだ挿入していない。
+
+				// 変数の干渉が見つかった
+				// テンポラリ変数を作成し、この phi 文で定義した変数を
+				// そのテンポラリ変数に変更する
+				tSSAVariable * tmp_var = new tSSAVariable(Form, this, RISSE_WS("phitmp"));
+				// phi 関数直後にコピー文を作成する
+				tSSAVariable * org_decld_var = Declared;
+				tSSAStatement * new_copy_stmt = new tSSAStatement(
+					Form, Position, ocAssign);
+				new_copy_stmt->AddUsed(tmp_var);
+				new_copy_stmt->SetDeclared(org_decld_var);
+				org_decld_var->SetDeclared(new_copy_stmt);
+
+			}
+			break;
+		}
+
+		// Used が 1 個のときは ocAssign と一緒
+		// through down
+	case ocAssign: // 単純代入
+/*
 		// Used を一つずつみていき、
 		// Used の変数の生存範囲に Declared の変数の定義が
 		// 入っていれば、生存範囲が重なっているので合併できないとする。
@@ -112,7 +159,7 @@ void tSSAStatement::TraceCoalescable()
 		}
 
 		break;
-
+*/
 	default: ;
 	}
 }

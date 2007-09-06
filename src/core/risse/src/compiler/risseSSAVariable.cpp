@@ -126,14 +126,13 @@ void tSSAVariable::CoalesceCoalescableList(tSSAVariable * with)
 
 
 //---------------------------------------------------------------------------
-bool tSSAVariable::CheckCoalescableWith(tSSAVariable * with)
+bool tSSAVariable::CheckInterferenceWith(tSSAVariable * with)
 {
 	EnsureCoalescableList();
 	with->EnsureCoalescableList();
 
 	// with の変数の生存範囲に this の変数の定義が
-	// 入っていれば、生存範囲が重なっているので合併できないとする。
-	// そうでなければ合併ができるものとする。
+	// 入っていれば、真を返す
 
 	gc_vector<tSSAVariable *> * list = with->CoalescableList;
 	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
@@ -144,12 +143,12 @@ bool tSSAVariable::CheckCoalescableWith(tSSAVariable * with)
 		for(gc_vector<tSSAVariable *>::iterator j = CoalescableList->begin();
 			j != CoalescableList->end(); j++)
 		{
-			if((*j)->Declared->IsLivingIn(*i)) return false; // 生存範囲が重なっている
+			if((*j)->Declared->IsLivingIn(*i)) return true; // 生存範囲が重なっている
 		}
 	}
 
 	// すべての組み合わせをチェックした。生存範囲は重なっていない。
-	return true;
+	return false;
 }
 //---------------------------------------------------------------------------
 

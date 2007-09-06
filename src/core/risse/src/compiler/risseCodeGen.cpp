@@ -168,9 +168,13 @@ void tCodeGenerator::FreeRegister(const tSSAVariable *var)
 {
 	// RegMap から指定された変数を開放する
 	tRegMap::iterator f = RegMap.find(var);
-	RISSE_ASSERT(f != RegMap.end());
-
-	FreeRegister(f->second);
+	if(f != RegMap.end())
+	{
+		// 同じ変数が２度開放される可能性があることに注意すること
+		// (一つの文で同じ変数を２回以上useしてたりするとそうなるかもしれない)
+		FreeRegister(f->second);
+		RegMap.erase(f);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -375,9 +379,13 @@ void tCodeGenerator::PutNoOperation()
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tSSAVariable * src)
 {
-	PutWord(ocAssign);
-	PutWord(FindRegMap(dest));
-	PutWord(FindRegMap(src));
+	if(dest != src)
+	{
+		// 同じ変数同士のコピーは明らかに要らないのでここでもブロック
+		PutWord(ocAssign);
+		PutWord(FindRegMap(dest));
+		PutWord(FindRegMap(src));
+	}
 }
 //---------------------------------------------------------------------------
 

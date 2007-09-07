@@ -56,6 +56,7 @@ class tSSAStatement : public tCollectee
 		tString * Name; //!< 名前
 		risse_size Index; //!< インデックス
 		tString * Message; //!< Assert時のメッセージ
+		const tVariant * Value; //!< 値 (ocAssignConstant等用)
 	};
 	union
 	{
@@ -240,6 +241,10 @@ public:
 	//! @brief		メッセージを設定する
 	//! @param		name		メッセージ
 	void SetMessage(const tString & msg) { Message = new tString(msg); }
+
+	//! @brief		値を設定する
+	//! @param		value		値
+	void SetValue(const tVariant * value) { Value = value; }
 
 	//! @brief		メッセージを取得する
 	//! @return		メッセージ

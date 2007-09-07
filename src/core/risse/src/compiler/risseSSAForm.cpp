@@ -308,12 +308,15 @@ tSSAVariable * tSSAForm::AddConstantValueStatement(
 										risse_size pos,
 										const tVariant & val)
 {
+	tVariant *constant = new tVariant(val);
+
 	// 文の作成
 	tSSAStatement * stmt =
 		new tSSAStatement(this, pos, ocAssignConstant);
+	stmt->SetValue(constant);
 	// 変数の作成
 	tSSAVariable * var = new tSSAVariable(this, stmt);
-	var->SetValue(new tVariant(val));
+	var->SetValue(constant);
 	// 文の追加
 	CurrentBlock->AddStatement(stmt);
 	// 戻る

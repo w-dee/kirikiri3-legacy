@@ -462,8 +462,8 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 
 	case ocAssignConstant:
 		RISSE_ASSERT(Declared != NULL);
-		RISSE_ASSERT(Declared->GetValue() != NULL);
-		gen->PutAssign(Declared, *Declared->GetValue());
+		RISSE_ASSERT(Value != NULL);
+		gen->PutAssign(Declared, *Value);
 		break;
 
 	case ocAssignNewBinding:
@@ -1143,6 +1143,13 @@ tString tSSAStatement::Dump() const
 					// 引数が無い
 					ret += RISSE_WS("()");
 				}
+			}
+
+			// Value があればそれを追加
+			if(Value && Code == ocAssignConstant)
+			{
+				ret += RISSE_WS(" Value=");
+				ret += Value->AsHumanReadable();
 			}
 
 			// 変数の宣言に関してコメントがあればそれを追加

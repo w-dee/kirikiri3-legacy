@@ -581,23 +581,6 @@ void tSSABlock::RemovePhiStatements()
 		// stmt で宣言された変数
 		tSSAVariable * stmt_decld = stmt->GetDeclared();
 
-		// pred をたどる
-		bool var_used = false;
-		for(gc_vector<tSSABlock *>::iterator i = Pred.begin();
-			i != Pred.end(); i++)
-		{
-			// pred の最後で stmt_decld が存在しているかどうかを調べる
-			if((*i)->GetLiveness(stmt_decld))
-				{ var_used = true; break; }
-		}
-
-		if(var_used)
-		{
-			// TODO: 変数の干渉が見つかった場合の処理
-			FPrint(stderr, tString(RISSE_WS("variable interference found at block %1\n"), Dump()).c_str());
-			RISSE_ASSERT(!"variable interference found");
-		}
-
 		// 各 pred の分岐文の直前に 代入文を生成する
 		for(risse_size index = 0; index < Pred.size(); index ++)
 		{

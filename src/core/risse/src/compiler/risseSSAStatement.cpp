@@ -96,6 +96,7 @@ void tSSAStatement::TraceCoalescable()
 		if(Used.size() > 1)
 		{
 			RISSE_ASSERT(Declared != NULL);
+
 			// Used を一つずつみていき、Declared の生存範囲内に
 			// Used の定義がある場合(変数が干渉している場合)は
 			// 干渉を除去する。 Sreedhar らによる方法。
@@ -134,7 +135,14 @@ void tSSAStatement::TraceCoalescable()
 				new_copy_stmt->SetDeclared(org_decld_var);
 				org_decld_var->SetDeclared(new_copy_stmt);
 
+				// この時点で Declared は、新しく定義されたテンポラリ変数を指す
 			}
+
+			// 関連する変数の合併を行う
+			for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
+				i != Used.end(); i++)
+					Declared->CoalesceCoalescableList(*i);
+
 			break;
 		}
 

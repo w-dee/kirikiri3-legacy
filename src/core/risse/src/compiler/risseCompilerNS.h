@@ -32,6 +32,7 @@ class tSSAVariableAccessMap : public tCollectee
 		tInfo() { Read = false; Write = false; } //!< コンストラクタ
 		bool Read;		//!< この変数に対する読み込みが発生したかどうか(使用フラグ)
 		bool Write;		//!< この変数に対する書き込みが発生したかどうか(使用フラグ)
+		tString NumberedName; //!< 番号付きの名前
 	};
 	typedef gc_map<tString, tInfo> tMap; //!< 変数名(番号なし)→情報のマップのtypedef
 
@@ -51,8 +52,9 @@ public:
 
 	//! @brief		アクセスマップに追加する
 	//! @param		name		変数名(番号なし)
+	//! @param		n_name		変数名(番号付き)
 	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
-	void SetUsed(const tString & name, bool write);
+	void SetUsed(const tString & name, const tString & n_name, bool write);
 
 	//! @param		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス

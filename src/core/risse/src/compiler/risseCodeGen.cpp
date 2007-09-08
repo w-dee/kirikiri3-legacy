@@ -157,6 +157,7 @@ risse_size tCodeGenerator::AllocateRegister()
 //---------------------------------------------------------------------------
 void tCodeGenerator::FreeRegister(risse_size reg)
 {
+	RISSE_ASSERT(NumUsedRegs > 0);
 	RegFreeMap.push_back(reg); // 変数を空き配列に追加
 	NumUsedRegs --;
 }
@@ -314,8 +315,12 @@ risse_size tCodeGenerator::FindVariableMapForChildren(const tString & name)
 void tCodeGenerator::FreeVariableMapForChildren()
 {
 	// VariableMapForChildrenにある変数を自分からすべて開放する
+	// TODO: 一時的にこれ無効化
+/*
 	for(tNamedRegMap::iterator i = VariableMapForChildren.begin(); i != VariableMapForChildren.end(); i++)
 		FreeRegister(i->second);
+	VariableMapForChildren.clear();
+*/
 }
 //---------------------------------------------------------------------------
 

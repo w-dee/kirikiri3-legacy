@@ -66,9 +66,14 @@ void tSSAStatement::DeleteUsed(risse_size index)
 void tSSAStatement::OverwriteUsed(tSSAVariable * old_var, tSSAVariable * new_var)
 {
 	gc_vector<tSSAVariable*>::iterator i = std::find(Used.begin(), Used.end(), old_var);
-	RISSE_ASSERT(i != Used.end());
 
-	*i = new_var;
+	// すでに old_var が new_var に書き換わっている可能性もあるので
+	// 一応 ASSERT はするが、old_var が無い場合は何もしない
+	RISSE_ASSERT(i != Used.end() ||
+		std::find(Used.begin(), Used.end(), new_var) != Used.end());
+
+	if(i != Used.end())
+		*i = new_var;
 }
 //---------------------------------------------------------------------------
 

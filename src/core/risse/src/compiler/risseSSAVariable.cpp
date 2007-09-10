@@ -160,6 +160,7 @@ void tSSAVariable::Coalesce()
 	if(!CoalescableList) return; // 情報を持っていないので何もしない
 
 	gc_vector<tSSAVariable *> * list = CoalescableList;
+	gc_vector<tSSABlock *> blocks; // 書き換えが発生した変数の宣言や使用を含むブロック (あとで livein と liveout を修正するので)
 	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
 		i != list->end(); i++)
 	{
@@ -167,11 +168,19 @@ void tSSAVariable::Coalesce()
 		tSSAVariable * var = *i;
 		(*i)->CoalescableList = NULL; // CoalescableList は NULL にする (もう処理し終えたよということ)
 
+		// 以降は自分自身を除外
 		if(var == this) continue; // 自分自身は除外
+
+		tSSABlock * last_block;
+		tSSABlock * current_block;
 
 		// Declared の置き換え
 		tSSAStatement * decl_stmt = var->Declared;
 		decl_stmt->SetDeclared(this);
+
+		current_block = decl_stmt->GetBlock();
+		current_block->CoalesceLiveness(var, this);
+		last_block = current_block;
 
 		// Used の置き換え
 		gc_vector<tSSAStatement *> & used = var->Used;
@@ -181,6 +190,13 @@ void tSSAVariable::Coalesce()
 		{
 			(*i)->OverwriteUsed(var, this);
 			AddUsed(*i); // SSA性は保持しないので必要ないのかもしれないが、念のため。
+
+			if(current_block != last_block)
+			{
+				current_block = (*i)->GetBlock();
+				current_block->CoalesceLiveness(var, this);
+			}
+			last_block = current_block;
 		}
 	}
 

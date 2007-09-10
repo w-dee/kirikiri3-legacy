@@ -186,6 +186,13 @@ public:
 	//! @return		変数が見つかれば真
 	bool GetLiveness(const tSSAVariable * var, bool out = true) const;
 
+	//! @brief		LiveIn/Out の変数の合併を行う
+	//! @param		old_var		合併前の変数
+	//! @param		new_var		合併後の変数
+	//! @note		old_var がもしあれば、それを new_var に変更する。
+	//!				new_var がすでに存在していた場合は old_var を消すだけ。
+	void CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariable * new_var);
+
 	//! @brief		「マーク」フラグをクリアする
 	void ClearMark() const;
 

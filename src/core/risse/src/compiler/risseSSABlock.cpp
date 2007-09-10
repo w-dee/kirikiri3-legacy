@@ -375,6 +375,37 @@ bool tSSABlock::GetLiveness(const tSSAVariable * var, bool out) const
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariable * new_var)
+{
+	RISSE_ASSERT(LiveOut && LiveIn);
+
+	tLiveVariableMap::iterator i;
+	tLiveVariableMap * map;
+
+	map = LiveIn;
+	i = map->find(old_var);
+	if(i != map->end())
+	{
+		map->erase(i);
+		i = map->find(new_var);
+		if(i != map->end())
+			map->insert(tLiveVariableMap::value_type(new_var, NULL));
+	}
+
+	map = LiveOut;
+	i = map->find(old_var);
+	if(i != map->end())
+	{
+		map->erase(i);
+		i = map->find(new_var);
+		if(i != map->end())
+			map->insert(tLiveVariableMap::value_type(new_var, NULL));
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::ClearMark() const
 {
 	gc_vector<tSSABlock *> blocks;

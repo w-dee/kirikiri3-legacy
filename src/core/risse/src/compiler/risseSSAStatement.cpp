@@ -98,10 +98,9 @@ void tSSAStatement::TraceCoalescable()
 	switch(Code)
 	{
 	case ocPhi: // phi関数
-		if(Used.size() > 1)
-		{
-			RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Declared != NULL);
 
+		{
 			// Used を一つずつみていき、Declared の生存範囲内に
 			// Used の定義がある場合(変数が干渉している場合)は
 			// 干渉を除去する。 Sreedhar らによる方法。
@@ -151,8 +150,6 @@ void tSSAStatement::TraceCoalescable()
 			break;
 		}
 
-		// Used が 1 個のときは ocAssign と一緒
-		// through down
 	case ocAssign: // 単純代入
 /*
 		// Used を一つずつみていき、

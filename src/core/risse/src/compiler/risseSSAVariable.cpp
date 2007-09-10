@@ -109,6 +109,8 @@ void tSSAVariable::CoalesceCoalescableList(tSSAVariable * with)
 	EnsureCoalescableList();
 	with->EnsureCoalescableList();
 
+	if(CoalescableList == with->CoalescableList) return; // すでに合併済み
+
 	// with の CoalescableList に登録されている変数の CoalescableList を
 	// 自分の CoalescableList に変更し、
 	// 自分の CoalescableList に with->CoalescableList を追加する
@@ -130,6 +132,8 @@ bool tSSAVariable::CheckInterferenceWith(tSSAVariable * with)
 {
 	EnsureCoalescableList();
 	with->EnsureCoalescableList();
+
+	if(CoalescableList == with->CoalescableList) return false; // すでに合併済み
 
 	// with の変数の生存範囲に this の変数の定義が
 	// 入っていれば、真を返す

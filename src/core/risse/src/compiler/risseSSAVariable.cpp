@@ -182,6 +182,7 @@ void tSSAVariable::Coalesce()
 		tSSAStatement * decl_stmt = var->Declared;
 		decl_stmt->SetDeclared(this);
 
+		// Declared の含まれるブロックの LiveIn, LiveOut も更新
 		current_block = decl_stmt->GetBlock();
 		current_block->CoalesceLiveness(var, this);
 		last_block = current_block;
@@ -195,11 +196,10 @@ void tSSAVariable::Coalesce()
 			(*i)->OverwriteUsed(var, this);
 			AddUsed(*i); // SSA性は保持しないので必要ないのかもしれないが、念のため。
 
+			// (*i) の含まれるブロックの LiveIn, LiveOut も更新
+			current_block = (*i)->GetBlock();
 			if(current_block != last_block)
-			{
-				current_block = (*i)->GetBlock();
 				current_block->CoalesceLiveness(var, this);
-			}
 			last_block = current_block;
 		}
 	}

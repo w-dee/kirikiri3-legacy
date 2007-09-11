@@ -388,7 +388,7 @@ void tSSABlock::CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariabl
 	{
 		map->erase(i);
 		i = map->find(new_var);
-		if(i != map->end())
+		if(i == map->end())
 			map->insert(tLiveVariableMap::value_type(new_var, NULL));
 	}
 
@@ -398,7 +398,7 @@ void tSSABlock::CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariabl
 	{
 		map->erase(i);
 		i = map->find(new_var);
-		if(i != map->end())
+		if(i == map->end())
 			map->insert(tLiveVariableMap::value_type(new_var, NULL));
 	}
 }

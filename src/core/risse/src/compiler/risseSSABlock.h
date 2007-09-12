@@ -43,7 +43,7 @@ class tSSABlock : public tCollectee
 	risse_size LastStatementPosition; //!< 最後の文のスクリプト上の位置
 
 public:
-	typedef gc_map<const tSSAVariable *, void *> tLiveVariableMap; //!< 生存している変数のリスト
+	typedef gc_map<const tSSAVariable *, risse_size> tLiveVariableMap; //!< 生存している変数のリスト
 private:
 	tLiveVariableMap * LiveIn; //!< このブロックの開始時点で生存している変数のリスト
 	tLiveVariableMap * LiveOut; //!< このブロックの終了時点で生存している変数のリスト
@@ -226,12 +226,12 @@ public:
 	//! @brief		変数の生存区間を基本ブロック単位で解析する
 	void AnalyzeVariableBlockLiveness();
 
-	//! @brief		変数の生存区間を文単位で解析する
-	void AnalyzeVariableStatementLiveness();
+	//! @brief		すべての文に通し番号を設定する
+	//! @param		order		通し番号の開始値 (終了時には文の数が加算されている)
+	void SetOrder(risse_size & order);
 
-	//! @brief		φ関数を削除する
-	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
-	void RemovePhiStatements();
+	//! @brief		変数の干渉グラフを作成する
+	void CreateVariableInterferenceGraph();
 
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();
@@ -239,9 +239,12 @@ public:
 	//! @brief		変数の合併を行う
 	void Coalesce();
 
-	//! @brief		すべての文に通し番号を設定する
-	//! @param		order		通し番号の開始値 (終了時には文の数が加算されている)
-	void SetOrder(risse_size & order);
+	//! @brief		φ関数を削除する
+	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
+	void RemovePhiStatements();
+
+	//! @brief		変数の生存区間を文単位で解析する
+	void AnalyzeVariableStatementLiveness();
 
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ

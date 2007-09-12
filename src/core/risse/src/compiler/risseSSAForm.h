@@ -201,6 +201,8 @@ class tSSAForm : public tCollectee
 	tCodeBlock * CodeBlock; //!< コードブロック
 	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
 
+	bool HasSSAness; //!< SSA性が保持されている場合に真
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		pos				ソースコード上の位置
@@ -526,6 +528,9 @@ public:
 	//! @brief		文の前後関係を高速に判断するため、文に通し番号を振る
 	void SetStatementOrder();
 
+	// @brief		変数の干渉グラフを作成する
+	void CreateVariableInterferenceGraph();
+
 	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	void TraceCoalescable();
 
@@ -566,6 +571,10 @@ public:
 	//!				にのみ有効である。このメソッドはコードジェネレータに
 	//!				共有変数のネストレベルを問い合わせ、それをコードブロックに設定する。
 	void SetSharedVariableNestCount();
+
+	//! @brief		SSA性が保持されているかどうかを得る
+	//! @return		SSA性が保持されているかどうか
+	bool GetHasSSAness() const { return HasSSAness; }
 };
 //---------------------------------------------------------------------------
 

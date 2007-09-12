@@ -332,6 +332,74 @@ const tString & tSSAStatement::GetName() const
 
 
 //---------------------------------------------------------------------------
+void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *, risse_size> &livemap)
+{
+	// 一応このメソッドが実行時には SSA性が保持されていると見なす
+	RISSE_ASSERT(Block->GetForm()->GetHasSSAness());
+	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること
+
+wxFprintf(stderr, wxT("at %d:"), (int)Order);
+
+	// この文で定義された変数があるならば livemap にその変数を追加する
+	if(Declared)
+	{
+		// ただし、dead store な場合は追加しない
+		if(Declared->GetUsed().size() != 0)
+		{
+			// 既にlivemap にあるわけがない
+			RISSE_ASSERT(livemap.find(Declared) == livemap.end());
+			// livemap に追加
+			livemap.insert(gc_map<const tSSAVariable *, risse_size>::value_type(Declared, risse_size_max));
+wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().c_str());
+		}
+	}
+
+	// この文で使用された変数があり、それがこの文で使用が終了していればlivemapから削除する
+	// この文で使用が終了しているかどうかの判定は、
+	// ・ブロックのLiveOut にその変数がない
+	// かつ
+	// ・このブロックにこれ以降この変数を使用している箇所がない
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
+	{
+		// Block の LiveOut にその変数があるか
+		if(Block->GetLiveness(*i, true)) continue; // まだ生きている
+		// このブロックにこれ以降この変数を使用している箇所がないか
+		bool is_last = true;
+		risse_size current_order = Order;
+		const gc_vector<tSSAStatement *> & used_list = (*i)->GetUsed();
+		for(gc_vector<tSSAStatement *>::const_iterator si = used_list.begin();
+			si != used_list.end(); si++)
+		{
+			if((*si)->Block == Block)
+			{
+				risse_size order = (*si)->GetOrder();
+				if(order > current_order)
+				{
+					is_last = false;
+					break;
+				}
+			}
+		}
+
+		if(is_last)
+		{
+			// livemapからこれを削除する
+			gc_map<const tSSAVariable *, risse_size>::iterator fi =
+				livemap.find((*i));
+			RISSE_ASSERT(fi != livemap.end());
+			livemap.erase(fi);
+wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_str());
+		}
+	}
+
+
+wxFprintf(stderr, wxT("\n"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tSSAStatement::IsLivingIn(tSSAVariable * var)
 {
 	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること

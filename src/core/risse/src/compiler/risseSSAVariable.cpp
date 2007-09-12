@@ -34,6 +34,7 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	Form = form;
 	Declared = stmt;
 	CoalescableList = NULL;
+	InterferenceEdgeMap = NULL;
 	FirstUsedStatement = NULL;
 	LastUsedStatement = NULL;
 	Value = NULL;
@@ -164,7 +165,7 @@ void tSSAVariable::Coalesce()
 	if(!CoalescableList) return; // 情報を持っていないので何もしない
 
 	gc_vector<tSSAVariable *> * list = CoalescableList;
-	gc_vector<tSSABlock *> blocks; // 書き換えが発生した変数の宣言や使用を含むブロック (あとで livein と liveout を修正するので)
+
 	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
 		i != list->end(); i++)
 	{

@@ -39,6 +39,9 @@ class tSSAVariable : public tCollectee
 
 	gc_vector<tSSAVariable*> * CoalescableList; //!< 合併可能な場合はそのリストを指す
 
+	typedef gc_map<const tSSAVariable *, risse_size> tInterferenceEdgeMap; //!< 生存している変数のリスト
+	tInterferenceEdgeMap * InterferenceEdgeMap; //!< 干渉グラフのエッジを表すマップ
+
 	tSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
 	tSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
 

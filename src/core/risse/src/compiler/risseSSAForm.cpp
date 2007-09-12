@@ -104,6 +104,7 @@ tSSAForm::tSSAForm(risse_size pos, tCompilerFunction * function,
 	TryIdentifierIndex = risse_size_max;
 	CanReturn = !UseParentFrame; // いまのところ CanReturn はこの式の通りで決定される
 	ExitTryBranchTargetLabels = NULL;
+	HasSSAness = true; // 最初はSSA性が保持されていると見なす
 
 	// 関数インスタンスに自身を登録する
 	Function->AddSSAForm(this);
@@ -187,17 +188,20 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文に通し番号を振る
 	SetStatementOrder();
 
-	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
-	TraceCoalescable();
-
-	// 変数の合併を行う
-	Coalesce();
-
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
 	tString str = Dump();
 	FPrint(stderr, str.c_str());
+
+	// 変数の干渉グラフを作成する
+	CreateVariableInterferenceGraph();
+
+	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	TraceCoalescable();
+
+	// 変数の合併を行う
+	Coalesce();
 
 	// φ関数を除去
 	RemovePhiStatements();
@@ -1078,6 +1082,20 @@ void tSSAForm::SetStatementOrder()
 
 
 //---------------------------------------------------------------------------
+void tSSAForm::CreateVariableInterferenceGraph()
+{
+	// EntryBlock から到達可能なすべての基本ブロックを得る
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべての基本ブロックに対して変数の干渉グラフを作成させる
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->CreateVariableInterferenceGraph();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAForm::TraceCoalescable()
 {
 	// 基本ブロックのリストを取得
@@ -1102,6 +1120,9 @@ void tSSAForm::Coalesce()
 	// 変数の合併を行う
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->Coalesce();
+
+	// これ以降、SSA性は破壊される
+	HasSSAness = false;
 }
 //---------------------------------------------------------------------------
 

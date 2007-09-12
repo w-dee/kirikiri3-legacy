@@ -291,6 +291,9 @@ public:
 	//! @return		メンバ属性
 	tOperateFlags GetAccessFlags() const { return tOperateFlags(OperateFlagsValue); }
 
+	//! @brief		変数の干渉グラフを作成する
+	void CreateVariableInterferenceGraph(gc_map<const tSSAVariable *, risse_size> &livemap);
+
 	//! @brief		この文が、指定された変数の生存期間内に存在するかどうかを得る
 	//! @param		var		変数
 	//! @return		varの生存期間内にこの文が入っていれば真、そうでなければ偽。

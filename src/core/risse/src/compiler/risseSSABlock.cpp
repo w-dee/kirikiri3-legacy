@@ -359,7 +359,7 @@ void tSSABlock::AddLiveness(const tSSAVariable * var, bool out)
 {
 	tLiveVariableMap * map = out ? LiveOut : LiveIn;
 	RISSE_ASSERT(map != NULL);
-	map->insert(tLiveVariableMap::value_type(var, NULL));
+	map->insert(tLiveVariableMap::value_type(var, risse_size_max));
 }
 //---------------------------------------------------------------------------
 
@@ -389,7 +389,7 @@ void tSSABlock::CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariabl
 		map->erase(i);
 		i = map->find(new_var);
 		if(i == map->end())
-			map->insert(tLiveVariableMap::value_type(new_var, NULL));
+			map->insert(tLiveVariableMap::value_type(new_var, risse_size_max));
 	}
 
 	map = LiveOut;
@@ -399,7 +399,7 @@ void tSSABlock::CoalesceLiveness(const tSSAVariable * old_var, const tSSAVariabl
 		map->erase(i);
 		i = map->find(new_var);
 		if(i == map->end())
-			map->insert(tLiveVariableMap::value_type(new_var, NULL));
+			map->insert(tLiveVariableMap::value_type(new_var, risse_size_max));
 	}
 }
 //---------------------------------------------------------------------------
@@ -572,14 +572,56 @@ void tSSABlock::AnalyzeVariableBlockLiveness()
 
 
 //---------------------------------------------------------------------------
-void tSSABlock::AnalyzeVariableStatementLiveness()
+void tSSABlock::SetOrder(risse_size & order)
 {
-	// すべての文で宣言された変数について文単位の有効範囲解析を行う
-	// この時点では状態はすでにSSAではない可能性がある; phi関数の削除などにより、
-	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
 	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
-		stmt->AnalyzeVariableStatementLiveness();
+	{
+		stmt->SetOrder(order);
+		order ++;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::CreateVariableInterferenceGraph()
+{
+	RISSE_ASSERT(LiveIn && LiveOut);
+
+	tSSAStatement *stmt;
+
+	// livemap は LiveIn から出発し、この関数の最後では LiveOut と同じになるはず
+
+	tLiveVariableMap livemap(*LiveIn); // コピーを作成
+
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->CreateVariableInterferenceGraph(livemap);
+
+	// この時点では livemap は LiveOut と同じになっているはず
+	RISSE_ASSERT(livemap == *LiveOut);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::TraceCoalescable()
+{
+	// すべての文で定義された変数を見る
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->TraceCoalescable();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::Coalesce()
+{
+	// すべての文で定義された変数に対して合併を実行する
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->Coalesce();
 }
 //---------------------------------------------------------------------------
 
@@ -643,36 +685,14 @@ void tSSABlock::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
-void tSSABlock::TraceCoalescable()
+void tSSABlock::AnalyzeVariableStatementLiveness()
 {
-	// すべての文で定義された変数を見る
+	// すべての文で宣言された変数について文単位の有効範囲解析を行う
+	// この時点では状態はすでにSSAではない可能性がある; phi関数の削除などにより、
+	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
 	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
-		stmt->TraceCoalescable();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSSABlock::Coalesce()
-{
-	// すべての文で定義された変数に対して合併を実行する
-	tSSAStatement *stmt;
-	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
-		stmt->Coalesce();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSSABlock::SetOrder(risse_size & order)
-{
-	tSSAStatement *stmt;
-	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
-	{
-		stmt->SetOrder(order);
-		order ++;
-	}
+		stmt->AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 

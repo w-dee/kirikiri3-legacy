@@ -951,6 +951,7 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 	// マークされている箇所にまで逆順にブロックをたどる
 	// (すでにたどったブロックはたどらない)
 
+wxFprintf(stderr, wxT("for %s: "), var->GetQualifiedName().AsWxString().c_str());
 	// この変数が宣言されている文
 	tSSAStatement * decl_stmt = var->GetDeclared();
 
@@ -976,6 +977,7 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 		// ・すでにこの変数が使用されているとマークされているブロックにたどり着いた場合
 
 		gc_vector<tSSABlock *> Stack;
+wxFprintf(stderr, wxT(", starting from  %s"), used_block->GetName().AsWxString().c_str());
 		Stack.push_back(used_block); // 初期ノードを入れる
 		do
 		{
@@ -984,19 +986,25 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 			// スタックから値を取り出す
 			tSSABlock * quest_block = Stack.back();
 			Stack.pop_back();
+wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxString().c_str());
 
 			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
 			// の先をたどるのは辞める
 			if(quest_block == decl_block)
+			{
 				stop = true;
+wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
+			}
 
-			// quest_block の LiveOut または LiveIn にこの変数が追加されているか
+			// quest_block の LiveIn にこの変数が追加されているか
 			// 追加されているならば そこでこのノード
 			// の先をたどるのは辞める
 			if(!stop &&(
-					quest_block->GetLiveness(var, true) ||
 					quest_block->GetLiveness(var, false)))
+			{
 				stop = true;
+wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"), quest_block->GetName().AsWxString().c_str());
+			}
 
 			if(!stop)
 			{
@@ -1005,6 +1013,7 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 				// →このブロックとpredの間では変数は生存している
 				// つまり、LiveIn に変数を追加する
 				quest_block->AddLiveness(var, false);
+wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
 
 				// スタックに quest_block のpred を追加する
 				// また、pred の LiveOut にも変数を追加する
@@ -1042,6 +1051,7 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 		} while(Stack.size() > 0);
 
 	}
+wxFprintf(stderr, wxT("\n")); fflush(stderr);
 }
 //---------------------------------------------------------------------------
 

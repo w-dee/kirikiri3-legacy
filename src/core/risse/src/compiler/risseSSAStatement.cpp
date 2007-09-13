@@ -341,6 +341,7 @@ void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *,
 wxFprintf(stderr, wxT("at %d:"), (int)Order);
 
 	// この文で定義された変数があるならば livemap にその変数を追加する
+	bool has_new_declared = false;
 	if(Declared)
 	{
 		// ただし、dead store な場合は追加しない
@@ -350,6 +351,7 @@ wxFprintf(stderr, wxT("at %d:"), (int)Order);
 			RISSE_ASSERT(livemap.find(Declared) == livemap.end());
 			// livemap に追加
 			livemap.insert(gc_map<const tSSAVariable *, risse_size>::value_type(Declared, risse_size_max));
+			has_new_declared = true;
 wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().c_str());
 		}
 	}
@@ -395,6 +397,18 @@ wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_
 
 
 wxFprintf(stderr, wxT("\n"));
+
+	// 追加された変数がある場合は、変数の干渉を追加する
+	if(has_new_declared)
+	{
+		RISSE_ASSERT(Declared);
+		for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
+			li != livemap.end(); li++)
+		{
+			if(li->first == Declared) continue;
+			Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
+		}
+	}
 }
 //---------------------------------------------------------------------------
 

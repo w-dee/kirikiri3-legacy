@@ -119,6 +119,10 @@ public:
 	//! @return		文の通し番号順で最後にこの変数が使用された文
 	tSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
 
+	//! @brief		変数の干渉を設定する
+	//! @param		with		干渉する他の変数 (this != with で無ければならない)
+	void SetInterferenceWith(tSSAVariable * with);
+
 	//! @brief		合併可能な変数のリストがまだ作成されていないようならば作成する
 	//! @note		新規作成の際は、自分自身をリストの先頭に追加する
 	void EnsureCoalescableList();

@@ -93,6 +93,22 @@ void tSSAVariable::DeleteUsed(tSSAStatement * stmt)
 
 
 //---------------------------------------------------------------------------
+void tSSAVariable::SetInterferenceWith(tSSAVariable * with)
+{
+	// 作成しようとしているグラフは無向グラフ
+	// this と with に相互にエッジを作る
+	RISSE_ASSERT(this != with);
+
+	if(!this->InterferenceEdgeMap) this->InterferenceEdgeMap = new tInterferenceEdgeMap();
+	if(!with->InterferenceEdgeMap) with->InterferenceEdgeMap = new tInterferenceEdgeMap();
+
+	this->InterferenceEdgeMap->insert(tInterferenceEdgeMap::value_type(with, risse_size_max));
+	with->InterferenceEdgeMap->insert(tInterferenceEdgeMap::value_type(this, risse_size_max));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAVariable::EnsureCoalescableList()
 {
 	if(!CoalescableList)
@@ -131,29 +147,8 @@ void tSSAVariable::CoalesceCoalescableList(tSSAVariable * with)
 //---------------------------------------------------------------------------
 bool tSSAVariable::CheckInterferenceWith(tSSAVariable * with)
 {
-	EnsureCoalescableList();
-	with->EnsureCoalescableList();
-
-	if(CoalescableList == with->CoalescableList) return false; // すでに合併済み
-
-	// with の変数の生存範囲に this の変数の定義が
-	// 入っていれば、真を返す
-
-	gc_vector<tSSAVariable *> * list = with->CoalescableList;
-	for(gc_vector<tSSAVariable *>::iterator i = list->begin();
-		i != list->end(); i++)
-	{
-		// 二重ループ ... orz
-		// 多くの場合、with 側の要素数は1個だけなのでこれはたいした問題にならないと思う
-		for(gc_vector<tSSAVariable *>::iterator j = CoalescableList->begin();
-			j != CoalescableList->end(); j++)
-		{
-			if((*j)->Declared->IsLivingIn(*i)) return true; // 生存範囲が重なっている
-		}
-	}
-
-	// すべての組み合わせをチェックした。生存範囲は重なっていない。
-	return false;
+	if(!InterferenceEdgeMap) return false; // この変数はどれとも干渉していない
+	return InterferenceEdgeMap->find(with) != InterferenceEdgeMap->end();
 }
 //---------------------------------------------------------------------------
 

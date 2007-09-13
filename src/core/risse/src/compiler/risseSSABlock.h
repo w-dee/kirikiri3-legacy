@@ -99,6 +99,25 @@ public:
 	void AddStatement(tSSAStatement * stmt)
 	{ InsertStatement(stmt, sipTail); }
 
+	//! @brief		ブロックに文を追加する
+	//! @param		pos		スクリプト上の位置
+	//! @param		code	オペレーションコード
+	//! @param		ret_var	この文で変数を定義する場合はtSSAVariable *へのポインタを渡す
+	//!						(変数を定義したくない場合はNULLを渡す)
+	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
+	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
+	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
+	//! @param		using4	この文で使用する変数その4(NULL=使用しない)
+	//! @return		新しく追加された文
+	tSSAStatement * AddStatement(risse_size pos, tOpCode code,
+		tSSAVariable ** ret_var,
+			tSSAVariable *using1 = NULL,
+			tSSAVariable *using2 = NULL,
+			tSSAVariable *using3 = NULL,
+			tSSAVariable *using4 = NULL
+			);
+
+
 	//! @brief		文を挿入する
 	//! @param		stmt		挿入する文
 	//! @param		point		挿入する場所

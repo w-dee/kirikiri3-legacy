@@ -338,27 +338,7 @@ tSSAStatement * tSSAForm::AddStatement(risse_size pos, tOpCode code,
 			tSSAVariable *using4
 			)
 {
-	// 文の作成
-	tSSAStatement * stmt =
-		new tSSAStatement(this, pos, code);
-
-	if(ret_var)
-	{
-		// 戻りの変数の作成
-		*ret_var = new tSSAVariable(this, stmt);
-	}
-
-	// 文のSSAブロックへの追加
-	GetCurrentBlock()->AddStatement(stmt);
-
-	// 文に変数の使用を追加
-	if(using1) stmt->AddUsed(using1);
-	if(using2) stmt->AddUsed(using2);
-	if(using3) stmt->AddUsed(using3);
-	if(using4) stmt->AddUsed(using4);
-
-	// 文を返す
-	return stmt;
+	return GetCurrentBlock()->AddStatement(pos, code, ret_var, using1, using2, using3, using4);
 }
 //---------------------------------------------------------------------------
 

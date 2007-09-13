@@ -199,6 +199,26 @@ void tSSAVariable::Coalesce()
 				current_block->CoalesceLiveness(var, this);
 			last_block = current_block;
 		}
+
+		// InterferenceEdgeMap の合併
+		if(var->InterferenceEdgeMap)
+		{
+			if(InterferenceEdgeMap == NULL) InterferenceEdgeMap = new tInterferenceEdgeMap();
+			for(tInterferenceEdgeMap::iterator ii = var->InterferenceEdgeMap->begin();
+				ii != var->InterferenceEdgeMap->end(); ii++)
+			{
+				// ii を this に付け替え
+				if(ii->first != this)
+					InterferenceEdgeMap->insert(tInterferenceEdgeMap::value_type(ii->first, risse_size_max));
+				// ii->first のうち、var を向いていたエッジを this を向くように修正
+				tInterferenceEdgeMap * ii_map = ii->first->InterferenceEdgeMap;
+				RISSE_ASSERT(ii_map != NULL);
+				tInterferenceEdgeMap::iterator var_edge = ii_map->find(var);
+				RISSE_ASSERT(var_edge != ii_map->end());
+				ii_map->erase(var_edge);
+				ii_map->insert(tInterferenceEdgeMap::value_type(this, risse_size_max));
+			}
+		}
 	}
 
 	RISSE_ASSERT(CoalescableList == NULL);

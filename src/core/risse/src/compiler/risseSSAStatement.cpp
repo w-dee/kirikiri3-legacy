@@ -357,6 +357,29 @@ wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().
 		}
 	}
 
+	bool interf_added = false;
+	if(!(Code == ocAssign || Code == ocPhi))
+	{
+		// 一時的処置
+		// TODO: これあとで削除
+		// 現時点では各命令は3アドレス方式をとっており、また
+		// レジスタの read と write が同じレジスタにたいしておこると
+		// おかしくなる場合があるため、全面的に2アドレス方式をとるまでは
+		// 一時的に read と write が干渉している (=別のレジスタに割り当たる)
+		// ようにする。ただし ocAssign / ocPhi は別。
+		if(Declared)
+		{
+			for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
+				li != livemap.end(); li++)
+			{
+				if(li->first == Declared) continue;
+				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
+wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
+			}
+		}
+		interf_added = true;
+	}
+
 	// この文で使用された変数があり、それがこの文で使用が終了していればlivemapから削除する
 	// この文で使用が終了しているかどうかの判定は、
 	// ・ブロックのLiveOut にその変数がない
@@ -397,14 +420,17 @@ wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_
 	}
 
 	// 宣言された変数がある場合は、変数の干渉を追加する
-	if(Declared)
+	if(!interf_added)
 	{
-		for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
-			li != livemap.end(); li++)
+		if(Declared)
 		{
-			if(li->first == Declared) continue;
-			Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
+			for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
+				li != livemap.end(); li++)
+			{
+				if(li->first == Declared) continue;
+				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
 wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
+			}
 		}
 	}
 

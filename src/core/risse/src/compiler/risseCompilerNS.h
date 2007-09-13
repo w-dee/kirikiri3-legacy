@@ -195,13 +195,12 @@ public:
 	void MarkToCreatePhi();
 
 	//! @brief		変数に読み込みのためのアクセスをする(必要ならばφ関数などが作成される)
-	//! @param		form	SSA形式インスタンス
 	//! @param		pos		スクリプト上の位置
 	//! @param		name	変数名
 	//! @return		見つかった変数、あるいはφ関数の戻り値など (NULL=ローカル変数に見つからなかった)
 	//! @note		このメソッドは、「チェーンされた」名前空間も検索し、そこに変数があるならば
 	//!				チェーンされた名前空間へアクセスするための文を作成する
-	tSSAVariable * Read(tSSAForm * form, risse_size pos, const tString & name);
+	tSSAVariable * Read(risse_size pos, const tString & name);
 
 	//! @brief		変数に書き込みのためのアクセスをする(必要ならばφ関数などが作成される)
 	//! @param		form	SSA形式インスタンス
@@ -211,7 +210,7 @@ public:
 	//! @return		書き込み成功したか(変数が見つからないなど、書き込みに失敗した場合は偽)
 	//! @note		このメソッドは、「チェーンされた」名前空間も検索し、そこに変数があるならば
 	//!				チェーンされた名前空間へアクセスするための文を作成する
-	bool Write(tSSAForm * form, risse_size pos, const tString & name,
+	bool Write(risse_size pos, const tString & name,
 				tSSAVariable * value);
 
 	//! @brief		子名前空間から呼ばれ、変数に読み込み/書き込みのためのアクセスをする

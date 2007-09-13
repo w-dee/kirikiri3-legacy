@@ -132,13 +132,13 @@ tSSAForm::tSSAForm(risse_size pos, tCompilerFunction * function,
 	tSSAVariable * thisproxy = NULL;
 	AddStatement(pos, ocAssignThisProxy, &thisproxy);
 	LocalNamespace->Add(ss_thisProxyHiddenVarName, NULL);
-	LocalNamespace->Write(this, pos, ss_thisProxyHiddenVarName, thisproxy);
+	LocalNamespace->Write(pos, ss_thisProxyHiddenVarName, thisproxy);
 
 	// 一番浅い位置の名前空間に、変数 ss_lastEvalResultHiddenVarName を登録する
 	// 内容は void である
 	tSSAVariable * voidvalue = AddConstantValueStatement(pos, tVariant());
 	LocalNamespace->Add(ss_lastEvalResultHiddenVarName, NULL);
-	LocalNamespace->Write(this, pos, ss_lastEvalResultHiddenVarName, voidvalue);
+	LocalNamespace->Write(pos, ss_lastEvalResultHiddenVarName, voidvalue);
 }
 //---------------------------------------------------------------------------
 
@@ -223,7 +223,7 @@ tScriptBlockInstance * tSSAForm::GetScriptBlockInstance() const
 //---------------------------------------------------------------------------
 tSSAVariable * tSSAForm::GetThisProxy(risse_size pos)
 {
-	return LocalNamespace->Read(this, pos, ss_thisProxyHiddenVarName);
+	return LocalNamespace->Read(pos, ss_thisProxyHiddenVarName);
 }
 //---------------------------------------------------------------------------
 
@@ -234,7 +234,7 @@ void tSSAForm::WriteLastEvalResult(risse_size pos, tSSAVariable * value)
 	if(value)
 	{
 		// _ 変数に値を書き込む
-		bool result = LocalNamespace->Write(this, pos,
+		bool result = LocalNamespace->Write(pos,
 						ss_lastEvalResultHiddenVarName, value);
 		(void)result;
 		RISSE_ASSERT(result != false);
@@ -463,7 +463,7 @@ void tSSAForm::AddBreakStatement(risse_size pos,
 					else
 					{
 						// そうでなければ _ の値を得る
-						var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
+						var = LocalNamespace->Read(pos, ss_lastEvalResultHiddenVarName);
 					}
 				}
 				if(var == NULL && info->GetIsBlock())
@@ -872,7 +872,7 @@ void tSSAForm::GenerateLastReturn(const tASTNode * root)
 	// 後続の LeapDeadBlocks() で破棄される。
 	// 返す値は '_' の値となる。
 	risse_size pos = root->SearchEndPosition();
-	tSSAVariable * ret_var = LocalNamespace->Read(this, pos, ss_lastEvalResultHiddenVarName);
+	tSSAVariable * ret_var = LocalNamespace->Read(pos, ss_lastEvalResultHiddenVarName);
 	AddStatement(pos, ocReturn, NULL, ret_var);
 }
 //---------------------------------------------------------------------------

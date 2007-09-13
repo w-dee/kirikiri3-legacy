@@ -69,7 +69,7 @@ void tSSAVariableAccessMap::GenerateChildWrite(tSSAForm * form, risse_size pos)
 			// そもそも読み込みと書き込みを区別して記録しているのは、読み込みのみしか
 			// 行われなかった変数は、親の名前空間内に書き戻す必要がないため。
 			tSSAVariable * var =
-				form->GetLocalNamespace()->Read(form, pos, i->first);
+				form->GetLocalNamespace()->Read(pos, i->first);
 			RISSE_ASSERT(var != NULL);
 			form->AddStatement(pos, ocChildWrite, NULL, Variable, var)->SetName(i->second.NumberedName);
 		}
@@ -88,7 +88,7 @@ void tSSAVariableAccessMap::GenerateChildRead(tSSAForm * form, risse_size pos)
 			// 書き込みが発生している
 			tSSAVariable * var = NULL;
 			form->AddStatement(pos, ocChildRead, &var, Variable)->SetName(i->second.NumberedName);
-			form->GetLocalNamespace()->Write(form, pos, i->first, var);
+			form->GetLocalNamespace()->Write(pos, i->first, var);
 		}
 	}
 }
@@ -349,15 +349,14 @@ void tSSALocalNamespace::MarkToCreatePhi()
 
 
 //---------------------------------------------------------------------------
-tSSAVariable * tSSALocalNamespace::Read(tSSAForm * form,
-							risse_size pos, const tString & name)
+tSSAVariable * tSSALocalNamespace::Read(risse_size pos, const tString & name)
 {
 	tSSAVariable * ret = MakePhiFunction(pos, name);
 	if(ret)
 	{
 		// 文の作成
 		tSSAVariable * ret_var = NULL;
-		tSSAStatement *stmt = form->AddStatement(pos, ocReadVar, &ret_var, ret);
+		tSSAStatement *stmt = Block->AddStatement(pos, ocReadVar, &ret_var, ret);
 		stmt->SetName(ret->GetNumberedName());
 		ret = ret_var;
 		return ret;
@@ -376,7 +375,7 @@ tSSAVariable * tSSALocalNamespace::Read(tSSAForm * form,
 				// 共有変数領域からの読み込み文または
 				// 親名前空間からの読み込み文を生成する
 				tSSAVariable * ret_var = NULL;
-				tSSAStatement *stmt = form->AddStatement(pos,
+				tSSAStatement *stmt = Block->AddStatement(pos,
 								is_shared ? ocRead : ocParentRead, &ret_var);
 				stmt->SetName(n_name);
 				ret = ret_var;
@@ -391,7 +390,7 @@ tSSAVariable * tSSALocalNamespace::Read(tSSAForm * form,
 
 
 //---------------------------------------------------------------------------
-bool tSSALocalNamespace::Write(tSSAForm * form, risse_size pos,
+bool tSSALocalNamespace::Write(risse_size pos,
 					const tString & name, tSSAVariable * value)
 {
 	// ローカル変数に上書きする
@@ -412,7 +411,7 @@ bool tSSALocalNamespace::Write(tSSAForm * form, risse_size pos,
 
 			// 文の作成
 			tSSAVariable * ret_var = NULL;
-			tSSAStatement *stmt = form->AddStatement(pos, ocWriteVar, &ret_var, value);
+			tSSAStatement *stmt = Block->AddStatement(pos, ocWriteVar, &ret_var, value);
 			stmt->SetName(n_name);
 
 			// 変数の上書き
@@ -438,7 +437,7 @@ bool tSSALocalNamespace::Write(tSSAForm * form, risse_size pos,
 			// この時点でn_name は番号付きの名前になっている
 			// 共有変数領域への書き込み文または
 			// 親名前空間への書き込み文を生成する
-			tSSAStatement *stmt = form->AddStatement(pos,
+			tSSAStatement *stmt = Block->AddStatement(pos,
 							is_shared ? ocWrite : ocParentWrite, NULL, value);
 			stmt->SetName(n_name);
 			return true;

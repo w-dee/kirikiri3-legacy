@@ -282,7 +282,7 @@ void tCompilerFunction::BindAllLabels()
 
 					// _ の値を取得する
 					tSSAVariable * var =
-						i->SourceBlock->GetLocalNamespace()->Read(source_form,
+						i->SourceBlock->GetLocalNamespace()->Read(
 							i->SourceBlock->GetLastStatementPosition(), ss_lastEvalResultHiddenVarName);
 
 					// この try id まで例外で抜けるためのコードを生成
@@ -467,7 +467,7 @@ void tCompiler::CompileClass(const gc_vector<tASTNode *> & roots, const tString 
 		assignparam_stmt->SetIndex(0);
 
 		new_form->GetLocalNamespace()->Add(RISSE_WS("super"), NULL);
-		new_form->GetLocalNamespace()->Write(new_form, pos, RISSE_WS("super"), param_var);
+		new_form->GetLocalNamespace()->Write(pos, RISSE_WS("super"), param_var);
 	}
 
 	// トップレベルのSSA形式の内容を作成する

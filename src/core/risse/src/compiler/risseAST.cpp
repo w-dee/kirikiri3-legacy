@@ -710,7 +710,7 @@ tSSAVariable * tASTNode_Context::DoReadSSA(
 	}
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
-	return form->GetLocalNamespace()->Read(form, GetEndPosition(), ss_lastEvalResultHiddenVarName);
+	return form->GetLocalNamespace()->Read(GetEndPosition(), ss_lastEvalResultHiddenVarName);
 }
 //---------------------------------------------------------------------------
 
@@ -777,7 +777,7 @@ tSSAVariable * tASTNode_Factor::DoReadSSA(
 			// 文を作成して戻る
 			// ローカル変数から "super" を探す
 			tSSAVariable * ret_var =
-				form->GetLocalNamespace()->Read(form, GetPosition(), RISSE_WS("super"));
+				form->GetLocalNamespace()->Read(GetPosition(), RISSE_WS("super"));
 			if(!ret_var)
 			{
 				// "super" がみつからない、すなわちそこには super キーワードをおけない
@@ -951,7 +951,7 @@ void tASTNode_VarDeclPair::GenerateVarDecl(tSSAForm * form,
 			// ローカル変数として作成する
 
 			// ローカル変数への書き込み
-			form->GetLocalNamespace()->Write(form, position, str_name, init);
+			form->GetLocalNamespace()->Write(position, str_name, init);
 		}
 		else
 		{
@@ -1127,7 +1127,7 @@ tSSAVariable * tASTNode_Id::DoReadSSA(
 	else
 	{
 		// ローカル変数に見つかった
-		return form->GetLocalNamespace()->Read(form, GetPosition(), Name);
+		return form->GetLocalNamespace()->Read(GetPosition(), Name);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1152,7 +1152,7 @@ bool tASTNode_Id::DoWriteSSA(
 	else
 	{
 		// ローカル変数に見つかった;ローカル変数に上書きする
-		bool result = form->GetLocalNamespace()->Write(form, GetPosition(), Name, value);
+		bool result = form->GetLocalNamespace()->Write(GetPosition(), Name, value);
 		RISSE_ASSERT(result == true);
 		return result;
 	}
@@ -2133,7 +2133,7 @@ tSSAVariable * tASTNode_While::DoReadSSA(tSSAForm *form, void * param) const
 	// あるいは break 文によって tSSAForm::AddBreakOrContinueStatement() 内で
 	// _ への書き込みが行われている。
 	tSSAVariable * res = form->GetLocalNamespace()->Read(
-					form, GetPosition(), ss_lastEvalResultHiddenVarName);
+					GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
 //---------------------------------------------------------------------------
@@ -2250,7 +2250,7 @@ tSSAVariable * tASTNode_For::DoReadSSA(tSSAForm *form, void * param) const
 	// あるいは break 文によって tSSAForm::AddBreakOrContinueStatement() 内で
 	// _ への書き込みが行われている。
 	tSSAVariable * res = form->GetLocalNamespace()->Read(
-					form, GetPosition(), ss_lastEvalResultHiddenVarName);
+					GetPosition(), ss_lastEvalResultHiddenVarName);
 	return res;
 }
 //---------------------------------------------------------------------------
@@ -2437,7 +2437,7 @@ tSSAVariable * tASTNode_Synchronized::DoReadSSA(tSSAForm *form, void * param) co
 
 	// ss_lastEvalResultHiddenVarName の値を取り出す
 	tSSAVariable * last_value =
-		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
+		form->GetLocalNamespace()->Read(GetPosition(), ss_lastEvalResultHiddenVarName);
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
 	return last_value;
@@ -2836,7 +2836,7 @@ tSSAVariable * tASTNode_Try::GenerateTryCatchOrFinally(tSSAForm *form,  bool is_
 
 	// ss_lastEvalResultHiddenVarName の値を取り出す
 	tSSAVariable * last_value =
-		form->GetLocalNamespace()->Read(form, GetPosition(), ss_lastEvalResultHiddenVarName);
+		form->GetLocalNamespace()->Read(GetPosition(), ss_lastEvalResultHiddenVarName);
 
 	// このノードは ss_lastEvalResultHiddenVarName を返す
 	return last_value;
@@ -2872,7 +2872,7 @@ void tASTNode_Try::GenerateCatchBlock(tSSAForm * form,
 				form->GetLocalNamespace()->Add(catch_node->GetName(), NULL);
 
 				// ローカル変数への書き込み
-				form->GetLocalNamespace()->Write(form, GetPosition(),
+				form->GetLocalNamespace()->Write(GetPosition(),
 												catch_node->GetName(), try_block_ret_var);
 			}
 
@@ -3357,7 +3357,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);
 
 		// ローカル変数への書き込み
-		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+		new_form->GetLocalNamespace()->Write(GetPosition(),
 										child->GetName(), param_var);
 	}
 
@@ -3379,7 +3379,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 		new_form->GetLocalNamespace()->Add(child->GetName(), NULL);
 
 		// ローカル変数への書き込み
-		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+		new_form->GetLocalNamespace()->Write(GetPosition(),
 										child->GetName(), param_var);
 	}
 
@@ -3504,7 +3504,7 @@ tSSAVariable * tASTNode_PropDecl::GeneratePropertyDecl(tSSAForm *form) const
 		new_form->GetLocalNamespace()->Add(SetterArgumentName, NULL);
 
 		// ローカル変数への書き込み
-		new_form->GetLocalNamespace()->Write(new_form, GetPosition(),
+		new_form->GetLocalNamespace()->Write(GetPosition(),
 										SetterArgumentName, param_var);
 
 		// ブロックの内容を生成する

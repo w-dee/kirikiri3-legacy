@@ -48,6 +48,7 @@ class tSSAVariable : public tCollectee
 	const tVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
 	tVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
 	void * Mark; //!< マーク
+	risse_size AssignedRegister; //!< 割り当てられたレジスタ
 
 public:
 	static tSSAVariable * GetUninitialized()
@@ -141,6 +142,15 @@ public:
 
 	//! @brief		合併可能な変数のリストを得る
 	gc_vector<tSSAVariable*> * GetCoalescableList() { return CoalescableList; }
+
+	//! @brief		変数にレジスタを割り当てる
+	//! @param		assign_work		割り当て作業用のワーク
+	void AssignRegister(gc_vector<void*> & assign_work);
+
+	//! @brief		割り当たっているレジスタを得る
+	//! @return		割り当たっているレジスタ (risse_size_max の場合はまだレジスタが割り当たっていない)
+	risse_size GetAssignedRegister() const { return AssignedRegister; }
+
 
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値

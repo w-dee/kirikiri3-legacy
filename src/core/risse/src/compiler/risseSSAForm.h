@@ -542,6 +542,9 @@ public:
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
 
+	//! @brief		変数にレジスタを割り当てる
+	void AssignRegisters();
+
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();
 

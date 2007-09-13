@@ -300,6 +300,9 @@ public:
 	//!				この文で生存期間が終わっている場合は偽が帰る
 	bool IsLivingIn(tSSAVariable * var);
 
+	//! @brief		変数にレジスタを割り当てる
+	void AssignRegisters(gc_vector<void*> & assign_work);
+
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();
 

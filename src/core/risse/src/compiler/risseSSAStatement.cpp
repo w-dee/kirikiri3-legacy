@@ -126,6 +126,7 @@ void tSSAStatement::TraceCoalescable()
 				// ・ここで一時的に作成するコピー文は合併してはいけない。
 				// ・ここで挿入する文には通し番号が付いていない。
 				// ・文をブロックにまだ挿入していない。
+				// ・文を挿入する際、干渉グラフの更新を行っていない。
 
 				// 変数の干渉が見つかった
 				// テンポラリ変数を作成し、この phi 文で定義した変数を
@@ -395,20 +396,20 @@ wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_
 		}
 	}
 
-
-wxFprintf(stderr, wxT("\n"));
-
-	// 追加された変数がある場合は、変数の干渉を追加する
-	if(has_new_declared)
+	// 宣言された変数がある場合は、変数の干渉を追加する
+	if(Declared)
 	{
-		RISSE_ASSERT(Declared);
 		for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
 			li != livemap.end(); li++)
 		{
 			if(li->first == Declared) continue;
 			Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
+wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
 		}
 	}
+
+wxFprintf(stderr, wxT("\n"));
+
 }
 //---------------------------------------------------------------------------
 
@@ -508,6 +509,19 @@ bool tSSAStatement::IsLivingIn(tSSAVariable * var)
 	}
 
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::AssignRegisters(gc_vector<void*> & assign_work)
+{
+	// Declared および Used をみて、それぞれの変数にレジスタが割り当たってないようならば
+	// レジスタを割り当てる
+	if(Declared) Declared->AssignRegister(assign_work);
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
+		(*i)->AssignRegister(assign_work);
 }
 //---------------------------------------------------------------------------
 

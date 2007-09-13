@@ -719,6 +719,16 @@ void tSSABlock::RemovePhiStatements()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::AssignRegisters(gc_vector<void*> & assign_work)
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->AssignRegisters(assign_work);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::AnalyzeVariableStatementLiveness()
 {
 	// すべての文で宣言された変数について文単位の有効範囲解析を行う

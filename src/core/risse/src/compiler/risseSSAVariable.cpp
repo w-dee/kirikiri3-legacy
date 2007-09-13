@@ -40,6 +40,7 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	Value = NULL;
 	ValueType = tVariant::vtVoid;
 	Mark = NULL;
+	AssignedRegister = risse_size_max;
 
 	// この変数が定義された文の登録
 	if(Declared) Declared->SetDeclared(this);
@@ -206,6 +207,62 @@ void tSSAVariable::Coalesce()
 
 
 //---------------------------------------------------------------------------
+void tSSAVariable::AssignRegister(gc_vector<void*> & assign_work)
+{
+	if(AssignedRegister != risse_size_max) return; // 既に割り当たっている
+
+	if(!InterferenceEdgeMap)
+	{
+wxFprintf(stderr, wxT("no interference map for %s\n"), GetQualifiedName().AsWxString().c_str());
+		AssignedRegister = 0;
+		return; // 干渉マップがない; そもそも干渉がないということなので遠慮無く 0 番を割り当てる
+	}
+
+	// InterferenceEdgeMap に列挙されている各変数とは異なるレジスタを割り当てる。
+	// 具体的には、InterferenceEdgeMap に列挙されている変数のうち、
+	// レジスタが既に割り当てられている変数のレジスタを除くレジスタのどれかを割り当てる。
+
+wxFprintf(stderr, wxT("with %s"), GetQualifiedName().AsWxString().c_str());
+	// 今までに割り当たっているうちの最大の番号のレジスタを得る
+	risse_size max_assigned_reg_num = risse_size_max;
+	for(tInterferenceEdgeMap::iterator i = InterferenceEdgeMap->begin();
+		i != InterferenceEdgeMap->end(); i++)
+	{
+		risse_size assigned_reg_num = i->first->AssignedRegister;
+		if(assigned_reg_num != risse_size_max)
+		{
+			// assign_work の該当部分を this に設定
+			if(assign_work.size() <= assigned_reg_num)
+				assign_work.resize(assigned_reg_num + 1);
+			assign_work[assigned_reg_num] = this;
+wxFprintf(stderr, wxT(", %s is at %d"), i->first->GetQualifiedName().AsWxString().c_str(), (int)assigned_reg_num);
+
+			if(max_assigned_reg_num == risse_size_max || max_assigned_reg_num < assigned_reg_num)
+				max_assigned_reg_num = assigned_reg_num;
+		}
+	}
+wxFprintf(stderr, wxT("\n"));
+
+	// assign_work を見ていき、最初に this で無かったレジスタを割り当てる。
+	if(max_assigned_reg_num != risse_size_max)
+	{
+		for(risse_size i = 0; i <= max_assigned_reg_num; i++)
+		{
+			if(assign_work[i] != this)
+			{
+				AssignedRegister = i;
+				return;
+			}
+		}
+	}
+
+	// 最後まで探したけど無かったというときは max_assigned_reg_num + 1 を割り当てる
+	AssignedRegister = max_assigned_reg_num + 1;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tSSAVariable * tSSAVariable::GenerateFuncCall(risse_size pos, const tString & name,
 			tSSAVariable * param1,
 			tSSAVariable * param2,
@@ -328,6 +385,14 @@ tString tSSAVariable::GetComment() const
 		risse_char tmp[25];
 		pointer_to_str(CoalescableList, tmp);
 		comment += tString(RISSE_WS(" coalescable to id 0x")) + tmp;
+	}
+	if(AssignedRegister != risse_size_max)
+	{
+		if(comment.IsEmpty())
+			comment = RISSE_WS(" //");
+		else
+			comment += RISSE_WS(",");
+		comment += tString(RISSE_WS(" register %")) + tString::AsString((risse_int64)AssignedRegister);
 	}
 	return comment;
 }

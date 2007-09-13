@@ -262,6 +262,9 @@ public:
 	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
 	void RemovePhiStatements();
 
+	//! @brief		変数にレジスタを割り当てる
+	void AssignRegisters(gc_vector<void*> & assign_work);
+
 	//! @brief		変数の生存区間を文単位で解析する
 	void AnalyzeVariableStatementLiveness();
 

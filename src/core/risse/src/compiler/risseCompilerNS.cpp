@@ -71,7 +71,9 @@ void tSSAVariableAccessMap::GenerateChildWrite(tSSAForm * form, risse_size pos)
 			tSSAVariable * var =
 				form->GetLocalNamespace()->Read(pos, i->first);
 			RISSE_ASSERT(var != NULL);
-			form->AddStatement(pos, ocChildWrite, NULL, Variable, var)->SetName(i->second.NumberedName);
+			tSSAVariable *temp = NULL;
+			form->AddStatement(pos, ocChildWrite, &temp, Variable, var)->SetName(i->second.NumberedName);
+			i->second.TempVariable = temp; // 一時変数を記録
 		}
 	}
 }
@@ -95,6 +97,21 @@ void tSSAVariableAccessMap::GenerateChildRead(tSSAForm * form, risse_size pos)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tSSAVariableAccessMap::GenerateEndAccessMap(tSSAForm * form, risse_size pos)
+{
+	// ocEndAccessMap を追加する
+	tSSAStatement * stmt = form->AddStatement(pos, ocEndAccessMap, NULL, Variable);
+
+	// 暫定実装
+	// ocEndAccessMap の Used に、アクセスマップで作成された一時変数を登録する
+	// (変数の生存期間がここまであることを確実にする)
+	for(tMap::iterator i = Map.begin(); i != Map.end(); i++)
+	{
+		stmt->AddUsed(i->second.TempVariable);
+	}
+}
+//---------------------------------------------------------------------------
 
 
 

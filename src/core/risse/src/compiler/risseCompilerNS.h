@@ -29,10 +29,11 @@ class tSSAVariableAccessMap : public tCollectee
 	//! @brief		名前に関する情報
 	struct tInfo : public tCollectee
 	{
-		tInfo() { Read = false; Write = false; } //!< コンストラクタ
+		tInfo() { Read = false; Write = false; TempVariable = NULL; } //!< コンストラクタ
 		bool Read;		//!< この変数に対する読み込みが発生したかどうか(使用フラグ)
 		bool Write;		//!< この変数に対する書き込みが発生したかどうか(使用フラグ)
 		tString NumberedName; //!< 番号付きの名前
+		tSSAVariable * TempVariable; //!< この変数に割り当てられた childwrite 用の一時変数
 	};
 	typedef gc_map<tString, tInfo> tMap; //!< 変数名(番号なし)→情報のマップのtypedef
 
@@ -65,6 +66,11 @@ public:
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
 	void GenerateChildRead(tSSAForm * form, risse_size pos);
+
+	//! @param		アクセスマップの終了を表す ocEndAccessMap を追加する
+	//! @param		form		SSA形式インスタンス
+	//! @param		pos			スクリプト上の位置
+	void GenerateEndAccessMap(tSSAForm * form, risse_size pos);
 
 };
 //---------------------------------------------------------------------------

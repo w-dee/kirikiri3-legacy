@@ -1136,9 +1136,14 @@ tString tSSAStatement::Dump() const
 		{
 			RISSE_ASSERT(Name != NULL);
 			RISSE_ASSERT(Used.size() == 2);
-			return Used[0]->Dump()  + RISSE_WS(".ChildWrite(") +
+			RISSE_ASSERT(Declared != NULL);
+			tString ret;
+			if(Declared)
+				ret += Declared->Dump() + RISSE_WS(" = "); // この文で宣言された変数がある
+			ret += Used[0]->Dump()  + RISSE_WS(".ChildWrite(") +
 					Name->AsHumanReadable() + RISSE_WS(", ") + Used[1]->Dump() +
 					RISSE_WS(")");
+			return ret + Declared->GetComment();
 		}
 
 	case ocChildRead: // 子名前空間からの読み込み

@@ -826,7 +826,7 @@ void tSSAForm::CleanupAccessMap(risse_size pos, tSSAVariableAccessMap * accessma
 	accessmap->GenerateChildRead(this, pos);
 
 	// ocEndAccessMap を追加する
-	AddStatement(pos, ocEndAccessMap, NULL, accessmap->GetVariable());
+	accessmap->GenerateEndAccessMap(this, pos);
 }
 //---------------------------------------------------------------------------
 

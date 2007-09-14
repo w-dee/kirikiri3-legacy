@@ -303,10 +303,6 @@ public:
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters(gc_vector<void*> & assign_work);
 
-	//! @brief		変数の生存区間を文単位で解析する
-	void AnalyzeVariableStatementLiveness();
-
-
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
 	void GenerateCode(tCodeGenerator * gen) const;
@@ -315,9 +311,6 @@ public:
 	//! @return		ダンプ文字列
 	tString Dump() const;
 
-	//! @brief		文単位の変数の使用開始と使用終了についてダンプを行う
-	//! @param		is_start		使用開始のダンプを行う際にtrue,使用終了の場合はfalse
-	tString DumpVariableStatementLiveness(bool is_start) const;
 };
 //---------------------------------------------------------------------------
 

@@ -553,21 +553,8 @@ void tSSAStatement::AssignRegisters(gc_vector<void*> & assign_work)
 
 
 //---------------------------------------------------------------------------
-void tSSAStatement::AnalyzeVariableStatementLiveness()
-{
-	if(Declared) Declared->AnalyzeVariableStatementLiveness(this);
-	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
-		i != Used.end(); i++)
-		(*i)->AnalyzeVariableStatementLiveness(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 {
-	bool free_unused_var = true;
-
 	// gen にソースコード上の位置を伝える
 	gen->SetSourceCodePosition(Position);
 
@@ -810,25 +797,6 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 	case ocDefineAccessMap:
 		{
 			RISSE_ASSERT(Declared != NULL);
-			// Declared で使用している文のうち、ocChildWrite/ocChildRead
-			// してる物を探し、そこで使用されている名前で gen の VariableMapForChildren に
-			// マップを作成する
-			// (実際の変数へのアクセスは後の ocChildWrite や ocChildRead で処理する)
-			const gc_vector<tSSAStatement *> & child_access_stmts =
-				Declared->GetUsed();
-			for(gc_vector<tSSAStatement *>::const_iterator i =
-				child_access_stmts.begin(); i != child_access_stmts.end(); i++)
-			{
-				tSSAStatement * stmt = *i;
-				switch((*i)->Code)
-				{
-				case ocChildWrite:
-				case ocChildRead:
-					gen->FindOrRegisterVariableMapForChildren(*stmt->Name); // マップに変数名だけを追加する
-					break;
-				default: ;
-				}
-			}
 		}
 		break;
 
@@ -861,12 +829,14 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 	case ocChildWrite:
 		{
 			RISSE_ASSERT(Used.size() == 2);
+			RISSE_ASSERT(Declared != NULL);
 			RISSE_ASSERT(Name != NULL);
 			// Used[0] が define された文は ocDefineAccessMap であるはずである
 			// TODO: この部分は変数の併合を実装するに当たり書き換わる可能性が高い。
 			//       現状の実装は暫定的なもの。
 			tSSAStatement * lazy_stmt = Used[0]->GetDeclared();
 			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
+			gen->RegisterVariableMapForChildren(Declared, *Name);
 			gen->PutAssign(gen->FindVariableMapForChildren(*Name), Used[1]);
 		}
 		break;
@@ -887,16 +857,6 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 	case ocEndAccessMap:
 		// アクセスマップの使用終了
 		// 暫定実装
-		{
-			RISSE_ASSERT(Used.size() == 1);
-			// 変数を開放する
-			gen->FreeVariableMapForChildren();
-		}
-		free_unused_var = false;
-			// この文で使用が終わった変数(すなわち ocDefineAccessMapで
-			// 宣言した変数) の開放はおこなわない。なぜならば、ocDefineAccessMapで
-			// 宣言された変数は擬似的な変数であり、実際に変数マップに登録されないから。
-		
 		break;
 
 
@@ -918,22 +878,6 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 	default:
 		RISSE_ASSERT(!"not acceptable SSA operation code");
 		break;
-	}
-
-	if(free_unused_var)
-	{
-		// この文で使用が終了している変数を解放する
-		if(Declared)
-		{
-			if(Declared->GetLastUsedStatement() == this)
-				gen->FreeRegister(Declared);
-		}
-		for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
-				i != Used.end(); i++)
-		{
-			if((*i)->GetLastUsedStatement() == this)
-				gen->FreeRegister(*i);
-		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -1306,32 +1250,6 @@ tString tSSAStatement::Dump() const
 			return ret;
 		}
 	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tString tSSAStatement::DumpVariableStatementLiveness(bool is_start) const
-{
-	tString ret;
-	tSSAVariable *var;
-	var = Declared;
-	if(var)
-		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
-			ret += var->GetQualifiedName();
-
-	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
-			i != Used.end(); i++)
-	{
-		var = *i;
-		if((is_start?var->GetFirstUsedStatement():var->GetLastUsedStatement()) == this)
-		{
-			if(!ret.IsEmpty()) ret += RISSE_WS(", ");
-			ret += var->GetQualifiedName();
-		}
-	}
-
-	return ret;
 }
 //---------------------------------------------------------------------------
 

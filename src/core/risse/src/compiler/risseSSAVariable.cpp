@@ -35,8 +35,6 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	Declared = stmt;
 	CoalescableList = NULL;
 	InterferenceEdgeMap = NULL;
-	FirstUsedStatement = NULL;
-	LastUsedStatement = NULL;
 	Value = NULL;
 	ValueType = tVariant::vtVoid;
 	Mark = NULL;
@@ -337,27 +335,6 @@ void tSSAVariable::DeleteDeadStatements()
 		}
 	}
 
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSSAVariable::AnalyzeVariableStatementLiveness(tSSAStatement * stmt)
-{
-	// ここでは命令の生成順(通し番号順)に比較を行うため、通し番号が
-	// すでに文についていなければならない
-	RISSE_ASSERT(stmt->GetOrder() != risse_size_max);
-	if(!FirstUsedStatement)
-	{
-		FirstUsedStatement = LastUsedStatement = stmt;
-	}
-	else
-	{
-		if(FirstUsedStatement->GetOrder() > stmt->GetOrder())
-			FirstUsedStatement = stmt;
-		if(LastUsedStatement->GetOrder() < stmt->GetOrder())
-			LastUsedStatement = stmt;
-	}
 }
 //---------------------------------------------------------------------------
 

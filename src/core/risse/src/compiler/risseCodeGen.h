@@ -46,14 +46,11 @@ class tCodeGenerator : public tCollectee
 public:
 	typedef gc_map<tString, risse_size> tNamedRegMap;
 		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
-	typedef gc_map<const tSSAVariable *, risse_size> tRegMap;
-		//!< 変数とそれに対応するレジスタ番号のマップのtypedef
 private:
 	tNamedRegMap *SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ(一連の関数グループ内ではこれを共有する)
 	risse_size SharedRegCount; //!< このコードジェネレータのネストレベルに対する共有変数の数を返す
 
 	tNamedRegMap VariableMapForChildren; //!< 親コードジェネレータが子ジェネレータに対して提供する変数のマップ
-	tRegMap RegMap; //!< 変数とそれに対応するレジスタ番号のマップ
 	//! @brief		未解決のジャンプを表す構造体
 	struct tPendingBlockJump : public tCollectee
 	{
@@ -138,12 +135,10 @@ public:
 	//! @return		その定数のインデックス
 	risse_size FindConst(const tVariant & value);
 
-	//! @brief		レジスタのマップを変数で探す
+	//! @brief		変数からレジスタ番号を得る
 	//! @param		var			変数
 	//! @return		そのレジスタのインデックス
-	//! @note		varがマップ内に見つからなかったときはレジスタを割り当て
-	//!				そのレジスタのインデックスを返す
-	risse_size FindRegMap(const tSSAVariable * var);
+	risse_size GetRegNum(const tSSAVariable * var);
 
 	//! @brief		使用中のレジスタの最大値を更新する
 	//! @param		max		レジスタの最大値
@@ -152,20 +147,6 @@ public:
 	//!				このメソッドは子から親へ再帰的に呼ばれる(結果、子と親の
 	//!				MaxNumUsedRegs は同一になる)
 	void UpdateMaxNumUsedRegs(risse_size max);
-
-	//! @brief		レジスタを一つ割り当てる
-	//! @return		割り当てられたレジスタ
-	//! @note		レジスタを割り当てたら FreeRegister で開放すること
-	risse_size AllocateRegister();
-
-	//! @brief		レジスタを一つ開放する(レジスタインデックスより)
-	//! @param		reg		AllocateRegister() で割り当てたレジスタ
-	void FreeRegister(risse_size reg);
-
-	//! @brief		レジスタを一つ解放する(変数インスタンスより)
-	//! @param		var		変数
-	//! @note		変数はレジスタマップ内に存在しないとならない
-	void FreeRegister(const tSSAVariable *var);
 
 	//! @brief		共有されたレジスタのマップを変数名で探す
 	//! @param		name			変数名
@@ -199,12 +180,10 @@ public:
 	risse_size QuerySharedVariableNestCount() const;
 
 
-	//! @brief		VariableMapForChildren 内で変数を探す
+	//! @brief		VariableMapForChildren 用の変数を登録する
+	//! @param		var			変数
 	//! @param		name		変数名
-	//! @return		そのレジスタのインデックス
-	//! @note		nameがマップ内に見つからなかったときはレジスタを割り当て
-	//!				そのレジスタのインデックスを返す
-	risse_size FindOrRegisterVariableMapForChildren(const tString & name);
+	risse_size RegisterVariableMapForChildren(const tSSAVariable * var, const tString & name);
 
 	//! @brief		VariableMapForChildren 内で変数を探す
 	//! @param		name		変数名
@@ -212,10 +191,6 @@ public:
 	//! @note		nameがマップ内に見つからなかったときは(デバッグ時は)
 	//!				ASSERTに失敗する
 	risse_size FindVariableMapForChildren(const tString & name);
-
-	//! @brief		VariableMapForChildren にある変数をすべて開放する
-	//! @note		変数は開放するが、マップそのものはクリアしない。
-	void FreeVariableMapForChildren();
 
 	//! @brief		コードを確定する(未解決のジャンプなどを解決する)
 	void FixCode();

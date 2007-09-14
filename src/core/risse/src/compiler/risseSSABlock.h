@@ -265,9 +265,6 @@ public:
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters(gc_vector<void*> & assign_work);
 
-	//! @brief		変数の生存区間を文単位で解析する
-	void AnalyzeVariableStatementLiveness();
-
 	//! @brief		バイトコードを生成する
 	//! @param		gen		バイトコードジェネレータ
 	void GenerateCode(tCodeGenerator * gen) const;

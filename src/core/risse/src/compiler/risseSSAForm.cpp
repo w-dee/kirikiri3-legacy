@@ -208,9 +208,6 @@ void tSSAForm::OptimizeAndUnSSA()
 							RISSE_WS(") ==========\n")).c_str());
 	tString str = Dump();
 	FPrint(stderr, str.c_str());
-
-	// 変数の有効範囲を文単位で解析
-	AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 
@@ -1147,23 +1144,6 @@ void tSSAForm::AssignRegisters()
 	gc_vector<void*> assign_work;
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->AssignRegisters(assign_work);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSSAForm::AnalyzeVariableStatementLiveness()
-{
-	// すべての文に通し番号を振る
-	SetStatementOrder();
-
-	// 基本ブロックのリストを取得
-	gc_vector<tSSABlock *> blocks;
-	EntryBlock->Traverse(blocks);
-
-	// 変数の詳細な生存範囲解析を行う
-	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
-		(*i)->AnalyzeVariableStatementLiveness();
 }
 //---------------------------------------------------------------------------
 

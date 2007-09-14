@@ -42,9 +42,6 @@ class tSSAVariable : public tCollectee
 	typedef gc_map<const tSSAVariable *, risse_size> tInterferenceEdgeMap; //!< 生存している変数のリスト
 	tInterferenceEdgeMap * InterferenceEdgeMap; //!< 干渉グラフのエッジを表すマップ
 
-	tSSAStatement * FirstUsedStatement; //!< 文の通し番号順で最初にこの変数が使用された文
-	tSSAStatement * LastUsedStatement; //!< 文の通し番号順で最後にこの変数が使用された文
-
 	const tVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
 	tVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
 	void * Mark; //!< マーク
@@ -111,14 +108,6 @@ public:
 
 	//! @brief		この変数で使用されている文のリストを得る
 	const gc_vector<tSSAStatement *> & GetUsed() const { return Used; }
-
-	//! @brief		文の通し番号順で最初にこの変数が使用された文を得る
-	//! @return		文の通し番号順で最初にこの変数が使用された文
-	tSSAStatement * GetFirstUsedStatement() const { return FirstUsedStatement; }
-
-	//! @brief		文の通し番号順で最後にこの変数が使用された文を得る
-	//! @return		文の通し番号順で最後にこの変数が使用された文
-	tSSAStatement * GetLastUsedStatement() const { return LastUsedStatement; }
 
 	//! @brief		変数の干渉を設定する
 	//! @param		with		干渉する他の変数 (this != with で無ければならない)

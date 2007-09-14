@@ -729,19 +729,6 @@ void tSSABlock::AssignRegisters(gc_vector<void*> & assign_work)
 
 
 //---------------------------------------------------------------------------
-void tSSABlock::AnalyzeVariableStatementLiveness()
-{
-	// すべての文で宣言された変数について文単位の有効範囲解析を行う
-	// この時点では状態はすでにSSAではない可能性がある; phi関数の削除などにより、
-	// 変数のDeclaredが一カ所ではなくて複数箇所になっている場合があるので注意
-	tSSAStatement *stmt;
-	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
-		stmt->AnalyzeVariableStatementLiveness();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tSSABlock::GenerateCode(tCodeGenerator * gen) const
 {
 	// この基本ブロックを gen に登録する
@@ -801,20 +788,11 @@ tString tSSABlock::Dump() const
 		// すべての文をダンプ
 		for(tSSAStatement * stmt = FirstStatement; stmt != NULL; stmt = stmt->GetSucc())
 		{
-			tString vars;
-			// この文で使用が開始された変数
-			vars = stmt->DumpVariableStatementLiveness(true);
-			if(!vars.IsEmpty()) ret += RISSE_WS("// Use start: ") + vars +
-																RISSE_WS("\n");
 			// 文本体
 			if(stmt->GetOrder() != risse_size_max)
 				ret += RISSE_WS("[") + tString::AsString((risse_int64)stmt->GetOrder()) +
 					RISSE_WS("] ");
 			ret += stmt->Dump() + RISSE_WS("\n");
-			// この文で使用が終了した変数
-			vars = stmt->DumpVariableStatementLiveness(false);
-			if(!vars.IsEmpty()) ret += RISSE_WS("// Use end: ") + vars +
-																RISSE_WS("\n");
 		}
 	}
 

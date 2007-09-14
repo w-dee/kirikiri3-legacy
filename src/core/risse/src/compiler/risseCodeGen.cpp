@@ -229,7 +229,12 @@ risse_size tCodeGenerator::RegisterVariableMapForChildren(const tSSAVariable * v
 	risse_size reg_num = var->GetAssignedRegister();
 	RISSE_ASSERT(reg_num != risse_size_max);
 
+	reg_num += RegisterBase;
+
+	UpdateMaxNumUsedRegs(reg_num + 1);
+
 	// VariableMapForChildren に名前と変数番号を登録する
+	RISSE_ASSERT(VariableMapForChildren.find(name) == VariableMapForChildren.end());
 	VariableMapForChildren.insert(tNamedRegMap::value_type(name, reg_num));
 
 	return reg_num;

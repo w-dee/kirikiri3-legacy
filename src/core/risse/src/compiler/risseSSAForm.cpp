@@ -104,7 +104,7 @@ tSSAForm::tSSAForm(risse_size pos, tCompilerFunction * function,
 	TryIdentifierIndex = risse_size_max;
 	CanReturn = !UseParentFrame; // いまのところ CanReturn はこの式の通りで決定される
 	ExitTryBranchTargetLabels = NULL;
-	HasSSAness = true; // 最初はSSA性が保持されていると見なす
+	State = ssSSA; // 最初はSSA性が保持されていると見なす
 
 	// 関数インスタンスに自身を登録する
 	Function->AddSSAForm(this);
@@ -1112,7 +1112,7 @@ void tSSAForm::Coalesce()
 		(*i)->Coalesce();
 
 	// これ以降、SSA性は破壊される
-	HasSSAness = false;
+	State = ssNonSSA;
 }
 //---------------------------------------------------------------------------
 
@@ -1158,8 +1158,10 @@ void tSSAForm::EnsureCodeGenerator()
 
 
 //---------------------------------------------------------------------------
-void tSSAForm::GenerateCode() const
+void tSSAForm::GenerateCode()
 {
+	if(State == ssCodeGenerated) return; // 既にコードを生成した場合は何もしない
+
 	// バイトコードを生成する
 	RISSE_ASSERT(CodeGenerator != NULL);
 	CodeGenerator->SetRegisterBase();
@@ -1194,6 +1196,9 @@ void tSSAForm::GenerateCode() const
 
 	// CodeBlock にコードを設定する
 	CodeBlock->Assign(CodeGenerator);
+
+	// コードを生成し終わった
+	State = ssCodeGenerated;
 }
 //---------------------------------------------------------------------------
 

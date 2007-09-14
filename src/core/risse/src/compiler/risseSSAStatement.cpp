@@ -336,7 +336,7 @@ const tString & tSSAStatement::GetName() const
 void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *, risse_size> &livemap)
 {
 	// 一応このメソッドが実行時には SSA性が保持されていると見なす
-	RISSE_ASSERT(Block->GetForm()->GetHasSSAness());
+	RISSE_ASSERT(Block->GetForm()->GetState() == tSSAForm::ssSSA);
 	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること
 
 wxFprintf(stderr, wxT("at %d:"), (int)Order);
@@ -836,6 +836,7 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 			//       現状の実装は暫定的なもの。
 			tSSAStatement * lazy_stmt = Used[0]->GetDeclared();
 			RISSE_ASSERT(lazy_stmt->GetCode() == ocDefineAccessMap);
+wxFprintf(stderr, wxT("registering %s\n"), Name->AsWxString().c_str());
 			gen->RegisterVariableMapForChildren(Declared, *Name);
 			gen->PutAssign(gen->FindVariableMapForChildren(*Name), Used[1]);
 		}

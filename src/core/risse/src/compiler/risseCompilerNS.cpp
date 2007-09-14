@@ -39,7 +39,7 @@ tSSAVariableAccessMap::tSSAVariableAccessMap(tSSAForm * form, risse_size pos)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void tSSAVariableAccessMap::SetUsed(const tString & name, const tString & n_name, bool write)
+void tSSAVariableAccessMap::SetUsed(const tString & name, const tString & q_name, bool write)
 {
 	tMap::iterator i = Map.find(name);
 	if(i == Map.end()) i = Map.insert(tMap::value_type(name, tInfo())).first;
@@ -49,7 +49,7 @@ void tSSAVariableAccessMap::SetUsed(const tString & name, const tString & n_name
 	else
 		i->second.Read = true;
 
-	i->second.NumberedName = n_name;
+	i->second.Id = q_name;
 }
 //---------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ void tSSAVariableAccessMap::GenerateChildWrite(tSSAForm * form, risse_size pos)
 				form->GetLocalNamespace()->Read(pos, i->first);
 			RISSE_ASSERT(var != NULL);
 			tSSAVariable *temp = NULL;
-			form->AddStatement(pos, ocChildWrite, &temp, Variable, var)->SetName(i->second.NumberedName);
+			form->AddStatement(pos, ocChildWrite, &temp, Variable, var)->SetName(i->second.Id);
 			i->second.TempVariable = temp; // 一時変数を記録
 		}
 	}
@@ -89,7 +89,7 @@ void tSSAVariableAccessMap::GenerateChildRead(tSSAForm * form, risse_size pos)
 		{
 			// 書き込みが発生している
 			tSSAVariable * var = NULL;
-			form->AddStatement(pos, ocChildRead, &var, Variable)->SetName(i->second.NumberedName);
+			form->AddStatement(pos, ocChildRead, &var, Variable)->SetName(i->second.Id);
 			form->GetLocalNamespace()->Write(pos, i->first, var);
 		}
 	}
@@ -447,7 +447,7 @@ bool tSSALocalNamespace::Write(risse_size pos,
 	if(Parent)
 	{
 		tString n_name;
-			bool is_shared = false;;
+		bool is_shared = false;;
 		if(Parent->AccessFromChild(name, true, AccessMap == NULL, this, &n_name, &is_shared))
 		{
 			// 親名前空間で見つかった
@@ -475,7 +475,6 @@ bool tSSALocalNamespace::AccessFromChild(const tString & name,
 	if(Find(name, false, &n_name))
 	{
 		// 変数が見つかった
-		if(ret_n_name) *ret_n_name = n_name;
 		if(should_share) if(Block) Block->GetForm()->GetFunction()->ShareVariable(n_name);
 		if(is_shared)
 		{
@@ -496,8 +495,13 @@ bool tSSALocalNamespace::AccessFromChild(const tString & name,
 		}
 
 		// 子のAccessMap に記録
-		if(!should_share && child->AccessMap) child->AccessMap->SetUsed(name, n_name, access);
+		if(!should_share && child->AccessMap)
+		{
+			n_name += RISSE_WS(":") + child->AccessMap->GetIdString();
+			child->AccessMap->SetUsed(name, n_name, access);
+		}
 
+		if(ret_n_name) *ret_n_name = n_name;
 		return true;
 	}
 	else
@@ -510,11 +514,15 @@ bool tSSALocalNamespace::AccessFromChild(const tString & name,
 
 		// 親名前空間内で探す
 		bool found = Parent->AccessFromChild(name, access, should_share, this, &n_name, is_shared);
-		if(ret_n_name) *ret_n_name = n_name;
 
 		// 子がAccessMapを持っていればそれに記録
-		if(!should_share && child->AccessMap) child->AccessMap->SetUsed(name, n_name, access);
+		if(!should_share && child->AccessMap)
+		{
+			n_name += RISSE_WS(":") + child->AccessMap->GetIdString();
+			child->AccessMap->SetUsed(name, n_name, access);
+		}
 
+		if(ret_n_name) *ret_n_name = n_name;
 		return found;
 	}
 }

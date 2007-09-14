@@ -201,7 +201,16 @@ class tSSAForm : public tCollectee
 	tCodeBlock * CodeBlock; //!< コードブロック
 	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
 
-	bool HasSSAness; //!< SSA性が保持されている場合に真
+public:
+	//! @brief		このSSA形式の状態を表す列挙型
+	enum tState {
+		ssSSA, //!< 有効な SSA 形式である
+		ssNonSSA, //!< phi関数の除去などでSSA性は失われた
+		ssCodeGenerated //!< すでにコードジェネレータにたいしてコードを生成した後である
+	};
+
+private:
+	tState State; //!< ステート
 
 public:
 	//! @brief		コンストラクタ
@@ -561,7 +570,7 @@ public:
 	risse_size GetCodeBlockIndex() const { return CodeBlockIndex; }
 
 	//! @brief		バイトコードを生成する
-	void GenerateCode() const;
+	void GenerateCode();
 
 	//! @brief		最大の共有変数のネストカウントを設定する
 	//! @note		トップレベルの関数は、共有変数のネストカウントに応じたバッファを
@@ -572,9 +581,9 @@ public:
 	//!				共有変数のネストレベルを問い合わせ、それをコードブロックに設定する。
 	void SetSharedVariableNestCount();
 
-	//! @brief		SSA性が保持されているかどうかを得る
-	//! @return		SSA性が保持されているかどうか
-	bool GetHasSSAness() const { return HasSSAness; }
+	//! @brief		状態を得る
+	//! @return		状態
+	tState GetState() const { return State; }
 };
 //---------------------------------------------------------------------------
 

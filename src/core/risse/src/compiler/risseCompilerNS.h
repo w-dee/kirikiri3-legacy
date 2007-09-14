@@ -32,12 +32,12 @@ class tSSAVariableAccessMap : public tCollectee
 		tInfo() { Read = false; Write = false; TempVariable = NULL; } //!< コンストラクタ
 		bool Read;		//!< この変数に対する読み込みが発生したかどうか(使用フラグ)
 		bool Write;		//!< この変数に対する書き込みが発生したかどうか(使用フラグ)
-		tString NumberedName; //!< 番号付きの名前
+		tString Id; //!< 番号・アクセスマップID付きの名前
 		tSSAVariable * TempVariable; //!< この変数に割り当てられた childwrite 用の一時変数
 	};
-	typedef gc_map<tString, tInfo> tMap; //!< 変数名(番号なし)→情報のマップのtypedef
+	typedef gc_map<tString, tInfo> tMap; //!< 変数名(番号・アクセスマップIDあり)→情報のマップのtypedef
 
-	tMap Map; //!< 変数名(番号なし)→情報のマップ
+	tMap Map; //!< 変数名(番号・アクセスマップIDあり)→情報のマップ
 
 	tSSAVariable * Variable; //!< このアクセスマップを表すSSA変数
 
@@ -53,9 +53,9 @@ public:
 
 	//! @brief		アクセスマップに追加する
 	//! @param		name		変数名(番号なし)
-	//! @param		n_name		変数名(番号付き)
+	//! @param		q_name		変数名(番号・アクセスマップID付き)
 	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
-	void SetUsed(const tString & name, const tString & n_name, bool write);
+	void SetUsed(const tString & name, const tString & q_name, bool write);
 
 	//! @param		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス
@@ -71,6 +71,9 @@ public:
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
 	void GenerateEndAccessMap(tSSAForm * form, risse_size pos);
+
+	//! @param		ID文字列を得る
+	tString GetIdString() const { return Variable->GetQualifiedName(); }
 
 };
 //---------------------------------------------------------------------------
@@ -225,6 +228,7 @@ public:
 	//! @param		should_share	見つかった変数を共有すべきかどうか
 	//! @param		child		子名前空間
 	//! @param		ret_n_name	見つかった番号付き変数名を格納する先 (NULL = いらない)
+	//! @param					ただし、見つかった変数が共有でない場合はAccessMapのIDを伴った名前が帰る
 	//! @param		is_shared	実際に見つかった変数を共有した場合真、それ以外偽が入る(NULL = この情報はいらない)
 	//! @return		変数が見つかったかどうか
 	bool AccessFromChild(const tString & name, bool access,

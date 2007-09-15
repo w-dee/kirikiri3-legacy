@@ -101,8 +101,7 @@ void tSSAStatement::TraceCoalescable()
 		RISSE_ASSERT(Declared != NULL);
 
 		{
-			// Used を一つずつみていき、Declared の生存範囲内に
-			// Used の定義がある場合(変数が干渉している場合)は
+			// Used を一つずつみていき、Declared と Used が干渉している場合は
 			// 干渉を除去する。 Sreedhar らによる方法。
 			bool interference_found = false;
 			for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
@@ -348,8 +347,9 @@ wxFprintf(stderr, wxT("at %d:"), (int)Order);
 		// ただし、dead store な場合は追加しない
 		if(Declared->GetUsed().size() != 0)
 		{
-			// 既にlivemap にあるわけがない
-			RISSE_ASSERT(livemap.find(Declared) == livemap.end());
+			// 既にlivemap にあるわけがない(LiveInにそれがある場合は除く)
+			RISSE_ASSERT(Block->GetLiveness(Declared, false) ||
+				livemap.find(Declared) == livemap.end());
 			// livemap に追加
 			livemap.insert(gc_map<const tSSAVariable *, risse_size>::value_type(Declared, risse_size_max));
 			has_new_declared = true;

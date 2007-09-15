@@ -188,6 +188,12 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文に通し番号を振る
 	SetStatementOrder();
 
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
 	// 変数の干渉グラフを作成する
 	CreateVariableInterferenceGraph();
 
@@ -203,11 +209,6 @@ void tSSAForm::OptimizeAndUnSSA()
 	// レジスタの割り当て
 	AssignRegisters();
 
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
 }
 //---------------------------------------------------------------------------
 
@@ -990,10 +991,27 @@ wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxStr
 
 			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
 			// の先をたどるのは辞める
+			// ただし、宣言された文が phi 関数で、それが同じブロックのいずれかの
+			// phi 関数で使われている場合
+			//   要するにたとえば
+			//     x1=phi(x0,x2)
+			//     y1=phi(y0,x1)
+			//   こんな感じの基本ブロックに再入してたりとか
+			//     x1=phi(x0,x1)
+			//   こんな感じの基本ブロックに再入してたりとか
+			// こういうときは前のブロック(=それは自分自身のブロックかもしれないが)
+			// をちゃんとたどる
 			if(quest_block == decl_block)
 			{
-				stop = true;
+				if(used_stmt->GetCode() == ocPhi && decl_stmt->GetCode() == ocPhi && used_stmt->GetBlock() == decl_block)
+				{
+wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
+				}
+				else
+				{
+					stop = true;
 wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
+				}
 			}
 
 			// quest_block の LiveIn にこの変数が追加されているか

@@ -35,6 +35,7 @@ class tCodeGenerator;
 class tSSAStatement : public tCollectee
 {
 	tSSAForm * Form; //!< この変数が属している SSA 形式インスタンス
+	risse_size Id; //!< Id (ユニークな値)
 	risse_size Position; //!< ソースコード上の位置 (コードポイント数オフセット)
 	tOpCode Code; //!< オペレーションコード
 	tSSABlock * Block; //!< この文が含まれている基本ブロック
@@ -81,6 +82,9 @@ public:
 	//! @brief		ソースコード上の位置を得る
 	//! @return		ソースコード上の位置
 	risse_size GetPosition() const { return Position; }
+
+	//! @brief		Id を得る
+	risse_size GetId() const { return Id; }
 
 	//! @brief		この文が含まれている基本ブロックを設定する
 	//! @param		block この文が含まれている基本ブロック
@@ -299,6 +303,10 @@ public:
 	//! @return		varの生存期間内にこの文が入っていれば真、そうでなければ偽。
 	//!				この文で生存期間が終わっている場合は偽が帰る
 	bool IsLivingIn(tSSAVariable * var);
+
+	//! @brief		文レベルでの最適化を行う
+	//! @param		statements		作業リスト
+	void OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *> &statements);
 
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters(gc_vector<void*> & assign_work);

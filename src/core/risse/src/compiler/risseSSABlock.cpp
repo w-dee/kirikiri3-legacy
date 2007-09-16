@@ -639,6 +639,16 @@ void tSSABlock::CreateVariableInterferenceGraph()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements)
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		statements.insert(gc_map<risse_size, tSSAStatement *>::value_type(stmt->GetId(), stmt));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::TraceCoalescable()
 {
 	// すべての文で定義された変数を見る

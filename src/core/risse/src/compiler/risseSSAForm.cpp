@@ -182,6 +182,9 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 共有変数へのアクセスを別形式の文に変換
 	ConvertSharedVariableAccess();
 
+	// 文レベルでの最適化を行う
+	OptimizeStatement();
+
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -1099,6 +1102,35 @@ void tSSAForm::CreateVariableInterferenceGraph()
 	// すべての基本ブロックに対して変数の干渉グラフを作成させる
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->CreateVariableInterferenceGraph();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::OptimizeStatement()
+{
+	// すべての文をいったん列挙した後、それを作業リストとして作業を行う
+
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべての文を収集
+	gc_map<risse_size, tSSAStatement *> statements;
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->ListAllStatements(statements);
+
+	// リストが空になるまで文ごとに処理を行う
+	while(statements.size())
+	{
+		// どれか一つをstatementsからとってくる
+		gc_map<risse_size, tSSAStatement *>::iterator i = statements.begin();
+		tSSAStatement * stmt = i->second;
+		statements.erase(i);
+
+		// その文に対して最適化を行う
+		stmt->OptimizeAtStatementLevel(statements);
+	}
 }
 //---------------------------------------------------------------------------
 

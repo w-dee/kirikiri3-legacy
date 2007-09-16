@@ -17,6 +17,7 @@
 #include "risseSSABlock.h"
 #include "risseCodeGen.h"
 #include "risseSSAForm.h"
+#include "risseCompiler.h"
 
 namespace Risse
 {
@@ -31,6 +32,8 @@ tSSAStatement::tSSAStatement(tSSAForm * form,
 	// フィールドの初期化
 	Form = form;
 	Position = position;
+	Id = Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetUniqueNumber();
+		// Id は文と文を識別できる程度にユニークであればよい
 	Code = code;
 	Block = NULL;
 	Pred = NULL;
@@ -535,6 +538,40 @@ bool tSSAStatement::IsLivingIn(tSSAVariable * var)
 	}
 
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *> &statements)
+{
+	// コピー伝播
+	if(Code == ocPhi && Used.size() == 1 ||
+		Code == ocAssign)
+	{
+		// 引数が一個の phi あるいは単純コピーの場合
+		// コピー伝播を行う
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		// コピー先である Declared で使用している文に対し、
+		// Declared を使用している所をすべて Used[0] に置き換える。
+		const gc_vector<tSSAStatement *> & used_list = Declared->GetUsed();
+		for(gc_vector<tSSAStatement *>::const_iterator si = used_list.begin();
+			si != used_list.end(); si++)
+		{
+			if(*si == this) continue; // 自分自身は除外
+			(*si)->OverwriteUsed(Declared, Used[0]); // Declared を Used[0] に置き換え
+			// Used[0] の Used に (*si) を追加
+			Used[0]->AddUsed(*si);
+		}
+		// Used[0] の Used から this を削除
+		Used[0]->DeleteUsed(this);
+		// this を block から削除
+		Block->DeleteStatement(this);
+		// statements から this を削除
+		gc_map<risse_size, tSSAStatement *>::iterator sti = statements.find(this->GetId());
+		if(sti != statements.end()) statements.erase(sti);
+	}
 }
 //---------------------------------------------------------------------------
 

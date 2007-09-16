@@ -252,6 +252,10 @@ public:
 	//! @brief		変数の干渉グラフを作成する
 	void CreateVariableInterferenceGraph();
 
+	//! @brief		すべての文を列挙する
+	//! @param		statements		文を格納する先
+	void ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements);
+
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();
 

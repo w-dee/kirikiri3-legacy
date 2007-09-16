@@ -540,6 +540,9 @@ public:
 	// @brief		変数の干渉グラフを作成する
 	void CreateVariableInterferenceGraph();
 
+	// @brief		文レベルでの最適化を行う
+	void OptimizeStatement();
+
 	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	void TraceCoalescable();
 

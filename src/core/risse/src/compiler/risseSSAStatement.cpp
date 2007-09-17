@@ -103,7 +103,10 @@ void tSSAStatement::TraceCoalescable()
 	case ocPhi: // phi関数
 		RISSE_ASSERT(Declared != NULL);
 
+		// 2 引数以上のphi関数
+		if(Used.size() > 1)
 		{
+			// Used と Declared 間の干渉を探る
 			// Used を一つずつみていき、Declared と Used が干渉している場合は
 			// 干渉を除去する。 Sreedhar らによる方法。
 			bool interference_found = false;
@@ -153,26 +156,14 @@ void tSSAStatement::TraceCoalescable()
 			break;
 		}
 
+		// 一応 ここに break は *おかない*
+		// 1引数のphi関数は単純な代入として扱うため
+
 	case ocAssign: // 単純代入
-/*
-		// Used を一つずつみていき、
-		// Used の変数の生存範囲に Declared の変数の定義が
-		// 入っていれば、生存範囲が重なっているので合併できないとする。
-		// そうでなければ合併を行う。
-		Declared->EnsureCoalescableList();
 
-		for(gc_vector<tSSAVariable*>::iterator i = Used.begin();
-			i != Used.end(); i++)
-		{
-			if(Declared->CheckCoalescableWith(*i))
-			{
-				// 合併可能
-				Declared->CoalesceCoalescableList(*i);
-			}
-		}
+		// 昔はここでコピー伝播を行おうとしていたのだけれども
+		// コピー伝播は他の所でやってます
 
-		break;
-*/
 	default: ;
 	}
 }
@@ -414,11 +405,16 @@ wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxStri
 		if(is_last)
 		{
 			// livemapからこれを削除する
+			// φ関数などで前の関数と同じ順位の場合は
+			// 前の関数ですでに変数が削除されている可能性がある
 			gc_map<const tSSAVariable *, risse_size>::iterator fi =
 				livemap.find((*i));
-			RISSE_ASSERT(fi != livemap.end());
-			livemap.erase(fi);
+			RISSE_ASSERT(Code == ocPhi || fi != livemap.end());
+			if(fi != livemap.end())
+			{
+				livemap.erase(fi);
 wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_str());
+			}
 		}
 	}
 

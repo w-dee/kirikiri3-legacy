@@ -609,11 +609,15 @@ void tSSABlock::AnalyzeVariableBlockLiveness()
 void tSSABlock::SetOrder(risse_size & order)
 {
 	tSSAStatement *stmt;
-	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+	for(stmt = FirstStatement; stmt;)
 	{
 		stmt->SetOrder(order);
-		order ++;
+		stmt = stmt->GetSucc();
+		// φ関数間には順位の差はないので ocPhi の場合は順位をインクリメントしない(同順とする)
+		if(stmt && stmt->GetCode() != ocPhi)
+			order ++;
 	}
+	order++;
 }
 //---------------------------------------------------------------------------
 
@@ -651,8 +655,77 @@ void tSSABlock::ListAllStatements(gc_map<risse_size, tSSAStatement *> &statement
 //---------------------------------------------------------------------------
 void tSSABlock::TraceCoalescable()
 {
+	// phi 関数の Used の干渉を見る
+
+	// phi 関数の Used の中に、そのブロックに属する他の phi 関数と
+	// 同じ 変数が含まれていると後段の stmt->TraceCoalescable() で
+	// 合併が行われてしまう。
+	// 合併が行われないように、pred の最後にコピー文を挿入することにする。
+	// たとえば以下のような場合
+	//	a0 = phi(x0, y0)
+	//	a1 = phi(x0, y1)
+	// x0 が共通して使われている。この場合は x0 方向の pred の最後に x0' = x0 の文を
+	// 挿入し、a1 = phi(x0', y1) に置き換える。
+	// 条件としては、同じブロックに属するphi関数にまたがって、同じ方向の
+	// pred から来る 変数が同じ場合 (上記の場合はx0)。
+	// 厳密には全く Used の構成が同じ phi 関数があった場合はこの処理はしなくていいが
+	// ここではかんがえていない
+
+	tSSAStatement *stmt = FirstStatement;
+	risse_size pred_count = Pred.size();
+	if(stmt) stmt = stmt->GetSucc();
+	for(stmt = FirstStatement; stmt && stmt->GetCode() == ocPhi;
+		stmt = stmt->GetSucc())
+	{
+		const gc_vector<tSSAVariable*> & stmt_used  = stmt->GetUsed();
+		for(risse_size index = 0; index < pred_count; index ++)
+		{
+			for(tSSAStatement * prev = stmt->GetPred(); prev;
+				prev = prev->GetPred())
+			{
+				RISSE_ASSERT(prev->GetUsed().size() == stmt->GetUsed().size());
+				const gc_vector<tSSAVariable*> & prev_used  = prev->GetUsed();
+				if(stmt_used[index] == prev_used[index])
+				{
+					// 同じ変数を使ってることが分かった
+					// pred の最後にコピー文を挿入
+					tSSAVariable * tmp_var = new tSSAVariable(Form, NULL, stmt_used[index]->GetName());
+wxFprintf(stderr, wxT("multiple use of the same variable in phi statements found; inserting %s at %s\n"),
+	tmp_var->GetQualifiedName().AsWxString().c_str(),
+	Pred[index]->GetName().AsWxString().c_str());
+					tSSAStatement * new_stmt =
+						new tSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
+					new_stmt->AddUsed(const_cast<tSSAVariable*>(stmt_used[index]));
+					new_stmt->SetDeclared(tmp_var);
+					stmt_used[index]->DeleteUsed(stmt);
+					stmt->OverwriteUsed(stmt_used[index], tmp_var); // 該当変数の使用を置き換え
+					Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
+
+					// 干渉グラフを更新する。
+					// tmp_var は Pred の最後のすべての変数と干渉するはず
+					for(tLiveVariableMap::iterator i = Pred[index]->LiveOut->begin();
+						i != Pred[index]->LiveOut->end(); i++)
+						tmp_var->SetInterferenceWith(const_cast<tSSAVariable * >(i->first));
+
+					// tmp_var は this の最初のすべての変数と干渉するはず
+					for(tLiveVariableMap::iterator i = this->LiveIn->begin();
+						i != this->LiveIn->end(); i++)
+						tmp_var->SetInterferenceWith(const_cast<tSSAVariable * >(i->first));
+
+					// Pred の LiveOut にも tmp_var を追加する
+					Pred[index]->AddLiveness(tmp_var, true);
+					// this の LiveIn にも tmp_var を追加する
+					AddLiveness(tmp_var, false);
+
+					break;
+				}
+			}
+		}
+	}
+
+
+
 	// すべての文で定義された変数を見る
-	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 		stmt->TraceCoalescable();
 }

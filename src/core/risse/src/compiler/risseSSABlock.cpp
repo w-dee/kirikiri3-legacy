@@ -697,6 +697,7 @@ wxFprintf(stderr, wxT("multiple use of the same variable in phi statements found
 						new tSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
 					new_stmt->AddUsed(const_cast<tSSAVariable*>(stmt_used[index]));
 					new_stmt->SetDeclared(tmp_var);
+					tmp_var->SetDeclared(new_stmt);
 					stmt_used[index]->DeleteUsed(stmt);
 					stmt->OverwriteUsed(stmt_used[index], tmp_var); // 該当変数の使用を置き換え
 					Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);

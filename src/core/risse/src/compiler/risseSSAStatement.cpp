@@ -122,30 +122,41 @@ void tSSAStatement::TraceCoalescable()
 
 			if(interference_found)
 			{
-				RISSE_ASSERT(!"interference_found !! report to the auther");
-				// TODO: どうも Risse の SSA 形式はここに引っかかるような
-				// (干渉を起こすような) コードにはならないようである。
-				// 一応 assert コードを置いておくので、 ここで引っかかったら
-				// 気をつけること。
-				// ・合併のための情報を置くことはまだやっていない。
-				// ・ここで一時的に作成するコピー文は合併してはいけない。
-				// ・ここで挿入する文には通し番号が付いていない。
-				// ・文をブロックにまだ挿入していない。
-				// ・文を挿入する際、干渉グラフの更新を行っていない。
+				tSSAVariable * orig_decl_var = Declared;
+				tSSAVariable * tmp_var = new tSSAVariable(Form, NULL, orig_decl_var->GetName());
+wxFprintf(stderr, wxT("variable interference found at phi statement, inserting %s at %s\n"),
+	tmp_var->GetQualifiedName().AsWxString().c_str(),
+	Block->GetName().AsWxString().c_str());
+				tSSAStatement * new_stmt =
+					new tSSAStatement(Form, Position, ocAssign);
+				new_stmt->AddUsed(const_cast<tSSAVariable*>(tmp_var));
+				orig_decl_var->SetDeclared(new_stmt);
+				new_stmt->SetDeclared(orig_decl_var);
+				tmp_var->SetDeclared(this);
+				this->SetDeclared(tmp_var);
+				Block->InsertStatement(new_stmt, tSSABlock::sipAfterPhi);
 
-				// 変数の干渉が見つかった
-				// テンポラリ変数を作成し、この phi 文で定義した変数を
-				// そのテンポラリ変数に変更する
-				tSSAVariable * tmp_var = new tSSAVariable(Form, this, RISSE_WS("phitmp"));
-				// phi 関数直後にコピー文を作成する
-				tSSAVariable * org_decld_var = Declared;
-				tSSAStatement * new_copy_stmt = new tSSAStatement(
-					Form, Position, ocAssign);
-				new_copy_stmt->AddUsed(tmp_var);
-				new_copy_stmt->SetDeclared(org_decld_var);
-				org_decld_var->SetDeclared(new_copy_stmt);
+				// 干渉グラフを更新する。
+				// tmp_var は ここ一連のすべてのphi関数の宣言、およびその使用変数すべてと
+				// 干渉すると見なす。
+				// ブロック単位の livein, liveout には影響しない。
+				tSSAStatement * cur = this;
+				tSSAStatement * first = cur;
+				while(cur) { first = cur; cur = cur->Pred; }
+				for(cur = first; cur && cur->Code == ocPhi; cur = cur->Succ)
+				{
+					RISSE_ASSERT(cur->Declared);
+					if(tmp_var != cur->Declared) tmp_var->SetInterferenceWith(cur->Declared);
+					for(gc_vector<tSSAVariable*>::iterator i =cur-> Used.begin();
+						i != cur->Used.end(); i++)
+					{
+						if(tmp_var != *i)
+							tmp_var->SetInterferenceWith(*i);
+					}
+				}
 
-				// この時点で Declared は、新しく定義されたテンポラリ変数を指す
+				// この時点で Declared は、新しく定義されたテンポラリ変数を指しているはず
+				RISSE_ASSERT(Declared == tmp_var);
 			}
 
 			// 関連する変数の合併を行う

@@ -191,17 +191,17 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文に通し番号を振る
 	SetStatementOrder();
 
-	// 変数の干渉グラフを作成する
-	CreateVariableInterferenceGraph();
-
-	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
-	TraceCoalescable();
-
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
 	tString str = Dump();
 	FPrint(stderr, str.c_str());
+
+	// 変数の干渉グラフを作成する
+	CreateVariableInterferenceGraph();
+
+	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	TraceCoalescable();
 
 	// 変数の合併を行う
 	Coalesce();
@@ -994,7 +994,7 @@ wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxStr
 
 			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
 			// の先をたどるのは辞める
-			// ただし、宣言された文が phi 関数で、それが同じブロックのいずれかの
+			// ただし、宣言された文と同じブロックのいずれかの
 			// phi 関数で使われている場合
 			//   要するにたとえば
 			//     x1=phi(x0,x2)
@@ -1002,11 +1002,14 @@ wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxStr
 			//   こんな感じの基本ブロックに再入してたりとか
 			//     x1=phi(x0,x1)
 			//   こんな感じの基本ブロックに再入してたりとか
+			//     x0=phi(x1,x2)
+			//     x2=x0+3
+			//   こんな感じの基本ブロックに再入してたりとか
 			// こういうときは前のブロック(=それは自分自身のブロックかもしれないが)
 			// をちゃんとたどる
 			if(quest_block == decl_block)
 			{
-				if(used_stmt->GetCode() == ocPhi && decl_stmt->GetCode() == ocPhi && used_stmt->GetBlock() == decl_block)
+				if(used_stmt->GetCode() == ocPhi && used_stmt->GetBlock() == decl_block)
 				{
 wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
 				}

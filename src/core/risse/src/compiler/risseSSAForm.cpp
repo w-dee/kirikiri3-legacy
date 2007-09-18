@@ -1060,7 +1060,6 @@ wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_
 							tSSABlock * pred = quest_block->GetPred()[idx];
 							pred->AddLiveness(var, true);
 							Stack.push_back(pred);
-//							break;
 						}
 					}
 				}

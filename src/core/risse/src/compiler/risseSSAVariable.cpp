@@ -108,6 +108,20 @@ void tSSAVariable::SetInterferenceWith(tSSAVariable * with)
 
 
 //---------------------------------------------------------------------------
+void tSSAVariable::SetInterferenceWithAll(tSSAVariable * with)
+{
+	SetInterferenceWith(with);
+	for(tInterferenceEdgeMap::iterator ii = with->InterferenceEdgeMap->begin();
+		ii != with->InterferenceEdgeMap->end(); ii++)
+	{
+		if(ii->first != this && ii->first != with)
+			const_cast<tSSAVariable *>(ii->first)->SetInterferenceWith(this);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAVariable::EnsureCoalescableList()
 {
 	if(!CoalescableList)

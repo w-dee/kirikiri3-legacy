@@ -191,12 +191,6 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文に通し番号を振る
 	SetStatementOrder();
 
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
-
 	// 変数の干渉グラフを作成する
 	CreateVariableInterferenceGraph();
 
@@ -208,6 +202,15 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// φ関数を除去
 	RemovePhiStatements();
+
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
+	// 3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	Check3AddrAssignee();
 
 	// レジスタの割り当て
 	AssignRegisters();
@@ -1180,6 +1183,20 @@ void tSSAForm::RemovePhiStatements()
 	// それぞれのブロックについて処理
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->RemovePhiStatements();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::Check3AddrAssignee()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// それぞれのブロックについて処理
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->Check3AddrAssignee();
 }
 //---------------------------------------------------------------------------
 

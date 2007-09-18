@@ -554,6 +554,9 @@ public:
 	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
 	void RemovePhiStatements();
 
+	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	void Check3AddrAssignee();
+
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters();
 

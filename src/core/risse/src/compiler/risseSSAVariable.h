@@ -113,6 +113,12 @@ public:
 	//! @param		with		干渉する他の変数 (this != with で無ければならない)
 	void SetInterferenceWith(tSSAVariable * with);
 
+	//! @brief		変数の干渉を設定する
+	//! @param		with		干渉する他の変数 (this != with で無ければならない)
+	//! @note		SetInterferenceWith と違い、withだけでなく、withが干渉している
+	//!				他の変数すべてに対しても干渉する
+	void SetInterferenceWithAll(tSSAVariable * with);
+
 	//! @brief		合併可能な変数のリストがまだ作成されていないようならば作成する
 	//! @note		新規作成の際は、自分自身をリストの先頭に追加する
 	void EnsureCoalescableList();

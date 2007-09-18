@@ -343,7 +343,7 @@ void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *,
 	RISSE_ASSERT(Block->GetForm()->GetState() == tSSAForm::ssSSA);
 	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること
 
-wxFprintf(stderr, wxT("at %d:"), (int)Order);
+wxFprintf(stderr, wxT("at [%d]:"), (int)Order);
 
 	// この文で定義された変数があるならば livemap にその変数を追加する
 	bool has_new_declared = false;
@@ -492,6 +492,56 @@ void tSSAStatement::OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *>
 		// statements から this を削除
 		gc_map<risse_size, tSSAStatement *>::iterator sti = statements.find(this->GetId());
 		if(sti != statements.end()) statements.erase(sti);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::Check3AddrAssignee()
+{
+	// VM命令の中にはdestinationとその他の引数が同じだった場合に異常な動作をする
+	// 命令があるため、ここで暫定的に対処。本来はコードジェネレータがやるべき
+	// 仕事かもしれないね。
+	if(!Declared) return;
+	if(Code == ocAssign || Code == ocPhi) return; // 単純コピーやφ関数は無視
+
+	bool do_save = false;
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
+	{
+		if((*i) == Declared)
+		{
+			do_save = true;
+			break;
+		}
+	}
+
+	if(do_save)
+	{
+		tSSAVariable * orig_decl_var = Declared;
+		tSSAVariable * tmp_var = new tSSAVariable(Form, NULL, orig_decl_var->GetName());
+wxFprintf(stderr, wxT("assignee is the same with the argument, inserting %s after [%d]\n"),
+tmp_var->GetQualifiedName().AsWxString().c_str(),
+(int)Order);
+		tSSAStatement * new_stmt =
+			new tSSAStatement(Form, Position, ocAssign);
+		new_stmt->AddUsed(const_cast<tSSAVariable*>(tmp_var));
+		orig_decl_var->SetDeclared(new_stmt);
+		new_stmt->SetDeclared(orig_decl_var);
+		tmp_var->SetDeclared(this);
+		this->SetDeclared(tmp_var);
+		Block->InsertStatement(new_stmt, this);
+
+		// 干渉グラフを更新する。
+		// tmp_var はここで生きているすべての文と干渉すると見なす。
+		// ここで生きているすべての文というのは、この文の使用と宣言
+		// そのものと、それが干渉している物すべて。
+		// ブロック単位の livein, liveout には影響しない。
+		for(gc_vector<tSSAVariable*>::iterator i =Used.begin();
+			i != Used.end(); i++)
+			tmp_var->SetInterferenceWithAll(*i);
+		tmp_var->SetInterferenceWithAll(orig_decl_var);
 	}
 }
 //---------------------------------------------------------------------------

@@ -152,6 +152,24 @@ void tSSABlock::InsertStatement(tSSAStatement * stmt, tStatementInsertPoint poin
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::InsertStatement(tSSAStatement * stmt, tSSAStatement * after)
+{
+	// この時点で after は挿入したい文の直前の文
+	tSSAStatement * after_succ = after->GetSucc();
+	if(after_succ)	after_succ->SetPred(stmt);
+	if(after)		after->SetSucc(stmt);
+	stmt->SetPred(after);
+	stmt->SetSucc(after_succ);
+	if(after_succ == NULL) LastStatement = stmt;
+
+	stmt->SetBlock(this);
+
+	SetLastStatementPosition();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::DeleteStatement(tSSAStatement * stmt)
 {
 	tSSAStatement * stmt_pred = stmt->GetPred();
@@ -753,51 +771,22 @@ void tSSABlock::RemovePhiStatements()
 		stmt && stmt->GetCode() == ocPhi;
 		stmt = FirstStatement)
 	{
-		// φ関数を削除する処理は簡単にはそれぞれの pred ブロックの分岐の
-		// 最後に代入文を生成し、φ関数を削除する。
-		// ただし、この代入文の挿入によって変数が上書きされてしまう場合が
-		// ある(lost copy problem)ため、変数の有効範囲の解析を行う
-
-		// TODO: 変数の併合(coalescing)
-
-		// 代入文を生成するに先立ち、代入文を生成することにより変数が上書き
-		// されないことを確認する。具体的には、代入文を生成する場所で
-		// 代入先変数が生存していれば、そこに代入文を生成してしまうと
-		// 変になる。この場合は phi 変数の戻り値をいったん一時変数にとるような
-		// 文を挿入することで生存範囲の干渉を避ける。
-
-		// stmt の used の配列
-		const gc_vector<tSSAVariable *> phi_used = stmt->GetUsed();
-
-		// stmt で宣言された変数
-		tSSAVariable * stmt_decld = stmt->GetDeclared();
-
-		// 各 pred の分岐文の直前に 代入文を生成する
-		for(risse_size index = 0; index < Pred.size(); index ++)
-		{
-			tSSAStatement * new_stmt =
-				new tSSAStatement(Form, Pred[index]->GetLastStatementPosition(), ocAssign);
-			new_stmt->AddUsed(const_cast<tSSAVariable*>(phi_used[index]));
-			new_stmt->SetDeclared(stmt_decld);
-			stmt_decld->SetDeclared(new_stmt); // 一応代入
-				/* 注意
-					「この変数が宣言された位置」(tSSAVariable::Declared) は
-					φ関数を削除した後は意味がなくなる。φ関数の削除により、一つの変数
-					への代入が複数箇所になり、SSA性が保持されなくなるため。
-				*/
-
-			Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
-
-			// LiveOut にも stmt_decld を追加する
-			Pred[index]->AddLiveness(stmt_decld);
-		}
-
 		// φ関数を除去
 		stmt->DeleteUsed();
 		DeleteStatement(stmt);
 	}
 
 	SetLastStatementPosition();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::Check3AddrAssignee()
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->Check3AddrAssignee();
 }
 //---------------------------------------------------------------------------
 

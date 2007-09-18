@@ -302,6 +302,9 @@ public:
 	//! @param		statements		作業リスト
 	void OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *> &statements);
 
+	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	void Check3AddrAssignee();
+
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters(gc_vector<void*> & assign_work);
 

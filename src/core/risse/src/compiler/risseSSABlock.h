@@ -123,6 +123,11 @@ public:
 	//! @param		point		挿入する場所
 	void InsertStatement(tSSAStatement * stmt, tStatementInsertPoint point);
 
+	//! @brief		文を挿入する
+	//! @param		stmt		挿入する文
+	//! @param		point		挿入する文(この文の次に挿入される)
+	void InsertStatement(tSSAStatement * stmt, tSSAStatement * after);
+
 	//! @brief		文を削除する
 	//! @param		stmt		削除する文
 	//! @note		文で使用されていた変数の使用リストは変更を行わない
@@ -265,6 +270,9 @@ public:
 	//! @brief		φ関数を削除する
 	//! @note		このメソッド実行後はSSA形式としての性質は保てなくなる。
 	void RemovePhiStatements();
+
+	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	void Check3AddrAssignee();
 
 	//! @brief		変数にレジスタを割り当てる
 	void AssignRegisters(gc_vector<void*> & assign_work);

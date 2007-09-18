@@ -191,17 +191,17 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文に通し番号を振る
 	SetStatementOrder();
 
-	// 変数の干渉グラフを作成する
-	CreateVariableInterferenceGraph();
-
-	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
-	TraceCoalescable();
-
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
 	tString str = Dump();
 	FPrint(stderr, str.c_str());
+
+	// 変数の干渉グラフを作成する
+	CreateVariableInterferenceGraph();
+
+	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	TraceCoalescable();
 
 	// 変数の合併を行う
 	Coalesce();

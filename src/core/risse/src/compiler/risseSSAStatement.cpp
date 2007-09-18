@@ -392,7 +392,15 @@ wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxStri
 	// ・このブロックにこれ以降この変数を使用している箇所がない
 	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 		i != Used.end(); i++)
+		(*i)->SetMark(NULL); // マークをいったんクリア
+
+	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
+		i != Used.end(); i++)
 	{
+		// この変数は既に処理をしたか
+		if((*i)->GetMark() != NULL) continue; // 既に処理されている
+		(*i)->SetMark(this);
+
 		// Block の LiveOut にその変数があるか
 		if(Block->GetLiveness(*i, true)) continue; // まだ生きている
 		// このブロックにこれ以降この変数を使用している箇所がないか
@@ -418,13 +426,18 @@ wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxStri
 			// livemapからこれを削除する
 			// φ関数などで前の関数と同じ順位の場合は
 			// 前の関数ですでに変数が削除されている可能性がある
+wxFprintf(stderr, wxT("deleting %s:"), (*i)->GetQualifiedName().AsWxString().c_str());
 			gc_map<const tSSAVariable *, risse_size>::iterator fi =
 				livemap.find((*i));
 			RISSE_ASSERT(Code == ocPhi || fi != livemap.end());
 			if(fi != livemap.end())
 			{
+wxFprintf(stderr, wxT("deleted  "), (*i)->GetQualifiedName().AsWxString().c_str());
 				livemap.erase(fi);
-wxFprintf(stderr, wxT("deleting %s  "), (*i)->GetQualifiedName().AsWxString().c_str());
+			}
+			else
+			{
+wxFprintf(stderr, wxT("not found  "), (*i)->GetQualifiedName().AsWxString().c_str());
 			}
 		}
 	}

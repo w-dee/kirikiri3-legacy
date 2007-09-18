@@ -203,17 +203,17 @@ void tSSAForm::OptimizeAndUnSSA()
 	// φ関数を除去
 	RemovePhiStatements();
 
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
-
 	// 3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
 	Check3AddrAssignee();
 
 	// レジスタの割り当て
 	AssignRegisters();
+
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
 
 }
 //---------------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_
 							tSSABlock * pred = quest_block->GetPred()[idx];
 							pred->AddLiveness(var, true);
 							Stack.push_back(pred);
-							break;
+//							break;
 						}
 					}
 				}

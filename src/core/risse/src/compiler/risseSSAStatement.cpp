@@ -498,6 +498,391 @@ void tSSAStatement::OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *>
 
 
 //---------------------------------------------------------------------------
+void tSSAStatement::AnalyzeConstantPropagation(
+		gc_vector<tSSAVariable *> &variables,
+		gc_vector<tSSABlock *> &blocks)
+{
+	// Code ごとに処理を行う
+
+	if(!Declared) return; // Declared が無い文は相手にしない
+
+	// Declared の古い状態をとっておく
+	tSSAVariable::tValueState old_value_state     = Declared->GetValueState();
+	tSSAVariable::tValueState old_valuetype_state = Declared->GetValueTypeState();
+
+	// phi 関数以外は、基本的に使用されいてる値によって定義されている
+	// 変数の型や値がどうなるかを考える
+	// たぶんここら辺の話は Modern Compiler Implementation in * に
+	// 書いてあると思う
+
+	switch(Code)
+	{
+	//--------------- φ関数
+	case ocPhi:
+	{
+		const gc_vector<tSSABlock *> & pred_blocks = Block->GetPred();
+		RISSE_ASSERT(Used.size() == pred_blocks.size());
+		bool done;
+
+		// なかなかコンパクトな実装が見つからないわけだが、ここは
+		// 値に対してと型に対してまったく同じアルゴリズムを実装する
+		// ために、似たようなコードを２回繰り返して書いてあるので注意すること。
+
+		//----- 値に対して
+		// 実行可能なpredブロックから来た変数にvsVaryingな物が一つでもあれば
+		// このφ関数で定義された変数もvsVaryingになる
+		done = false;
+		for(risse_size i = 0; i < pred_blocks.size(); i++)
+		{
+			if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsVarying)
+			{
+				Declared->RaiseValueState(tSSAVariable::vsVarying);
+				done = true;
+				break;
+			}
+		}
+		// すでに定数であるとマークされている変数の方向の実行可能なpredの定数の
+		// 値が異なる場合
+		// このφ関数で定義された変数もvsVaryingになる
+		if(!done)
+		{
+			tVariant C;
+			bool const_found = false;
+			for(risse_size i = 0; i < pred_blocks.size(); i++)
+			{
+				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsSet)
+				{
+					if(!const_found)
+					{
+						const_found = true;
+						C = Used[i]->GetValue();
+					}
+					else
+					{
+						if(!Used[i]->GetValue().DiscEqual(C))
+						{
+							// 値が違う
+							Declared->RaiseValueState(tSSAVariable::vsVarying);
+							done = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		// どれか一つ、実行可能なpredから来た定数をとるUsedがあったとしてその値をCとする
+		// 他のすべてのUsedが下のいずれかの場合
+		// ・vsNotSet
+		// ・値がC
+		// ・その方向のPredが実行不可能
+		// このφ関数で定義された変数は C になる
+		if(!done)
+		{
+			// C を探す
+			risse_size C_idx = risse_size_max;
+			tVariant C;
+			for(risse_size i = 0; i < pred_blocks.size(); i++)
+			{
+				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsSet)
+				{
+					C = Used[i]->GetValue();
+					C_idx = i;
+					break;
+				}
+			}
+			if(C_idx != risse_size_max)
+			{
+				bool fail = false;
+				for(risse_size i = 0; i < pred_blocks.size(); i++)
+				{
+					if(i == C_idx) continue;
+					if(!(
+						Used[i]->GetValueState() == tSSAVariable::vsNotSet ||
+						Used[i]->GetValueState() == tSSAVariable::vsSet &&
+							Used[i]->GetValue().DiscEqual(C) ||
+						!pred_blocks[i]->GetAlive()
+						))
+					{
+						fail = true;
+						break;
+					}
+				}
+				if(!fail)
+				{
+					Declared->RaiseValueState(tSSAVariable::vsSet);
+					Declared->SetValue(C);
+				}
+			}
+		}
+
+		//----- 型に対して
+		// 実行可能なpredブロックから来た変数の型にvsVaryingな物が一つでもあれば
+		// このφ関数で定義された変数の型もvsVaryingになる
+		done = false;
+		for(risse_size i = 0; i < pred_blocks.size(); i++)
+		{
+			if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsVarying)
+			{
+				Declared->RaiseValueTypeState(tSSAVariable::vsVarying);
+				done = true;
+				break;
+			}
+		}
+		// すでに型が分かっている変数の方向の実行可能なpredの定数の
+		// 値が異なる場合
+		// このφ関数で定義された変数もvsVaryingになる
+		if(!done)
+		{
+			tVariant::tType C;
+			bool const_found = false;
+			for(risse_size i = 0; i < pred_blocks.size(); i++)
+			{
+				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsSet)
+				{
+					if(!const_found)
+					{
+						const_found = true;
+						C = Used[i]->GetValueType();
+					}
+					else
+					{
+						if(!Used[i]->GetValueType() == C)
+						{
+							// 値が違う
+							Declared->RaiseValueTypeState(tSSAVariable::vsVarying);
+							done = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		// どれか一つ、実行可能なpredから来た定数をとるUsedがあったとしてその値をCとする
+		// 他のすべてのUsedが下のいずれかの場合
+		// ・vsNotSet
+		// ・値がC
+		// ・その方向のPredが実行不可能
+		// このφ関数で定義された変数は C になる
+		if(!done)
+		{
+			// C を探す
+			risse_size C_idx = risse_size_max;
+			tVariant::tType C;
+			for(risse_size i = 0; i < pred_blocks.size(); i++)
+			{
+				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsSet)
+				{
+					C = Used[i]->GetValueType();
+					C_idx = i;
+					break;
+				}
+			}
+			if(C_idx != risse_size_max)
+			{
+				bool fail = false;
+				for(risse_size i = 0; i < pred_blocks.size(); i++)
+				{
+					if(i == C_idx) continue;
+					if(!(
+						Used[i]->GetValueTypeState() == tSSAVariable::vsNotSet ||
+						Used[i]->GetValueTypeState() == tSSAVariable::vsSet &&
+							Used[i]->GetValueType() == C ||
+						!pred_blocks[i]->GetAlive()
+						))
+					{
+						fail = true;
+						break;
+					}
+				}
+				if(!fail)
+				{
+					Declared->RaiseValueTypeState(tSSAVariable::vsSet);
+					Declared->SetValueType(C);
+				}
+			}
+		}
+
+		break;
+	}
+
+	//--------------- 単純代入
+	case ocAssign:
+		RISSE_ASSERT(Used.size() == 1);
+		RISSE_ASSERT(Declared != NULL);
+		Declared->RaiseValueState(Used[0]->GetValueState());
+		Declared->RaiseValueTypeState(Used[0]->GetValueTypeState());
+		if(Declared->GetValueState() == tSSAVariable::vsSet)
+			Declared->SetValue(Used[0]->GetValue());
+		if(Declared->GetValueTypeState() == tSSAVariable::vsSet)
+			Declared->SetValueType(Used[0]->GetValueType());
+		break;
+
+	//--------------- 定数代入
+	case ocAssignConstant:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Value != NULL);
+		Declared->SuggestValue(*Value);
+		Declared->SuggestValueType(Value->GetType());
+		break;
+
+	//--------------- 値はどうなるかわからないが、型は vtObject を代入する物
+	case ocAssignNewBinding:
+	case ocAssignThisProxy:
+	case ocAssignGlobal:
+	case ocAssignNewArray:
+	case ocAssignNewDict:
+	case ocAssignNewRegExp:
+	case ocAssignNewFunction:
+	case ocAssignNewProperty:
+	case ocAssignNewClass:
+	case ocAssignNewModule:
+	case ocTryFuncCall:
+	case ocSync:
+	case ocSetFrame:
+	case ocSetShare:
+		RISSE_ASSERT(Declared != NULL);
+		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
+		Declared->SuggestValueType(tVariant::vtObject);
+		break;
+
+	//--------------- 値も型もどうなるかわからないもの
+	case ocGetExitTryValue:
+	case ocAssignThis:
+	case ocAssignParam:
+	case ocAssignBlockParam:
+	case ocRead:
+	case ocNew:
+	case ocFuncCall:
+	case ocFuncCallBlock:
+		RISSE_ASSERT(Declared != NULL);
+		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
+		Declared->RaiseValueTypeState(tSSAVariable::vsVarying); // どんな型になるかはわからない
+		break;
+
+	//--------------- 宣言する変数がない物
+	case ocAddBindingMap:
+	case ocWrite:
+	case ocReturn:
+	case ocDebugger:
+	case ocThrow:
+	case ocExitTryException:
+		// declared の無いタイプ
+		RISSE_ASSERT(Declared == NULL);
+		break;
+
+	//--------------- 分岐関連
+	case ocJump:
+	case ocBranch:
+	case ocCatchBranch:
+		break;
+
+	//--------------- 結果はUsedに依存し、boolean を帰す物
+	//-- 単項
+	case ocLogNot:
+		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Used.size() == 1);
+		Declared->SuggestValueType(tVariant::vtBoolean); // 常に boolean
+		if(Used[0]->GetValueState() == tSSAVariable::vsSet)
+			Declared->SuggestValue(Used[0]->GetValue().LogNot());
+		break;
+
+	case ocLogOr:
+	case ocLogAnd:
+	case ocNotEqual:
+	case ocEqual:
+	case ocDiscNotEqual:
+	case ocDiscEqual:
+	case ocLesser:
+	case ocGreater:
+	case ocLesserOrEqual:
+	case ocGreaterOrEqual:
+
+
+	case ocBitNot:
+	case ocDecAssign:
+	case ocIncAssign:
+	case ocPlus:
+	case ocMinus:
+	case ocString:
+	case ocBoolean:
+	case ocReal:
+	case ocInteger:
+	case ocOctet:
+	case ocBitOr:
+	case ocBitXor:
+	case ocBitAnd:
+	case ocRBitShift:
+	case ocLShift:
+	case ocRShift:
+	case ocMod:
+	case ocDiv:
+	case ocIdiv:
+	case ocMul:
+	case ocAdd:
+	case ocSub:
+	case ocInContextOf:
+	case ocInContextOfDyn:
+	case ocInstanceOf:
+	case ocDGet:
+	case ocDGetF:
+	case ocIGet:
+	case ocDDelete:
+	case ocIDelete:
+	case ocDSetAttrib:
+	case ocDSet:
+	case ocDSetF:
+	case ocISet:
+	case ocAssert:
+	case ocBitAndAssign:
+	case ocBitOrAssign:
+	case ocBitXorAssign:
+	case ocSubAssign:
+	case ocAddAssign:
+	case ocModAssign:
+	case ocDivAssign:
+	case ocIdivAssign:
+	case ocMulAssign:
+	case ocLogOrAssign:
+	case ocLogAndAssign:
+	case ocRBitShiftAssign:
+	case ocLShiftAssign:
+	case ocRShiftAssign:
+	case ocSetDefaultContext:
+	case ocGetDefaultContext:
+	case ocDefineAccessMap:
+	case ocDefineLazyBlock:
+	case ocDefineClass:
+	case ocEndAccessMap:
+	case ocParentWrite:
+	case ocParentRead:
+	case ocChildWrite:
+	case ocChildRead:
+	case ocWriteVar:
+	case ocReadVar:
+	case ocOpCodeLast:
+
+
+	//--------------- ???? な物
+	case ocAssignSuper:
+	case ocNoOperation:
+	case ocVMCodeLast:
+		// とりあえず Declared を varying に設定してしまおう
+		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
+		Declared->RaiseValueTypeState(tSSAVariable::vsVarying); // どんな型になるかはわからない
+		break;
+
+	}
+
+	// Declared の ValueState や ValueTypeState がランクアップしているようだったら
+	// variables に Declared を push する
+	if(old_value_state < Declared->GetValueState() ||
+		old_valuetype_state < Declared->GetValueTypeState())
+		variables.push_back(Declared);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAStatement::Check3AddrAssignee()
 {
 	// VM命令の中にはdestinationとその他の引数が同じだった場合に異常な動作をする

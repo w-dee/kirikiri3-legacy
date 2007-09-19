@@ -327,7 +327,6 @@ tSSAVariable * tSSAForm::AddConstantValueStatement(
 	stmt->SetValue(constant);
 	// 変数の作成
 	tSSAVariable * var = new tSSAVariable(this, stmt);
-	var->SetValue(constant);
 	// 文の追加
 	CurrentBlock->AddStatement(stmt);
 	// 戻る
@@ -1114,12 +1113,11 @@ void tSSAForm::CreateVariableInterferenceGraph()
 //---------------------------------------------------------------------------
 void tSSAForm::OptimizeStatement()
 {
-	// すべての文をいったん列挙した後、それを作業リストとして作業を行う
-
 	// 基本ブロックのリストを取得
 	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
+	// すべての文をいったん列挙した後、それを作業リストとして作業を行う
 	// すべての文を収集
 	gc_map<risse_size, tSSAStatement *> statements;
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
@@ -1135,6 +1133,47 @@ void tSSAForm::OptimizeStatement()
 
 		// その文に対して最適化を行う
 		stmt->OptimizeAtStatementLevel(statements);
+	}
+
+	// すべてのブロックの生存フラグを倒す
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->SetAlive(false);
+
+	// 各文で宣言された変数の型の伝播や、条件付き定数伝播を行う。
+	gc_vector<tSSAVariable *> variables;
+
+	// エントリブロックの生存フラグを立てる
+	EntryBlock->SetAlive(true);
+
+	// blocks にエントリブロックを push する
+	blocks.clear();
+	blocks.push_back(EntryBlock);
+
+	// リストが空になるまで文ごとあるいはブロックごとに処理を行う
+	while(variables.size() || blocks.size())
+	{
+		if(variables.size() > 0)
+		{
+			// variables から変数を pop する
+			tSSAVariable * var = variables.back();
+			variables.pop_back();
+
+			// その変数が使用されている各文について解析を行う
+			const gc_vector<tSSAStatement *> & used = var->GetUsed();
+			for(gc_vector<tSSAStatement *>::const_iterator i = used.begin();
+				i != used.end(); i++)
+				const_cast<tSSAStatement*>(*i)->AnalyzeConstantPropagation(variables, blocks);
+		}
+
+		if(blocks.size() > 0)
+		{
+			// blocks からブロックを pop する
+			tSSABlock * block = blocks.back();
+			blocks.pop_back();
+
+			// そのブロックに対して型伝播解析・定数伝播解析を行う
+			block->AnalyzeConstantPropagation(variables, blocks);
+		}
 	}
 }
 //---------------------------------------------------------------------------

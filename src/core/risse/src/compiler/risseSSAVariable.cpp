@@ -35,8 +35,9 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	Declared = stmt;
 	CoalescableList = NULL;
 	InterferenceEdgeMap = NULL;
-	Value = NULL;
+	ValueState = vsNotSet;
 	ValueType = tVariant::vtVoid;
+	ValueTypeState = vsNotSet;
 	Mark = NULL;
 	AssignedRegister = risse_size_max;
 
@@ -364,19 +365,34 @@ tString tSSAVariable::Dump() const
 //---------------------------------------------------------------------------
 tString tSSAVariable::GetTypeComment() const
 {
-	if(Value)
+	tString ret;
+	switch(ValueState)
 	{
-		// 定数である
-		return tString(RISSE_WS("constant ")) +
-			Value->AsHumanReadable();
+	case vsNotSet:
+		break;
+	case vsSet:
+		ret += tString(RISSE_WS("constant ")) + Value.AsHumanReadable();
+		break;
+	case vsVarying:
+		ret += tString(RISSE_WS("constant varying"));
+		break;
 	}
-	else if(ValueType != tVariant::vtVoid)
+
+	switch(ValueTypeState)
 	{
-		// 型が決まっている
-		return tString(RISSE_WS("always type ")) +
-			tVariant::GetTypeString(ValueType);
+	case vsNotSet:
+		break;
+	case vsSet:
+		if(!ret.IsEmpty()) ret += RISSE_WS(", ");
+		ret += tString(RISSE_WS("type ")) + tVariant::GetTypeString(ValueType);
+		break;
+	case vsVarying:
+		if(!ret.IsEmpty()) ret += RISSE_WS(", ");
+		ret += tString(RISSE_WS("type varying"));
+		break;
 	}
-	else return tString();
+
+	return ret;
 }
 //---------------------------------------------------------------------------
 

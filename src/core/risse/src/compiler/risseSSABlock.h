@@ -34,6 +34,7 @@ class tCodeGenerator;
 class tSSABlock : public tCollectee
 {
 	tSSAForm * Form; //!< この基本ブロックを保持する SSA 形式インスタンス
+	risse_size Id; //!< Id (ユニークな値)
 	tString Name; //!< 基本ブロック名(人間が読みやすい名前)
 	gc_vector<tSSABlock *> Pred; //!< 直前の基本ブロックのリスト
 	gc_vector<tSSABlock *> Succ; //!< 直後の基本ブロックのリスト
@@ -64,6 +65,9 @@ public:
 	//! @return		この基本ブロックが属している SSA 形式インスタンス
 	tSSAForm * GetForm() const { return Form; }
 
+	//! @brief		Id を得る
+	risse_size GetId() const { return Id; }
+
 	//! @brief		基本ブロック名を得る
 	//! @return		基本ブロック名
 	tString GetName() const { return Name; }
@@ -78,7 +82,7 @@ public:
 	};
 
 	//! @brief		この基本ブロックが生存しているとマークする
-	void SetAlive() { Alive = true; }
+	void SetAlive(bool status = true) { Alive = status; }
 
 	//! @brief		この基本ブロックが生存しているかどうかを返す
 	bool GetAlive() { return Alive; }
@@ -259,7 +263,18 @@ public:
 
 	//! @brief		すべての文を列挙する
 	//! @param		statements		文を格納する先
-	void ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements);
+	void ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements) const;
+
+	//! @brief		すべての文を列挙する
+	//! @param		statements		文を格納する先
+	void ListAllStatements(gc_vector<tSSAStatement *> &statements) const;
+
+	//! @brief		型伝播解析・定数伝播解析を行う
+	//! @param		variables		変数の作業リスト
+	//! @param		blocks			ブロックの作業リスト
+	void AnalyzeConstantPropagation(
+			gc_vector<tSSAVariable *> &variables,
+			gc_vector<tSSABlock *> &blocks);
 
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();

@@ -42,8 +42,19 @@ class tSSAVariable : public tCollectee
 	typedef gc_map<const tSSAVariable *, risse_size> tInterferenceEdgeMap; //!< 生存している変数のリスト
 	tInterferenceEdgeMap * InterferenceEdgeMap; //!< 干渉グラフのエッジを表すマップ
 
-	const tVariant *Value; //!< この変数がとりうる値(NULL=決まった値がない)
-	tVariant::tType ValueType; //!< この変数がとりうる型(void = どんな型でも取りうる)
+	tVariant Value; //!< この変数がとりうる値
+	tVariant::tType ValueType; //!< この変数がとりうる型
+public:
+	//! @brief	Valueの状態を表す列挙型
+	enum tValueState
+	{
+		vsNotSet, //!< 値の型は設定されていない
+		vsSet, //!< 値の型は設定され、ValueType の通りである
+		vsVarying //!< 値の型は設定されたが、これといってとりうる型が決まらない
+	};
+private:
+	tValueState ValueState; //!< Valueの状態
+	tValueState ValueTypeState; //!< Valueの状態
 	void * Mark; //!< マーク
 	risse_size AssignedRegister; //!< 割り当てられたレジスタ
 
@@ -146,30 +157,73 @@ public:
 	//! @return		割り当たっているレジスタ (risse_size_max の場合はまだレジスタが割り当たっていない)
 	risse_size GetAssignedRegister() const { return AssignedRegister; }
 
+	//! @brief		この変数がとりうる値を設定する
+	//! @param		value		この変数がとりうる値
+	void SetValue(const tVariant value) { Value = value; }
 
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
-	//! @note		ValueType も、この value にあわせて設定される
-	void SetValue(const tVariant * value)
+	//! @note		SetValue と異なり、ValueState が vsVarying な場合は値を設定しない。
+	//!				また、値を設定した場合は ValueState を vsSet に設定する。
+	void SuggestValue(const tVariant value)
 	{
-		Value = value;
-		if(value)
-			SetValueType(value->GetType());
-		else
-			SetValueType(tVariant::vtVoid);
+		if(ValueState != vsVarying)
+		{
+			Value = value;
+			ValueState = vsSet;
+		}
 	}
 
 	//! @brief		この変数がとりうる値を取得する
 	//! @return		この変数がとりうる値
-	const tVariant * GetValue() const { return Value; }
+	const tVariant GetValue() const { return Value; }
+
+	//! @brief		この変数がとりうる値の状態を設定する
+	//! @param		state		この変数がとりうる値の状態
+	void SetValueState(tValueState state) { ValueState = state; }
+
+	//! @brief		この変数がとりうる値の状態をあげる
+	//! @param		state		この変数がとりうる値の状態
+	//! @note		状態が state 未満だった場合にのみ値が設定される
+	void RaiseValueState(tValueState state) { if(ValueState < state) ValueState = state; }
+
+	//! @brief		この変数がとりうる値の状態を取得する
+	//! @return		この変数がとりうる値の状態
+	tValueState GetValueState() const { return ValueState; }
 
 	//! @brief		この変数がとりうる型を設定する
 	//! @param		type		この変数がとりうる型
 	void SetValueType(tVariant::tType type) { ValueType = type; }
 
+	//! @brief		この変数がとりうる型の状態を設定する
+	//! @param		value		この変数の型がとりうる値
+	//! @note		SetValueType と異なり、ValueTypeState が vsVarying な場合は値を設定しない。
+	//!				また、値を設定した場合は ValueTypeState を vsSet に設定する。
+	void SuggestValueType(tVariant::tType type)
+	{
+		if(ValueTypeState != vsVarying)
+		{
+			ValueType = type;
+			ValueTypeState = vsSet;
+		}
+	}
+
 	//! @brief		この変数がとりうる型を取得する
 	//! @return		この変数がとりうる型
 	tVariant::tType GetValueType() const { return ValueType; }
+
+	//! @brief		この変数がとりうる型の状態を設定する
+	//! @param		state		この変数がとりうる型の状態
+	void SetValueTypeState(tValueState state) { ValueTypeState = state; }
+
+	//! @brief		この変数がとりうる型の状態をあげる
+	//! @param		state		この変数がとりうる型の状態
+	//! @note		状態が state 未満だった場合にのみ値が設定される
+	void RaiseValueTypeState(tValueState state) { if(ValueTypeState < state) ValueTypeState = state; }
+
+	//! @brief		この変数がとりうる型の状態を取得する
+	//! @return		この変数がとりうる型の状態
+	tValueState GetValueTypeState() const { return ValueTypeState; }
 
 	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する
 	//! @param		pos		ソースコード上の位置

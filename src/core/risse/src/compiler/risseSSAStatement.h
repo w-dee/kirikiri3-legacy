@@ -302,6 +302,13 @@ public:
 	//! @param		statements		作業リスト
 	void OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *> &statements);
 
+	//! @brief		型伝播解析・定数伝播解析を行う
+	//! @param		variables		変数の作業リスト
+	//! @param		blocks			ブロックの作業リスト
+	void AnalyzeConstantPropagation(
+			gc_vector<tSSAVariable *> &variables,
+			gc_vector<tSSABlock *> &blocks);
+
 	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
 	void Check3AddrAssignee();
 

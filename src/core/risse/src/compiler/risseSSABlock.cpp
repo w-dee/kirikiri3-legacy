@@ -36,6 +36,8 @@ tSSABlock::tSSABlock(tSSAForm * form, const tString & name,
 	const tSSALocalNamespace * ns)
 {
 	Form = form;
+	Id = Form->GetFunction()->GetFunctionGroup()->GetCompiler()->GetUniqueNumber();
+		// Id は文と文を識別できる程度にユニークであればよい
 	FirstStatement = LastStatement = NULL;
 	LocalNamespace = new tSSALocalNamespace(*ns);
 	LocalNamespace->SetBlock(this);
@@ -661,11 +663,30 @@ void tSSABlock::CreateVariableInterferenceGraph()
 
 
 //---------------------------------------------------------------------------
-void tSSABlock::ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements)
+void tSSABlock::ListAllStatements(gc_map<risse_size, tSSAStatement *> &statements) const
 {
 	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 		statements.insert(gc_map<risse_size, tSSAStatement *>::value_type(stmt->GetId(), stmt));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::ListAllStatements(gc_vector<tSSAStatement *> &statements) const
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		statements.push_back(stmt);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::AnalyzeConstantPropagation(
+		gc_vector<tSSAVariable *> &variables,
+		gc_vector<tSSABlock *> &blocks)
+{
 }
 //---------------------------------------------------------------------------
 

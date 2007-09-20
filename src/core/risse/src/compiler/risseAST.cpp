@@ -796,7 +796,6 @@ tSSAVariable * tASTNode_Factor::DoReadSSA(
 			// 文を作成して戻る
 			tSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignGlobal);
-			ret_var->SetValueType(tVariant::vtObject); // 結果は常に vtObject
 			return ret_var;
 		}
 
@@ -805,7 +804,6 @@ tSSAVariable * tASTNode_Factor::DoReadSSA(
 			// 文を作成して戻る
 			tSSAVariable * ret_var =
 				form->AddVariableWithStatement(GetPosition(), ocAssignNewBinding);
-			ret_var->SetValueType(tVariant::vtObject); // 結果は常に vtObject
 
 			// bindingオブジェクトに変数とそのレジスタ番号の対応を追加する
 			form->AddBindingMap(GetPosition(), ret_var);
@@ -1222,7 +1220,6 @@ tSSAVariable * tASTNode_Unary::DoReadSSA(
 			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
 
-		//	ret_var->SetValueType(tVariant::vtBoolean); // 結果は常に vtBoolean
 			//////////////////////////////////////////////////////////////////////////////////////////
 			// 演算子のオーバーロードによっては ! 演算子は bool を返さない可能性がある
 			// この仕様は後に変更の可能性アリ (! 演算子をオーバーロードできないようにする可能性がある)
@@ -1259,8 +1256,6 @@ tSSAVariable * tASTNode_Unary::DoReadSSA(
 			// 文の作成
 			tSSAVariable * ret_var = NULL;
 			form->AddStatement(GetPosition(), oc, &ret_var, child_var);
-
-			ret_var->SetValueType(rettype); // 結果は常にキャストした後の型になる
 
 			// 戻る
 			return ret_var;
@@ -1726,7 +1721,6 @@ tSSAVariable * tASTNode_Array::DoReadSSA(tSSAForm *form, void * param) const
 	// 配列オブジェクトを作成
 	tSSAVariable * array_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewArray, &array_var);
-	array_var->SetValueType(tVariant::vtObject); // 結果は常に object
 
 #if 0
 XXXX: Array は内部的に deque を使っているので配列の予約はできない(必要ない)
@@ -1853,7 +1847,6 @@ tSSAVariable * tASTNode_Dict::DoReadSSA(tSSAForm *form, void * param) const
 	// 辞書配列オブジェクトを作成
 	tSSAVariable * dict_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewDict, &dict_var);
-	dict_var->SetValueType(tVariant::vtObject); // 結果は常に object
 
 	RISSE_ASSERT(data->Names.size() == GetChildCount());
 	RISSE_ASSERT(data->Values.size() == GetChildCount());
@@ -1937,7 +1930,6 @@ tSSAVariable * tASTNode_RegExp::DoReadSSA(tSSAForm *form, void * param) const
 	tSSAVariable * regexp_var = NULL;
 	form->AddStatement(GetPosition(), ocAssignNewRegExp, &regexp_var,
 		pattern_var, flags_var);
-	regexp_var->SetValueType(tVariant::vtObject); // 結果は常に object
 	return regexp_var;
 }
 //---------------------------------------------------------------------------

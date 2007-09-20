@@ -185,6 +185,12 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
 
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -208,12 +214,6 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// レジスタの割り当て
 	AssignRegisters();
-
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
 
 }
 //---------------------------------------------------------------------------

@@ -687,6 +687,10 @@ void tSSABlock::AnalyzeConstantPropagation(
 		gc_vector<tSSAVariable *> &variables,
 		gc_vector<tSSABlock *> &blocks)
 {
+	// すべての文に対して解析を行う
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->AnalyzeConstantPropagation(variables, blocks);
 }
 //---------------------------------------------------------------------------
 
@@ -847,9 +851,14 @@ tString tSSABlock::Dump() const
 
 	// ラベル名と直前のブロックを列挙
 	ret +=  + RISSE_WS("*") + Name;
+	ret += RISSE_WS(" // ");
+	if(GetAlive())
+		ret += RISSE_WS("alive");
+	else
+		ret += RISSE_WS("dead");
 	if(Pred.size() != 0)
 	{
-		ret += RISSE_WS(" // pred: ");
+		ret += RISSE_WS(", pred: ");
 		for(gc_vector<tSSABlock *>::const_iterator i = Pred.begin();
 										i != Pred.end(); i ++)
 		{

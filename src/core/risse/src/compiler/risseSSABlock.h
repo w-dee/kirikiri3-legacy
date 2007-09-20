@@ -85,7 +85,7 @@ public:
 	void SetAlive(bool status = true) { Alive = status; }
 
 	//! @brief		この基本ブロックが生存しているかどうかを返す
-	bool GetAlive() { return Alive; }
+	bool GetAlive() const { return Alive; }
 
 	//! @brief		LastStatementPosition を設定する
 	void SetLastStatementPosition();

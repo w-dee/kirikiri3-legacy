@@ -35,9 +35,7 @@ tSSAVariable::tSSAVariable(tSSAForm * form,
 	Declared = stmt;
 	CoalescableList = NULL;
 	InterferenceEdgeMap = NULL;
-	ValueState = vsNotSet;
-	ValueType = tVariant::vtVoid;
-	ValueTypeState = vsNotSet;
+	ValueState = vsUnknown;
 	Mark = NULL;
 	AssignedRegister = risse_size_max;
 
@@ -368,27 +366,16 @@ tString tSSAVariable::GetTypeComment() const
 	tString ret;
 	switch(ValueState)
 	{
-	case vsNotSet:
+	case vsUnknown:
 		break;
-	case vsSet:
+	case vsConstant:
 		ret += tString(RISSE_WS("constant ")) + Value.AsHumanReadable();
+		break;
+	case vsTypeConstant:
+		ret += tString(RISSE_WS("constant type ")) + Value.GetTypeString();
 		break;
 	case vsVarying:
 		ret += tString(RISSE_WS("constant varying"));
-		break;
-	}
-
-	switch(ValueTypeState)
-	{
-	case vsNotSet:
-		break;
-	case vsSet:
-		if(!ret.IsEmpty()) ret += RISSE_WS(", ");
-		ret += tString(RISSE_WS("type ")) + tVariant::GetTypeString(ValueType);
-		break;
-	case vsVarying:
-		if(!ret.IsEmpty()) ret += RISSE_WS(", ");
-		ret += tString(RISSE_WS("type varying"));
 		break;
 	}
 

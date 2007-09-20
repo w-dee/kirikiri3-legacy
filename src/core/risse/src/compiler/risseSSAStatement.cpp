@@ -503,17 +503,19 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		gc_vector<tSSABlock *> &blocks)
 {
 	// Code ごとに処理を行う
-
 	if(!Declared) return; // Declared が無い文は相手にしない
 
 	// Declared の古い状態をとっておく
 	tSSAVariable::tValueState old_value_state     = Declared->GetValueState();
-	tSSAVariable::tValueState old_valuetype_state = Declared->GetValueTypeState();
 
 	// phi 関数以外は、基本的に使用されいてる値によって定義されている
 	// 変数の型や値がどうなるかを考える
 	// たぶんここら辺の話は Modern Compiler Implementation in * に
 	// 書いてあると思う
+
+	// phi 関数意外は、この文を含むブロックが実行可能であると分かっていない場合は
+	// 精査しない
+	if(Code != ocPhi && !Block->GetAlive()) return;
 
 	switch(Code)
 	{
@@ -522,183 +524,206 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	{
 		const gc_vector<tSSABlock *> & pred_blocks = Block->GetPred();
 		RISSE_ASSERT(Used.size() == pred_blocks.size());
-		bool done;
 
-		// なかなかコンパクトな実装が見つからないわけだが、ここは
-		// 値に対してと型に対してまったく同じアルゴリズムを実装する
-		// ために、似たようなコードを２回繰り返して書いてあるので注意すること。
+		// Modern Compiler Implementation in * では条件付き定数伝播における
+		// 変数の状態において ⊥とCとT の3つの状態を元にアルゴリズムを解説しているが、
+		// Risse の場合はさらにこれに「型が決まっているが値が決まっていない状態」を
+		// 追加して、vsUnknown, vsConstant, vsTypeConstant, vsVarying の4つの状態をとると
+		// している。
 
-		//----- 値に対して
-		// 実行可能なpredブロックから来た変数にvsVaryingな物が一つでもあれば
-		// このφ関数で定義された変数もvsVaryingになる
-		done = false;
+		// 実行可能な pred ブロックの中から最も強い 状態を一つ得る
+		risse_size t_idx = risse_size_max; // そのインデックス
+		tVariant t_value; // その値または型
+		tSSAVariable::tValueState t_state; // その状態
+
 		for(risse_size i = 0; i < pred_blocks.size(); i++)
 		{
-			if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsVarying)
+			if(pred_blocks[i]->GetAlive())
 			{
-				Declared->RaiseValueState(tSSAVariable::vsVarying);
-				done = true;
-				break;
+				tSSAVariable::tValueState i_state = Used[i]->GetValueState();
+				if(t_idx == risse_size_max || t_state < i_state)
+				{
+					t_state = i_state;
+					t_idx = i;
+					if(i_state == tSSAVariable::vsConstant || i_state == tSSAVariable::vsTypeConstant)
+						t_value = Used[i]->GetValue();
+				}
 			}
 		}
-		// すでに定数であるとマークされている変数の方向の実行可能なpredの定数の
-		// 値が異なる場合
-		// このφ関数で定義された変数もvsVaryingになる
-		if(!done)
+
+		// その最も強い状態に従って:
+		if(t_idx != risse_size_max)
 		{
-			tVariant C;
-			bool const_found = false;
-			for(risse_size i = 0; i < pred_blocks.size(); i++)
+			switch(t_state)
 			{
-				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsSet)
+			case tSSAVariable::vsUnknown:
+				// うーん、この場合はどういう場合なんだろう
+				break;
+
+			case tSSAVariable::vsConstant:
+				// 定数
+				// 他のすべてのUsedが下のいずれかの場合
+				// ・vsUnknown
+				// ・値がC
+				// ・その方向のPredが実行不可能
+				// このφ関数で定義された変数は C になる
+				// ただし、実行可能なブロックのうち値がCと異なる
+				// 物があれば、C の型が同じならば vsTypeConstant 、
+				// C の型が異なれば vsVarying になる
 				{
-					if(!const_found)
+					tSSAVariable::tValueState new_state = tSSAVariable::vsConstant;
+					for(risse_size i = 0; i < pred_blocks.size(); i++)
 					{
-						const_found = true;
-						C = Used[i]->GetValue();
-					}
-					else
-					{
-						if(!Used[i]->GetValue().DiscEqual(C))
+						if(i == t_idx) continue;
+						bool value_same = false;
+						if(pred_blocks[i]->GetAlive())
 						{
-							// 値が違う
+							if(Used[i]->GetValueState() == tSSAVariable::vsConstant)
+							{
+								// その変数は定数であることがわかっている
+								if(!Used[i]->GetValue().DiscEqual(t_value))
+								{
+									// 値が違う
+									if(Used[i]->GetValue().GetType() != t_value.GetType())
+									{
+										// 型も違う
+										// これは vsVarying にしかならない
+										new_state = tSSAVariable::vsVarying;
+										break;
+									}
+									else
+									{
+										// 値が違うが型は同じ
+										// これは vsTypeConstant になる可能性がある
+										if(new_state < tSSAVariable::vsTypeConstant)
+											new_state = tSSAVariable::vsTypeConstant;
+										// break はしない。さらに見つかった変数によっては
+										// vsVarying になるかもしれないから。
+										value_same = true;
+									}
+								}
+								else
+								{
+									value_same = true;
+								}
+							}
+							else if(Used[i]->GetValueState() == tSSAVariable::vsTypeConstant)
+							{
+								// その変数は型が決まっていることがわかっている
+								if(Used[i]->GetValue().GetType() != t_value.GetType())
+								{
+									// 型が違う
+									// これは vsVarying にしかならない
+									new_state = tSSAVariable::vsVarying;
+									break;
+								}
+								else
+								{
+									// 型が同じ
+									// これは vsTypeConstant になる可能性がある
+									if(new_state < tSSAVariable::vsTypeConstant)
+										new_state = tSSAVariable::vsTypeConstant;
+									// break はしない。さらに見つかった変数によっては
+									// vsVarying になるかもしれないから。
+									value_same = true;
+								}
+							}
+						}
+
+						if(!(
+							Used[i]->GetValueState() == tSSAVariable::vsUnknown ||
+							value_same ||
+							!pred_blocks[i]->GetAlive()
+							))
+						{
+							// 条件と違うのが見つかった
+							new_state = tSSAVariable::vsUnknown;
+							break;
+						}
+					}
+					// Declared に情報を設定
+					if(new_state == tSSAVariable::vsConstant)
+						Declared->SuggestValue(t_value);
+					else if(new_state == tSSAVariable::vsTypeConstant)
+						Declared->SuggestValue(t_value.GetType());
+					if(Block->GetAlive())
+					{
+						if(new_state == tSSAVariable::vsVarying)
 							Declared->RaiseValueState(tSSAVariable::vsVarying);
-							done = true;
-							break;
-						}
 					}
 				}
-			}
-		}
-		// どれか一つ、実行可能なpredから来た定数をとるUsedがあったとしてその値をCとする
-		// 他のすべてのUsedが下のいずれかの場合
-		// ・vsNotSet
-		// ・値がC
-		// ・その方向のPredが実行不可能
-		// このφ関数で定義された変数は C になる
-		if(!done)
-		{
-			// C を探す
-			risse_size C_idx = risse_size_max;
-			tVariant C;
-			for(risse_size i = 0; i < pred_blocks.size(); i++)
-			{
-				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueState() == tSSAVariable::vsSet)
-				{
-					C = Used[i]->GetValue();
-					C_idx = i;
-					break;
-				}
-			}
-			if(C_idx != risse_size_max)
-			{
-				bool fail = false;
-				for(risse_size i = 0; i < pred_blocks.size(); i++)
-				{
-					if(i == C_idx) continue;
-					if(!(
-						Used[i]->GetValueState() == tSSAVariable::vsNotSet ||
-						Used[i]->GetValueState() == tSSAVariable::vsSet &&
-							Used[i]->GetValue().DiscEqual(C) ||
-						!pred_blocks[i]->GetAlive()
-						))
-					{
-						fail = true;
-						break;
-					}
-				}
-				if(!fail)
-				{
-					Declared->RaiseValueState(tSSAVariable::vsSet);
-					Declared->SetValue(C);
-				}
-			}
-		}
 
-		//----- 型に対して
-		// 実行可能なpredブロックから来た変数の型にvsVaryingな物が一つでもあれば
-		// このφ関数で定義された変数の型もvsVaryingになる
-		done = false;
-		for(risse_size i = 0; i < pred_blocks.size(); i++)
-		{
-			if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsVarying)
-			{
-				Declared->RaiseValueTypeState(tSSAVariable::vsVarying);
-				done = true;
 				break;
-			}
-		}
-		// すでに型が分かっている変数の方向の実行可能なpredの定数の
-		// 値が異なる場合
-		// このφ関数で定義された変数もvsVaryingになる
-		if(!done)
-		{
-			tVariant::tType C;
-			bool const_found = false;
-			for(risse_size i = 0; i < pred_blocks.size(); i++)
-			{
-				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsSet)
+
+			case tSSAVariable::vsTypeConstant:
+				// 型が決まっている
+				// 他のすべてのUsedが下のいずれかの場合
+				// ・vsUnknown
+				// ・vsConstantかつ値の型がC
+				// ・vsTypeConstantでC
+				// ・その方向のPredが実行不可能
+				// このφ関数で定義された変数の型 C になる
+				// ただし、実行可能なブロックのうち値の型がCと異なる
+				// 物があれば vsVarying になる
 				{
-					if(!const_found)
+					tSSAVariable::tValueState new_state = tSSAVariable::vsConstant;
+					for(risse_size i = 0; i < pred_blocks.size(); i++)
 					{
-						const_found = true;
-						C = Used[i]->GetValueType();
-					}
-					else
-					{
-						if(!Used[i]->GetValueType() == C)
+						if(i == t_idx) continue;
+						bool value_same = false;
+						if(pred_blocks[i]->GetAlive())
 						{
-							// 値が違う
-							Declared->RaiseValueTypeState(tSSAVariable::vsVarying);
-							done = true;
+							if(Used[i]->GetValueState() == tSSAVariable::vsConstant ||
+								Used[i]->GetValueState() == tSSAVariable::vsTypeConstant)
+							{
+								// その変数は定数であること、あるいは型が決まっていることがわかっている
+								if(Used[i]->GetValue().GetType() != t_value.GetType())
+								{
+									// 型も違う
+									// これは vsVarying にしかならない
+									new_state = tSSAVariable::vsVarying;
+									break;
+								}
+								else
+								{
+									// 値が違うが型は同じ
+									// これは vsTypeConstant になる可能性がある
+									if(new_state < tSSAVariable::vsTypeConstant)
+										new_state = tSSAVariable::vsTypeConstant;
+									// break はしない。さらに見つかった変数によっては
+									// vsVarying になるかもしれないから。
+									value_same = true;
+								}
+							}
+						}
+
+						if(!(
+							Used[i]->GetValueState() == tSSAVariable::vsUnknown ||
+							value_same ||
+							!pred_blocks[i]->GetAlive()
+							))
+						{
+							// 条件と違うのが見つかった
+							new_state = tSSAVariable::vsUnknown;
 							break;
 						}
 					}
-				}
-			}
-		}
-		// どれか一つ、実行可能なpredから来た定数をとるUsedがあったとしてその値をCとする
-		// 他のすべてのUsedが下のいずれかの場合
-		// ・vsNotSet
-		// ・値がC
-		// ・その方向のPredが実行不可能
-		// このφ関数で定義された変数は C になる
-		if(!done)
-		{
-			// C を探す
-			risse_size C_idx = risse_size_max;
-			tVariant::tType C;
-			for(risse_size i = 0; i < pred_blocks.size(); i++)
-			{
-				if(pred_blocks[i]->GetAlive() && Used[i]->GetValueTypeState() == tSSAVariable::vsSet)
-				{
-					C = Used[i]->GetValueType();
-					C_idx = i;
-					break;
-				}
-			}
-			if(C_idx != risse_size_max)
-			{
-				bool fail = false;
-				for(risse_size i = 0; i < pred_blocks.size(); i++)
-				{
-					if(i == C_idx) continue;
-					if(!(
-						Used[i]->GetValueTypeState() == tSSAVariable::vsNotSet ||
-						Used[i]->GetValueTypeState() == tSSAVariable::vsSet &&
-							Used[i]->GetValueType() == C ||
-						!pred_blocks[i]->GetAlive()
-						))
+					// Declared に情報を設定
+					if(new_state == tSSAVariable::vsTypeConstant)
+						Declared->SuggestValue(t_value.GetType());
+					if(Block->GetAlive())
 					{
-						fail = true;
-						break;
+						if(new_state == tSSAVariable::vsVarying)
+							Declared->RaiseValueState(tSSAVariable::vsVarying);
 					}
 				}
-				if(!fail)
-				{
-					Declared->RaiseValueTypeState(tSSAVariable::vsSet);
-					Declared->SetValueType(C);
-				}
+
+				break;
+
+			case tSSAVariable::vsVarying:
+				// Declared は必ず Varying
+				Declared->RaiseValueState(tSSAVariable::vsVarying);
+				break;
 			}
 		}
 
@@ -710,11 +735,10 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		RISSE_ASSERT(Used.size() == 1);
 		RISSE_ASSERT(Declared != NULL);
 		Declared->RaiseValueState(Used[0]->GetValueState());
-		Declared->RaiseValueTypeState(Used[0]->GetValueTypeState());
-		if(Declared->GetValueState() == tSSAVariable::vsSet)
-			Declared->SetValue(Used[0]->GetValue());
-		if(Declared->GetValueTypeState() == tSSAVariable::vsSet)
-			Declared->SetValueType(Used[0]->GetValueType());
+		if(Declared->GetValueState() == tSSAVariable::vsConstant)
+			Declared->SuggestValue(Used[0]->GetValue());
+		else if(Declared->GetValueState() == tSSAVariable::vsTypeConstant)
+			Declared->SuggestValue(Used[0]->GetValue().GetType());
 		break;
 
 	//--------------- 定数代入
@@ -722,7 +746,6 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Value != NULL);
 		Declared->SuggestValue(*Value);
-		Declared->SuggestValueType(Value->GetType());
 		break;
 
 	//--------------- 値はどうなるかわからないが、型は vtObject を代入する物
@@ -741,8 +764,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocSetFrame:
 	case ocSetShare:
 		RISSE_ASSERT(Declared != NULL);
-		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
-		Declared->SuggestValueType(tVariant::vtObject);
+		Declared->SuggestValue(tVariant::vtObject);
 		break;
 
 	//--------------- 値も型もどうなるかわからないもの
@@ -756,7 +778,6 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocFuncCallBlock:
 		RISSE_ASSERT(Declared != NULL);
 		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
-		Declared->RaiseValueTypeState(tSSAVariable::vsVarying); // どんな型になるかはわからない
 		break;
 
 	//--------------- 宣言する変数がない物
@@ -772,8 +793,86 @@ void tSSAStatement::AnalyzeConstantPropagation(
 
 	//--------------- 分岐関連
 	case ocJump:
+		// ジャンプ先は生き残る
+		{
+			tSSABlock * block = GetJumpTarget();
+			if(!block->GetAlive())
+			{
+				block->SetAlive(true);
+				blocks.push_back(block);
+			}
+		}
+		break;
+
 	case ocBranch:
+		{
+			// Used[0] の状態による
+			bool push_true = false;
+			bool push_false = false;
+			if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
+			{
+				// Used[0] が定数ならばどっちに行くかがわかるはず
+				if((bool)Used[0]->GetValue())
+					push_true = true;
+				else
+					push_false = true;
+			}
+			if(Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
+			{
+				// タイプによっては必ずfalseとして評価される物がある
+				switch(Used[0]->GetValue().GetType())
+				{
+				case tVariant::vtVoid:
+				case tVariant::vtNull:
+					// この二つは必ず偽になる
+					push_false = true;
+					break;
+				default:
+					// どっちに行くかわからない
+					push_false = true;
+					push_true = true;
+				}
+			}
+			else if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
+			{
+				// Used[0] がとる値が複数あり得るならば、どちらに行くかわからない
+				push_false = true;
+				push_true = true;
+			}
+
+			tSSABlock * block;
+			if(push_false)
+			{
+				block = GetFalseBranch();
+				if(!block->GetAlive())
+				{
+					block->SetAlive(true);
+					blocks.push_back(block);
+				}
+			}
+			if(push_true)
+			{
+				block = GetTrueBranch();
+				if(!block->GetAlive())
+				{
+					block->SetAlive(true);
+					blocks.push_back(block);
+				}
+			}
+		}
+		break;
+
 	case ocCatchBranch:
+		// すべての target に分岐する可能性があるのですべてを生存していると見なす
+		for(gc_vector<tSSABlock *>::iterator i = Targets.begin(); i != Targets.end();
+			i++)
+		{
+			if(!(*i)->GetAlive())
+			{
+				(*i)->SetAlive(true);
+				blocks.push_back(*i);
+			}
+		}
 		break;
 
 	//--------------- 結果はUsedに依存し、boolean を帰す物
@@ -781,9 +880,10 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocLogNot:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 1);
-		Declared->SuggestValueType(tVariant::vtBoolean); // 常に boolean
-		if(Used[0]->GetValueState() == tSSAVariable::vsSet)
+		if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
 			Declared->SuggestValue(Used[0]->GetValue().LogNot());
+		else
+			Declared->SuggestValue(tVariant::vtBoolean); // 常に boolean
 		break;
 
 	case ocLogOr:
@@ -868,15 +968,13 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocVMCodeLast:
 		// とりあえず Declared を varying に設定してしまおう
 		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
-		Declared->RaiseValueTypeState(tSSAVariable::vsVarying); // どんな型になるかはわからない
 		break;
 
 	}
 
 	// Declared の ValueState や ValueTypeState がランクアップしているようだったら
 	// variables に Declared を push する
-	if(old_value_state < Declared->GetValueState() ||
-		old_valuetype_state < Declared->GetValueTypeState())
+	if(old_value_state < Declared->GetValueState())
 		variables.push_back(Declared);
 }
 //---------------------------------------------------------------------------

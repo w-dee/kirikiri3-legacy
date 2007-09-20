@@ -42,19 +42,18 @@ class tSSAVariable : public tCollectee
 	typedef gc_map<const tSSAVariable *, risse_size> tInterferenceEdgeMap; //!< 生存している変数のリスト
 	tInterferenceEdgeMap * InterferenceEdgeMap; //!< 干渉グラフのエッジを表すマップ
 
-	tVariant Value; //!< この変数がとりうる値
-	tVariant::tType ValueType; //!< この変数がとりうる型
+	tVariant Value; //!< この変数がとりうる値/型
 public:
 	//! @brief	Valueの状態を表す列挙型
 	enum tValueState
 	{
-		vsNotSet, //!< 値の型は設定されていない
-		vsSet, //!< 値の型は設定され、ValueType の通りである
-		vsVarying //!< 値の型は設定されたが、これといってとりうる型が決まらない
+		vsUnknown, //!< 値は設定されていない
+		vsConstant, //!< 値は設定され、Value の通りである
+		vsTypeConstant, //!< 値は複数の状態をとりうるが、型は決まっている(Valueの型がそれを表す)
+		vsVarying //!< 値も型も複数の状態を取りうる
 	};
 private:
 	tValueState ValueState; //!< Valueの状態
-	tValueState ValueTypeState; //!< Valueの状態
 	void * Mark; //!< マーク
 	risse_size AssignedRegister; //!< 割り当てられたレジスタ
 
@@ -163,14 +162,27 @@ public:
 
 	//! @brief		この変数がとりうる値を設定する
 	//! @param		value		この変数がとりうる値
-	//! @note		SetValue と異なり、ValueState が vsVarying な場合は値を設定しない。
-	//!				また、値を設定した場合は ValueState を vsSet に設定する。
+	//! @note		SetValue と異なり、ValueState > vsConstant な場合は値を設定しない。
+	//!				また、値を設定した場合は ValueState を vsConstant に設定する。
 	void SuggestValue(const tVariant value)
 	{
-		if(ValueState != vsVarying)
+		if(ValueState <= vsConstant)
 		{
 			Value = value;
-			ValueState = vsSet;
+			ValueState = vsConstant;
+		}
+	}
+
+	//! @brief		この変数がとりうる型を設定する
+	//! @param		type		この変数がとりうる型
+	//! @note		ValueState > vsTypeConstant な場合は値を設定しない。
+	//!				また、値を設定した場合は ValueState を vsTypeConstant に設定する。
+	void SuggestValue(tVariant::tType type)
+	{
+		if(ValueState <= vsTypeConstant)
+		{
+			Value.SetTypeTag(type);
+			ValueState = vsTypeConstant;
 		}
 	}
 
@@ -190,40 +202,6 @@ public:
 	//! @brief		この変数がとりうる値の状態を取得する
 	//! @return		この変数がとりうる値の状態
 	tValueState GetValueState() const { return ValueState; }
-
-	//! @brief		この変数がとりうる型を設定する
-	//! @param		type		この変数がとりうる型
-	void SetValueType(tVariant::tType type) { ValueType = type; }
-
-	//! @brief		この変数がとりうる型の状態を設定する
-	//! @param		value		この変数の型がとりうる値
-	//! @note		SetValueType と異なり、ValueTypeState が vsVarying な場合は値を設定しない。
-	//!				また、値を設定した場合は ValueTypeState を vsSet に設定する。
-	void SuggestValueType(tVariant::tType type)
-	{
-		if(ValueTypeState != vsVarying)
-		{
-			ValueType = type;
-			ValueTypeState = vsSet;
-		}
-	}
-
-	//! @brief		この変数がとりうる型を取得する
-	//! @return		この変数がとりうる型
-	tVariant::tType GetValueType() const { return ValueType; }
-
-	//! @brief		この変数がとりうる型の状態を設定する
-	//! @param		state		この変数がとりうる型の状態
-	void SetValueTypeState(tValueState state) { ValueTypeState = state; }
-
-	//! @brief		この変数がとりうる型の状態をあげる
-	//! @param		state		この変数がとりうる型の状態
-	//! @note		状態が state 未満だった場合にのみ値が設定される
-	void RaiseValueTypeState(tValueState state) { if(ValueTypeState < state) ValueTypeState = state; }
-
-	//! @brief		この変数がとりうる型の状態を取得する
-	//! @return		この変数がとりうる型の状態
-	tValueState GetValueTypeState() const { return ValueTypeState; }
 
 	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する
 	//! @param		pos		ソースコード上の位置

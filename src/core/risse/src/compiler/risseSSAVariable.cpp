@@ -375,7 +375,7 @@ tString tSSAVariable::GetTypeComment() const
 		ret += tString(RISSE_WS("constant type ")) + Value.GetTypeString();
 		break;
 	case vsVarying:
-		ret += tString(RISSE_WS("constant varying"));
+		ret += tString(RISSE_WS("varying"));
 		break;
 	}
 

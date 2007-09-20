@@ -503,6 +503,103 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		gc_vector<tSSABlock *> &blocks)
 {
 	// Code ごとに処理を行う
+
+	// phi 関数以外は、この文を含むブロックが実行可能であると分かっていない場合は
+	// 精査しない
+	if(Code != ocPhi && !Block->GetAlive()) return;
+
+	// まずは分岐系
+	switch(Code)
+	{
+	//--------------- 分岐関連
+	case ocJump:
+		// ジャンプ先は生き残る
+		{
+			tSSABlock * block = GetJumpTarget();
+			if(!block->GetAlive())
+			{
+				block->SetAlive(true);
+				blocks.push_back(block);
+			}
+		}
+		return;
+
+	case ocBranch:
+		{
+			// Used[0] の状態による
+			bool push_true = false;
+			bool push_false = false;
+			if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
+			{
+				// Used[0] が定数ならばどっちに行くかがわかるはず
+				if((bool)Used[0]->GetValue())
+					push_true = true;
+				else
+					push_false = true;
+			}
+			else if(Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
+			{
+				// タイプによっては必ずfalseとして評価される物がある
+				switch(Used[0]->GetValue().GetType())
+				{
+				case tVariant::vtVoid:
+				case tVariant::vtNull:
+					// この二つは必ず偽になる
+					push_false = true;
+					break;
+				default:
+					// どっちに行くかわからない
+					push_false = true;
+					push_true = true;
+				}
+			}
+			else if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
+			{
+				// Used[0] がとる値が複数あり得るならば、どちらに行くかわからない
+				push_false = true;
+				push_true = true;
+			}
+
+			tSSABlock * block;
+			if(push_false)
+			{
+				block = GetFalseBranch();
+				if(!block->GetAlive())
+				{
+					block->SetAlive(true);
+					blocks.push_back(block);
+				}
+			}
+			if(push_true)
+			{
+				block = GetTrueBranch();
+				if(!block->GetAlive())
+				{
+					block->SetAlive(true);
+					blocks.push_back(block);
+				}
+			}
+		}
+		return;
+
+	case ocCatchBranch:
+		// すべての target に分岐する可能性があるのですべてを生存していると見なす
+		for(gc_vector<tSSABlock *>::iterator i = Targets.begin(); i != Targets.end();
+			i++)
+		{
+			if(!(*i)->GetAlive())
+			{
+				(*i)->SetAlive(true);
+				blocks.push_back(*i);
+			}
+		}
+		return;
+
+	default: ;
+	}
+
+
+
 	if(!Declared) return; // Declared が無い文は相手にしない
 
 	// Declared の古い状態をとっておく
@@ -513,9 +610,6 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	// たぶんここら辺の話は Modern Compiler Implementation in * に
 	// 書いてあると思う
 
-	// phi 関数意外は、この文を含むブロックが実行可能であると分かっていない場合は
-	// 精査しない
-	if(Code != ocPhi && !Block->GetAlive()) return;
 
 	switch(Code)
 	{
@@ -791,99 +885,84 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		RISSE_ASSERT(Declared == NULL);
 		break;
 
-	//--------------- 分岐関連
-	case ocJump:
-		// ジャンプ先は生き残る
-		{
-			tSSABlock * block = GetJumpTarget();
-			if(!block->GetAlive())
-			{
-				block->SetAlive(true);
-				blocks.push_back(block);
-			}
-		}
-		break;
-
-	case ocBranch:
-		{
-			// Used[0] の状態による
-			bool push_true = false;
-			bool push_false = false;
-			if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
-			{
-				// Used[0] が定数ならばどっちに行くかがわかるはず
-				if((bool)Used[0]->GetValue())
-					push_true = true;
-				else
-					push_false = true;
-			}
-			if(Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
-			{
-				// タイプによっては必ずfalseとして評価される物がある
-				switch(Used[0]->GetValue().GetType())
-				{
-				case tVariant::vtVoid:
-				case tVariant::vtNull:
-					// この二つは必ず偽になる
-					push_false = true;
-					break;
-				default:
-					// どっちに行くかわからない
-					push_false = true;
-					push_true = true;
-				}
-			}
-			else if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
-			{
-				// Used[0] がとる値が複数あり得るならば、どちらに行くかわからない
-				push_false = true;
-				push_true = true;
-			}
-
-			tSSABlock * block;
-			if(push_false)
-			{
-				block = GetFalseBranch();
-				if(!block->GetAlive())
-				{
-					block->SetAlive(true);
-					blocks.push_back(block);
-				}
-			}
-			if(push_true)
-			{
-				block = GetTrueBranch();
-				if(!block->GetAlive())
-				{
-					block->SetAlive(true);
-					blocks.push_back(block);
-				}
-			}
-		}
-		break;
-
-	case ocCatchBranch:
-		// すべての target に分岐する可能性があるのですべてを生存していると見なす
-		for(gc_vector<tSSABlock *>::iterator i = Targets.begin(); i != Targets.end();
-			i++)
-		{
-			if(!(*i)->GetAlive())
-			{
-				(*i)->SetAlive(true);
-				blocks.push_back(*i);
-			}
-		}
-		break;
-
 	//--------------- 結果はUsedに依存し、boolean を帰す物
 	//-- 単項
 	case ocLogNot:
-		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 1);
 		if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
 			Declared->SuggestValue(Used[0]->GetValue().LogNot());
 		else
 			Declared->SuggestValue(tVariant::vtBoolean); // 常に boolean
+		break;
+
+	//-- 二項
+	case ocAdd:
+		// ・最初のパラメータがvaryingならば宣言された変数もvarying
+		// ・両方とも定数ならば定数たたみ込みできる
+		// ・最初のパラメータがプリミティブ型ならば宣言された変数もプリミティブ型かもしれない
+		RISSE_ASSERT(Used.size() == 2);
+		if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
+			Declared->RaiseValueState(tSSAVariable::vsVarying);
+		else if(
+			Used[0]->GetValueState() == tSSAVariable::vsConstant &&
+			Used[1]->GetValueState() == tSSAVariable::vsConstant)
+		{
+			// 定数たたみ込み
+			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));
+		}
+		else if(
+			Used[0]->GetValueState() == tSSAVariable::vsConstant ||
+			Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
+		{
+			// 最初のパラメータが定数か、あるいは型が決まっている
+			switch(Used[0]->GetValue().GetType())
+			{
+			case tVariant::vtVoid:
+				// void + (r) の場合は、r の型が分かれば r の型になる
+				// わからなければ vsVarying
+				if(
+					Used[1]->GetValueState() == tSSAVariable::vsConstant ||
+					Used[1]->GetValueState() == tSSAVariable::vsTypeConstant)
+					Declared->SuggestValue(Used[1]->GetValue().GetType());
+				else
+					Declared->RaiseValueState(tSSAVariable::vsVarying);
+				break;
+			case tVariant::vtInteger:
+				// integer + (r) の場合は、r が void の場合は integer,
+				if(
+					Used[1]->GetValueState() == tSSAVariable::vsConstant ||
+					Used[1]->GetValueState() == tSSAVariable::vsTypeConstant)
+				{
+					switch(Used[1]->GetValue().GetType())
+					{
+					case tVariant::vtVoid:
+					case tVariant::vtInteger:
+						Declared->SuggestValue(tVariant::vtInteger);
+						break;
+					case tVariant::vtReal:
+						Declared->SuggestValue(tVariant::vtReal);
+						break;
+					default:
+						Declared->RaiseValueState(tSSAVariable::vsVarying);
+					}
+				}
+				else
+					Declared->RaiseValueState(tSSAVariable::vsVarying);
+				break;
+			case tVariant::vtReal:
+			case tVariant::vtNull:
+			case tVariant::vtString:
+			case tVariant::vtBoolean:
+			case tVariant::vtOctet:
+			case tVariant::vtObject:
+					Declared->RaiseValueState(tSSAVariable::vsVarying);
+				break;
+			}
+		}
+		else
+		{
+			Declared->RaiseValueState(tSSAVariable::vsVarying);
+		}
 		break;
 
 	case ocLogOr:
@@ -918,7 +997,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocDiv:
 	case ocIdiv:
 	case ocMul:
-	case ocAdd:
+//	case ocAdd:
 	case ocSub:
 	case ocInContextOf:
 	case ocInContextOfDyn:
@@ -970,6 +1049,10 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
 		break;
 
+	case ocJump:
+	case ocBranch:
+	case ocCatchBranch:
+		; // すでに処理済み
 	}
 
 	// Declared の ValueState や ValueTypeState がランクアップしているようだったら

@@ -131,6 +131,25 @@ const risse_char * tVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
+void tVariantBlock::SetTypeTag(tType type)
+{
+	switch(type)
+	{
+	case vtVoid:		Clear();							RISSE_ASSERT(GetType()==vtVoid);    return;
+	case vtInteger:		*this = (risse_int64)0;				RISSE_ASSERT(GetType()==vtInteger); return;
+	case vtReal:		*this = (risse_real)0.0;			RISSE_ASSERT(GetType()==vtReal);    return;
+	case vtNull:		Nullize();							RISSE_ASSERT(GetType()==vtNull);    return;
+	case vtString:		*this = tString::GetEmptyString();	RISSE_ASSERT(GetType()==vtString);  return;
+	case vtObject:		*this = *GetDynamicContext();		RISSE_ASSERT(GetType()==vtObject);  return;
+	case vtBoolean:		*this = false;						RISSE_ASSERT(GetType()==vtBoolean); return;
+	case vtOctet:		*this = tOctet();					RISSE_ASSERT(GetType()==vtOctet);   return;
+	}
+	return;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * engine) const
 {
 	tPrimitiveClassBase * Class = NULL;

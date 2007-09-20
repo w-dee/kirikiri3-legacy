@@ -109,6 +109,13 @@ public: // バリアントタイプ
 	//! @return		型を表す文字列
 	const risse_char * GetTypeString() const { return GetTypeString(GetType()); }
 
+	//! @brief		バリアントのタイプをタグとして設定する
+	//! @param		type		型
+	//! @note		バリアントのタイプがこれによって設定されるが、
+	//!				元の値は破棄され、値は各バリアントタイプの代表値になる
+	//!				(例えば文字列ならば空文字列、数値ならば0)
+	void SetTypeTag(tType type);
+
 public: // コンストラクタ/代入演算子
 
 	//! @brief デフォルトコンストラクタ(void型を作成)

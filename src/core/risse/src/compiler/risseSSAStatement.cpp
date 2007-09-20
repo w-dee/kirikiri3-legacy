@@ -134,6 +134,8 @@ wxFprintf(stderr, wxT("variable interference found at phi statement, inserting %
 				new_stmt->SetDeclared(orig_decl_var);
 				tmp_var->SetDeclared(this);
 				this->SetDeclared(tmp_var);
+				tmp_var->SetValueState(orig_decl_var->GetValueState());
+				tmp_var->SetValue(orig_decl_var->GetValue());
 				Block->InsertStatement(new_stmt, tSSABlock::sipAfterPhi);
 
 				// 干渉グラフを更新する。
@@ -1097,6 +1099,8 @@ tmp_var->GetQualifiedName().AsWxString().c_str(),
 		new_stmt->SetDeclared(orig_decl_var);
 		tmp_var->SetDeclared(this);
 		this->SetDeclared(tmp_var);
+		tmp_var->SetValueState(orig_decl_var->GetValueState());
+		tmp_var->SetValue(orig_decl_var->GetValue());
 		Block->InsertStatement(new_stmt, this);
 
 		// 干渉グラフを更新する。

@@ -185,12 +185,6 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
 
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
-
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -202,6 +196,12 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
+
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
 
 	// 変数の合併を行う
 	Coalesce();

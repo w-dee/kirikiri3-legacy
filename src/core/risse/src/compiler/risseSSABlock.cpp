@@ -743,6 +743,8 @@ wxFprintf(stderr, wxT("multiple use of the same variable in phi statements found
 					tmp_var->SetDeclared(new_stmt);
 					stmt_used[index]->DeleteUsed(stmt);
 					stmt->OverwriteUsed(stmt_used[index], tmp_var); // 該当変数の使用を置き換え
+					tmp_var->SetValueState(stmt_used[index]->GetValueState());
+					tmp_var->SetValue(stmt_used[index]->GetValue());
 					Pred[index]->InsertStatement(new_stmt, sipBeforeBranch);
 
 					// 干渉グラフを更新する。

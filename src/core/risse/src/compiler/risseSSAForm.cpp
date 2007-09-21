@@ -185,6 +185,12 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
 
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -196,12 +202,6 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
-
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
 
 	// 変数の合併を行う
 	Coalesce();
@@ -1025,11 +1025,38 @@ wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetN
 			// quest_block の LiveIn にこの変数が追加されているか
 			// 追加されているならば そこでこのノード
 			// の先をたどるのは辞める
-			if(!stop &&(
-					quest_block->GetLiveness(var, false)))
+			// また、φ関数の場合は、φ関数の先が既にliveoutになっているかどうかをみる
+			if(used_stmt->GetCode() == ocPhi && used_block == quest_block)
 			{
-				stop = true;
-wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"), quest_block->GetName().AsWxString().c_str());
+				// φ関数のused内でvarを探す
+				if(!stop)
+				{
+					const gc_vector<tSSAVariable *> & phi_used = used_stmt->GetUsed();
+					risse_size idx = 0;
+					for(gc_vector<tSSAVariable *>::const_iterator i = phi_used.begin();
+						i != phi_used.end(); i++, idx++)
+					{
+						if(*i == var)
+						{
+							// var が見つかったのでその方向のブロックの liveout を見る
+							tSSABlock * pred = quest_block->GetPred()[idx];
+							if(pred->GetLiveness(var, true))
+							{
+								stop = true;
+	wxFprintf(stderr, wxT(", the phi pred block %s has liveness for the variable; stop"), pred->GetName().AsWxString().c_str());
+								break;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if(!stop && quest_block->GetLiveness(var, false))
+				{
+					stop = true;
+wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
+				}
 			}
 
 			if(!stop)
@@ -1057,6 +1084,7 @@ wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_
 						{
 							// var が見つかったのでその方向へ探索を続ける
 							tSSABlock * pred = quest_block->GetPred()[idx];
+wxFprintf(stderr, wxT(", found phi pred %s"), pred->GetName().AsWxString().c_str());
 							pred->AddLiveness(var, true);
 							Stack.push_back(pred);
 						}

@@ -728,7 +728,10 @@ void tSSABlock::TraceCoalescable()
 			{
 				RISSE_ASSERT(prev->GetUsed().size() == stmt->GetUsed().size());
 				const gc_vector<tSSAVariable*> & prev_used  = prev->GetUsed();
-				if(stmt_used[index] == prev_used[index])
+				bool found = false;
+				for(risse_size j = 0; j < pred_count; j++)
+					if(stmt_used[index] == prev_used[j]) { found  = true; break; }
+				if(found)
 				{
 					// 同じ変数を使ってることが分かった
 					// pred の最後にコピー文を挿入

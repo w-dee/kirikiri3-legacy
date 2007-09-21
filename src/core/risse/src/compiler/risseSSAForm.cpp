@@ -994,40 +994,34 @@ wxFprintf(stderr, wxT(", starting from  %s"), used_block->GetName().AsWxString()
 			Stack.pop_back();
 wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxString().c_str());
 
-			// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
-			// の先をたどるのは辞める
-			// ただし、宣言された文と同じブロックのいずれかの
-			// phi 関数で使われている場合
-			//   要するにたとえば
-			//     x1=phi(x0,x2)
-			//     y1=phi(y0,x1)
-			//   こんな感じの基本ブロックに再入してたりとか
-			//     x1=phi(x0,x1)
-			//   こんな感じの基本ブロックに再入してたりとか
-			//     x0=phi(x1,x2)
-			//     x2=x0+3
-			//   こんな感じの基本ブロックに再入してたりとか
-			// こういうときは前のブロック(=それは自分自身のブロックかもしれないが)
-			// をちゃんとたどる
-			if(quest_block == decl_block)
+			if(quest_block == decl_block && used_stmt->GetCode() == ocPhi)
 			{
-				if(used_stmt->GetCode() == ocPhi && used_stmt->GetBlock() == decl_block)
-				{
-wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
-				}
-				else
+				// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
+				// の先をたどるのは辞める
+				// ただし宣言された文と同じブロックのいずれかの
+				// phi 関数で使われている場合
+				//   要するにたとえば
+				//     x1=phi(x0,x2)
+				//     y1=phi(y0,x1)
+				//   こんな感じの基本ブロックに再入してたりとか
+				//     x1=phi(x0,x1)
+				//   こんな感じの基本ブロックに再入してたりとか
+				//     x0=phi(x1,x2)
+				//     x2=x0+3
+				//   こんな感じの基本ブロックに再入してたりとか
+				// こういうときは前のブロック(=それは自分自身のブロックかもしれないが)
+				// をちゃんとたどる
+				if(used_stmt->GetBlock() != decl_block)
 				{
 					stop = true;
 wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
 				}
-			}
+				else
+				{
+wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
+				}
 
-			// quest_block の LiveIn にこの変数が追加されているか
-			// 追加されているならば そこでこのノード
-			// の先をたどるのは辞める
-			// また、φ関数の場合は、φ関数の先が既にliveoutになっているかどうかをみる
-			if(used_stmt->GetCode() == ocPhi && used_block == quest_block)
-			{
+				// φ関数の場合は、φ関数の先が既にliveoutになっているかどうかをみる
 				// φ関数のused内でvarを探す
 				if(!stop)
 				{
@@ -1049,31 +1043,21 @@ wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetN
 						}
 					}
 				}
-			}
-			else
-			{
-				if(!stop && quest_block->GetLiveness(var, false))
-				{
-					stop = true;
-wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
-				}
-			}
 
-			if(!stop)
-			{
-				// この時点で quest_block では
-				// 変数が宣言されていない→これよりも前のブロックで変数が宣言されている
-				// →このブロックとpredの間では変数は生存している
-				// つまり、LiveIn に変数を追加する
-				quest_block->AddLiveness(var, false);
+				if(!stop)
+				{
+					// この時点で quest_block では
+					// 変数が宣言されていない→これよりも前のブロックで変数が宣言されている
+					// →このブロックとpredの間では変数は生存している
+					// つまり、LiveIn に変数を追加する
+					quest_block->AddLiveness(var, false);
 wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
 
-				// スタックに quest_block のpred を追加する
-				// また、pred の LiveOut にも変数を追加する
-				// ただし、この文がφ関数だった場合は、φ関数に対応した
-				// 方向のブロックのみを追加する
-				if(used_stmt->GetCode() == ocPhi && used_block == quest_block)
-				{
+					// スタックに quest_block のpred を追加する
+					// また、pred の LiveOut にも変数を追加する
+					// ただし、この文がφ関数だった場合は、φ関数に対応した
+					// 方向のブロックのみを追加する
+
 					// φ関数のused内でvarを探す
 					const gc_vector<tSSAVariable *> & phi_used = used_stmt->GetUsed();
 					risse_size idx = 0;
@@ -1090,8 +1074,40 @@ wxFprintf(stderr, wxT(", found phi pred %s"), pred->GetName().AsWxString().c_str
 						}
 					}
 				}
-				else
+
+
+			}
+			else
+			{
+				// 変数が宣言されているブロックにたどり着いた場合は、そこでこのノード
+				// の先をたどるのは辞める
+				if(quest_block == decl_block)
 				{
+					stop = true;
+wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
+				}
+
+				// quest_block の LiveIn にこの変数が追加されているか
+				// 追加されているならば そこでこのノード
+				// の先をたどるのは辞める
+				// また、φ関数の場合は、φ関数の先が既にliveoutになっているかどうかをみる
+				if(!stop && quest_block->GetLiveness(var, false))
+				{
+					stop = true;
+wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
+				}
+
+				if(!stop)
+				{
+					// この時点で quest_block では
+					// 変数が宣言されていない→これよりも前のブロックで変数が宣言されている
+					// →このブロックとpredの間では変数は生存している
+					// つまり、LiveIn に変数を追加する
+					quest_block->AddLiveness(var, false);
+	wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
+
+					// スタックに quest_block のpred を追加する
+					// また、pred の LiveOut にも変数を追加する
 					for(gc_vector<tSSABlock *>::const_iterator i =
 										quest_block->GetPred().begin();
 						i != quest_block->GetPred().end(); i++)

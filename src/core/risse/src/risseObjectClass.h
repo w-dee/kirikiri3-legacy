@@ -49,6 +49,7 @@ public: // Risse用メソッドなど
 	static tVariant toException(
 				const tNativeCallInfo & info);
 	static void p(const tMethodArgument & args);
+	static bool toBoolean() { return true; }
 
 public: // ユーティリティ
 	//! @brief		intf を Object クラスのインスタンスとしてマークする

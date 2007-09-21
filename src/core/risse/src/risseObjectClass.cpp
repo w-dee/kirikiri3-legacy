@@ -58,6 +58,7 @@ void tObjectClass::RegisterMembers()
 	BindFunction(this, ss_setInstanceMember, &tObjectClass::setInstanceMember);
 	BindFunction(this, ss_toException, &tObjectClass::toException);
 	BindFunction(this, ss_p, &tObjectClass::p);
+	BindFunction(this, mnBoolean, &tObjectClass::toBoolean);
 }
 //---------------------------------------------------------------------------
 

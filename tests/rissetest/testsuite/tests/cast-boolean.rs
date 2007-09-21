@@ -1,13 +1,6 @@
-( (boolean)null === false ? "ok" : "ng"    )+
-( (boolean)"" === false ? "ok" : "ng"      )+
-( (boolean)"0" === true ? "ok" : "ng"      )+
-( (boolean)0 === false ? "ok" : "ng"       )+
-( (boolean)1 === true ? "ok" : "ng"        )+
-( (boolean)4 === true ? "ok" : "ng"        )+
-( (boolean)<% %> === false ? "ok" : "ng"   )+
-( (boolean)<% 01 %> === true ? "ok" : "ng" )+
-( (bool)false === false ? "ok" : "ng"      )+
-( (bool)true === true ? "ok" : "ng"        )
+Script::require("../arith-unary.rs");
 
+var data =    [void, 0, 1, 0.0, 1.0, null, "", "a", <% %>, <% 00 %>, false, true, new Object()];
+var expects = [   F, F, T,   F,   T,    F,  F,   T,     F,        T,     F,    T,            T];
 
-//=> "okokokokokokokokokok"
+test(data, expects) { |v| (boolean)v } ; //=> "ok"

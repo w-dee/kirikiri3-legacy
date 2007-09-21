@@ -2228,7 +2228,7 @@ public: // キャスト
 	tString CastToString_Real     () const;
 	tString CastToString_Null     () const;
 	tString CastToString_String   () const { return AsString(); }
-	tString CastToString_Octet    () const { return AsOctet().AsHumanReadable();  }
+	tString CastToString_Octet    () const { ThrowNoSuchMemberException(mnString); return tString();  }
 	tString CastToString_Boolean  () const;
 	tString CastToString_Object   () const { return Invoke_Object(mnString); }
 
@@ -2255,12 +2255,12 @@ public: // キャスト
 	tOctet CastToOctet          () const { return operator tOctet(); }
 
 	tOctet CastToOctet_Void     () const { return tOctet(); }
-	tOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
-	tOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
-	tOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
 	tOctet CastToOctet_String   () const;
 	tOctet CastToOctet_Octet    () const { return AsOctet();  }
-	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnReal); return tOctet(); }
+	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
 	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }
 
 public: // スレッド同期

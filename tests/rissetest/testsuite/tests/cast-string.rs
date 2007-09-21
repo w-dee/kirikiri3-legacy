@@ -1,6 +1,8 @@
-var a1 = (string)2.5 === "2.5" ? "ok" : "ng";
-var a2 = (string)-4.5 === "-4.5" ? "ok" : "ng";
+Script::require("../arith-unary.rs");
 
-return a1 + ":" + a2; //=> "ok:ok"
+var N = NoSuchMemberException;
 
+var data =    [void,   0,   1,   0.0,   1.0,   -0.0,   +Infinity,   +NaN,   -Infinity,   -NaN, null, "", "1", <% %>, <% 00 %>,   false,   true, new Object()];
+var expects = [  "", "0", "1", "0.0", "1.0", "-0.0", "+Infinity",  "NaN", "-Infinity",  "NaN",    N, "", "1",     N,        N, "false", "true",            N];
 
+test(data, expects) { |v| (string)v } ; //=> "ok"

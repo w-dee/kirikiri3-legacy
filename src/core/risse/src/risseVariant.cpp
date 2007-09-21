@@ -2699,11 +2699,18 @@ tString tVariantBlock::CastToString_Real     () const
 		if(RISSE_FC_IS_NEGATIVE(cls))
 			return RISSE_WS("-0.0");
 		else
-			return RISSE_WS("+0.0");
+			return RISSE_WS("0.0");
 	}
 
-	risse_char buf[25];
+	risse_char buf[27];
 	::Risse::real_to_str(AsReal(), buf);
+	if(!::Risse::strchr(buf, RISSE_WC('.')))
+	{
+		size_t len = ::Risse::strlen(buf);
+		buf[len  ] = RISSE_WC('.');
+		buf[len+1] = RISSE_WC('0');
+		buf[len+2] = RISSE_WC('\0');
+	}
 	return buf;
 }
 //---------------------------------------------------------------------------

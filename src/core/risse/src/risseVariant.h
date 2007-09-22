@@ -1187,7 +1187,8 @@ public:
 	tVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
 	tVariantBlock Plus_String   () const;
 	tVariantBlock Plus_Octet    () const { ThrowNoSuchMemberException(mnPlus); return *this; }
-	tVariantBlock Plus_Boolean  () const { return CastToBoolean_Boolean() != false; /* boolean は 0 か 1 かに変換される */ }
+	tVariantBlock Plus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean() != false);
+	                                       /* boolean は 0 か 1 かに変換される */ }
 	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
 	//-----------------------------------------------------------------------

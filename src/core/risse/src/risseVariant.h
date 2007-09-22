@@ -1217,9 +1217,9 @@ public:
 	tVariantBlock Minus_Integer  () const { return -AsInteger(); }
 	tVariantBlock Minus_Real     () const { return -AsReal(); }
 	tVariantBlock Minus_Null     () const { ThrowNoSuchMemberException(mnMinus); return *this; }
-	tVariantBlock Minus_String   () const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock Minus_Octet    () const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock Minus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean()?-1:0); }
+	tVariantBlock Minus_String   () const { ThrowNoSuchMemberException(mnMinus); return *this; }
+	tVariantBlock Minus_Octet    () const { ThrowNoSuchMemberException(mnMinus); return *this; }
+	tVariantBlock Minus_Boolean  () const { ThrowNoSuchMemberException(mnMinus); return *this; }
 	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	//-----------------------------------------------------------------------

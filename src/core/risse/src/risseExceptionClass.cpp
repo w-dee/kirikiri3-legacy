@@ -1521,6 +1521,19 @@ void tIllegalArgumentClassExceptionClass::ThrowNonAcceptableClass(tScriptEngine 
 
 
 //---------------------------------------------------------------------------
+void tIllegalArgumentClassExceptionClass::ThrowIllegalOperationMethod(tScriptEngine * engine,
+		const tString & method_name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_IllegalArgumentClassException,
+			tString(RISSE_WS_TR("method %1 is illegal operation"),
+				method_name));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(tScriptEngine * engine,
 	const tString & class_name)
 {

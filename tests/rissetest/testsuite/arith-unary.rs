@@ -1,6 +1,8 @@
 // library for examining operator unary test
 var T = true;
 var F = false;
+var I = IllegalArgumentClassException;
+var N = NoSuchMemberException;
 
 
 function test(data, expects) testmethod

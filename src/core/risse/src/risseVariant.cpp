@@ -81,6 +81,15 @@ void tVariantBlock::ThrowIllegalArgumentClassException(const tString & class_nam
 
 
 //---------------------------------------------------------------------------
+void tVariantBlock::ThrowIllegalOperationMethod(const tString & method_name) const
+{
+	tIllegalArgumentClassExceptionClass::ThrowIllegalOperationMethod(
+			GetClassName() + ss_doubleColon + (method_name));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 // voidオブジェクトへのconst参照を保持するオブジェクト
 // これのバイナリレイアウトはtVariantBlockと同一でなければならない
 tVariantBlock::tStaticPrimitive tVariantBlock::VoidObject = {
@@ -3016,15 +3025,6 @@ tString tVariantBlock::CastToString_Boolean  () const
 	return CastToBoolean_Boolean()?
 		RISSE_WS("true"):
 		RISSE_WS("false");
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Null     () const
-{
-	ThrowNoSuchMemberException(mnString);
-	return tString();
 }
 //---------------------------------------------------------------------------
 

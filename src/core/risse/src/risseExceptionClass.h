@@ -865,14 +865,24 @@ public:
 	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		method_name	メソッド名
-	//! @param		type_name	クラス名
+	//! @param		class_name	クラス名
 	static void ThrowNonAcceptableClass(tScriptEngine * engine,
 		const tString & method_name, const tString & class_name);
 	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		method_name	メソッド名
-	//! @param		type_name	型名
+	//! @param		class_name	クラス名
 	static void ThrowNonAcceptableClass(const tString & method_name, const tString & class_name)
 		{ ThrowNonAcceptableClass(NULL, method_name, class_name); }
+
+	//! @brief		「このクラスではこのmethod_nameは実行できない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		method_name	メソッド名
+	static void ThrowIllegalOperationMethod(tScriptEngine * engine,
+		const tString & method_name);
+	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
+	//! @param		method_name	メソッド名
+	static void ThrowIllegalOperationMethod(const tString & method_name)
+		{ ThrowIllegalOperationMethod(NULL, method_name); }
 
 	//! @brief		「クラスclass_nameのインスタンスを指定すべし」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス

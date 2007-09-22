@@ -54,6 +54,11 @@ private:
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
 	static void ThrowIllegalArgumentClassException(const tString & class_name);
 
+	//! @brief		IllegalArgumentClassException を投げる
+	//! @param		method_name			メソッド名
+	//! @note		本来 risseExceptionClass.h に書いてある物だが
+	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	void ThrowIllegalOperationMethod(const tString & method_name) const;
 
 private: // static オブジェクト
 	//! @brief	null/void/などの特殊な値を表すstaticな領域
@@ -1119,10 +1124,10 @@ public:
 	risse_int64   BitNot_Void     () const { return ~CastToInteger_Void(); }
 	risse_int64   BitNot_Integer  () const { return ~CastToInteger_Integer(); }
 	risse_int64   BitNot_Real     () const { return ~CastToInteger_Real(); }
-	risse_int64   BitNot_Null     () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
-	risse_int64   BitNot_String   () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
+	risse_int64   BitNot_Null     () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
+	risse_int64   BitNot_String   () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	tOctet        BitNot_Octet    () const { return ~AsOctet(); }
-	risse_int64   BitNot_Boolean  () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
+	risse_int64   BitNot_Boolean  () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	static int GuessTypeBitNot(tGuessType l)
@@ -1268,9 +1273,9 @@ public:
 	tVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
 	tVariantBlock Plus_Integer  () const { return *this; }
 	tVariantBlock Plus_Real     () const { return *this; }
-	tVariantBlock Plus_Null     () const { ThrowNoSuchMemberException(mnPlus); return *this; }
+	tVariantBlock Plus_Null     () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
 	tVariantBlock Plus_String   () const;
-	tVariantBlock Plus_Octet    () const { ThrowNoSuchMemberException(mnPlus); return *this; }
+	tVariantBlock Plus_Octet    () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
 	tVariantBlock Plus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean() != false);
 	                                       /* boolean は 0 か 1 かに変換される */ }
 	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
@@ -1318,10 +1323,10 @@ public:
 	tVariantBlock Minus_Void     () const { return (risse_int64)0; }
 	tVariantBlock Minus_Integer  () const { return -AsInteger(); }
 	tVariantBlock Minus_Real     () const { return -AsReal(); }
-	tVariantBlock Minus_Null     () const { ThrowNoSuchMemberException(mnMinus); return *this; }
-	tVariantBlock Minus_String   () const { ThrowNoSuchMemberException(mnMinus); return *this; }
-	tVariantBlock Minus_Octet    () const { ThrowNoSuchMemberException(mnMinus); return *this; }
-	tVariantBlock Minus_Boolean  () const { ThrowNoSuchMemberException(mnMinus); return *this; }
+	tVariantBlock Minus_Null     () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariantBlock Minus_String   () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariantBlock Minus_Octet    () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariantBlock Minus_Boolean  () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
 	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	static int GuessTypeMinus(tGuessType l)
@@ -2305,9 +2310,9 @@ public: // キャスト
 	risse_int64 CastToInteger_Void     () const { return false; /* void は 0 */}
 	risse_int64 CastToInteger_Integer  () const { return AsInteger(); }
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
-	risse_int64 CastToInteger_Null     () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
+	risse_int64 CastToInteger_Null     () const { ThrowIllegalOperationMethod(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_String   () const;
-	risse_int64 CastToInteger_Octet    () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
+	risse_int64 CastToInteger_Octet    () const { ThrowIllegalOperationMethod(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
 	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger).CastToInteger(); }
 
@@ -2354,9 +2359,9 @@ public: // キャスト
 	risse_real CastToReal_Void     () const { return (risse_real)0.0; }
 	risse_real CastToReal_Integer  () const { return AsInteger(); }
 	risse_real CastToReal_Real     () const { return AsReal(); }
-	risse_real CastToReal_Null     () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
+	risse_real CastToReal_Null     () const { ThrowIllegalOperationMethod(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
-	risse_real CastToReal_Octet    () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
+	risse_real CastToReal_Octet    () const { ThrowIllegalOperationMethod(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
 	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal).CastToReal(); }
 
@@ -2452,9 +2457,9 @@ public: // キャスト
 	tString CastToString_Void     () const { return tString(); }
 	tString CastToString_Integer  () const;
 	tString CastToString_Real     () const;
-	tString CastToString_Null     () const;
+	tString CastToString_Null     () const { ThrowIllegalOperationMethod(mnString); return tString();  }
 	tString CastToString_String   () const { return AsString(); }
-	tString CastToString_Octet    () const { ThrowNoSuchMemberException(mnString); return tString();  }
+	tString CastToString_Octet    () const { ThrowIllegalOperationMethod(mnString); return tString();  }
 	tString CastToString_Boolean  () const;
 	tString CastToString_Object   () const { return Invoke_Object(mnString).CastToString(); }
 
@@ -2499,12 +2504,12 @@ public: // キャスト
 	tOctet CastToOctet          () const { return operator tOctet(); }
 
 	tOctet CastToOctet_Void     () const { return tOctet(); }
-	tOctet CastToOctet_Integer  () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
-	tOctet CastToOctet_Real     () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
-	tOctet CastToOctet_Null     () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Integer  () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Real     () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Null     () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
 	tOctet CastToOctet_String   () const;
 	tOctet CastToOctet_Octet    () const { return AsOctet();  }
-	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Boolean  () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
 	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet).CastToOctet(); }
 
 	static int GuessTypeCastToOctet(tGuessType l)

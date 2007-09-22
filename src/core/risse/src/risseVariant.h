@@ -1120,10 +1120,10 @@ public:
 	tVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
 	tVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
 	tVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tVariantBlock & Inc_Null     () { ThrowNoSuchMemberException(mnAdd); return *this; }
-	tVariantBlock & Inc_String   () { *this = tVariantBlock((risse_int64)1).Add_Integer(Plus_String()); return *this; }
-	tVariantBlock & Inc_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tVariantBlock & Inc_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() + 1); return *this; }
+	tVariantBlock & Inc_Null     () { AddAssign((risse_int64)1); return *this; }
+	tVariantBlock & Inc_String   () { AddAssign((risse_int64)1); return *this; }
+	tVariantBlock & Inc_Octet    () { AddAssign((risse_int64)1); return *this; }
+	tVariantBlock & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
 	tVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariantBlock((risse_int64)1)); return *this; }
 
 	//-----------------------------------------------------------------------
@@ -1152,10 +1152,10 @@ public:
 	tVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
 	tVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
 	tVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tVariantBlock & Dec_Null     () { ThrowNoSuchMemberException(mnSub); return *this; }
-	tVariantBlock & Dec_String   () { *this = tVariantBlock((risse_int64)-1).Add_Integer(Plus_String()); return *this; }
-	tVariantBlock & Dec_Octet    () { *this = (risse_int64)0; return *this; /* incomplete */; }
-	tVariantBlock & Dec_Boolean  () { *this = (risse_int64)((int)CastToBoolean_Boolean() - 1); return *this; }
+	tVariantBlock & Dec_Null     () { SubAssign((risse_int64)1); return *this; }
+	tVariantBlock & Dec_String   () { SubAssign((risse_int64)1); return *this; }
+	tVariantBlock & Dec_Octet    () { SubAssign((risse_int64)1); return *this; }
+	tVariantBlock & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
 	tVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tVariantBlock((risse_int64)1)); return *this; }
 
 

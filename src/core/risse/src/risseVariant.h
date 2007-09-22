@@ -116,6 +116,30 @@ public: // バリアントタイプ
 	//!				(例えば文字列ならば空文字列、数値ならば0)
 	void SetTypeTag(tType type);
 
+public: // GuessTypeXXXXX で使用されるもの
+	//! @brief		GuessTypeXXXXX で使用される列挙型
+	enum tGuessType
+	{
+		gtVoid		= vtVoid,
+		gtInteger	= vtInteger,
+		gtReal		= vtReal,
+		gtNull		= vtNull,
+		gtString	= vtString,
+		gtOctet		= vtOctet,
+		gtBoolean	= vtBoolean,
+		gtObject	= vtObject,
+
+		gtAny,		//!< 任意の型(GuessTypeXXXXX の入力として用いられた場合は
+					//!< どのような型もあり得ることを表す。出力として得られた場合も
+					//!< どのような型もあり得ることを表す)
+
+		// 以降、出力のみ
+		gtError,	//!< (出力のみ) この演算の組み合わせは「必ず」エラーになる。
+					//!< 「場合によってはエラーになる」場合は他の結果が
+					//!< 得られる。
+		gtEffective = 0x40 //!< (出力のみ) 副作用を持っている場合にこれを組み合わせて使う。
+	};
+
 public: // コンストラクタ/代入演算子
 
 	//! @brief デフォルトコンストラクタ(void型を作成)
@@ -1061,6 +1085,13 @@ public:
 	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
 	bool LogNot_Object   () const { return !CastToBoolean_Object(); }
 
+	static int GuessTypeLogNot(tGuessType l)
+	{
+		return gtBoolean | (GuessTypeCastToBoolean(l) & gtEffective);
+		// lに関わらず必ずbooleanになる
+		// 副作用を持つかどうかはCastToBooleanが副作用を持つかどうかによる
+	}
+
 	//-----------------------------------------------------------------------
 	//! @brief		単項 ~ 演算子		BitNot
 	//! @return		演算結果(通常、integerへのキャストのビットを反転させた物)
@@ -1094,6 +1125,24 @@ public:
 	risse_int64   BitNot_Boolean  () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
 	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
+	static int GuessTypeBitNot(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtInteger;
+		case gtNull:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtString:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtOctet:		return gtOctet;
+		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtObject:		return gtAny		|gtEffective;	// 何が呼ばれるか分からない
+		case gtAny:			return gtAny		|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
 	//-----------------------------------------------------------------------
 	//! @brief		++ 演算子			Inc
 	//! @return		演算結果(通常、+1 をした数値)
@@ -1125,6 +1174,24 @@ public:
 	tVariantBlock & Inc_Octet    () { AddAssign((risse_int64)1); return *this; }
 	tVariantBlock & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
 	tVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariantBlock((risse_int64)1)); return *this; }
+
+	static int GuessTypeInc(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtReal;
+		case gtNull:		return GuessTypeAdd(l, gtInteger);
+		case gtString:		return GuessTypeAdd(l, gtInteger);
+		case gtOctet:		return GuessTypeAdd(l, gtInteger);
+		case gtBoolean:		return GuessTypeAdd(l, gtInteger);
+		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
+		case gtAny:			return gtAny	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		-- 演算子			Dec
@@ -1158,6 +1225,23 @@ public:
 	tVariantBlock & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
 	tVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tVariantBlock((risse_int64)1)); return *this; }
 
+	static int GuessTypeDec(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtReal;
+		case gtNull:		return GuessTypeSub(l, gtInteger);
+		case gtString:		return GuessTypeSub(l, gtInteger);
+		case gtOctet:		return GuessTypeSub(l, gtInteger);
+		case gtBoolean:		return GuessTypeSub(l, gtInteger);
+		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
+		case gtAny:			return gtAny	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		単項 + 演算子		Plus
@@ -1191,6 +1275,24 @@ public:
 	                                       /* boolean は 0 か 1 かに変換される */ }
 	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
+	static int GuessTypePlus(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtReal;
+		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtString:		return gtAny;	// Integer にも Real にもなりうる
+		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return GuessTypeCastToBoolean(l);
+		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
+		case gtAny:			return gtAny	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
 	//-----------------------------------------------------------------------
 	//! @brief		単項 - 演算子		Minus
 	//! @return		演算結果(通常、符号が反転した物)
@@ -1221,6 +1323,24 @@ public:
 	tVariantBlock Minus_Octet    () const { ThrowNoSuchMemberException(mnMinus); return *this; }
 	tVariantBlock Minus_Boolean  () const { ThrowNoSuchMemberException(mnMinus); return *this; }
 	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
+
+	static int GuessTypeMinus(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtReal;
+		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
+		case gtAny:			return gtAny	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		|| 演算子		LogOr
@@ -2038,6 +2158,33 @@ public:
 	tVariantBlock Add_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Add_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
+	static int GuessTypeAdd(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeAdd_Void     (r);
+		case gtInteger:		return GuessTypeAdd_Integer  (r);
+		case gtReal:		return GuessTypeAdd_Real     (r);
+		case gtNull:		return GuessTypeAdd_Null     (r);
+		case gtString:		return GuessTypeAdd_String   (r);
+		case gtOctet:		return GuessTypeAdd_Octet    (r);
+		case gtBoolean:		return GuessTypeAdd_Boolean  (r);
+		case gtObject:		return GuessTypeAdd_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeAdd_Void     (tGuessType r);
+	static int GuessTypeAdd_Integer  (tGuessType r);
+	static int GuessTypeAdd_Real     (tGuessType r);
+	static int GuessTypeAdd_Null     (tGuessType r);
+	static int GuessTypeAdd_String   (tGuessType r);
+	static int GuessTypeAdd_Octet    (tGuessType r);
+	static int GuessTypeAdd_Boolean  (tGuessType r);
+	static int GuessTypeAdd_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		+= 演算子		AddAssign
 	//! @return		演算後の*thisへの参照
@@ -2082,6 +2229,33 @@ public:
 	tVariantBlock Sub_Octet    (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
+
+	static int GuessTypeSub(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeSub_Void     (r);
+		case gtInteger:		return GuessTypeSub_Integer  (r);
+		case gtReal:		return GuessTypeSub_Real     (r);
+		case gtNull:		return GuessTypeSub_Null     (r);
+		case gtString:		return GuessTypeSub_String   (r);
+		case gtOctet:		return GuessTypeSub_Octet    (r);
+		case gtBoolean:		return GuessTypeSub_Boolean  (r);
+		case gtObject:		return GuessTypeSub_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeSub_Void     (tGuessType r);
+	static int GuessTypeSub_Integer  (tGuessType r);
+	static int GuessTypeSub_Real     (tGuessType r);
+	static int GuessTypeSub_Null     (tGuessType r);
+	static int GuessTypeSub_String   (tGuessType r);
+	static int GuessTypeSub_Octet    (tGuessType r);
+	static int GuessTypeSub_Boolean  (tGuessType r);
+	static int GuessTypeSub_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		-= 演算子		SubAssign
@@ -2135,7 +2309,25 @@ public: // キャスト
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { ThrowNoSuchMemberException(mnInteger); return (risse_int64)0; }
 	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
-	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger); }
+	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger).CastToInteger(); }
+
+	static int GuessTypeCastToInteger(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtInteger;
+		case gtInteger:		return gtInteger;
+		case gtReal:		return gtInteger;
+		case gtNull:		return gtError		|gtEffective;
+		case gtString:		return gtInteger;
+		case gtOctet:		return gtError		|gtEffective;
+		case gtBoolean:		return gtInteger;
+		case gtObject:		return gtInteger	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtAny:			return gtInteger	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		realに変換
@@ -2166,7 +2358,25 @@ public: // キャスト
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
 	risse_real CastToReal_Octet    () const { ThrowNoSuchMemberException(mnReal); return (risse_real)0.0; }
 	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
-	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal); }
+	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal).CastToReal(); }
+
+	static int GuessTypeCastToReal(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtReal;
+		case gtInteger:		return gtReal;
+		case gtReal:		return gtReal;
+		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtString:		return gtReal;
+		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtReal;
+		case gtObject:		return gtReal	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtAny:			return gtReal	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		boolに変換
@@ -2197,7 +2407,25 @@ public: // キャスト
 	bool CastToBoolean_String   () const { return !AsString().IsEmpty(); }
 	bool CastToBoolean_Octet    () const { return !AsOctet().IsEmpty(); }
 	bool CastToBoolean_Boolean  () const { return Type == BooleanTrue; }
-	bool CastToBoolean_Object   () const { return Invoke_Object(mnBoolean); }
+	bool CastToBoolean_Object   () const { return Invoke_Object(mnBoolean).CastToBoolean(); }
+
+	static int GuessTypeCastToBoolean(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtBoolean;
+		case gtInteger:		return gtBoolean;
+		case gtReal:		return gtBoolean;
+		case gtNull:		return gtBoolean;
+		case gtString:		return gtBoolean;
+		case gtOctet:		return gtBoolean;
+		case gtBoolean:		return gtBoolean;
+		case gtObject:		return gtBoolean	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtAny:			return gtBoolean	|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		文字列に変換
@@ -2228,7 +2456,25 @@ public: // キャスト
 	tString CastToString_String   () const { return AsString(); }
 	tString CastToString_Octet    () const { ThrowNoSuchMemberException(mnString); return tString();  }
 	tString CastToString_Boolean  () const;
-	tString CastToString_Object   () const { return Invoke_Object(mnString); }
+	tString CastToString_Object   () const { return Invoke_Object(mnString).CastToString(); }
+
+	static int GuessTypeCastToString(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtString;
+		case gtInteger:		return gtString;
+		case gtReal:		return gtString;
+		case gtNull:		return gtString;
+		case gtString:		return gtString;
+		case gtOctet:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtString;
+		case gtObject:		return gtString		|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtAny:			return gtString		|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		オクテット列に変換
@@ -2259,7 +2505,25 @@ public: // キャスト
 	tOctet CastToOctet_String   () const;
 	tOctet CastToOctet_Octet    () const { return AsOctet();  }
 	tOctet CastToOctet_Boolean  () const { ThrowNoSuchMemberException(mnOctet); return tOctet(); }
-	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet); }
+	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet).CastToOctet(); }
+
+	static int GuessTypeCastToOctet(tGuessType l)
+	{
+		switch(l)
+		{
+		case gtVoid:		return gtOctet;
+		case gtInteger:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtReal:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtNull:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtString:		return gtOctet;
+		case gtOctet:		return gtOctet;
+		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtObject:		return gtOctet		|gtEffective;	// 何が呼ばれるか分からないが強制的に Octet にキャストされる
+		case gtAny:			return gtOctet		|gtEffective;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
 
 public: // スレッド同期
 

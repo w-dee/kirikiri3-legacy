@@ -1083,18 +1083,15 @@ public:
 
 	tVariantBlock operator ~() const { return BitNot(); }
 
-	// vtObject 以外は常に integer へのキャストのビットを反転させた物を返す。
-	// vtObject に関してはオブジェクトによっては演算子をオーバーロードしている可能性が
-	// あるため、別途処理を行う。
-	// vtObject の戻り値は integer ではないかもしれない。
+	// 基本的にビットを反転させた物を返す。
 
-	risse_int64        BitNot_Void     () const { return ~CastToInteger_Void(); }
-	risse_int64        BitNot_Integer  () const { return ~CastToInteger_Integer(); }
-	risse_int64        BitNot_Real     () const { return ~CastToInteger_Real(); }
-	risse_int64        BitNot_Null     () const { return ~CastToInteger_Null(); }
-	risse_int64        BitNot_String   () const { return ~CastToInteger_String(); }
-	risse_int64        BitNot_Octet    () const { return ~CastToInteger_Octet(); }
-	risse_int64        BitNot_Boolean  () const { return ~CastToInteger_Boolean(); }
+	risse_int64   BitNot_Void     () const { return ~CastToInteger_Void(); }
+	risse_int64   BitNot_Integer  () const { return ~CastToInteger_Integer(); }
+	risse_int64   BitNot_Real     () const { return ~CastToInteger_Real(); }
+	risse_int64   BitNot_Null     () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
+	risse_int64   BitNot_String   () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
+	tOctet        BitNot_Octet    () const { return ~AsOctet(); }
+	risse_int64   BitNot_Boolean  () const { ThrowNoSuchMemberException(mnBitNot); return 0; }
 	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	//-----------------------------------------------------------------------

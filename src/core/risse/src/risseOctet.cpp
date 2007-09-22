@@ -166,6 +166,30 @@ void tOctetBlock::Concat(tOctetBlock * dest, const tOctetBlock & ref) const
 
 
 //---------------------------------------------------------------------------
+tOctetBlock tOctetBlock::operator ~() const
+{
+	tOctetBlock block(*this);
+	risse_uint8 * ptr = block.Independ();
+	risse_size length = Length;
+	for(risse_size i = 0; i < length; i++)
+		ptr[i] = ~ptr[i];
+	return block;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOctetBlock::BitNot()
+{
+	risse_uint8 * ptr = Independ();
+	risse_size length = Length;
+	for(risse_size i = 0; i < length; i++)
+		ptr[i] = ~ptr[i];
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint8 * tOctetBlock::InternalIndepend() const
 {
 	if(!Buffer) return NULL;

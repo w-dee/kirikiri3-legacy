@@ -232,6 +232,14 @@ public: // operators
 		return Buffer[n];
 	}
 
+	//! @brief	~ 演算子(ビット反転)
+	//! @return		ビット反転されたオクテット列
+	tOctetBlock operator ~() const;
+
+	//! @brief	ビット反転
+	//! @note	このオクテット列の内容をビット反転する
+	void BitNot();
+
 public: // pointer
 
 	//! @brief バッファをコピーし、独立させる
@@ -480,6 +488,15 @@ public: // operators
 	risse_uint8 operator [] (risse_size n) const
 	{
 		return (*GetBlock())[n];
+	}
+
+	//! @brief		~ 演算子(ビット反転)
+	//! @return		ビット反転されたオクテット列
+	tOctet operator ~() const
+	{
+		tOctet ret(*this);
+		ret.GetBlock()->BitNot();
+		return ret;
 	}
 
 public: // pointer

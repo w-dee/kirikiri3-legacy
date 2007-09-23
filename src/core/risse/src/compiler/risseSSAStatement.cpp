@@ -890,80 +890,118 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	//--------------- 結果はUsedに依存し、boolean を帰す物
 	//-- 単項
 	case ocLogNot:
-		RISSE_ASSERT(Used.size() == 1);
-		if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
-			Declared->SuggestValue(Used[0]->GetValue().LogNot());
-		else
-			Declared->SuggestValue(tVariant::vtBoolean); // 常に boolean
+	case ocBitNot:
+	case ocPlus:
+	case ocMinus:
+	case ocString:
+	case ocBoolean:
+	case ocReal:
+	case ocInteger:
+	case ocOctet:
+		{
+			RISSE_ASSERT(Used.size() == 1);
+			tSSAVariable::tValueState vs = Used[0]->GetValueState();
+			int gt;
+			switch(vs)
+			{
+			case tSSAVariable::vsUnknown:
+				break;	// なにもしない
+			case tSSAVariable::vsConstant:
+				// 定数畳み込みをする
+				switch(Code)
+				{
+					case ocLogNot:	Declared->SuggestValue(Used[0]->GetValue().LogNot());			break;
+					case ocBitNot:	Declared->SuggestValue(Used[0]->GetValue().BitNot());			break;
+					case ocPlus:	Declared->SuggestValue(Used[0]->GetValue().Plus());				break;
+					case ocMinus:	Declared->SuggestValue(Used[0]->GetValue().Minus());			break;
+					case ocString:	Declared->SuggestValue(Used[0]->GetValue().CastToString());		break;
+					case ocBoolean:	Declared->SuggestValue(Used[0]->GetValue().CastToBoolean());	break;
+					case ocReal:	Declared->SuggestValue(Used[0]->GetValue().CastToReal());		break;
+					case ocInteger:	Declared->SuggestValue(Used[0]->GetValue().CastToInteger());	break;
+					case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet());		break;
+					default: RISSE_ASSERT(!"Unhandled type here!"); ;
+				}
+				break;
+
+			case tSSAVariable::vsTypeConstant: // 特定の型になる場合
+			case tSSAVariable::vsVarying: // 任意の型になる場合
+
+				// 特定の型あるいは tVariant::gtAny を渡してみて、特定の型が帰ってくればそれにする
+				switch(Code)
+				{
+					case ocLogNot:	gt = tVariant::GuessTypeLogNot			(Used[0]->GetGuessType());	break;
+					case ocBitNot:	gt = tVariant::GuessTypeBitNot			(Used[0]->GetGuessType());	break;
+					case ocPlus:	gt = tVariant::GuessTypePlus			(Used[0]->GetGuessType());	break;
+					case ocMinus:	gt = tVariant::GuessTypeMinus			(Used[0]->GetGuessType());	break;
+					case ocString:	gt = tVariant::GuessTypeCastToString	(Used[0]->GetGuessType());	break;
+					case ocBoolean:	gt = tVariant::GuessTypeCastToBoolean	(Used[0]->GetGuessType());	break;
+					case ocReal:	gt = tVariant::GuessTypeCastToReal		(Used[0]->GetGuessType());	break;
+					case ocInteger:	gt = tVariant::GuessTypeCastToInteger	(Used[0]->GetGuessType());	break;
+					case ocOctet:	gt = tVariant::GuessTypeCastToOctet		(Used[0]->GetGuessType());	break;
+					default: RISSE_ASSERT(!"Unhandled type here!"); ;
+				}
+				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
+				{
+				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
+					break; // この場合はなにもしない
+				case tVariant::gtError: // 確実にエラーになるということ
+					// TODO: エラー記録
+					break;
+				default:
+					// 必ず特定の型になる場合
+					Declared->SuggestValue((tVariant::tType)gt);
+					break;
+				}
+				break;
+			}
+		}
 		break;
 
 	//-- 二項
 	case ocAdd:
-		// ・最初のパラメータがvaryingならば宣言された変数もvarying
-		// ・両方とも定数ならば定数たたみ込みできる
-		// ・最初のパラメータがプリミティブ型ならば宣言された変数もプリミティブ型かもしれない
-		RISSE_ASSERT(Used.size() == 2);
-		if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
-			Declared->RaiseValueState(tSSAVariable::vsVarying);
-		else if(
-			Used[0]->GetValueState() == tSSAVariable::vsConstant &&
-			Used[1]->GetValueState() == tSSAVariable::vsConstant)
+	case ocSub:
 		{
-			// 定数たたみ込み
-			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));
-		}
-		else if(
-			Used[0]->GetValueState() == tSSAVariable::vsConstant ||
-			Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
-		{
-			// 最初のパラメータが定数か、あるいは型が決まっている
-			switch(Used[0]->GetValue().GetType())
+			// ・最初のパラメータがvaryingならば宣言された変数もvarying
+			// ・両方とも定数ならば定数たたみ込みできる
+			RISSE_ASSERT(Used.size() == 2);
+			tSSAVariable::tValueState vs_l = Used[0]->GetValueState();
+			tSSAVariable::tValueState vs_r = Used[1]->GetValueState();
+			if(vs_l == tSSAVariable::vsConstant && vs_r == tSSAVariable::vsConstant)
 			{
-			case tVariant::vtVoid:
-				// void + (r) の場合は、r の型が分かれば r の型になる
-				// わからなければ vsVarying
-				if(
-					Used[1]->GetValueState() == tSSAVariable::vsConstant ||
-					Used[1]->GetValueState() == tSSAVariable::vsTypeConstant)
-					Declared->SuggestValue(Used[1]->GetValue().GetType());
-				else
-					Declared->RaiseValueState(tSSAVariable::vsVarying);
-				break;
-			case tVariant::vtInteger:
-				// integer + (r) の場合は、r が void の場合は integer,
-				if(
-					Used[1]->GetValueState() == tSSAVariable::vsConstant ||
-					Used[1]->GetValueState() == tSSAVariable::vsTypeConstant)
+				// 定数畳み込みをする
+				switch(Code)
 				{
-					switch(Used[1]->GetValue().GetType())
-					{
-					case tVariant::vtVoid:
-					case tVariant::vtInteger:
-						Declared->SuggestValue(tVariant::vtInteger);
-						break;
-					case tVariant::vtReal:
-						Declared->SuggestValue(tVariant::vtReal);
-						break;
-					default:
-						Declared->RaiseValueState(tSSAVariable::vsVarying);
-					}
+					case ocAdd:			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));	break;
+					case ocSub:			Declared->SuggestValue(Used[0]->GetValue().Sub(Used[1]->GetValue()));	break;
+					default: RISSE_ASSERT(!"Unhandled type here!"); ;
 				}
-				else
-					Declared->RaiseValueState(tSSAVariable::vsVarying);
-				break;
-			case tVariant::vtReal:
-			case tVariant::vtNull:
-			case tVariant::vtString:
-			case tVariant::vtBoolean:
-			case tVariant::vtOctet:
-			case tVariant::vtObject:
-					Declared->RaiseValueState(tSSAVariable::vsVarying);
-				break;
 			}
-		}
-		else
-		{
-			Declared->RaiseValueState(tSSAVariable::vsVarying);
+			else if(vs_l != tSSAVariable::vsUnknown && vs_r != tSSAVariable::vsUnknown)
+			{
+				// 結果は guess させてみないとわからない
+				// この時点で vs_l および vs_r は vsUnknown を除くいずれかの状態
+				tVariant::tGuessType input_gt_l = Used[0]->GetGuessType();
+				tVariant::tGuessType input_gt_r = Used[1]->GetGuessType();
+				int gt;
+				switch(Code)
+				{
+					case ocAdd:			gt = tVariant::GuessTypeAdd(input_gt_l, input_gt_r);	break;
+					case ocSub:			gt = tVariant::GuessTypeSub(input_gt_l, input_gt_r);	break;
+					default: RISSE_ASSERT(!"Unhandled type here!"); ;
+				}
+				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
+				{
+				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
+					break; // この場合はなにもしない
+				case tVariant::gtError: // 確実にエラーになるということ
+					// TODO: エラー記録
+					break;
+				default:
+					// 必ず特定の型になる場合
+					Declared->SuggestValue((tVariant::tType)gt);
+					break;
+				}
+			}
 		}
 		break;
 
@@ -979,16 +1017,9 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocGreaterOrEqual:
 
 
-	case ocBitNot:
+
 	case ocDecAssign:
 	case ocIncAssign:
-	case ocPlus:
-	case ocMinus:
-	case ocString:
-	case ocBoolean:
-	case ocReal:
-	case ocInteger:
-	case ocOctet:
 	case ocBitOr:
 	case ocBitXor:
 	case ocBitAnd:
@@ -1000,7 +1031,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocIdiv:
 	case ocMul:
 //	case ocAdd:
-	case ocSub:
+//	case ocSub:
 	case ocInContextOf:
 	case ocInContextOfDyn:
 	case ocInstanceOf:

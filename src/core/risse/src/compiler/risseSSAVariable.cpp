@@ -294,6 +294,26 @@ wxFprintf(stderr, wxT("\n"));
 
 
 //---------------------------------------------------------------------------
+tVariant::tGuessType tSSAVariable::GetGuessType() const
+{
+	RISSE_ASSERT(ValueState != vsUnknown);
+	switch(ValueState)
+	{
+	case vsTypeConstant:
+	case vsConstant:
+		return (tVariant::tGuessType) Value.GetType();
+	case vsVarying:
+		return tVariant::gtAny;
+	default:
+		;
+	}
+
+	return tVariant::gtAny;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tSSAVariable * tSSAVariable::GenerateFuncCall(risse_size pos, const tString & name,
 			tSSAVariable * param1,
 			tSSAVariable * param2,

@@ -203,6 +203,11 @@ public:
 	//! @return		この変数がとりうる値の状態
 	tValueState GetValueState() const { return ValueState; }
 
+	//! @brief		この変数がとりうる値の型を tVariant::tGuessType として返す
+	//! @return		tVariant::tGuessType タイプ
+	//! @note		ValueState が vsUnknown の状態で呼び出さないこと
+	tVariant::tGuessType GetGuessType() const;
+
 	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する
 	//! @param		pos		ソースコード上の位置
 	//! @param		name	メソッド名

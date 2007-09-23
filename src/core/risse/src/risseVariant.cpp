@@ -159,6 +159,30 @@ void tVariantBlock::SetTypeTag(tType type)
 
 
 //---------------------------------------------------------------------------
+const risse_char * tVariantBlock::GetGuessTypeString(tGuessType type)
+{
+	switch(type)
+	{
+	case gtVoid:		return RISSE_WS("Void");
+	case gtInteger: 	return RISSE_WS("Integer");
+	case gtReal:		return RISSE_WS("Real");
+	case gtNull:		return RISSE_WS("Null");
+	case gtString:		return RISSE_WS("String");
+	case gtOctet:		return RISSE_WS("Object");
+	case gtBoolean:		return RISSE_WS("Boolean");
+	case gtObject:		return RISSE_WS("Octet");
+
+	case gtAny:
+		return RISSE_WS("any");
+	case gtError:
+		return RISSE_WS("error");
+	}
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * engine) const
 {
 	tPrimitiveClassBase * Class = NULL;

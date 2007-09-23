@@ -527,6 +527,20 @@ void tSSABlock::ClearVariableMarks()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::ClearStatementMarks()
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement;
+		stmt;
+		stmt = stmt->GetSucc())
+	{
+		stmt->SetMark(NULL);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::ConvertSharedVariableAccess()
 {
 	// すべての文について
@@ -691,6 +705,17 @@ void tSSABlock::AnalyzeConstantPropagation(
 	tSSAStatement *stmt;
 	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
 		stmt->AnalyzeConstantPropagation(variables, blocks);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::RealizeConstantPropagationErrors()
+{
+	// すべての文に対して処理を行う
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->RealizeConstantPropagationErrors();
 }
 //---------------------------------------------------------------------------
 

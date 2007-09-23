@@ -175,16 +175,9 @@ public:
 
 	//! @brief		この変数がとりうる型を設定する
 	//! @param		type		この変数がとりうる型
-	//! @note		ValueState > vsTypeConstant な場合は値を設定しない。
+	//! @note		ステートが降りるような動作はしない。
 	//!				また、値を設定した場合は ValueState を vsTypeConstant に設定する。
-	void SuggestValue(tVariant::tType type)
-	{
-		if(ValueState <= vsTypeConstant)
-		{
-			Value.SetTypeTag(type);
-			ValueState = vsTypeConstant;
-		}
-	}
+	void SuggestValue(tVariant::tType type);
 
 	//! @brief		この変数がとりうる値を取得する
 	//! @return		この変数がとりうる値

@@ -1184,6 +1184,8 @@ void tSSAForm::OptimizeStatement()
 		(*i)->SetAlive(false);
 
 	// 各文で宣言された変数の型の伝播や、条件付き定数伝播を行う。
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->ClearStatementMarks(); // 文にはエラーが発生したかどうかのマークを付けるので
 	gc_vector<tSSAVariable *> variables;
 
 	// エントリブロックの生存フラグを立てる
@@ -1219,6 +1221,12 @@ void tSSAForm::OptimizeStatement()
 			block->AnalyzeConstantPropagation(variables, blocks);
 		}
 	}
+
+	// エラーが発生した文に対して警告などを発する
+	EntryBlock->Traverse(blocks);
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->RealizeConstantPropagationErrors();
+
 }
 //---------------------------------------------------------------------------
 

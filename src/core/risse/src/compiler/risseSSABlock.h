@@ -245,6 +245,9 @@ public:
 	//! @brief		すべての変数のマークを解除する
 	void ClearVariableMarks();
 
+	//! @brief		すべての文のマークを解除する
+	void ClearStatementMarks();
+
 	//! @brief		共有の刺さった変数へのアクセスを別形式の文に変換
 	void ConvertSharedVariableAccess();
 
@@ -275,6 +278,10 @@ public:
 	void AnalyzeConstantPropagation(
 			gc_vector<tSSAVariable *> &variables,
 			gc_vector<tSSABlock *> &blocks);
+
+	//! @brief		事前にしらべた型伝播解析・定数伝播解析のエラーを実際に発生させたり、警告を表示したりする
+	//! @note		エラー情報は各文の Mark に設定されている
+	void RealizeConstantPropagationErrors();
 
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();

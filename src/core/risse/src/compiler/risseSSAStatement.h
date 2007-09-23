@@ -47,6 +47,8 @@ class tSSAStatement : public tCollectee
 
 	risse_size Order; //!< コード先頭からの通し番号
 
+	void * Mark; //!< マーク (任意の用途に使う)
+
 	gc_vector<tSSABlock *> Targets; //!< 分岐のターゲット(解釈はCodeによって異なる)
 
 	// ここでは構造体のバイト数の節約のために、いくつか相互に関係のない
@@ -69,6 +71,15 @@ class tSSAStatement : public tCollectee
 	};
 
 public:
+	// 型伝播解析・定数伝播解析 で使う警告/エラーの情報(Mark にこれが設定される)
+	struct tErrorWarningInfo
+	{
+		tString Message; //!< メッセージ
+		bool Error; //!< エラーかどうか
+		tErrorWarningInfo(const tString & message, bool error_) : Message(message), Error(error_) {;}
+	};
+
+public:
 	//! @brief		コンストラクタ
 	//! @param		form		この文が属する SSA 形式インスタンス
 	//! @param		position	ソースコード上の位置
@@ -85,6 +96,14 @@ public:
 
 	//! @brief		Id を得る
 	risse_size GetId() const { return Id; }
+
+	//! @brief		Mark を得る
+	//! @return		Mark
+	void * GetMark() const { return Mark; }
+
+	//! @brief		Mark を設定する
+	//! @param		mark	マーク
+	void SetMark(void * mark) { Mark = mark; }
 
 	//! @brief		この文が含まれている基本ブロックを設定する
 	//! @param		block この文が含まれている基本ブロック
@@ -308,6 +327,10 @@ public:
 	void AnalyzeConstantPropagation(
 			gc_vector<tSSAVariable *> &variables,
 			gc_vector<tSSABlock *> &blocks);
+
+	//! @brief		事前にしらべた型伝播解析・定数伝播解析のエラーを実際に発生させたり、警告を表示したりする
+	//! @note		エラー情報は各文の Mark に設定されている
+	void RealizeConstantPropagationErrors();
 
 	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
 	void Check3AddrAssignee();

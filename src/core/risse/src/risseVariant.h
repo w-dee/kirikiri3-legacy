@@ -139,11 +139,20 @@ public: // GuessTypeXXXXX で使用されるもの
 					//!< どのような型もあり得ることを表す)
 
 		// 以降、出力のみ
-		gtError,	//!< (出力のみ) この演算の組み合わせは「必ず」エラーになる。
+		gtError		//!< (出力のみ) この演算の組み合わせは「必ず」エラーになる。
 					//!< 「場合によってはエラーになる」場合は他の結果が
 					//!< 得られる。
+	};
+	enum tGuessTypeFlags
+	{
+		gtTypeMask = 0x3f, //!< 型のマスク
 		gtEffective = 0x40 //!< (出力のみ) 副作用を持っている場合にこれを組み合わせて使う。
 	};
+
+	//! @brief		tGuessType を文字列化する
+	//! @param		type		タイプ
+	//! @return		type		を文字列化した物
+	static const risse_char * GetGuessTypeString(tGuessType type);
 
 public: // コンストラクタ/代入演算子
 

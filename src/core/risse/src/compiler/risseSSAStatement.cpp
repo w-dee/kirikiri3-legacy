@@ -18,6 +18,8 @@
 #include "risseCodeGen.h"
 #include "risseSSAForm.h"
 #include "risseCompiler.h"
+#include "../risseExceptionClass.h"
+#include "../risseScriptBlockClass.h"
 
 namespace Risse
 {
@@ -39,6 +41,7 @@ tSSAStatement::tSSAStatement(tSSAForm * form,
 	Pred = NULL;
 	Succ = NULL;
 	Declared = NULL;
+	Mark = NULL;
 	Order = risse_size_max;
 	FuncExpandFlags = 0;
 }
@@ -887,7 +890,6 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		RISSE_ASSERT(Declared == NULL);
 		break;
 
-	//--------------- 結果はUsedに依存し、boolean を帰す物
 	//-- 単項
 	case ocLogNot:
 	case ocBitNot:
@@ -908,20 +910,29 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				break;	// なにもしない
 			case tSSAVariable::vsConstant:
 				// 定数畳み込みをする
-				switch(Code)
+				try
 				{
-					case ocLogNot:	Declared->SuggestValue(Used[0]->GetValue().LogNot());			break;
-					case ocBitNot:	Declared->SuggestValue(Used[0]->GetValue().BitNot());			break;
-					case ocPlus:	Declared->SuggestValue(Used[0]->GetValue().Plus());				break;
-					case ocMinus:	Declared->SuggestValue(Used[0]->GetValue().Minus());			break;
-					case ocString:	Declared->SuggestValue(Used[0]->GetValue().CastToString());		break;
-					case ocBoolean:	Declared->SuggestValue(Used[0]->GetValue().CastToBoolean());	break;
-					case ocReal:	Declared->SuggestValue(Used[0]->GetValue().CastToReal());		break;
-					case ocInteger:	Declared->SuggestValue(Used[0]->GetValue().CastToInteger());	break;
-					case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet());		break;
-					default: RISSE_ASSERT(!"Unhandled type here!"); ;
+					switch(Code)
+					{
+						case ocLogNot:	Declared->SuggestValue(Used[0]->GetValue().LogNot());			break;
+						case ocBitNot:	Declared->SuggestValue(Used[0]->GetValue().BitNot());			break;
+						case ocPlus:	Declared->SuggestValue(Used[0]->GetValue().Plus());				break;
+						case ocMinus:	Declared->SuggestValue(Used[0]->GetValue().Minus());			break;
+						case ocString:	Declared->SuggestValue(Used[0]->GetValue().CastToString());		break;
+						case ocBoolean:	Declared->SuggestValue(Used[0]->GetValue().CastToBoolean());	break;
+						case ocReal:	Declared->SuggestValue(Used[0]->GetValue().CastToReal());		break;
+						case ocInteger:	Declared->SuggestValue(Used[0]->GetValue().CastToInteger());	break;
+						case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet());		break;
+						default: RISSE_ASSERT(!"Unhandled type here!"); ;
+					}
+					break;
 				}
-				break;
+				catch(...)
+				{
+					// 何らかの例外が発生したとき
+					// この場合は break せずにそのまま下に行って Guess したあと、
+					// エラーになるような組み合わせならば警告メッセージを表示するようになる
+				}
 
 			case tSSAVariable::vsTypeConstant: // 特定の型になる場合
 			case tSSAVariable::vsVarying: // 任意の型になる場合
@@ -945,11 +956,18 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
 					break; // この場合はなにもしない
 				case tVariant::gtError: // 確実にエラーになるということ
-					// TODO: エラー記録
+					{
+						tString method_name(VMInsnInfo[Code].GetMemberName());
+						Mark = new tErrorWarningInfo(
+							tString(RISSE_WS_TR("%1::%2() will cause an exception at runtime"),
+								tVariant::GetGuessTypeString(Used[0]->GetGuessType()),
+								method_name),
+							false);
+					}
 					break;
 				default:
 					// 必ず特定の型になる場合
-					Declared->SuggestValue((tVariant::tType)gt);
+					Declared->SuggestValue((tVariant::tType)(gt & tVariant::gtTypeMask));
 					break;
 				}
 				break;
@@ -969,14 +987,25 @@ void tSSAStatement::AnalyzeConstantPropagation(
 			if(vs_l == tSSAVariable::vsConstant && vs_r == tSSAVariable::vsConstant)
 			{
 				// 定数畳み込みをする
-				switch(Code)
+				try
 				{
-					case ocAdd:			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));	break;
-					case ocSub:			Declared->SuggestValue(Used[0]->GetValue().Sub(Used[1]->GetValue()));	break;
-					default: RISSE_ASSERT(!"Unhandled type here!"); ;
+					switch(Code)
+					{
+						case ocAdd:			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));	break;
+						case ocSub:			Declared->SuggestValue(Used[0]->GetValue().Sub(Used[1]->GetValue()));	break;
+						default: RISSE_ASSERT(!"Unhandled type here!"); ;
+					}
+					break; //--------- 一番外側の switch をここで抜けるので注意
+				}
+				catch(...)
+				{
+					// 何らかの例外が発生したとき
+					// この場合は break せずにそのまま下に行って Guess したあと、
+					// エラーになるような組み合わせならば警告メッセージを表示するようになる
 				}
 			}
-			else if(vs_l != tSSAVariable::vsUnknown && vs_r != tSSAVariable::vsUnknown)
+
+			if(vs_l != tSSAVariable::vsUnknown && vs_r != tSSAVariable::vsUnknown)
 			{
 				// 結果は guess させてみないとわからない
 				// この時点で vs_l および vs_r は vsUnknown を除くいずれかの状態
@@ -994,11 +1023,19 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
 					break; // この場合はなにもしない
 				case tVariant::gtError: // 確実にエラーになるということ
-					// TODO: エラー記録
+					{
+						tString method_name(VMInsnInfo[Code].GetMemberName());
+						Mark = new tErrorWarningInfo(
+							tString(RISSE_WS_TR("%1::%3(%2) will cause an exception at runtime"),
+								tVariant::GetGuessTypeString(input_gt_l),
+								tVariant::GetGuessTypeString(input_gt_r),
+								method_name),
+							false);
+					}
 					break;
 				default:
 					// 必ず特定の型になる場合
-					Declared->SuggestValue((tVariant::tType)gt);
+					Declared->SuggestValue((tVariant::tType)(gt & tVariant::gtTypeMask));
 					break;
 				}
 			}
@@ -1092,6 +1129,29 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	// variables に Declared を push する
 	if(old_value_state < Declared->GetValueState())
 		variables.push_back(Declared);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::RealizeConstantPropagationErrors()
+{
+	if(!Mark) return;
+	tErrorWarningInfo * info = reinterpret_cast<tErrorWarningInfo *>(Mark);
+	if(info->Error)
+	{
+		tCompileExceptionClass::Throw(
+			Form->GetFunction()->GetFunctionGroup()->
+				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
+			info->Message,
+				Form->GetScriptBlockInstance(), GetPosition());
+	}
+	else
+	{
+		Form->GetFunction()->GetFunctionGroup()->
+			GetCompiler()->GetScriptBlockInstance()->OutputWarning(GetPosition(), 
+			info->Message);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1592,7 +1652,7 @@ tString tSSAStatement::Dump() const
 			RISSE_ASSERT(Used.size() == 0);
 			ret += Declared->Dump() + RISSE_WS(" = AssignParam(") +
 				tString::AsString((risse_int)Index) + RISSE_WS(")");
-			return ret;
+			return ret + Declared->GetComment();
 		}
 
 	case ocJump:

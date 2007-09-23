@@ -294,6 +294,34 @@ wxFprintf(stderr, wxT("\n"));
 
 
 //---------------------------------------------------------------------------
+void tSSAVariable::SuggestValue(tVariant::tType type)
+{
+	switch(type)
+	{
+	case tVariant::vtVoid:		if(ValueState <= vsConstant)
+								{ Value.SetTypeTag(tVariant::vtVoid); ValueState = vsConstant; }
+								return;
+	case tVariant::vtInteger:	break;
+	case tVariant::vtReal:		break;
+	case tVariant::vtNull:		if(ValueState <= vsConstant)
+								{ Value.SetTypeTag(tVariant::vtNull); ValueState = vsConstant; }
+								return;
+	case tVariant::vtString:	break;
+	case tVariant::vtOctet:		break;
+	case tVariant::vtBoolean:	break;
+	case tVariant::vtObject:	break;
+	}
+
+	if(ValueState <= vsTypeConstant)
+	{
+		Value.SetTypeTag(type);
+		ValueState = vsTypeConstant;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariant::tGuessType tSSAVariable::GetGuessType() const
 {
 	RISSE_ASSERT(ValueState != vsUnknown);

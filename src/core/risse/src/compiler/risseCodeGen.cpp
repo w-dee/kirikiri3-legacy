@@ -837,6 +837,16 @@ void tCodeGenerator::PutAssert(const tSSAVariable *cond, const tString & msg)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tCodeGenerator::PutAssertType(const tSSAVariable *var, tVariant::tType type)
+{
+	RISSE_ASSERT(VMInsnInfo[ocAssertType].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[ocAssertType].Flags[1] == tVMInsnInfo::vifOthers);
+	PutWord(ocAssertType);
+	PutWord(GetRegNum(var));
+	PutWord(static_cast<risse_uint32>(type));
+}
+//---------------------------------------------------------------------------
 
 
 

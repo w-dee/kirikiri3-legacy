@@ -721,6 +721,17 @@ void tSSABlock::RealizeConstantPropagationErrors()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::InsertTypeAssertion()
+{
+	// すべての文に対して処理を行う
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+		stmt->InsertTypeAssertion();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::TraceCoalescable()
 {
 	// phi 関数の Used の干渉を見る

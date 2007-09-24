@@ -342,6 +342,15 @@ const tString & tSSAStatement::GetName() const
 
 
 //---------------------------------------------------------------------------
+void tSSAStatement::SetAssertType(tVariant::tType type)
+{
+	RISSE_ASSERT(Code == ocAssertType);
+	AssertType = type;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *, risse_size> &livemap)
 {
 	// 一応このメソッドが実行時には SSA性が保持されていると見なす
@@ -1082,6 +1091,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocDSetF:
 	case ocISet:
 	case ocAssert:
+	case ocAssertType:
 	case ocBitAndAssign:
 	case ocBitOrAssign:
 	case ocBitXorAssign:
@@ -1151,6 +1161,28 @@ void tSSAStatement::RealizeConstantPropagationErrors()
 		Form->GetFunction()->GetFunctionGroup()->
 			GetCompiler()->GetScriptBlockInstance()->OutputWarning(GetPosition(), 
 			info->Message);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::InsertTypeAssertion()
+{
+	// Declared の ValueState が vsTypeConstant あるいは vsConstant の場合、直後に
+	// ocAssertType 文を挿入する
+	if(Declared &&
+		(Declared->GetValueState() == tSSAVariable::vsTypeConstant ||
+		 Declared->GetValueState() == tSSAVariable::vsConstant))
+	{
+		tSSAStatement * new_stmt =
+			new tSSAStatement(Form, Position, ocAssertType);
+		new_stmt->AddUsed(Declared);
+		new_stmt->SetAssertType(Declared->GetValue().GetType());
+		if(Code == ocPhi)
+			Block->InsertStatement(new_stmt, tSSABlock::sipAfterPhi);
+		else
+			Block->InsertStatement(new_stmt, this);
 	}
 }
 //---------------------------------------------------------------------------
@@ -1463,6 +1495,11 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 		gen->PutAssert(Used[0], GetMessage());
 		break;
 
+	case ocAssertType:
+		RISSE_ASSERT(Used.size() == 1);
+		gen->PutAssertType(Used[0], GetAssertType());
+		break;
+
 	case ocDefineAccessMap:
 		{
 			RISSE_ASSERT(Declared != NULL);
@@ -1546,6 +1583,7 @@ wxFprintf(stderr, wxT("registering %s\n"), Name->AsWxString().c_str());
 		break;
 
 	default:
+wxFprintf(stderr, wxT("not acceptable SSA operation code %d\n"), (int)Code);
 		RISSE_ASSERT(!"not acceptable SSA operation code");
 		break;
 	}
@@ -1822,6 +1860,15 @@ tString tSSAStatement::Dump() const
 			return Used[0]->Dump() + RISSE_WS(".AddBindingMap(") +
 					Used[1]->Dump() + RISSE_WS(", ") +
 					Name->AsHumanReadable() +
+					RISSE_WS(")");
+		}
+
+	case ocAssertType: // 型のassert
+		{
+			RISSE_ASSERT(Used.size() == 1);
+
+			return Used[0]->Dump() + RISSE_WS(".AssertType(") +
+					tVariant::GetTypeString(GetAssertType()) +
 					RISSE_WS(")");
 		}
 

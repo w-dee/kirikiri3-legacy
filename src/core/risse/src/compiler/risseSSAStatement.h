@@ -59,6 +59,7 @@ class tSSAStatement : public tCollectee
 		tString * Name; //!< 名前
 		risse_size Index; //!< インデックス
 		tString * Message; //!< Assert時のメッセージ
+		tVariant::tType AssertType; //!< AssertType時の型
 		const tVariant * Value; //!< 値 (ocAssignConstant等用)
 	};
 	union
@@ -265,13 +266,21 @@ public:
 	//! @param		name		メッセージ
 	void SetMessage(const tString & msg) { Message = new tString(msg); }
 
-	//! @brief		値を設定する
-	//! @param		value		値
-	void SetValue(const tVariant * value) { Value = value; }
+	//! @brief		型を取得する(ocAssertType用)
+	//! @return		型
+	tVariant::tType GetAssertType() const { return AssertType; }
+
+	//! @brief		型を設定する
+	//! @param		type		型
+	void SetAssertType(tVariant::tType type);
 
 	//! @brief		メッセージを取得する
 	//! @return		メッセージ
 	const tString & GetMessage() const { return * Message; }
+
+	//! @brief		値を設定する
+	//! @param		value		値
+	void SetValue(const tVariant * value) { Value = value; }
 
 	//! @brief		インデックスを設定する
 	//! @param		index		インデックス
@@ -331,6 +340,9 @@ public:
 	//! @brief		事前にしらべた型伝播解析・定数伝播解析のエラーを実際に発生させたり、警告を表示したりする
 	//! @note		エラー情報は各文の Mark に設定されている
 	void RealizeConstantPropagationErrors();
+
+	//! @brief		型 Assertion コードを挿入する
+	void InsertTypeAssertion();
 
 	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
 	void Check3AddrAssignee();

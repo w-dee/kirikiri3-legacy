@@ -240,6 +240,13 @@ tString tVMCodeIterator::Dump() const
 		}
 		break;
 
+	case ocAssertType:
+		{
+			ret += RISSE_WS(" = ");
+			ret += tVariant::GetTypeString(static_cast<tVariant::tType>(CodePointer[2]));
+		}
+		break;
+
 	default:
 		;
 	}

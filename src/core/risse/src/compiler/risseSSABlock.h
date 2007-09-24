@@ -283,6 +283,9 @@ public:
 	//! @note		エラー情報は各文の Mark に設定されている
 	void RealizeConstantPropagationErrors();
 
+	//! @brief		型 Assertion コードを挿入する
+	void InsertTypeAssertion();
+
 	//! @brief		変数の合併を行うための、どの変数とどの変数が合併できそうかのリストを作成する
 	void TraceCoalescable();
 

@@ -139,6 +139,7 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 
 // assertion
 Assert					assert		R,C,-,-,-,-		----		#!< assertion check
+AssertType				assertt		R,O,-,-,-,-		----		#!< assertion of variant type
 
 // 代入演算子の類
 BitAndAssign			ERR			-,-,-,-,-,-		&=			#!< &=

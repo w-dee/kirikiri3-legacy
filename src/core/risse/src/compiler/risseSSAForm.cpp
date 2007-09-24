@@ -22,6 +22,7 @@
 #include "../risseScriptBlockClass.h"
 #include "../risseCodeBlock.h"
 #include "../risseStaticStrings.h"
+#include "../risseScriptEngine.h"
 
 namespace Risse
 {
@@ -1227,6 +1228,24 @@ void tSSAForm::OptimizeStatement()
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->RealizeConstantPropagationErrors();
 
+	// 型チェック用コードを挿入する
+	if(GetFunction()->GetFunctionGroup()->
+				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->GetAssertionEnabled())
+		InsertTypeAssertion();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::InsertTypeAssertion()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべてのブロックに対して処理
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->InsertTypeAssertion();
 }
 //---------------------------------------------------------------------------
 

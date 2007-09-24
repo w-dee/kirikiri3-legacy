@@ -427,6 +427,11 @@ public:
 	//! @param		cond	条件を表す変数
 	//! @param		msg		条件が偽の時に投げるメッセージ
 	void PutAssert(const tSSAVariable *cond, const tString & msg);
+
+	//! @brief		Type Assertion のコードを置く
+	//! @param		var		対象となる変数
+	//! @param		type	チェックする型
+	void PutAssertType(const tSSAVariable *var, tVariant::tType type);
 };
 //---------------------------------------------------------------------------
 

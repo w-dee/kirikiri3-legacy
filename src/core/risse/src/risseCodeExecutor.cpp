@@ -1075,6 +1075,18 @@ void tCodeInterpreter::Execute(
 				code += 3;
 				break;
 
+			case ocAssertType	: // assertion of variant type
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				if(AR(code[1]).GetType() != static_cast<tVariant::tType>(code[2]))
+					tAssertionErrorClass::Throw(engine,
+						tString(RISSE_WS_TR("assertion failed: register %1 must be type of %2 (but %3)"),
+							tString::AsString((risse_int64)code[1]),
+							tString(tVariant::GetTypeString(static_cast<tVariant::tType>(code[2]))),
+							tString(AR(code[1]).GetTypeString())
+								));
+				code += 3;
+				break;
+
 			default:
 				// TODO: 本当はASSERTではなくて例外を発生した方がいい
 				RISSE_ASSERT(!"unknown instruction code");

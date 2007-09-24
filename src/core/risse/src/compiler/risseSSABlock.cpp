@@ -384,6 +384,9 @@ void tSSABlock::DeleteSucc(risse_size index)
 		break;
 
 	default:
+wxFprintf(stderr, wxT("about to delete latent alive succ block #%d of %s\n"),
+			(int)index,
+			GetName().AsWxString().c_str());
 		RISSE_ASSERT(!"about to delete latent alive block");
 	}
 }
@@ -404,16 +407,13 @@ void tSSABlock::DeleteDeadPred()
 	// Pred は削除の効率を考え、逆順に見ていく
 	// Pred が 1 の場合にその Pred を消すと自分自身も消さないとならないが
 	// その場合は何もしないので注意
-	if(Pred.size() > 1)
+	risse_size i = Pred.size() - 1;
+	while(Pred.size() > 1)
 	{
-		risse_size i = Pred.size() - 1;
-		while(true)
-		{
-			if(!Pred[i]->Alive) DeletePred(i);
+		if(!Pred[i]->Alive) DeletePred(i);
 
-			if(i == 0) break;
-			i--;
-		}
+		if(i == 0) break;
+		i--;
 	}
 }
 //---------------------------------------------------------------------------
@@ -425,16 +425,13 @@ void tSSABlock::DeleteDeadSucc()
 	// Succ は削除の効率を考え、逆順に見ていく
 	// Succ が 1 の場合にその Succ を消すと自分自身も消さないとならないが
 	// その場合は何もしないので注意
-	if(Succ.size() > 1)
+	risse_size i = Succ.size() - 1;
+	while(Succ.size() > 1)
 	{
-		risse_size i = Succ.size() - 1;
-		while(true)
-		{
-			if(!Succ[i]->Alive) DeleteSucc(i);
+		if(!Succ[i]->Alive) DeleteSucc(i);
 
-			if(i == 0) break;
-			i--;
-		}
+		if(i == 0) break;
+		i--;
 	}
 }
 //---------------------------------------------------------------------------

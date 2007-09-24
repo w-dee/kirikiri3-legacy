@@ -186,14 +186,14 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
 
-	// 到達しない基本ブロックを削除
-	LeapDeadBlocks();
-
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
 							RISSE_WS(") ==========\n")).c_str());
 	tString str = Dump();
 	FPrint(stderr, str.c_str());
+
+	// 到達しない基本ブロックを削除
+	LeapDeadBlocks();
 
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();

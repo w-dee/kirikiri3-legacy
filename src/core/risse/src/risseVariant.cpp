@@ -1051,6 +1051,27 @@ bool tVariantBlock::Equal_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
+{
+	// Real の符合、クラスも厳密に同じかどうかを見る
+	if(rhs.GetType() != vtReal) return false;
+
+	risse_real lv =     AsReal();
+	risse_real rv = rhs.AsReal();
+	risse_int32 l_cls = GetFPClass(lv);
+	risse_int32 r_cls = GetFPClass(rv);
+
+	// NaN の場合は符合はチェックしない
+	if(RISSE_FC_IS_NAN(l_cls))
+		return RISSE_FC_IS_NAN(r_cls);
+
+	// クラスと値が同じであるかどうかを返す
+	return l_cls == r_cls && lv == rv;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Lesser_Void     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())

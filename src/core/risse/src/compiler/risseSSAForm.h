@@ -546,6 +546,9 @@ public:
 	//! @brief		型 Assertion コードを挿入する
 	void InsertTypeAssertion();
 
+	//! @brief		定数代入を置き換える
+	void ReplaceConstantAssign();
+
 	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	void TraceCoalescable();
 

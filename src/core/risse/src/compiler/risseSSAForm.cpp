@@ -1228,6 +1228,9 @@ void tSSAForm::OptimizeStatement()
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->RealizeConstantPropagationErrors();
 
+	// 定数が代入されることが分かっている文を定数代入文に置き換える
+	ReplaceConstantAssign();
+
 	// 型チェック用コードを挿入する
 	if(GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->GetAssertionEnabled())
@@ -1246,6 +1249,20 @@ void tSSAForm::InsertTypeAssertion()
 	// すべてのブロックに対して処理
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->InsertTypeAssertion();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::ReplaceConstantAssign()
+{
+	// 基本ブロックのリストを取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべてのブロックに対して処理
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->ReplaceConstantAssign();
 }
 //---------------------------------------------------------------------------
 

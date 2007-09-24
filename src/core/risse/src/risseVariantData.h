@@ -126,6 +126,9 @@ protected:
 		const tVariantBlock * Context;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
+		//! @brief		厳密に同一かどうかを返す
+		bool StrictEqual(const tObject & rhs) const
+		{	return Intf == rhs.Intf && Context == rhs.Context; }
 	};
 public:
 	static const int ObjectPointerBias = 3; //!< Variantに格納される際の Object 型のポインタのバイアス値

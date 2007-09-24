@@ -89,7 +89,7 @@ risse_size tCodeGenerator::FindConst(const tVariant & value)
 	risse_size search_limit = const_size > MaxConstSearch ? MaxConstSearch : const_size;
 	for(risse_size n = 0; n < search_limit; n++)
 	{
-		if(Consts[const_size - n - 1].DiscEqual(value))
+		if(Consts[const_size - n - 1].StrictEqual(value))  // DiscEqual による比較では不十分
 			return const_size - n - 1; // 見つかった
 	}
 

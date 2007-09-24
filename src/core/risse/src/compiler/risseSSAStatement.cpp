@@ -689,7 +689,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 							if(Used[i]->GetValueState() == tSSAVariable::vsConstant)
 							{
 								// その変数は定数であることがわかっている
-								if(!Used[i]->GetValue().DiscEqual(t_value))
+								if(!Used[i]->GetValue().StrictEqual(t_value))
 								{
 									// 値が違う
 									if(Used[i]->GetValue().GetType() != t_value.GetType())
@@ -963,7 +963,8 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
 				{
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
-					break; // この場合はなにもしない
+					Declared->RaiseValueState(tSSAVariable::vsVarying);
+					break;
 				case tVariant::gtError: // 確実にエラーになるということ
 					{
 						tString method_name(VMInsnInfo[Code].GetMemberName());
@@ -1030,7 +1031,8 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
 				{
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
-					break; // この場合はなにもしない
+					Declared->RaiseValueState(tSSAVariable::vsVarying);
+					break;
 				case tVariant::gtError: // 確実にエラーになるということ
 					{
 						tString method_name(VMInsnInfo[Code].GetMemberName());
@@ -1183,6 +1185,39 @@ void tSSAStatement::InsertTypeAssertion()
 			Block->InsertStatement(new_stmt, tSSABlock::sipAfterPhi);
 		else
 			Block->InsertStatement(new_stmt, this);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::ReplaceConstantAssign()
+{
+	// 定数が代入されることが分かっている文を定数代入文に置き換える
+	if(Code != ocAssignConstant && Declared &&
+		 Declared->GetValueState() == tSSAVariable::vsConstant)
+	{
+		// この文を定数代入文に置き換える
+		tVariant *constant = new tVariant(Declared->GetValue());
+
+		// 文の作成
+		tSSAStatement * new_stmt =
+			new tSSAStatement(Form, Position, ocAssignConstant);
+		new_stmt->SetValue(constant);
+		new_stmt->SetDeclared(Declared);
+		Declared->SetDeclared(new_stmt);
+
+		// この文で使用していた変数をすべて開放する
+		DeleteUsed();
+
+		// 文の追加
+		if(Code == ocPhi)
+			Block->InsertStatement(new_stmt, tSSABlock::sipAfterPhi);
+		else
+			Block->InsertStatement(new_stmt, this);
+
+		// この文を削除する
+		Block->DeleteStatement(this);
 	}
 }
 //---------------------------------------------------------------------------

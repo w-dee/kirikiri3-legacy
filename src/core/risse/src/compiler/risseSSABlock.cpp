@@ -732,6 +732,21 @@ void tSSABlock::InsertTypeAssertion()
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::ReplaceConstantAssign()
+{
+	// すべての文に対して処理を行う
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; )
+	{
+		tSSAStatement * next = stmt->GetSucc();
+		stmt->ReplaceConstantAssign();
+		stmt = next;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::TraceCoalescable()
 {
 	// phi 関数の Used の干渉を見る

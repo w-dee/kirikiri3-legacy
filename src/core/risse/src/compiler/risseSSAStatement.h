@@ -344,6 +344,9 @@ public:
 	//! @brief		型 Assertion コードを挿入する
 	void InsertTypeAssertion();
 
+	//! @brief		定数代入を置き換える
+	void ReplaceConstantAssign();
+
 	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
 	void Check3AddrAssignee();
 

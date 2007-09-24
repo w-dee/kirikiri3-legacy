@@ -1684,7 +1684,47 @@ public:
 	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_Object   (const tVariantBlock & rhs) const
-			{ if(IsNull()) { return rhs.IsNull(); } return Invoke_Object(mnDiscEqual, rhs); }
+			{ return Invoke_Object(mnDiscEqual, rhs); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		厳密な識別演算子		StrictEqual
+	//! @param		rhs			右辺
+	//! @return		識別の結果、同一ならば真、そうでなければ偽。
+	//!				=== 演算子と異なり、real の符合判断も厳密に行う。
+	//!				オブジェクト型の場合、インスタンスのポインタが同一があることで
+	//!				真とみなす。
+	//-----------------------------------------------------------------------
+	bool StrictEqual(const tVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return StrictEqual_Void     (rhs);
+		case vtInteger:	return StrictEqual_Integer  (rhs);
+		case vtReal:	return StrictEqual_Real     (rhs);
+		case vtNull:	return StrictEqual_Null     (rhs);
+		case vtString:	return StrictEqual_String   (rhs);
+		case vtOctet:	return StrictEqual_Octet    (rhs);
+		case vtBoolean:	return StrictEqual_Boolean  (rhs);
+		case vtObject:	return StrictEqual_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool StrictEqual_Void     (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtVoid; }
+	bool StrictEqual_Integer  (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
+	bool StrictEqual_Real     (const tVariantBlock & rhs) const;
+	bool StrictEqual_Null     (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtNull; }
+	bool StrictEqual_String   (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
+	bool StrictEqual_Octet    (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
+	bool StrictEqual_Boolean  (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
+	bool StrictEqual_Object   (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtObject && rhs.AsObject().StrictEqual(AsObject()); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		< 演算子		Lesser

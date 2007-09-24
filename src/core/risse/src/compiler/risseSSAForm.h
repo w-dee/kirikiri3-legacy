@@ -521,7 +521,12 @@ public:
 	//! @param		root		実行ブロックを表すASTノード
 	void GenerateLastReturn(const tASTNode * root);
 
-	//! @brief		到達しない基本ブロックを削除する
+	//! @brief		到達しない直前ブロックを削除する
+	//! @note		この時点では条件付き定数伝播解析を行っていない
+	void LeapDeadPredBlocks();
+
+	//! @brief		到達しないブロックを削除する
+	//! @note		この処理は条件付き定数伝播解析の結果を利用する
 	void LeapDeadBlocks();
 
 	//! @brief		共有された変数へのアクセスを別形式の文に変換

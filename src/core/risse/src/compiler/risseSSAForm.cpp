@@ -178,13 +178,16 @@ void tSSAForm::Generate(const tASTNode * root)
 void tSSAForm::OptimizeAndUnSSA()
 {
 	// 到達しない基本ブロックからのパスを削除
-	LeapDeadBlocks();
+	LeapDeadPredBlocks();
 
 	// 共有変数へのアクセスを別形式の文に変換
 	ConvertSharedVariableAccess();
 
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
+
+	// 到達しない基本ブロックを削除
+	LeapDeadBlocks();
 
 	// SSA 形式のダンプ(デバッグ)
 	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
@@ -876,7 +879,7 @@ void tSSAForm::GenerateLastReturn(const tASTNode * root)
 {
 	// 最後の return; 文がない場合に備え、これを補う。
 	// 実際に最後の return 文があった場合は単にこの文は実行されない物として
-	// 後続の LeapDeadBlocks() で破棄される。
+	// 後続の LeapDeadPredBlocks() で破棄される。
 	// 返す値は '_' の値となる。
 	risse_size pos = root->SearchEndPosition();
 	tSSAVariable * ret_var = LocalNamespace->Read(pos, ss_lastEvalResultHiddenVarName);
@@ -886,9 +889,13 @@ void tSSAForm::GenerateLastReturn(const tASTNode * root)
 
 
 //---------------------------------------------------------------------------
-void tSSAForm::LeapDeadBlocks()
+void tSSAForm::LeapDeadPredBlocks()
 {
 	// EntryBlock から到達可能なすべての基本ブロックを得る
+	// LeapDeadBlocks との違いは、LeapDeadBlocks が条件付き定数伝播解析の結果に
+	// 基づいて、実質的に死んでいるブロックを削除するのに対し、
+	// このメソッドは、AST->SSA形式変換時に生成された無駄な Pred を削除する
+	// 為にある
 	gc_vector<tSSABlock *> blocks;
 	EntryBlock->Traverse(blocks);
 
@@ -904,6 +911,30 @@ void tSSAForm::LeapDeadBlocks()
 	// 到達できないブロックが Pred にあれば削除する
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->DeleteDeadPred();
+
+	// 各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
+	// その文を変数の使用リストから削除する
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->DeleteDeadStatementsFromVariables();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::LeapDeadBlocks()
+{
+	// すべての Dead とマークされたブロックを削除する
+
+	// すべての基本ブロックを得る
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+	{
+		(*i)->DeleteDeadPred(); // 直前ブロックが死んでいればそれを削除
+		(*i)->DeleteDeadSucc(); // 直後ブロックが死んでいればそれを削除
+		(*i)->ClearVariableMarks(); // 変数のマークをクリアする
+	}
 
 	// 各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
 	// その文を変数の使用リストから削除する

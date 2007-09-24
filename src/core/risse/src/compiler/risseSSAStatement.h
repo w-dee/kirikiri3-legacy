@@ -216,6 +216,11 @@ public:
 	//! @note		block の直前基本ブロックとして Block を追加するので注意
 	void SetJumpTarget(tSSABlock * block);
 
+	//! @brief		単純ジャンプのジャンプ先を設定する
+	//! @param		block	単純ジャンプのジャンプ先
+	//! @note		SetJumpTarget と違って直前基本ブロックなどの情報はいじらない
+	void SetJumpTargetNoSetPred(tSSABlock * block);
+
 	//! @brief		単純ジャンプのジャンプ先を取得する
 	//! @return		単純ジャンプのジャンプ先
 	tSSABlock * GetJumpTarget() const;

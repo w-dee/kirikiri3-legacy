@@ -337,6 +337,7 @@ void tSSABlock::DeletePred(risse_size index)
 {
 	// 直前の基本ブロックを削除する
 	RISSE_ASSERT(Pred.size() > 0);
+
 	Pred.erase(Pred.begin() + index);
 
 	// 既存のφ関数からも削除する
@@ -356,6 +357,40 @@ void tSSABlock::DeletePred(risse_size index)
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::DeleteSucc(risse_size index)
+{
+	// 直後の基本ブロックを削除する
+	RISSE_ASSERT(Succ.size() > 0);
+
+	Succ.erase(Succ.begin() + index);
+
+	// 最後の文がどのような文であるかによって処理が異なる
+	RISSE_ASSERT(LastStatement);
+	switch(LastStatement->GetCode())
+	{
+	case ocBranch:
+		// ocBranch は削除し、単純な jump 文に置き換える
+		{
+			tSSAStatement * orig_last_stmt = LastStatement;
+			RISSE_ASSERT(index == 0 || index == 1);
+			tSSAStatement * new_stmt =
+				new tSSAStatement(Form, GetLastStatementPosition(), ocJump);
+			new_stmt->SetBlock(this);
+			new_stmt->SetJumpTargetNoSetPred(Succ[0]); // 残っている方のブロック
+			InsertStatement(new_stmt, sipTail);
+			orig_last_stmt->DeleteUsed();
+			DeleteStatement(orig_last_stmt);
+		}
+		break;
+
+	default:
+		RISSE_ASSERT(!"about to delete latent alive block");
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::AddSucc(tSSABlock * block)
 {
 	Succ.push_back(block);
@@ -367,12 +402,35 @@ void tSSABlock::AddSucc(tSSABlock * block)
 void tSSABlock::DeleteDeadPred()
 {
 	// Pred は削除の効率を考え、逆順に見ていく
-	if(Pred.size() > 0)
+	// Pred が 1 の場合にその Pred を消すと自分自身も消さないとならないが
+	// その場合は何もしないので注意
+	if(Pred.size() > 1)
 	{
 		risse_size i = Pred.size() - 1;
 		while(true)
 		{
 			if(!Pred[i]->Alive) DeletePred(i);
+
+			if(i == 0) break;
+			i--;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSABlock::DeleteDeadSucc()
+{
+	// Succ は削除の効率を考え、逆順に見ていく
+	// Succ が 1 の場合にその Succ を消すと自分自身も消さないとならないが
+	// その場合は何もしないので注意
+	if(Succ.size() > 1)
+	{
+		risse_size i = Succ.size() - 1;
+		while(true)
+		{
+			if(!Succ[i]->Alive) DeleteSucc(i);
 
 			if(i == 0) break;
 			i--;

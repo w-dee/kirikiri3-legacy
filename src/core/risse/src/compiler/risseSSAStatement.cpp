@@ -241,10 +241,18 @@ tSSABlock * tSSAStatement::GetFalseBranch() const
 //---------------------------------------------------------------------------
 void tSSAStatement::SetJumpTarget(tSSABlock * block)
 {
+	SetJumpTargetNoSetPred(block);
+	block->AddPred(Block);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAStatement::SetJumpTargetNoSetPred(tSSABlock * block)
+{
 	RISSE_ASSERT(Code == ocJump);
 	if(Targets.size() != 1) Targets.resize(1, NULL);
 	Targets[0] = block;
-	block->AddPred(Block);
 }
 //---------------------------------------------------------------------------
 

@@ -51,7 +51,6 @@ private:
 	mutable void * Mark; //!< マーク
 	mutable bool Traversing; //!< トラバース中かどうか
 	bool Alive; //!< この基本ブロックが生きているかどうか
-		//!< (tSSAForm::LeapDeadBlocks() 後に有効;それ以前は生存している・していないにかかわらず常に偽なので注意)
 
 public:
 	//! @brief		コンストラクタ
@@ -178,7 +177,15 @@ public:
 	//! @param		index		基本ブロックのインデックス(0～)
 	//! @note		このメソッドは AddPred() と異なり、削除されようとする
 	//!				基本ブロックの直後ブロックの情報は書き換えない
+	//!				(どうせ削除されて消えるため)
 	void DeletePred(risse_size index);
+
+	//! @brief		直後の基本ブロックを削除する
+	//! @param		index		基本ブロックのインデックス(0～)
+	//! @note		このメソッドは AddSucc() と異なり、削除されようとする
+	//!				基本ブロックの直前ブロックの情報は書き換えない
+	//!				(どうせ削除されて消えるため)
+	void DeleteSucc(risse_size index);
 
 	//! @brief		直後の基本ブロックを追加する
 	//! @param		block	基本ブロック
@@ -194,6 +201,9 @@ public:
 
 	//! @brief		死んでいるPredがあれば削除する
 	void DeleteDeadPred();
+
+	//! @brief		死んでいるSuccがあれば削除する
+	void DeleteDeadSucc();
 
 	//! @brief		各変数のうち、変数が使用されている文が所属しているブロックが死んでいる場合、
 	//!				その文を変数の使用リストから削除する

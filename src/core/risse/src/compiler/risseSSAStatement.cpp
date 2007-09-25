@@ -104,11 +104,10 @@ void tSSAStatement::TraceCoalescable()
 	switch(Code)
 	{
 	case ocPhi: // phi関数
-		RISSE_ASSERT(Declared != NULL);
-
-		// 2 引数以上のphi関数
-		if(Used.size() > 1)
 		{
+			RISSE_ASSERT(Declared != NULL);
+
+			// 1 引数以上のphi関数
 			// Used と Declared 間の干渉を探る
 			// Used を一つずつみていき、Declared と Used が干渉している場合は
 			// 干渉を除去する。 Sreedhar らによる方法。
@@ -128,8 +127,8 @@ void tSSAStatement::TraceCoalescable()
 				tSSAVariable * orig_decl_var = Declared;
 				tSSAVariable * tmp_var = new tSSAVariable(Form, NULL, orig_decl_var->GetName());
 wxFprintf(stderr, wxT("variable interference found at phi statement, inserting %s at %s\n"),
-	tmp_var->GetQualifiedName().AsWxString().c_str(),
-	Block->GetName().AsWxString().c_str());
+tmp_var->GetQualifiedName().AsWxString().c_str(),
+Block->GetName().AsWxString().c_str());
 				tSSAStatement * new_stmt =
 					new tSSAStatement(Form, Position, ocAssign);
 				new_stmt->AddUsed(const_cast<tSSAVariable*>(tmp_var));
@@ -169,11 +168,8 @@ wxFprintf(stderr, wxT("variable interference found at phi statement, inserting %
 				i != Used.end(); i++)
 					Declared->CoalesceCoalescableList(*i);
 
-			break;
 		}
-
-		// 一応 ここに break は *おかない*
-		// 1引数のphi関数は単純な代入として扱うため
+		break;
 
 	case ocAssign: // 単純代入
 
@@ -530,6 +526,8 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	// 精査しない
 	if(Code != ocPhi && !Block->GetAlive()) return;
 
+wxFprintf(stderr, wxT("at block %s : %s\n"), Block->GetName().AsWxString().c_str(), Dump().AsWxString().c_str());
+
 	// まずは分岐系
 	switch(Code)
 	{
@@ -540,6 +538,9 @@ void tSSAStatement::AnalyzeConstantPropagation(
 			tSSABlock * block = GetJumpTarget();
 			if(!block->GetAlive())
 			{
+wxFprintf(stderr, wxT("ocJump at %s, pushing the target %s\n"),
+		Block->GetName().AsWxString().c_str(),
+		block->GetName().AsWxString().c_str());
 				block->SetAlive(true);
 				blocks.push_back(block);
 			}
@@ -588,6 +589,9 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				block = GetFalseBranch();
 				if(!block->GetAlive())
 				{
+wxFprintf(stderr, wxT("ocBranch at %s, pushing the false target %s\n"),
+		Block->GetName().AsWxString().c_str(),
+		block->GetName().AsWxString().c_str());
 					block->SetAlive(true);
 					blocks.push_back(block);
 				}
@@ -597,6 +601,9 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				block = GetTrueBranch();
 				if(!block->GetAlive())
 				{
+wxFprintf(stderr, wxT("ocBranch at %s, pushing the true target %s\n"),
+		Block->GetName().AsWxString().c_str(),
+		block->GetName().AsWxString().c_str());
 					block->SetAlive(true);
 					blocks.push_back(block);
 				}
@@ -611,6 +618,9 @@ void tSSAStatement::AnalyzeConstantPropagation(
 		{
 			if(!(*i)->GetAlive())
 			{
+wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
+		Block->GetName().AsWxString().c_str(),
+		(*i)->GetName().AsWxString().c_str());
 				(*i)->SetAlive(true);
 				blocks.push_back(*i);
 			}
@@ -782,7 +792,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 				// ただし、実行可能なブロックのうち値の型がCと異なる
 				// 物があれば vsVarying になる
 				{
-					tSSAVariable::tValueState new_state = tSSAVariable::vsConstant;
+					tSSAVariable::tValueState new_state = tSSAVariable::vsTypeConstant;
 					for(risse_size i = 0; i < pred_blocks.size(); i++)
 					{
 						if(i == t_idx) continue;
@@ -1148,7 +1158,23 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	// Declared の ValueState や ValueTypeState がランクアップしているようだったら
 	// variables に Declared を push する
 	if(old_value_state < Declared->GetValueState())
+	{
+wxFprintf(stderr, wxT("changing state of %s from %s to %s\n"),
+	Declared->GetQualifiedName().AsWxString().c_str(),
+
+	old_value_state==tSSAVariable::vsUnknown ? wxT("unknown"):
+	old_value_state==tSSAVariable::vsConstant ? wxT("constant"):
+	old_value_state==tSSAVariable::vsTypeConstant ? wxT("type constant"):
+	old_value_state==tSSAVariable::vsVarying ? wxT("varying") : wxT(""),
+
+	Declared->GetValueState()==tSSAVariable::vsUnknown ? wxT("unknown"):
+	Declared->GetValueState()==tSSAVariable::vsConstant ? wxT("constant"):
+	Declared->GetValueState()==tSSAVariable::vsTypeConstant ? wxT("type constant"):
+	Declared->GetValueState()==tSSAVariable::vsVarying ? wxT("varying") : wxT("")
+
+	);
 		variables.push_back(Declared);
+	}
 }
 //---------------------------------------------------------------------------
 

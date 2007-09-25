@@ -186,12 +186,6 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 文レベルでの最適化を行う
 	OptimizeStatement();
 
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
-
 	// 到達しない基本ブロックを削除
 	LeapDeadBlocks();
 
@@ -206,6 +200,12 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
+
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
 
 	// 変数の合併を行う
 	Coalesce();
@@ -1007,6 +1007,11 @@ wxFprintf(stderr, wxT("for %s: "), var->GetQualifiedName().AsWxString().c_str())
 		// この文のブロックは
 		tSSABlock * used_block = used_stmt->GetBlock();
 		RISSE_ASSERT(used_block != NULL);
+if(used_block->GetAlive() == false)
+{
+wxFprintf(stderr, wxT("%s is dead!!\n"), used_block->GetName().AsWxString().c_str());
+}
+		RISSE_ASSERT(used_block->GetAlive());
 
 		// ブロックを逆順にたどる
 		// 終了条件は

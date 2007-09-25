@@ -1588,23 +1588,33 @@ tSSAVariable * tASTNode_Binary::GenerateLogicalAndOr(tSSAForm *form) const
 	tSSAStatement * rhs_branch_stmt =
 		form->AddStatement(GetPosition(), ocBranch, NULL, rhs_var);
 
-	// 結果が真の時にくる基本ブロックを作成
-	tSSABlock * true_block = form->CreateNewBlock(RISSE_WS("log_true"));
+	//1: 結果が真の時にくる基本ブロックを作成
+	tSSABlock * true_block_1 = form->CreateNewBlock(RISSE_WS("log_true_1"));
+	//1: true の値を作成
+	tSSAVariable * true_var_1 = form->AddConstantValueStatement(GetPosition(), tVariant(true));
+	//1: ジャンプ文を作成
+	tSSAStatement * true_jump_stmt_1 = form->AddStatement(GetPosition(), ocJump, NULL);
 
-	// true の値を作成
-	tSSAVariable * true_var = form->AddConstantValueStatement(GetPosition(), tVariant(true));
+	//2: 結果が真の時にくる基本ブロックを作成
+	tSSABlock * true_block_2 = form->CreateNewBlock(RISSE_WS("log_true_2"));
+	//2: true の値を作成
+	tSSAVariable * true_var_2 = form->AddConstantValueStatement(GetPosition(), tVariant(true));
+	//2: ジャンプ文を作成
+	tSSAStatement * true_jump_stmt_2 = form->AddStatement(GetPosition(), ocJump, NULL);
 
-	// ジャンプ文を作成
-	tSSAStatement * true_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+	//1: 結果が偽の時にくる基本ブロックを作成
+	tSSABlock * false_block_1 = form->CreateNewBlock(RISSE_WS("log_false_1"));
+	//1: true の値を作成
+	tSSAVariable * false_var_1 = form->AddConstantValueStatement(GetPosition(), tVariant(false));
+	//1: ジャンプ文を作成
+	tSSAStatement * false_jump_stmt_1 = form->AddStatement(GetPosition(), ocJump, NULL);
 
-	// 結果が偽の時にくる基本ブロックを作成
-	tSSABlock * false_block = form->CreateNewBlock(RISSE_WS("log_false"));
-
-	// true の値を作成
-	tSSAVariable * false_var = form->AddConstantValueStatement(GetPosition(), tVariant(false));
-
-	// ジャンプ文を作成
-	tSSAStatement * false_jump_stmt = form->AddStatement(GetPosition(), ocJump, NULL);
+	//2: 結果が偽の時にくる基本ブロックを作成
+	tSSABlock * false_block_2 = form->CreateNewBlock(RISSE_WS("log_false_2"));
+	//2: true の値を作成
+	tSSAVariable * false_var_2 = form->AddConstantValueStatement(GetPosition(), tVariant(false));
+	//2: ジャンプ文を作成
+	tSSAStatement * false_jump_stmt_2 = form->AddStatement(GetPosition(), ocJump, NULL);
 
 	// 文を抜けるための基本ブロックを作成
 	tSSABlock * exit_block = form->CreateNewBlock(RISSE_WS("log_exit"));
@@ -1615,21 +1625,28 @@ tSSAVariable * tASTNode_Binary::GenerateLogicalAndOr(tSSAForm *form) const
 	{
 		// &&
 		lhs_branch_stmt->SetTrueBranch(non_shortcut_block);
-		lhs_branch_stmt->SetFalseBranch(false_block);
-		rhs_branch_stmt->SetTrueBranch(true_block);
-		rhs_branch_stmt->SetFalseBranch(false_block);
+		lhs_branch_stmt->SetFalseBranch(false_block_1);
+		rhs_branch_stmt->SetTrueBranch(true_block_1);
+		rhs_branch_stmt->SetFalseBranch(false_block_2);
+
+		true_jump_stmt_1->SetJumpTarget(exit_block);
+		false_jump_stmt_1->SetJumpTarget(exit_block);
+		false_jump_stmt_2->SetJumpTarget(exit_block);
+		form->AddStatement(GetPosition(), ocPhi, &ret_var, true_var_1, false_var_1, false_var_2);
 	}
 	else
 	{
 		// ||
-		lhs_branch_stmt->SetTrueBranch(true_block);
+		lhs_branch_stmt->SetTrueBranch(true_block_1);
 		lhs_branch_stmt->SetFalseBranch(non_shortcut_block);
-		rhs_branch_stmt->SetTrueBranch(true_block);
-		rhs_branch_stmt->SetFalseBranch(false_block);
+		rhs_branch_stmt->SetTrueBranch(true_block_2);
+		rhs_branch_stmt->SetFalseBranch(false_block_1);
+
+		true_jump_stmt_1->SetJumpTarget(exit_block);
+		true_jump_stmt_2->SetJumpTarget(exit_block);
+		false_jump_stmt_1->SetJumpTarget(exit_block);
+		form->AddStatement(GetPosition(), ocPhi, &ret_var, true_var_1, true_var_2, false_var_1);
 	}
-	true_jump_stmt->SetJumpTarget(exit_block);
-	false_jump_stmt->SetJumpTarget(exit_block);
-	form->AddStatement(GetPosition(), ocPhi, &ret_var, true_var, false_var);
 
 	return ret_var;
 }

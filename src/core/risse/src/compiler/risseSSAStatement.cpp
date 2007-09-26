@@ -45,6 +45,18 @@ tSSAStatement::tSSAStatement(tSSAForm * form,
 	Effective = true;
 	Order = risse_size_max;
 	FuncExpandFlags = 0;
+
+	// デフォルトの Effective は opecode に従う
+	switch(VMInsnInfo[Code].Effect)
+	{
+	case tVMInsnInfo::vieEffective:
+	case tVMInsnInfo::vieVarying:
+		Effective = true; // 副作用があると見なす
+		break;
+	case tVMInsnInfo::vieNonEffective:
+		Effective = false;
+		break;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1184,7 +1196,6 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocNoOperation:
 	case ocVMCodeLast:
 		// とりあえず Declared を varying に設定してしまおう
-		Effective = true; // とりあえず副作用はあると見なす
 		if(Declared) Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
 		break;
 

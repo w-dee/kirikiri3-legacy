@@ -8,6 +8,7 @@
 errorcount = 0
 linecount = 0
 On_defs = {'-' => '(tVMInsnInfo::tInsnFlag)(0)'}
+Eff_defs = {}
 defs = []
 File.open(ARGV[0]).readlines.each do |line|
 	linecount += 1
@@ -25,10 +26,13 @@ File.open(ARGV[0]).readlines.each do |line|
 	if    line =~ /^-On\s+([^\s])\s+([^\s]+)$/
 		# On_defs
 		On_defs[$1] = $2
-	elsif line =~ /(\w+)\s+(\w+)\s+([^\s]+)\s+([^\s]+)$/
+	elsif line =~ /^-Eff\s+([^\s])\s+([^\s]+)$/
+		# Eff_defs
+		Eff_defs[$1] = $2
+	elsif line =~ /(\w+)\s+(\w+)\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)$/
 		# defs
 		defs << { :long_id => $1, :mnemonic => $2,
-				:On => $3, :member_name => $4, :def_comment => defcomment }
+				:On => $3, :member_name => $4, :Eff => $5, :def_comment => defcomment }
 	else
 		STDERR.puts "Unrecognized definition at line #{linecount}\n"
 		errorcount += 1
@@ -97,6 +101,7 @@ EOS
 		file.printf "{"
 		file.print "#{item[:long_id].dump}, #{item[:mnemonic].dump}, "
 		file.print "{#{item[:On].split(/,/).map{ |i| On_defs[i] }.join(',')}}, "
+		file.print "#{Eff_defs[item[:Eff]]}, "
 		if item[:member_name] == '----'
 			file.print "{RISSE_STRING_EMPTY_BUFFER,0}"
 		else

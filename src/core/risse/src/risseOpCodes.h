@@ -59,9 +59,19 @@ struct tVMInsnInfo
 		vifOthers,		//!< O このオペランドはその他の何かを表している
 	};
 
+	//! @brief		オペコードが副作用を持つかどうかを表す情報
+	enum tInsnEffect
+	{
+		vieNonEffective, 	//!< N このオペコードは副作用を持たない
+		vieEffective,		//!< E このオペコードは副作用を持つ
+		vieVarying			//!< V このオペコードはオペランドによっては副作用を持つ
+	};
+
 	const char * Name;							//!< 命令名
 	const char * Mnemonic;						//!< ニーモニック
 	tInsnFlag Flags[MaxVMInsnOperand];		//!< オペランドnに対するフラグ
+
+	tInsnEffect Effect; //!< オペランドの副作用
 
 	const tStringData RawMemberName;		//!< オブジェクトの演算子メンバ名
 

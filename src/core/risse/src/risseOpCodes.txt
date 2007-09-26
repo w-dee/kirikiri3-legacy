@@ -11,6 +11,11 @@
 -On		S		tVMInsnInfo::vifShared
 -On		O		tVMInsnInfo::vifOthers
 
+// Eff の記号は以下の意味の通り
+-Eff	N		tVMInsnInfo::vieNonEffective
+-Eff	E		tVMInsnInfo::vieEffective
+-Eff	V		tVMInsnInfo::vieVarying
+
 
 //	ニーモニックに関するメモ:
 //	7 文字に納める (タブ幅8に対応)
@@ -20,110 +25,110 @@
 // Mnemonic に ERR と書いてある物は該当するニーモニックが存在しない物
 
 // 順番は以下の通り
-// LongId				Mnemonic	O1O2O3O4O5O6    MemberName	Comment
+// LongId				Mnemonic	O1O2O3O4O5O6    MemberName	Eff	Comment
 
 // なにもしない
-NoOperation				nop			-,-,-,-,-,-		----		#!< なにもしない
+NoOperation				nop			-,-,-,-,-,-		----		N	#!< なにもしない
 
 // 代入
-Assign					copy		R,R,-,-,-,-		----		#!< = (ローカル変数の代入)
-AssignConstant			const		R,C,-,-,-,-		----		#!< = 定数の代入
-AssignNewBinding		binding		R,-,-,-,-,-		----		#!< = 新しいバインディングオブジェクトの代入
-AssignThis				this		R,-,-,-,-,-		----		#!< = thisの代入
-AssignThisProxy			proxy		R,-,-,-,-,-		----		#!< = this-proxyの代入
-AssignSuper				super		R,-,-,-,-,-		----		#!< = superの代入
-AssignGlobal			global		R,-,-,-,-,-		----		#!< = globalの代入
-AssignNewArray			array		R,-,-,-,-,-		----		#!< = 新しい配列オブジェクトの代入
-AssignNewDict			dict		R,-,-,-,-,-		----		#!< = 新しい辞書配列オブジェクトの代入
-AssignNewRegExp			regexp		R,R,R,-,-,-		----		#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
-AssignNewFunction		func		R,R,-,-,-,-		----		#!< = 新しい関数インスタンスの代入 (引数=「裸の」関数インスタンス)
-AssignNewProperty		prop		R,R,R,-,-,-		----		#!< = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
-AssignNewClass			class		R,R,R,-,-,-		----		#!< = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
-AssignNewModule			module		R,R,-,-,-,-		----		#!< = 新しいモジュールインスタンスの代入 (引数=モジュール名)
-AssignParam				param		R,P,-,-,-,-		----		#!< = (O番目の関数引数を代入)
-AssignBlockParam		bparam		R,P,-,-,-,-		----		#!< = (O番目の関数ブロック引数を代入)
+Assign					copy		R,R,-,-,-,-		----		N	#!< = (ローカル変数の代入)
+AssignConstant			const		R,C,-,-,-,-		----		N	#!< = 定数の代入
+AssignNewBinding		binding		R,-,-,-,-,-		----		E	#!< = 新しいバインディングオブジェクトの代入
+AssignThis				this		R,-,-,-,-,-		----		N	#!< = thisの代入
+AssignThisProxy			proxy		R,-,-,-,-,-		----		N	#!< = this-proxyの代入
+AssignSuper				super		R,-,-,-,-,-		----		N	#!< = superの代入
+AssignGlobal			global		R,-,-,-,-,-		----		N	#!< = globalの代入
+AssignNewArray			array		R,-,-,-,-,-		----		E	#!< = 新しい配列オブジェクトの代入
+AssignNewDict			dict		R,-,-,-,-,-		----		E	#!< = 新しい辞書配列オブジェクトの代入
+AssignNewRegExp			regexp		R,R,R,-,-,-		----		E	#!< = 新しい正規表現オブジェクトの代入 (引数2つ)
+AssignNewFunction		func		R,R,-,-,-,-		----		E	#!< = 新しい関数インスタンスの代入 (引数=「裸の」関数インスタンス)
+AssignNewProperty		prop		R,R,R,-,-,-		----		E	#!< = 新しいプロパティインスタンスの代入 (引数=ゲッタ+セッタ)
+AssignNewClass			class		R,R,R,-,-,-		----		E	#!< = 新しいクラスインスタンスの代入 (引数=親クラス+クラス名)
+AssignNewModule			module		R,R,-,-,-,-		----		E	#!< = 新しいモジュールインスタンスの代入 (引数=モジュール名)
+AssignParam				param		R,P,-,-,-,-		----		N	#!< = (O番目の関数引数を代入)
+AssignBlockParam		bparam		R,P,-,-,-,-		----		N	#!< = (O番目の関数ブロック引数を代入)
 
 // Binding 関連
-AddBindingMap			bindmap		R,R,S,-,-,-		----		#!< ローカル変数のバインディング情報を追加
+AddBindingMap			bindmap		R,R,S,-,-,-		----		E	#!< ローカル変数のバインディング情報を追加
 
 // 共有空間アクセス
-Write					swrite		S,R,-,-,-,-		----		#!< 共有空間への書き込み
-Read					sread		R,S,-,-,-,-		----		#!< 共有空間からの読み込み
+Write					swrite		S,R,-,-,-,-		----		E	#!< 共有空間への書き込み
+Read					sread		R,S,-,-,-,-		----		N	#!< 共有空間からの読み込み
 
 // 関数定義/引数処理/関数呼び出し
-New						new			R,R,O,N,-,-		new			#!< "new"
-TryFuncCall				trycall		R,R,O,N,N,-		----		#!< try function call
-Sync					sync		R,R,R,-,-,-		----		#!< synchronized
-FuncCall				call		R,R,O,N,-,-		()			#!< function call
-FuncCallBlock			callb		R,R,O,N,N,-		----		#!< function call with lazyblock(VMのみで使用)
-SetFrame				sframe		R,-,-,-,-,-		----		#!< スタックフレームと共有空間を設定する
-SetShare				sshare		R,-,-,-,-,-		----		#!< 共有空間のみ設定する
+New						new			R,R,O,N,-,-		new			E	#!< "new"
+TryFuncCall				trycall		R,R,O,N,N,-		----		E	#!< try function call
+Sync					sync		R,R,R,-,-,-		----		E	#!< synchronized
+FuncCall				call		R,R,O,N,-,-		()			E	#!< function call
+FuncCallBlock			callb		R,R,O,N,N,-		----		E	#!< function call with lazyblock(VMのみで使用)
+SetFrame				sframe		R,-,-,-,-,-		----		E	#!< スタックフレームと共有空間を設定する
+SetShare				sshare		R,-,-,-,-,-		----		E	#!< 共有空間のみ設定する
 
 // ジャンプ/分岐/制御/補助
-Jump					jump		A,-,-,-,-,-		----		#!< 単純なジャンプ
-Branch					branch		R,A,A,-,-,-		----		#!< 分岐
-CatchBranch				cbranch		R,C,N,-,-,-		----		#!< 例外catch用の分岐
-//EnterTryBlock			enttry		A,A,A,-,-,-		----		#!< 例外保護ブロックに入る(VMのみで使用)
-//ExitTryBlock			exittry		-,-,-,-,-,-		----		#!< 例外保護ブロックから抜ける(VMのみで使用)
-Return					return		R,-,-,-,-,-		----		#!< return ステートメント
-Debugger				debug		-,-,-,-,-,-		----		#!< debugger ステートメント
-Throw					throw		R,-,-,-,-,-		----		#!< throw ステートメント
-ExitTryException		exittry		R,C,O,-,-,-		----		#!< Try脱出用例外を発生させる
-GetExitTryValue			exitval		R,R,-,-,-,-		----		#!< Try脱出用例外オブジェクトから値を得る
+Jump					jump		A,-,-,-,-,-		----		E	#!< 単純なジャンプ
+Branch					branch		R,A,A,-,-,-		----		E	#!< 分岐
+CatchBranch				cbranch		R,C,N,-,-,-		----		E	#!< 例外catch用の分岐
+//EnterTryBlock			enttry		A,A,A,-,-,-		----			#!< 例外保護ブロックに入る(VMのみで使用)
+//ExitTryBlock			exittry		-,-,-,-,-,-		----			#!< 例外保護ブロックから抜ける(VMのみで使用)
+Return					return		R,-,-,-,-,-		----		E	#!< return ステートメント
+Debugger				debug		-,-,-,-,-,-		----		E	#!< debugger ステートメント
+Throw					throw		R,-,-,-,-,-		----		E	#!< throw ステートメント
+ExitTryException		exittry		R,C,O,-,-,-		----		E	#!< Try脱出用例外を発生させる
+GetExitTryValue			exitval		R,R,-,-,-,-		----		N	#!< Try脱出用例外オブジェクトから値を得る
 
 // 引数1+なし
-LogNot					lnot		R,R,-,-,-,-		----		#!< "!" logical not
-BitNot					bnot		R,R,-,-,-,-		~			#!< "~" bit not
-DecAssign				ERR			-,-,-,-,-,-		--			#!< "--" decrement
-IncAssign				ERR			-,-,-,-,-,-		++			#!< ++ increment
-Plus					plus		R,R,-,-,-,-		+@			#!< +
-Minus					minus		R,R,-,-,-,-		-@			#!< -
-String					string		R,R,-,-,-,-		toString	#!< 文字列にキャスト
-Boolean					boolean		R,R,-,-,-,-		toBoolean	#!< booleanにキャスト
-Real					real		R,R,-,-,-,-		toReal		#!< realにキャスト
-Integer					integer		R,R,-,-,-,-		toInteger	#!< integerにキャスト
-Octet					octet		R,R,-,-,-,-		toOctet		#!< octetにキャスト
+LogNot					lnot		R,R,-,-,-,-		----		V	#!< "!" logical not
+BitNot					bnot		R,R,-,-,-,-		~			V	#!< "~" bit not
+DecAssign				ERR			-,-,-,-,-,-		--			V	#!< "--" decrement
+IncAssign				ERR			-,-,-,-,-,-		++			V	#!< ++ increment
+Plus					plus		R,R,-,-,-,-		+@			V	#!< +
+Minus					minus		R,R,-,-,-,-		-@			V	#!< -
+String					string		R,R,-,-,-,-		toString	V	#!< 文字列にキャスト
+Boolean					boolean		R,R,-,-,-,-		toBoolean	V	#!< booleanにキャスト
+Real					real		R,R,-,-,-,-		toReal		V	#!< realにキャスト
+Integer					integer		R,R,-,-,-,-		toInteger	V	#!< integerにキャスト
+Octet					octet		R,R,-,-,-,-		toOctet		V	#!< octetにキャスト
 
 
 // 引数1+1つ
-LogOr					lor			R,R,R,-,-,-		||			#!< ||
-LogAnd					land		R,R,R,-,-,-		&&			#!< &&
-BitOr					bor			R,R,R,-,-,-		|			#!< |
-BitXor					bxor		R,R,R,-,-,-		^			#!< ^
-BitAnd					band		R,R,R,-,-,-		&			#!< &
-NotEqual				ne			R,R,R,-,-,-		!=			#!< !=
-Equal					eq			R,R,R,-,-,-		==			#!< ==
-DiscNotEqual			dne			R,R,R,-,-,-		!==			#!< !==
-DiscEqual				deq			R,R,R,-,-,-		===			#!< ===
-Lesser					lt			R,R,R,-,-,-		<			#!< <
-Greater					gt			R,R,R,-,-,-		>			#!< >
-LesserOrEqual			lte			R,R,R,-,-,-		<=			#!< <=
-GreaterOrEqual			gte			R,R,R,-,-,-		>=			#!< >=
-RBitShift				rbs			R,R,R,-,-,-		>>>			#!< >>>
-LShift					ls			R,R,R,-,-,-		<<			#!< <<
-RShift					rs			R,R,R,-,-,-		>>			#!< >>
-Mod						mod			R,R,R,-,-,-		%			#!< %
-Div						div			R,R,R,-,-,-		/			#!< /
-Idiv					idiv		R,R,R,-,-,-		\			#!< \ (integer div)
-Mul						mul			R,R,R,-,-,-		*			#!< *
-Add						add			R,R,R,-,-,-		+			#!< +
-Sub						sub			R,R,R,-,-,-		-			#!< -
-InContextOf				cntx		R,R,R,-,-,-		----		#!< incontextof
-InContextOfDyn			cntxdyn		R,R,-,-,-,-		----		#!< incontextof dynamic
-InstanceOf				instof		R,R,R,-,-,-		isA			#!< instanceof (isA)
+LogOr					lor			R,R,R,-,-,-		||			V	#!< ||
+LogAnd					land		R,R,R,-,-,-		&&			V	#!< &&
+BitOr					bor			R,R,R,-,-,-		|			V	#!< |
+BitXor					bxor		R,R,R,-,-,-		^			V	#!< ^
+BitAnd					band		R,R,R,-,-,-		&			V	#!< &
+NotEqual				ne			R,R,R,-,-,-		!=			V	#!< !=
+Equal					eq			R,R,R,-,-,-		==			V	#!< ==
+DiscNotEqual			dne			R,R,R,-,-,-		!==			V	#!< !==
+DiscEqual				deq			R,R,R,-,-,-		===			V	#!< ===
+Lesser					lt			R,R,R,-,-,-		<			V	#!< <
+Greater					gt			R,R,R,-,-,-		>			V	#!< >
+LesserOrEqual			lte			R,R,R,-,-,-		<=			V	#!< <=
+GreaterOrEqual			gte			R,R,R,-,-,-		>=			V	#!< >=
+RBitShift				rbs			R,R,R,-,-,-		>>>			V	#!< >>>
+LShift					ls			R,R,R,-,-,-		<<			V	#!< <<
+RShift					rs			R,R,R,-,-,-		>>			V	#!< >>
+Mod						mod			R,R,R,-,-,-		%			V	#!< %
+Div						div			R,R,R,-,-,-		/			V	#!< /
+Idiv					idiv		R,R,R,-,-,-		\			V	#!< \ (integer div)
+Mul						mul			R,R,R,-,-,-		*			V	#!< *
+Add						add			R,R,R,-,-,-		+			V	#!< +
+Sub						sub			R,R,R,-,-,-		-			V	#!< -
+InContextOf				cntx		R,R,R,-,-,-		----		N	#!< incontextof
+InContextOfDyn			cntxdyn		R,R,-,-,-,-		----		N	#!< incontextof dynamic
+InstanceOf				instof		R,R,R,-,-,-		isA			E	#!< instanceof (isA)
 
-DGet					dget		R,R,R,-,-,-		----		#!< get .  
-DGetF					dgetf		R,R,R,O,-,-		----		#!< get . with flags (下記参照)
-IGet					iget		R,R,R,-,-,-		[]			#!< get [ ]
-DDelete					ddel		R,R,R,-,-,-		----		#!< delete .
-IDelete					idel		R,R,R,-,-,-		delete[]	#!< delete [ ]
+DGet					dget		R,R,R,-,-,-		----		E	#!< get .  
+DGetF					dgetf		R,R,R,O,-,-		----		E	#!< get . with flags (下記参照)
+IGet					iget		R,R,R,-,-,-		[]			E	#!< get [ ]
+DDelete					ddel		R,R,R,-,-,-		----		E	#!< delete .
+IDelete					idel		R,R,R,-,-,-		delete[]	E	#!< delete [ ]
 
-DSetAttrib				dseta		R,R,O,-,-,-		----		#!< set member attribute
+DSetAttrib				dseta		R,R,O,-,-,-		----		E	#!< set member attribute
 
 // 引数1+2つ
-DSet					dset		R,R,R,-,-,-		----		#!< set .
-DSetF					dsetf		R,R,R,O,-,-		----		#!< set . with flags (下記参照)
-ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
+DSet					dset		R,R,R,-,-,-		----		E	#!< set .
+DSetF					dsetf		R,R,R,O,-,-		----		E	#!< set . with flags (下記参照)
+ISet					iset		R,R,R,-,-,-		[]=			E	#!< set [ ]
 
 
 // コードジェネレータはフラグが指定されていると DGet あるいは DSet から必要に応じて
@@ -138,43 +143,43 @@ ISet					iset		R,R,R,-,-,-		[]=			#!< set [ ]
 // 書き込みの場合は DSet がメンバ名なしで呼ばれる。
 
 // assertion
-Assert					assert		R,C,-,-,-,-		----		#!< assertion check
-AssertType				assertt		R,O,-,-,-,-		----		#!< assertion of variant type
+Assert					assert		R,C,-,-,-,-		----		N	#!< assertion check
+AssertType				assertt		R,O,-,-,-,-		----		N	#!< assertion of variant type
 
 // 代入演算子の類
-BitAndAssign			ERR			-,-,-,-,-,-		&=			#!< &=
-BitOrAssign				ERR			-,-,-,-,-,-		|=			#!< |=
-BitXorAssign			ERR			-,-,-,-,-,-		^=			#!< ^=
-SubAssign				ERR			-,-,-,-,-,-		-=			#!< -=
-AddAssign				ERR			-,-,-,-,-,-		+=			#!< +=
-ModAssign				ERR			-,-,-,-,-,-		%=			#!< %=
-DivAssign				ERR			-,-,-,-,-,-		/=			#!< /=
-IdivAssign				ERR			-,-,-,-,-,-		\=			#!< \=
-MulAssign				ERR			-,-,-,-,-,-		*=			#!< *=
-LogOrAssign				ERR			-,-,-,-,-,-		||=			#!< ||=
-LogAndAssign			ERR			-,-,-,-,-,-		&&=			#!< &&=
-RBitShiftAssign			ERR			-,-,-,-,-,-		>>>=		#!< >>>=
-LShiftAssign			ERR			-,-,-,-,-,-		<<=			#!< <<=
-RShiftAssign			ERR			-,-,-,-,-,-		>>=			#!< >>=
+BitAndAssign			ERR			-,-,-,-,-,-		&=			V	#!< &=
+BitOrAssign				ERR			-,-,-,-,-,-		|=			V	#!< |=
+BitXorAssign			ERR			-,-,-,-,-,-		^=			V	#!< ^=
+SubAssign				ERR			-,-,-,-,-,-		-=			V	#!< -=
+AddAssign				ERR			-,-,-,-,-,-		+=			V	#!< +=
+ModAssign				ERR			-,-,-,-,-,-		%=			V	#!< %=
+DivAssign				ERR			-,-,-,-,-,-		/=			V	#!< /=
+IdivAssign				ERR			-,-,-,-,-,-		\=			V	#!< \=
+MulAssign				ERR			-,-,-,-,-,-		*=			V	#!< *=
+LogOrAssign				ERR			-,-,-,-,-,-		||=			V	#!< ||=
+LogAndAssign			ERR			-,-,-,-,-,-		&&=			V	#!< &&=
+RBitShiftAssign			ERR			-,-,-,-,-,-		>>>=		V	#!< >>>=
+LShiftAssign			ERR			-,-,-,-,-,-		<<=			V	#!< <<=
+RShiftAssign			ERR			-,-,-,-,-,-		>>=			V	#!< >>=
 
 // VM コードの最後
-VMCodeLast				ERR			-,-,-,-,-,-		----		#!< VMオペコードの最後
+VMCodeLast				ERR			-,-,-,-,-,-		----		N	#!< VMオペコードの最後
 
 // オブジェクトメタオペレーション
-SetDefaultContext		ERR			-,-,-,-,-,-		----		#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する
-GetDefaultContext		ERR			-,-,-,-,-,-		----		#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する
+SetDefaultContext		ERR			-,-,-,-,-,-		----		E	#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスに対して設定する
+GetDefaultContext		ERR			-,-,-,-,-,-		----		E	#!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキストをインスタンスから取得する
 
 // SSA形式特有
-Phi						ERR			-,-,-,-,-,-		----		#!< φ関数
-DefineAccessMap			ERR			-,-,-,-,-,-		----		#!< アクセスマップ定義
-DefineLazyBlock			ERR			-,-,-,-,-,-		----		#!< 遅延評価ブロックの定義
-DefineClass				ERR			-,-,-,-,-,-		----		#!< クラスの定義
-EndAccessMap			ERR			-,-,-,-,-,-		----		#!< アクセスマップの使用終了
-ParentWrite				ERR			-,-,-,-,-,-		----		#!< 親名前空間への書き込み
-ParentRead				ERR			-,-,-,-,-,-		----		#!< 親名前空間からの読み込み
-ChildWrite				ERR			-,-,-,-,-,-		----		#!< 子名前空間への書き込み
-ChildRead				ERR			-,-,-,-,-,-		----		#!< 子名前空間からの読み込み
-WriteVar				ERR			-,-,-,-,-,-		----		#!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
-ReadVar					ERR			-,-,-,-,-,-		----		#!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
+Phi						ERR			-,-,-,-,-,-		----		N	#!< φ関数
+DefineAccessMap			ERR			-,-,-,-,-,-		----		E	#!< アクセスマップ定義
+DefineLazyBlock			ERR			-,-,-,-,-,-		----		E	#!< 遅延評価ブロックの定義
+DefineClass				ERR			-,-,-,-,-,-		----		E	#!< クラスの定義
+EndAccessMap			ERR			-,-,-,-,-,-		----		E	#!< アクセスマップの使用終了
+ParentWrite				ERR			-,-,-,-,-,-		----		E	#!< 親名前空間への書き込み
+ParentRead				ERR			-,-,-,-,-,-		----		E	#!< 親名前空間からの読み込み
+ChildWrite				ERR			-,-,-,-,-,-		----		E	#!< 子名前空間への書き込み
+ChildRead				ERR			-,-,-,-,-,-		----		E	#!< 子名前空間からの読み込み
+WriteVar				ERR			-,-,-,-,-,-		----		E	#!< 変数への書き込み(変換の過程でocAssignかocWriteに変わる)
+ReadVar					ERR			-,-,-,-,-,-		----		E	#!< 変数からの読み込み(変換の過程でocAssignかocReadに変わる)
 
-OpCodeLast				ERR			-,-,-,-,-,-		----		#!< オペコードの最後
+OpCodeLast				ERR			-,-,-,-,-,-		----		N	#!< オペコードの最後

@@ -364,6 +364,12 @@ public:
 	//! @param		gen		バイトコードジェネレータ
 	void GenerateCode(tCodeGenerator * gen) const;
 
+public:
+	//! @brief		文そのもののダンプを行う
+	//! @return		ダンプ文字列
+	tString DumpBody() const;
+
+public:
 	//! @brief		ダンプを行う
 	//! @return		ダンプ文字列
 	tString Dump() const;

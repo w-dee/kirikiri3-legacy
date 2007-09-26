@@ -49,6 +49,8 @@ class tSSAStatement : public tCollectee
 
 	void * Mark; //!< マーク (任意の用途に使う)
 
+	bool Effective; //!< この文が副作用を持っているかどうか
+
 	gc_vector<tSSABlock *> Targets; //!< 分岐のターゲット(解釈はCodeによって異なる)
 
 	// ここでは構造体のバイト数の節約のために、いくつか相互に関係のない

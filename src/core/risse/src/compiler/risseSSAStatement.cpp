@@ -42,6 +42,7 @@ tSSAStatement::tSSAStatement(tSSAForm * form,
 	Succ = NULL;
 	Declared = NULL;
 	Mark = NULL;
+	Effective = true;
 	Order = risse_size_max;
 	FuncExpandFlags = 0;
 }
@@ -632,10 +633,9 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 
 
 
-	if(!Declared) return; // Declared が無い文は相手にしない
-
 	// Declared の古い状態をとっておく
-	tSSAVariable::tValueState old_value_state     = Declared->GetValueState();
+	tSSAVariable::tValueState old_value_state     =
+		Declared ? Declared->GetValueState() : tSSAVariable::vsUnknown;
 
 	// phi 関数以外は、基本的に使用されいてる値によって定義されている
 	// 変数の型や値がどうなるかを考える
@@ -649,7 +649,11 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocPhi:
 	{
 		const gc_vector<tSSABlock *> & pred_blocks = Block->GetPred();
+		RISSE_ASSERT(Declared);
 		RISSE_ASSERT(Used.size() == pred_blocks.size());
+
+		// φ関数に副作用はない
+		Effective = false;
 
 		// Modern Compiler Implementation in * では条件付き定数伝播における
 		// 変数の状態において ⊥とCとT の3つの状態を元にアルゴリズムを解説しているが、
@@ -859,7 +863,10 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	//--------------- 単純代入
 	case ocAssign:
 		RISSE_ASSERT(Used.size() == 1);
-		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Declared);
+
+		Effective = false; // 単純代入に副作用はない
+
 		Declared->RaiseValueState(Used[0]->GetValueState());
 		if(Declared->GetValueState() == tSSAVariable::vsConstant)
 			Declared->SuggestValue(Used[0]->GetValue());
@@ -869,15 +876,25 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 
 	//--------------- 定数代入
 	case ocAssignConstant:
-		RISSE_ASSERT(Declared != NULL);
+
+		Effective = false; // 定数代入に副作用はない
+
+		RISSE_ASSERT(Declared);
 		RISSE_ASSERT(Value != NULL);
 		Declared->SuggestValue(*Value);
 		break;
 
 	//--------------- 値はどうなるかわからないが、型は vtObject を代入する物
+	//------ かつ、副作用がない物
 	case ocAssignNewBinding:
 	case ocAssignThisProxy:
 	case ocAssignGlobal:
+		RISSE_ASSERT(Declared);
+		Effective = false; // 副作用なし
+		Declared->SuggestValue(tVariant::vtObject);
+		break;
+
+	//------ かつ、副作用がある物
 	case ocAssignNewArray:
 	case ocAssignNewDict:
 	case ocAssignNewRegExp:
@@ -889,24 +906,34 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocSync:
 	case ocSetFrame:
 	case ocSetShare:
-		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Declared);
+		Effective = true; // 副作用あり
 		Declared->SuggestValue(tVariant::vtObject);
 		break;
 
 	//--------------- 値も型もどうなるかわからないもの
+	//------ かつ、副作用がない物
 	case ocGetExitTryValue:
 	case ocAssignThis:
 	case ocAssignParam:
 	case ocAssignBlockParam:
 	case ocRead:
+		RISSE_ASSERT(Declared);
+		Effective = false; // 副作用なし
+		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
+		break;
+
+	//------ かつ、副作用がある物
 	case ocNew:
 	case ocFuncCall:
 	case ocFuncCallBlock:
-		RISSE_ASSERT(Declared != NULL);
+		RISSE_ASSERT(Declared);
+		Effective = true; // 副作用あり
 		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
 		break;
 
 	//--------------- 宣言する変数がない物
+	//------ かつ、副作用がある物
 	case ocAddBindingMap:
 	case ocWrite:
 	case ocReturn:
@@ -915,6 +942,7 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocExitTryException:
 		// declared の無いタイプ
 		RISSE_ASSERT(Declared == NULL);
+		Effective = true; // 副作用あり
 		break;
 
 	//-- 単項
@@ -927,10 +955,28 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocReal:
 	case ocInteger:
 	case ocOctet:
+		RISSE_ASSERT(Declared);
+
 		{
 			RISSE_ASSERT(Used.size() == 1);
 			tSSAVariable::tValueState vs = Used[0]->GetValueState();
 			int gt;
+			// 特定の型あるいは tVariant::gtAny を渡してみて、どの様な型が返ってくる可能性があるかを推測する
+			switch(Code)
+			{
+				case ocLogNot:	gt = tVariant::GuessTypeLogNot			(Used[0]->GetGuessType());	break;
+				case ocBitNot:	gt = tVariant::GuessTypeBitNot			(Used[0]->GetGuessType());	break;
+				case ocPlus:	gt = tVariant::GuessTypePlus			(Used[0]->GetGuessType());	break;
+				case ocMinus:	gt = tVariant::GuessTypeMinus			(Used[0]->GetGuessType());	break;
+				case ocString:	gt = tVariant::GuessTypeCastToString	(Used[0]->GetGuessType());	break;
+				case ocBoolean:	gt = tVariant::GuessTypeCastToBoolean	(Used[0]->GetGuessType());	break;
+				case ocReal:	gt = tVariant::GuessTypeCastToReal		(Used[0]->GetGuessType());	break;
+				case ocInteger:	gt = tVariant::GuessTypeCastToInteger	(Used[0]->GetGuessType());	break;
+				case ocOctet:	gt = tVariant::GuessTypeCastToOctet		(Used[0]->GetGuessType());	break;
+				default: RISSE_ASSERT(!"Unhandled type here!"); ;
+			}
+			Effective = gt & tVariant::gtEffective; // 副作用があるかどうか
+
 			switch(vs)
 			{
 			case tSSAVariable::vsUnknown:
@@ -952,32 +998,19 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 						case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet());		break;
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
+					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ
 					break;
 				}
 				catch(...)
 				{
 					// 何らかの例外が発生したとき
-					// この場合は break せずにそのまま下に行って Guess したあと、
+					// この場合は break せずにそのまま下に行って
 					// エラーになるような組み合わせならば警告メッセージを表示するようになる
 				}
 
 			case tSSAVariable::vsTypeConstant: // 特定の型になる場合
 			case tSSAVariable::vsVarying: // 任意の型になる場合
 
-				// 特定の型あるいは tVariant::gtAny を渡してみて、特定の型が帰ってくればそれにする
-				switch(Code)
-				{
-					case ocLogNot:	gt = tVariant::GuessTypeLogNot			(Used[0]->GetGuessType());	break;
-					case ocBitNot:	gt = tVariant::GuessTypeBitNot			(Used[0]->GetGuessType());	break;
-					case ocPlus:	gt = tVariant::GuessTypePlus			(Used[0]->GetGuessType());	break;
-					case ocMinus:	gt = tVariant::GuessTypeMinus			(Used[0]->GetGuessType());	break;
-					case ocString:	gt = tVariant::GuessTypeCastToString	(Used[0]->GetGuessType());	break;
-					case ocBoolean:	gt = tVariant::GuessTypeCastToBoolean	(Used[0]->GetGuessType());	break;
-					case ocReal:	gt = tVariant::GuessTypeCastToReal		(Used[0]->GetGuessType());	break;
-					case ocInteger:	gt = tVariant::GuessTypeCastToInteger	(Used[0]->GetGuessType());	break;
-					case ocOctet:	gt = tVariant::GuessTypeCastToOctet		(Used[0]->GetGuessType());	break;
-					default: RISSE_ASSERT(!"Unhandled type here!"); ;
-				}
 				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
 				{
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
@@ -1006,12 +1039,28 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	//-- 二項
 	case ocAdd:
 	case ocSub:
+		RISSE_ASSERT(Declared);
+
 		{
 			// ・最初のパラメータがvaryingならば宣言された変数もvarying
 			// ・両方とも定数ならば定数たたみ込みできる
 			RISSE_ASSERT(Used.size() == 2);
+
 			tSSAVariable::tValueState vs_l = Used[0]->GetValueState();
 			tSSAVariable::tValueState vs_r = Used[1]->GetValueState();
+
+			// 両方の値の状態・型から、どの様な結果が返ってくるかを推測する
+			tVariant::tGuessType input_gt_l = Used[0]->GetGuessType();
+			tVariant::tGuessType input_gt_r = Used[1]->GetGuessType();
+			int gt;
+			switch(Code)
+			{
+				case ocAdd:			gt = tVariant::GuessTypeAdd(input_gt_l, input_gt_r);	break;
+				case ocSub:			gt = tVariant::GuessTypeSub(input_gt_l, input_gt_r);	break;
+				default: RISSE_ASSERT(!"Unhandled type here!"); ;
+			}
+			Effective = gt & tVariant::gtEffective; // 副作用があるかどうか
+
 			if(vs_l == tSSAVariable::vsConstant && vs_r == tSSAVariable::vsConstant)
 			{
 				// 定数畳み込みをする
@@ -1023,29 +1072,20 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 						case ocSub:			Declared->SuggestValue(Used[0]->GetValue().Sub(Used[1]->GetValue()));	break;
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
+					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ
 					break; //--------- 一番外側の switch をここで抜けるので注意
 				}
 				catch(...)
 				{
 					// 何らかの例外が発生したとき
-					// この場合は break せずにそのまま下に行って Guess したあと、
+					// この場合は break せずにそのまま下に行って
 					// エラーになるような組み合わせならば警告メッセージを表示するようになる
 				}
 			}
 
 			if(vs_l != tSSAVariable::vsUnknown && vs_r != tSSAVariable::vsUnknown)
 			{
-				// 結果は guess させてみないとわからない
 				// この時点で vs_l および vs_r は vsUnknown を除くいずれかの状態
-				tVariant::tGuessType input_gt_l = Used[0]->GetGuessType();
-				tVariant::tGuessType input_gt_r = Used[1]->GetGuessType();
-				int gt;
-				switch(Code)
-				{
-					case ocAdd:			gt = tVariant::GuessTypeAdd(input_gt_l, input_gt_r);	break;
-					case ocSub:			gt = tVariant::GuessTypeSub(input_gt_l, input_gt_r);	break;
-					default: RISSE_ASSERT(!"Unhandled type here!"); ;
-				}
 				switch((tVariant::tGuessType)(gt & tVariant::gtTypeMask))
 				{
 				case tVariant::gtAny: // 任意の型が帰ってくる可能性がある
@@ -1081,8 +1121,6 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocGreater:
 	case ocLesserOrEqual:
 	case ocGreaterOrEqual:
-
-
 
 	case ocDecAssign:
 	case ocIncAssign:
@@ -1146,7 +1184,8 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocNoOperation:
 	case ocVMCodeLast:
 		// とりあえず Declared を varying に設定してしまおう
-		Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
+		Effective = true; // とりあえず副作用はあると見なす
+		if(Declared) Declared->RaiseValueState(tSSAVariable::vsVarying); // どんな値になるかはわからない
 		break;
 
 	case ocJump:
@@ -1155,25 +1194,28 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 		; // すでに処理済み
 	}
 
-	// Declared の ValueState や ValueTypeState がランクアップしているようだったら
-	// variables に Declared を push する
-	if(old_value_state < Declared->GetValueState())
+	if(Declared)
 	{
+		// Declared の ValueState や ValueTypeState がランクアップしているようだったら
+		// variables に Declared を push する
+		if(old_value_state < Declared->GetValueState())
+		{
 wxFprintf(stderr, wxT("changing state of %s from %s to %s\n"),
-	Declared->GetQualifiedName().AsWxString().c_str(),
+Declared->GetQualifiedName().AsWxString().c_str(),
 
-	old_value_state==tSSAVariable::vsUnknown ? wxT("unknown"):
-	old_value_state==tSSAVariable::vsConstant ? wxT("constant"):
-	old_value_state==tSSAVariable::vsTypeConstant ? wxT("type constant"):
-	old_value_state==tSSAVariable::vsVarying ? wxT("varying") : wxT(""),
+old_value_state==tSSAVariable::vsUnknown ? wxT("unknown"):
+old_value_state==tSSAVariable::vsConstant ? wxT("constant"):
+old_value_state==tSSAVariable::vsTypeConstant ? wxT("type constant"):
+old_value_state==tSSAVariable::vsVarying ? wxT("varying") : wxT(""),
 
-	Declared->GetValueState()==tSSAVariable::vsUnknown ? wxT("unknown"):
-	Declared->GetValueState()==tSSAVariable::vsConstant ? wxT("constant"):
-	Declared->GetValueState()==tSSAVariable::vsTypeConstant ? wxT("type constant"):
-	Declared->GetValueState()==tSSAVariable::vsVarying ? wxT("varying") : wxT("")
+Declared->GetValueState()==tSSAVariable::vsUnknown ? wxT("unknown"):
+Declared->GetValueState()==tSSAVariable::vsConstant ? wxT("constant"):
+Declared->GetValueState()==tSSAVariable::vsTypeConstant ? wxT("type constant"):
+Declared->GetValueState()==tSSAVariable::vsVarying ? wxT("varying") : wxT("")
 
-	);
-		variables.push_back(Declared);
+);
+			variables.push_back(Declared);
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -2011,10 +2053,6 @@ tString tSSAStatement::Dump() const
 				ret += Value->AsHumanReadable();
 			}
 
-			// 変数の宣言に関してコメントがあればそれを追加
-			if(Declared)
-				ret += Declared->GetComment();
-
 			// DSet あるいは DGet についてフラグがあればそれを追加
 			if(Code == ocDGet || Code == ocDSet)
 			{
@@ -2032,6 +2070,10 @@ tString tSSAStatement::Dump() const
 					tOperateFlags(OperateFlagsValue).AsString() +
 					RISSE_WS(")");
 			}
+
+			// 変数の宣言に関してコメントがあればそれを追加
+			if(Declared)
+				ret += Declared->GetComment();
 
 			return ret;
 		}

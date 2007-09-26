@@ -198,7 +198,7 @@ public:
 
 	//! @brief		この変数がとりうる値の型を tVariant::tGuessType として返す
 	//! @return		tVariant::tGuessType タイプ
-	//! @note		ValueState が vsUnknown の状態で呼び出さないこと
+	//! @note		ValueState が vsUnknown の状態では gtAny が返る
 	tVariant::tGuessType GetGuessType() const;
 
 	//! @brief		この変数のメソッド(固定名)を呼び出すSSA形式を生成する

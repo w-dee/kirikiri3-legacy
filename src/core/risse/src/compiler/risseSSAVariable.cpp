@@ -324,19 +324,17 @@ void tSSAVariable::SuggestValue(tVariant::tType type)
 //---------------------------------------------------------------------------
 tVariant::tGuessType tSSAVariable::GetGuessType() const
 {
-	RISSE_ASSERT(ValueState != vsUnknown);
 	switch(ValueState)
 	{
+	case vsUnknown:
+		return tVariant::gtAny;
 	case vsTypeConstant:
 	case vsConstant:
 		return (tVariant::tGuessType) Value.GetType();
 	case vsVarying:
 		return tVariant::gtAny;
-	default:
-		;
 	}
-
-	return tVariant::gtAny;
+	RISSE_ASSERT(!"unhandled type here!");
 }
 //---------------------------------------------------------------------------
 

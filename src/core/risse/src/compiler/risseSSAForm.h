@@ -554,6 +554,9 @@ public:
 	//! @brief		定数代入を置き換える
 	void ReplaceConstantAssign();
 
+	//! @brief		死んでる変数を除去する
+	void DeleteDeadVariables();
+
 	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	void TraceCoalescable();
 

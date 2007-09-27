@@ -752,6 +752,19 @@ void tSSABlock::ListAllStatements(gc_vector<tSSAStatement *> &statements) const
 
 
 //---------------------------------------------------------------------------
+void tSSABlock::ListAllVariables(gc_vector<tSSAVariable *> &variables) const
+{
+	tSSAStatement *stmt;
+	for(stmt = FirstStatement; stmt; stmt = stmt->GetSucc())
+	{
+		tSSAVariable * var = stmt->GetDeclared();
+		if(var) variables.push_back(var);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tSSABlock::AnalyzeConstantPropagation(
 		gc_vector<tSSAVariable *> &variables,
 		gc_vector<tSSABlock *> &blocks)

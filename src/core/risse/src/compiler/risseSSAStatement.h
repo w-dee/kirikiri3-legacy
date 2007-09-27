@@ -269,6 +269,10 @@ public:
 	//! @return		名前
 	const tString & GetName() const;
 
+	//! @brief		文に副作用があるかどうかを得る
+	//! @return		文に副作用があるかどうか
+	bool GetEffective() const { return Effective; }
+
 	//! @brief		メッセージを設定する
 	//! @param		name		メッセージ
 	void SetMessage(const tString & msg) { Message = new tString(msg); }

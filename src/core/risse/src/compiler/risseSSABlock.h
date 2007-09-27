@@ -282,6 +282,10 @@ public:
 	//! @param		statements		文を格納する先
 	void ListAllStatements(gc_vector<tSSAStatement *> &statements) const;
 
+	//! @brief		すべての変数を列挙する
+	//! @param		variables		変数を格納する先
+	void ListAllVariables(gc_vector<tSSAVariable *> &variables) const;
+
 	//! @brief		型伝播解析・定数伝播解析を行う
 	//! @param		variables		変数の作業リスト
 	//! @param		blocks			ブロックの作業リスト

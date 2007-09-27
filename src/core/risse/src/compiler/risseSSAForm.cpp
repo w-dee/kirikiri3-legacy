@@ -189,6 +189,15 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 到達しない基本ブロックを削除
 	LeapDeadBlocks();
 
+	// 使用されていない変数を削除する
+	DeleteDeadVariables();
+
+	// SSA 形式のダンプ(デバッグ)
+	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+							RISSE_WS(") ==========\n")).c_str());
+	tString str = Dump();
+	FPrint(stderr, str.c_str());
+
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -200,12 +209,6 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
-
-	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
 
 	// 変数の合併を行う
 	Coalesce();
@@ -975,6 +978,8 @@ void tSSAForm::AnalyzeVariableBlockLiveness()
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->CreateLiveInAndLiveOut();
 
+	// TODO: あれ、ここではすべての変数に対して処理をおこなってるけど
+	// tSSABlock::ListAllVariables をつかえね？
 	// それぞれのブロック内にある変数に対して生存区間解析を行う
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->AnalyzeVariableBlockLiveness();
@@ -1299,6 +1304,80 @@ void tSSAForm::ReplaceConstantAssign()
 	// すべてのブロックに対して処理
 	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
 		(*i)->ReplaceConstantAssign();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tSSAForm::DeleteDeadVariables()
+{
+	// すべての文を取得
+	gc_vector<tSSABlock *> blocks;
+	EntryBlock->Traverse(blocks);
+
+	// すべての文を収集
+	gc_vector<tSSAStatement *> statements;
+	for(gc_vector<tSSABlock *>::iterator i = blocks.begin(); i != blocks.end(); i++)
+		(*i)->ListAllStatements(statements);
+
+	gc_vector<tSSAVariable *> variables;
+
+	// 文リストが空になるまで処理を続ける
+	while(statements.size() > 0)
+	{
+		// 一つ取り出す
+		tSSAStatement * decl_stmt = statements.back();
+		statements.pop_back();
+
+		// その文で宣言された変数がない、かつ、文に副作用がないかどうか
+		if(decl_stmt->GetDeclared() == NULL && !decl_stmt->GetEffective())
+		{
+			// その文で宣言された変数がない、かつ、副作用がない
+
+			// decl_stmt で使用していた変数をすべて push
+			const gc_vector<tSSAVariable *> & decl_used_vars = decl_stmt->GetUsed();
+			for(gc_vector<tSSAVariable *>::const_iterator i = decl_used_vars.begin();
+				i != decl_used_vars.end(); i++)
+				variables.push_back(*i);
+
+			// decl_stmt で使用していた変数をすべて削除する
+			decl_stmt->DeleteUsed();
+
+			// decl_stmt を削除する
+			decl_stmt->GetBlock()->DeleteStatement(decl_stmt);
+		}
+	}
+
+	// 変数リストが空になるまで処理を続ける
+	while(variables.size() > 0)
+	{
+		// 一つ取り出す
+		tSSAVariable * var = variables.back();
+		variables.pop_back();
+
+		// その変数の使用リストが空か？
+		if(var->GetUsed().size() == 0)
+		{
+			// その変数の定義文に副作用がないかどうか
+			tSSAStatement *decl_stmt = var->GetDeclared();
+			if(!decl_stmt->GetEffective())
+			{
+				// 副作用がない
+
+				// decl_stmt で使用していた変数をすべて push
+				const gc_vector<tSSAVariable *> & decl_used_vars = decl_stmt->GetUsed();
+				for(gc_vector<tSSAVariable *>::const_iterator i = decl_used_vars.begin();
+					i != decl_used_vars.end(); i++)
+					variables.push_back(*i);
+
+				// decl_stmt で使用していた変数をすべて削除する
+				decl_stmt->DeleteUsed();
+
+				// decl_stmt を削除する
+				decl_stmt->GetBlock()->DeleteStatement(decl_stmt);
+			}
+		}
+	}
 }
 //---------------------------------------------------------------------------
 

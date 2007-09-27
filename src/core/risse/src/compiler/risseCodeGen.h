@@ -38,6 +38,9 @@ class tCodeGenerator : public tCollectee
 	risse_size NestLevel;		//!< 関数のネストレベル
 	risse_size RegisterBase; //!< レジスタの基本値
 
+	tOpCode LastCode; //!< 最後に置かれたコード
+	const tSSABlock * LastJumpTarget; //!< 最後の ocJump が指した先
+
 	gc_vector<risse_uint32> Code; //!< コード
 	gc_vector<tVariant> Consts; //!< 定数領域
 	gc_vector<risse_size> RegFreeMap; // 空きレジスタの配列
@@ -114,6 +117,10 @@ public:
 		{ return CodeToSourcePosition; }
 
 protected:
+	//! @param		コードを1ワード分置く(ただしコード用)
+	//! @param		r コード
+	void PutCode(tOpCode r) { LastCode = r; Code.push_back(static_cast<risse_uint32>(r)); }
+
 	//! @param		コードを1ワード分置く
 	//! @param		r コード
 	void PutWord(risse_uint32 r) { Code.push_back(r); }

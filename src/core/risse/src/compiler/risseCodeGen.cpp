@@ -36,6 +36,8 @@ tCodeGenerator::tCodeGenerator(tSSAForm * form,
 	NestLevel = nestlevel;
 	RISSE_ASSERT(!(!Parent && UseParentFrame)); // UseParentFrame が真の場合は親がなければならない
 	RegisterBase = 0;
+	LastCode = ocNoOperation;
+	LastJumpTarget = NULL;
 	NumUsedRegs = 0;
 	MaxNumUsedRegs = 0;
 	SharedRegCount = 0;
@@ -68,6 +70,15 @@ void tCodeGenerator::SetRegisterBase()
 //---------------------------------------------------------------------------
 void tCodeGenerator::AddBlockMap(const tSSABlock * block)
 {
+	// 直前がもしocJump で、そのジャンプ先が block だった場合、
+	// 最後の jump 文を取り消す
+	if(LastCode == ocJump && LastJumpTarget == block)
+	{
+		RISSE_ASSERT(Code.size() >= 2); // 2 = ジャンプ命令のワード数
+		Code.resize(Code.size() - 2);
+		PendingBlockJumps.pop_back(); 
+	}
+
 	BlockMap.insert(tBlockMap::value_type(block, Code.size()));
 }
 //---------------------------------------------------------------------------
@@ -304,7 +315,7 @@ risse_size tCodeGenerator::GetSourceCodePosition() const
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutNoOperation()
 {
-	PutWord(ocNoOperation);
+	PutCode(ocNoOperation);
 }
 //---------------------------------------------------------------------------
 
@@ -319,7 +330,7 @@ void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tSSAVariable * s
 		risse_size src_num  = GetRegNum(src);
 		if(dest_num != src_num)
 		{
-			PutWord(ocAssign);
+			PutCode(ocAssign);
 			PutWord(dest_num);
 			PutWord(src_num);
 		}
@@ -331,7 +342,7 @@ void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tSSAVariable * s
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssign(risse_size dest, const tSSAVariable * src)
 {
-	PutWord(ocAssign);
+	PutCode(ocAssign);
 	PutWord(dest);
 	PutWord(GetRegNum(src));
 }
@@ -341,7 +352,7 @@ void tCodeGenerator::PutAssign(risse_size dest, const tSSAVariable * src)
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssign(const tSSAVariable * dest, risse_size src)
 {
-	PutWord(ocAssign);
+	PutCode(ocAssign);
 	PutWord(GetRegNum(dest));
 	PutWord(src);
 }
@@ -351,7 +362,7 @@ void tCodeGenerator::PutAssign(const tSSAVariable * dest, risse_size src)
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssign(const tSSAVariable * dest, const tVariant & value)
 {
-	PutWord(ocAssignConstant);
+	PutCode(ocAssignConstant);
 	PutWord(GetRegNum(dest));
 	PutWord(FindConst(value));
 }
@@ -365,7 +376,7 @@ void tCodeGenerator::PutAssign(const tSSAVariable * dest, tOpCode code)
 	RISSE_ASSERT(VMInsnInfo[code].Flags[0] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[code].Flags[1] == tVMInsnInfo::vifVoid);
 
-	PutWord(static_cast<risse_uint32>(code));
+	PutCode(code);
 	PutWord(GetRegNum(dest));
 }
 //---------------------------------------------------------------------------
@@ -375,7 +386,7 @@ void tCodeGenerator::PutAssign(const tSSAVariable * dest, tOpCode code)
 void tCodeGenerator::PutAssignNewRegExp(const tSSAVariable * dest,
 			const tSSAVariable * pattern, const tSSAVariable * flags)
 {
-	PutWord(ocAssignNewRegExp);
+	PutCode(ocAssignNewRegExp);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(pattern));
 	PutWord(GetRegNum(flags));
@@ -387,7 +398,7 @@ void tCodeGenerator::PutAssignNewRegExp(const tSSAVariable * dest,
 void tCodeGenerator::PutAssignNewFunction(const tSSAVariable * dest,
 			const tSSAVariable * body)
 {
-	PutWord(ocAssignNewFunction);
+	PutCode(ocAssignNewFunction);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(body));
 }
@@ -398,7 +409,7 @@ void tCodeGenerator::PutAssignNewFunction(const tSSAVariable * dest,
 void tCodeGenerator::PutAssignNewProperty(const tSSAVariable * dest,
 			const tSSAVariable * getter, const tSSAVariable * setter)
 {
-	PutWord(ocAssignNewProperty);
+	PutCode(ocAssignNewProperty);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(getter));
 	PutWord(GetRegNum(setter));
@@ -410,7 +421,7 @@ void tCodeGenerator::PutAssignNewProperty(const tSSAVariable * dest,
 void tCodeGenerator::PutAssignNewClass(const tSSAVariable * dest,
 			const tSSAVariable * super, const tSSAVariable * name)
 {
-	PutWord(ocAssignNewClass);
+	PutCode(ocAssignNewClass);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(super));
 	PutWord(GetRegNum(name));
@@ -422,7 +433,7 @@ void tCodeGenerator::PutAssignNewClass(const tSSAVariable * dest,
 void tCodeGenerator::PutAssignNewModule(const tSSAVariable * dest,
 			const tSSAVariable * name)
 {
-	PutWord(ocAssignNewModule);
+	PutCode(ocAssignNewModule);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(name));
 }
@@ -432,7 +443,7 @@ void tCodeGenerator::PutAssignNewModule(const tSSAVariable * dest,
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssignParam(const tSSAVariable * dest, risse_size index)
 {
-	PutWord(ocAssignParam);
+	PutCode(ocAssignParam);
 	PutWord(GetRegNum(dest));
 	PutWord(static_cast<risse_uint32>(index));
 	// index の最大値は MaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
@@ -443,7 +454,7 @@ void tCodeGenerator::PutAssignParam(const tSSAVariable * dest, risse_size index)
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutAssignBlockParam(const tSSAVariable * dest, risse_size index)
 {
-	PutWord(ocAssignBlockParam);
+	PutCode(ocAssignBlockParam);
 	PutWord(GetRegNum(dest));
 	PutWord(static_cast<risse_uint32>(index));
 	// index の最大値は MaxArgCount で確実に risse_uint32 で表現できる範囲のため安全にキャストできる
@@ -457,7 +468,7 @@ void tCodeGenerator::PutAddBindingMap(const tSSAVariable * map,
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(nname, nestlevel, regnum);
-	PutWord(ocAddBindingMap);
+	PutCode(ocAddBindingMap);
 	PutWord(GetRegNum(map));
 	PutWord(GetRegNum(name));
 	PutWord((nestlevel << 16) + regnum);
@@ -470,7 +481,7 @@ void tCodeGenerator::PutWrite(const tString & dest, const tSSAVariable * src)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(dest, nestlevel, regnum);
-	PutWord(ocWrite);
+	PutCode(ocWrite);
 	PutWord((nestlevel << 16) + regnum);
 	PutWord(GetRegNum(src));
 }
@@ -482,7 +493,7 @@ void tCodeGenerator::PutRead(const tSSAVariable * dest, const tString & src)
 {
 	risse_uint16 nestlevel = 0, regnum = 0;
 	FindSharedRegNameMap(src, nestlevel, regnum);
-	PutWord(ocRead);
+	PutCode(ocRead);
 	PutWord(GetRegNum(dest));
 	PutWord((nestlevel << 16) + regnum);
 }
@@ -499,7 +510,7 @@ void tCodeGenerator::PutCodeBlockRelocatee(const tSSAVariable * dest, risse_size
 	Consts.push_back(value);
 
 	// ocAssignConstant 命令を生成する
-	PutWord(ocAssignConstant);
+	PutCode(ocAssignConstant);
 	PutWord(GetRegNum(dest));
 	PutWord(reloc_pos);
 
@@ -512,7 +523,7 @@ void tCodeGenerator::PutCodeBlockRelocatee(const tSSAVariable * dest, risse_size
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutSetFrame(const tSSAVariable * dest)
 {
-	PutWord(ocSetFrame);
+	PutCode(ocSetFrame);
 	PutWord(GetRegNum(dest));
 }
 //---------------------------------------------------------------------------
@@ -521,7 +532,7 @@ void tCodeGenerator::PutSetFrame(const tSSAVariable * dest)
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutSetShare(const tSSAVariable * dest)
 {
-	PutWord(ocSetShare);
+	PutCode(ocSetShare);
 	PutWord(GetRegNum(dest));
 }
 //---------------------------------------------------------------------------
@@ -542,7 +553,7 @@ void tCodeGenerator::PutFunctionCall(const tSSAVariable * dest,
 	if(code == ocFuncCall && blocks.size() != 0)
 		code = ocFuncCallBlock;
 
-	PutWord(static_cast<risse_uint32>(code));
+	PutCode(code);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(func));
 
@@ -572,7 +583,7 @@ void tCodeGenerator::PutFunctionCall(const tSSAVariable * dest,
 void tCodeGenerator::PutSync(const tSSAVariable * dest,
 	const tSSAVariable * func, const tSSAVariable * lockee)
 {
-	PutWord(ocSync);
+	PutCode(ocSync);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(func));
 	PutWord(GetRegNum(lockee));
@@ -584,7 +595,8 @@ void tCodeGenerator::PutSync(const tSSAVariable * dest,
 void tCodeGenerator::PutJump(const tSSABlock * target)
 {
 	risse_size insn_pos = Code.size();
-	PutWord(ocJump);
+	PutCode(ocJump);
+	LastJumpTarget = target;
 	AddPendingBlockJump(target, insn_pos);
 	PutWord(0); // 仮
 }
@@ -596,7 +608,7 @@ void tCodeGenerator::PutBranch(const tSSAVariable * ref,
 		const tSSABlock * truetarget, const tSSABlock * falsetarget)
 {
 	risse_size insn_pos = Code.size();
-	PutWord(ocBranch);
+	PutCode(ocBranch);
 	PutWord(GetRegNum(ref));
 	AddPendingBlockJump(truetarget, insn_pos);
 	PutWord(0); // 仮
@@ -623,7 +635,7 @@ void tCodeGenerator::PutCatchBranch(const tSSAVariable * ref,
 
 	// ocCatchBranch を置く
 	risse_size insn_pos = Code.size();
-	PutWord(ocCatchBranch);
+	PutCode(ocCatchBranch);
 	PutWord(GetRegNum(ref));
 	PutWord(static_cast<risse_uint32>(reloc_pos));
 
@@ -645,7 +657,7 @@ void tCodeGenerator::PutCatchBranch(const tSSAVariable * ref,
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutDebugger()
 {
-	PutWord(ocDebugger);
+	PutCode(ocDebugger);
 }
 //---------------------------------------------------------------------------
 
@@ -653,7 +665,7 @@ void tCodeGenerator::PutDebugger()
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutThrow(const tSSAVariable * throwee)
 {
-	PutWord(ocThrow);
+	PutCode(ocThrow);
 	PutWord(GetRegNum(throwee));
 }
 //---------------------------------------------------------------------------
@@ -662,7 +674,7 @@ void tCodeGenerator::PutThrow(const tSSAVariable * throwee)
 //---------------------------------------------------------------------------
 void tCodeGenerator::PutReturn(const tSSAVariable * value)
 {
-	PutWord(ocReturn);
+	PutCode(ocReturn);
 	PutWord(GetRegNum(value));
 }
 //---------------------------------------------------------------------------
@@ -680,7 +692,7 @@ void tCodeGenerator::PutExitTryException(const tSSAVariable * value,
 	TryIdentifierRelocations.push_back(std::pair<risse_size, risse_size>(reloc_pos, try_id_idx));
 
 	// ocExitTryException 命令を書く
-	PutWord(ocExitTryException);
+	PutCode(ocExitTryException);
 	PutWord(value?GetRegNum(value):InvalidRegNum);
 	PutWord(static_cast<risse_uint32>(reloc_pos));
 	PutWord(static_cast<risse_uint32>(idx));
@@ -692,7 +704,7 @@ void tCodeGenerator::PutExitTryException(const tSSAVariable * value,
 void tCodeGenerator::PutGetExitTryValue(const tSSAVariable * dest,
 											const tSSAVariable * src)
 {
-	PutWord(ocGetExitTryValue);
+	PutCode(ocGetExitTryValue);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(src));
 }
@@ -708,7 +720,7 @@ void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
 	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifVoid);
 
-	PutWord(static_cast<risse_uint32>(op));
+	PutCode(op);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(arg1));
 }
@@ -725,7 +737,7 @@ void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
 	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
-	PutWord(static_cast<risse_uint32>(op));
+	PutCode(op);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(arg1));
 	PutWord(GetRegNum(arg2));
@@ -744,7 +756,7 @@ void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
 	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
 
-	PutWord(static_cast<risse_uint32>(op));
+	PutCode(op);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(arg1));
 	PutWord(GetRegNum(arg2));
@@ -757,7 +769,7 @@ void tCodeGenerator::PutOperator(tOpCode op, const tSSAVariable * dest,
 void tCodeGenerator::PutInContextOf(const tSSAVariable * dest,
 		const tSSAVariable * instance, const tSSAVariable * context)
 {
-	PutWord(static_cast<risse_uint32>(context ? ocInContextOf : ocInContextOfDyn));
+	PutCode(context ? ocInContextOf : ocInContextOfDyn);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(instance));
 	if(context) PutWord(GetRegNum(context));
@@ -778,7 +790,7 @@ void tCodeGenerator::PutGet(tOpCode op, const tSSAVariable * dest,
 	RISSE_ASSERT(!(op == ocIGet && flags != 0)); // フラグをもてるのはocDGetのみ
 
 	if(op == ocDGet && flags != 0) op = ocDGetF; // フラグがある場合は ocDGetFを置く
-	PutWord(static_cast<risse_uint32>(op));
+	PutCode(op);
 	PutWord(GetRegNum(dest));
 	PutWord(GetRegNum(obj));
 	PutWord(GetRegNum(name));
@@ -802,7 +814,7 @@ void tCodeGenerator::PutSet(tOpCode op, const tSSAVariable * obj,
 
 	if(op == ocDSet && flags != 0) op = ocDSetF;
 		// フラグがある場合は ocDSetFを置く
-	PutWord(static_cast<risse_uint32>(op));
+	PutCode(op);
 	PutWord(GetRegNum(obj));
 	PutWord(GetRegNum(name));
 	PutWord(GetRegNum(value));
@@ -816,7 +828,7 @@ void tCodeGenerator::PutSetAttribute(const tSSAVariable * obj,
 		const tSSAVariable * name, risse_uint32 attrib)
 {
 	// 一応 code を assert (完全ではない)
-	PutWord(static_cast<risse_uint32>(ocDSetAttrib));
+	PutCode(ocDSetAttrib);
 	PutWord(GetRegNum(obj));
 	PutWord(GetRegNum(name));
 	PutWord(attrib);
@@ -830,7 +842,7 @@ void tCodeGenerator::PutAssert(const tSSAVariable *cond, const tString & msg)
 	// assertion コードを置く
 	RISSE_ASSERT(VMInsnInfo[ocAssert].Flags[0] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[ocAssert].Flags[1] == tVMInsnInfo::vifConstant);
-	PutWord(ocAssert);
+	PutCode(ocAssert);
 	PutWord(GetRegNum(cond));
 	PutWord(FindConst(msg));
 }
@@ -842,7 +854,7 @@ void tCodeGenerator::PutAssertType(const tSSAVariable *var, tVariant::tType type
 {
 	RISSE_ASSERT(VMInsnInfo[ocAssertType].Flags[0] == tVMInsnInfo::vifRegister);
 	RISSE_ASSERT(VMInsnInfo[ocAssertType].Flags[1] == tVMInsnInfo::vifOthers);
-	PutWord(ocAssertType);
+	PutCode(ocAssertType);
 	PutWord(GetRegNum(var));
 	PutWord(static_cast<risse_uint32>(type));
 }

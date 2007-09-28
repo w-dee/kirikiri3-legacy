@@ -335,6 +335,7 @@ tVariant::tGuessType tSSAVariable::GetGuessType() const
 		return tVariant::gtAny;
 	}
 	RISSE_ASSERT(!"unhandled type here!");
+	return tVariant::gtAny;
 }
 //---------------------------------------------------------------------------
 

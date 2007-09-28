@@ -562,6 +562,27 @@ tVariantBlock tVariantBlock::BitOr_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Void     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitOr_Integer  (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -576,6 +597,27 @@ tVariantBlock tVariantBlock::BitOr_Integer  (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Integer     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -600,9 +642,51 @@ tVariantBlock tVariantBlock::BitOr_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Real     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitOr_Null     (const tVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Null     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -628,6 +712,27 @@ tVariantBlock tVariantBlock::BitOr_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_String     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitOr_Octet    (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -643,6 +748,27 @@ tVariantBlock tVariantBlock::BitOr_Octet    (const tVariantBlock & rhs) const
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Octet     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -668,6 +794,27 @@ tVariantBlock tVariantBlock::BitOr_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitOr_Boolean     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitXor_Void     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -682,6 +829,27 @@ tVariantBlock tVariantBlock::BitXor_Void     (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Void     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -706,6 +874,27 @@ tVariantBlock tVariantBlock::BitXor_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Integer     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitXor_Real     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -725,9 +914,51 @@ tVariantBlock tVariantBlock::BitXor_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Real     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitXor_Null     (const tVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Null     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -753,6 +984,27 @@ tVariantBlock tVariantBlock::BitXor_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_String     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitXor_Octet    (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -768,6 +1020,27 @@ tVariantBlock tVariantBlock::BitXor_Octet    (const tVariantBlock & rhs) const
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Octet     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -793,6 +1066,27 @@ tVariantBlock tVariantBlock::BitXor_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitXor_Boolean     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitAnd_Void     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -807,6 +1101,27 @@ tVariantBlock tVariantBlock::BitAnd_Void     (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Void     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -831,6 +1146,27 @@ tVariantBlock tVariantBlock::BitAnd_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Integer     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitAnd_Real     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -850,9 +1186,51 @@ tVariantBlock tVariantBlock::BitAnd_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Real     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtInteger;
+	case gtInteger:		return gtInteger;
+	case gtReal:		return gtInteger;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtAny	|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitAnd_Null     (const tVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Null     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -878,6 +1256,27 @@ tVariantBlock tVariantBlock::BitAnd_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_String     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitAnd_Octet    (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -898,6 +1297,27 @@ tVariantBlock tVariantBlock::BitAnd_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Octet     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariantBlock tVariantBlock::BitAnd_Boolean  (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -913,6 +1333,27 @@ tVariantBlock tVariantBlock::BitAnd_Boolean  (const tVariantBlock & rhs) const
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
 	return tVariantBlock();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeBitAnd_Boolean     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtError|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1091,6 +1532,27 @@ bool tVariantBlock::Lesser_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Void     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtBoolean;
+	case gtOctet:		return gtBoolean;
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Lesser_Integer  (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1105,6 +1567,27 @@ bool tVariantBlock::Lesser_Integer  (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Integer     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1129,9 +1612,51 @@ bool tVariantBlock::Lesser_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Real     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Lesser_Null     (const tVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Null     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1156,6 +1681,27 @@ bool tVariantBlock::Lesser_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_String    (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtBoolean;
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Lesser_Octet    (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1170,6 +1716,27 @@ bool tVariantBlock::Lesser_Octet    (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Octet    (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtBoolean;
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1194,6 +1761,27 @@ bool tVariantBlock::Lesser_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeLesser_Boolean   (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Greater_Void     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1208,6 +1796,27 @@ bool tVariantBlock::Greater_Void     (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Void     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtBoolean;
+	case gtOctet:		return gtBoolean;
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1232,6 +1841,27 @@ bool tVariantBlock::Greater_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Integer     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Greater_Real     (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1251,9 +1881,51 @@ bool tVariantBlock::Greater_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Real     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtBoolean;
+	case gtReal:		return gtBoolean;
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Greater_Null     (const tVariantBlock & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Null     (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -1278,6 +1950,27 @@ bool tVariantBlock::Greater_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_String    (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtBoolean;
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Greater_Octet    (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1297,6 +1990,27 @@ bool tVariantBlock::Greater_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Octet    (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtBoolean;
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtBoolean;
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtBoolean|gtEffective;
+
+	default:		return gtAny|gtEffective;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Greater_Boolean  (const tVariantBlock & rhs) const
 {
 	switch(rhs.GetType())
@@ -1311,6 +2025,27 @@ bool tVariantBlock::Greater_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tVariantBlock::GuessTypeGreater_Boolean   (tGuessType r)
+{
+	switch(r)
+	{
+	case gtVoid:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
+
+	default:		return gtAny|gtEffective;
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -2605,9 +3340,9 @@ int tVariantBlock::GuessTypeAdd_Null     (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
-	default:		return gtAny|gtEffective;
+	default:		return gtError|gtEffective;
 	}
 }
 //---------------------------------------------------------------------------
@@ -2714,7 +3449,7 @@ int tVariantBlock::GuessTypeAdd_Boolean  (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
 	default:		return gtAny|gtEffective;
 	}
@@ -2863,9 +3598,9 @@ int tVariantBlock::GuessTypeSub_Null   (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
-	default:		return gtAny|gtEffective;
+	default:		return gtError|gtEffective;
 	}
 }
 //---------------------------------------------------------------------------
@@ -2892,7 +3627,7 @@ int tVariantBlock::GuessTypeSub_Octet   (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
 	default:		return gtAny|gtEffective;
 	}
@@ -2933,7 +3668,7 @@ int tVariantBlock::GuessTypeSub_String   (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
 	default:		return gtAny|gtEffective;
 	}
@@ -2973,7 +3708,7 @@ int tVariantBlock::GuessTypeSub_Boolean   (tGuessType r)
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtAny:			return gtAny	|gtEffective;
+	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
 	default:		return gtAny|gtEffective;
 	}

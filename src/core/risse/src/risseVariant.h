@@ -1457,6 +1457,33 @@ public:
 	tVariantBlock BitOr_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitOr_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
+	static int GuessTypeBitOr(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeBitOr_Void     (r);
+		case gtInteger:		return GuessTypeBitOr_Integer  (r);
+		case gtReal:		return GuessTypeBitOr_Real     (r);
+		case gtNull:		return GuessTypeBitOr_Null     (r);
+		case gtString:		return GuessTypeBitOr_String   (r);
+		case gtOctet:		return GuessTypeBitOr_Octet    (r);
+		case gtBoolean:		return GuessTypeBitOr_Boolean  (r);
+		case gtObject:		return GuessTypeBitOr_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeBitOr_Void     (tGuessType r);
+	static int GuessTypeBitOr_Integer  (tGuessType r);
+	static int GuessTypeBitOr_Real     (tGuessType r);
+	static int GuessTypeBitOr_Null     (tGuessType r);
+	static int GuessTypeBitOr_String   (tGuessType r);
+	static int GuessTypeBitOr_Octet    (tGuessType r);
+	static int GuessTypeBitOr_Boolean  (tGuessType r);
+	static int GuessTypeBitOr_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		|= 演算子		BitOrAssign
 	//! @return		演算後の*thisへの参照
@@ -1502,6 +1529,33 @@ public:
 	tVariantBlock BitXor_Octet    (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
+
+	static int GuessTypeBitXor(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeBitXor_Void     (r);
+		case gtInteger:		return GuessTypeBitXor_Integer  (r);
+		case gtReal:		return GuessTypeBitXor_Real     (r);
+		case gtNull:		return GuessTypeBitXor_Null     (r);
+		case gtString:		return GuessTypeBitXor_String   (r);
+		case gtOctet:		return GuessTypeBitXor_Octet    (r);
+		case gtBoolean:		return GuessTypeBitXor_Boolean  (r);
+		case gtObject:		return GuessTypeBitXor_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeBitXor_Void     (tGuessType r);
+	static int GuessTypeBitXor_Integer  (tGuessType r);
+	static int GuessTypeBitXor_Real     (tGuessType r);
+	static int GuessTypeBitXor_Null     (tGuessType r);
+	static int GuessTypeBitXor_String   (tGuessType r);
+	static int GuessTypeBitXor_Octet    (tGuessType r);
+	static int GuessTypeBitXor_Boolean  (tGuessType r);
+	static int GuessTypeBitXor_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		^= 演算子		BitXorAssign
@@ -1549,6 +1603,33 @@ public:
 	tVariantBlock BitAnd_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitAnd_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
+	static int GuessTypeBitAnd(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeBitAnd_Void     (r);
+		case gtInteger:		return GuessTypeBitAnd_Integer  (r);
+		case gtReal:		return GuessTypeBitAnd_Real     (r);
+		case gtNull:		return GuessTypeBitAnd_Null     (r);
+		case gtString:		return GuessTypeBitAnd_String   (r);
+		case gtOctet:		return GuessTypeBitAnd_Octet    (r);
+		case gtBoolean:		return GuessTypeBitAnd_Boolean  (r);
+		case gtObject:		return GuessTypeBitAnd_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeBitAnd_Void     (tGuessType r);
+	static int GuessTypeBitAnd_Integer  (tGuessType r);
+	static int GuessTypeBitAnd_Real     (tGuessType r);
+	static int GuessTypeBitAnd_Null     (tGuessType r);
+	static int GuessTypeBitAnd_String   (tGuessType r);
+	static int GuessTypeBitAnd_Octet    (tGuessType r);
+	static int GuessTypeBitAnd_Boolean  (tGuessType r);
+	static int GuessTypeBitAnd_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		&= 演算子		BitAndAssign
 	//! @return		演算後の*thisへの参照
@@ -1590,6 +1671,11 @@ public:
 	bool NotEqual_Boolean  (const tVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
 	bool NotEqual_Object   (const tVariantBlock & rhs) const { return !Equal_Object (rhs); }
 
+	static int GuessTypeNotEqual(tGuessType l, tGuessType r)
+	{
+		return GuessTypeEqual(l, r); // Equal と一緒
+	}
+
 	//-----------------------------------------------------------------------
 	//! @brief		== 演算子		Equal
 	//! @return		演算結果
@@ -1620,7 +1706,17 @@ public:
 	bool Equal_String   (const tVariantBlock & rhs) const;
 	bool Equal_Octet    (const tVariantBlock & rhs) const;
 	bool Equal_Boolean  (const tVariantBlock & rhs) const;
-	bool Equal_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs); }
+	bool Equal_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs).CastToBoolean(); }
+
+	static int GuessTypeEqual(tGuessType l, tGuessType r)
+	{
+		int effective = 0;
+		(void)r;
+		if(l == gtObject) effective = gtEffective;
+		return gtBoolean | effective;
+		// l,rに関わらず必ずbooleanになる
+		// gtObject の場合は確実に副作用を持つ場合がある
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		!== 演算子		DiscNotEqual
@@ -1647,6 +1743,11 @@ public:
 	bool DiscNotEqual_Octet    (const tVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
 	bool DiscNotEqual_Boolean  (const tVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
 	bool DiscNotEqual_Object   (const tVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
+
+	static int GuessTypeDiscNotEqual(tGuessType l, tGuessType r)
+	{
+		return GuessTypeDiscEqual(l, r); // GuessTypeDiscEqual と一緒
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		識別 === 演算子		DiscEqual
@@ -1684,7 +1785,17 @@ public:
 	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_Object   (const tVariantBlock & rhs) const
-			{ return Invoke_Object(mnDiscEqual, rhs); }
+			{ return Invoke_Object(mnDiscEqual, rhs).CastToBoolean(); }
+
+	static int GuessTypeDiscEqual(tGuessType l, tGuessType r)
+	{
+		int effective = 0;
+		(void)r;
+		if(l == gtObject) effective = gtEffective;
+		return gtBoolean | effective;
+		// l,rに関わらず必ずbooleanになる
+		// gtObject の場合は確実に副作用を持つ場合がある
+	}
 
 	//-----------------------------------------------------------------------
 	//! @brief		厳密な識別演算子		StrictEqual
@@ -1758,6 +1869,33 @@ public:
 	bool Lesser_Boolean  (const tVariantBlock & rhs) const;
 	bool Lesser_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
+	static int GuessTypeLesser(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeLesser_Void     (r);
+		case gtInteger:		return GuessTypeLesser_Integer  (r);
+		case gtReal:		return GuessTypeLesser_Real     (r);
+		case gtNull:		return GuessTypeLesser_Null     (r);
+		case gtString:		return GuessTypeLesser_String   (r);
+		case gtOctet:		return GuessTypeLesser_Octet    (r);
+		case gtBoolean:		return GuessTypeLesser_Boolean  (r);
+		case gtObject:		return GuessTypeLesser_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeLesser_Void     (tGuessType r);
+	static int GuessTypeLesser_Integer  (tGuessType r);
+	static int GuessTypeLesser_Real     (tGuessType r);
+	static int GuessTypeLesser_Null     (tGuessType r);
+	static int GuessTypeLesser_String   (tGuessType r);
+	static int GuessTypeLesser_Octet    (tGuessType r);
+	static int GuessTypeLesser_Boolean  (tGuessType r);
+	static int GuessTypeLesser_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		> 演算子		Greater
 	//! @param		rhs			右辺
@@ -1789,6 +1927,33 @@ public:
 	bool Greater_Octet    (const tVariantBlock & rhs) const;
 	bool Greater_Boolean  (const tVariantBlock & rhs) const;
 	bool Greater_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
+
+	static int GuessTypeGreater(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeGreater_Void     (r);
+		case gtInteger:		return GuessTypeGreater_Integer  (r);
+		case gtReal:		return GuessTypeGreater_Real     (r);
+		case gtNull:		return GuessTypeGreater_Null     (r);
+		case gtString:		return GuessTypeGreater_String   (r);
+		case gtOctet:		return GuessTypeGreater_Octet    (r);
+		case gtBoolean:		return GuessTypeGreater_Boolean  (r);
+		case gtObject:		return GuessTypeGreater_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeGreater_Void     (tGuessType r);
+	static int GuessTypeGreater_Integer  (tGuessType r);
+	static int GuessTypeGreater_Real     (tGuessType r);
+	static int GuessTypeGreater_Null     (tGuessType r);
+	static int GuessTypeGreater_String   (tGuessType r);
+	static int GuessTypeGreater_Octet    (tGuessType r);
+	static int GuessTypeGreater_Boolean  (tGuessType r);
+	static int GuessTypeGreater_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		<= 演算子		LesserOrEqual
@@ -1823,6 +1988,33 @@ public:
 	bool LesserOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
 
+	static int GuessTypeLesserOrEqual(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeLesserOrEqual_Void     (r);
+		case gtInteger:		return GuessTypeLesserOrEqual_Integer  (r);
+		case gtReal:		return GuessTypeLesserOrEqual_Real     (r);
+		case gtNull:		return GuessTypeLesserOrEqual_Null     (r);
+		case gtString:		return GuessTypeLesserOrEqual_String   (r);
+		case gtOctet:		return GuessTypeLesserOrEqual_Octet    (r);
+		case gtBoolean:		return GuessTypeLesserOrEqual_Boolean  (r);
+		case gtObject:		return GuessTypeLesserOrEqual_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeLesserOrEqual_Void     (tGuessType r) { return GuessTypeGreater_Void     (r); }
+	static int GuessTypeLesserOrEqual_Integer  (tGuessType r) { return GuessTypeGreater_Integer  (r); }
+	static int GuessTypeLesserOrEqual_Real     (tGuessType r) { return GuessTypeGreater_Real     (r); }
+	static int GuessTypeLesserOrEqual_Null     (tGuessType r) { return GuessTypeGreater_Null     (r); }
+	static int GuessTypeLesserOrEqual_String   (tGuessType r) { return GuessTypeGreater_String   (r); }
+	static int GuessTypeLesserOrEqual_Octet    (tGuessType r) { return GuessTypeGreater_Octet    (r); }
+	static int GuessTypeLesserOrEqual_Boolean  (tGuessType r) { return GuessTypeGreater_Boolean  (r); }
+	static int GuessTypeLesserOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		>= 演算子		GreaterOrEqual
 	//! @param		rhs			右辺
@@ -1854,6 +2046,33 @@ public:
 	bool GreaterOrEqual_Octet    (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
+
+	static int GuessTypeGreaterOrEqual(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeGreaterOrEqual_Void     (r);
+		case gtInteger:		return GuessTypeGreaterOrEqual_Integer  (r);
+		case gtReal:		return GuessTypeGreaterOrEqual_Real     (r);
+		case gtNull:		return GuessTypeGreaterOrEqual_Null     (r);
+		case gtString:		return GuessTypeGreaterOrEqual_String   (r);
+		case gtOctet:		return GuessTypeGreaterOrEqual_Octet    (r);
+		case gtBoolean:		return GuessTypeGreaterOrEqual_Boolean  (r);
+		case gtObject:		return GuessTypeGreaterOrEqual_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeGreaterOrEqual_Void     (tGuessType r) { return GuessTypeLesser_Void     (r); }
+	static int GuessTypeGreaterOrEqual_Integer  (tGuessType r) { return GuessTypeLesser_Integer  (r); }
+	static int GuessTypeGreaterOrEqual_Real     (tGuessType r) { return GuessTypeLesser_Real     (r); }
+	static int GuessTypeGreaterOrEqual_Null     (tGuessType r) { return GuessTypeLesser_Null     (r); }
+	static int GuessTypeGreaterOrEqual_String   (tGuessType r) { return GuessTypeLesser_String   (r); }
+	static int GuessTypeGreaterOrEqual_Octet    (tGuessType r) { return GuessTypeLesser_Octet    (r); }
+	static int GuessTypeGreaterOrEqual_Boolean  (tGuessType r) { return GuessTypeLesser_Boolean  (r); }
+	static int GuessTypeGreaterOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift

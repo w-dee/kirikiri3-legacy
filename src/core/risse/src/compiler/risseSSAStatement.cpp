@@ -974,12 +974,14 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 			tSSAVariable::tValueState vs = Used[0]->GetValueState();
 			int gt;
 			// 特定の型あるいは tVariant::gtAny を渡してみて、どの様な型が返ってくる可能性があるかを推測する
+#define RISA_GUESS_UNARY(C) \
+	case oc##C:	gt = tVariant::GuessType##C			(Used[0]->GetGuessType());	break;
 			switch(Code)
 			{
-				case ocLogNot:	gt = tVariant::GuessTypeLogNot			(Used[0]->GetGuessType());	break;
-				case ocBitNot:	gt = tVariant::GuessTypeBitNot			(Used[0]->GetGuessType());	break;
-				case ocPlus:	gt = tVariant::GuessTypePlus			(Used[0]->GetGuessType());	break;
-				case ocMinus:	gt = tVariant::GuessTypeMinus			(Used[0]->GetGuessType());	break;
+				RISA_GUESS_UNARY(LogNot)
+				RISA_GUESS_UNARY(BitNot)
+				RISA_GUESS_UNARY(Plus)
+				RISA_GUESS_UNARY(Minus)
 				case ocString:	gt = tVariant::GuessTypeCastToString	(Used[0]->GetGuessType());	break;
 				case ocBoolean:	gt = tVariant::GuessTypeCastToBoolean	(Used[0]->GetGuessType());	break;
 				case ocReal:	gt = tVariant::GuessTypeCastToReal		(Used[0]->GetGuessType());	break;
@@ -997,17 +999,19 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 				// 定数畳み込みをする
 				try
 				{
+#define RISA_FOLD_UNARY(C) \
+	case oc##C:	Declared->SuggestValue(Used[0]->GetValue().C());			break;
 					switch(Code)
 					{
-						case ocLogNot:	Declared->SuggestValue(Used[0]->GetValue().LogNot());			break;
-						case ocBitNot:	Declared->SuggestValue(Used[0]->GetValue().BitNot());			break;
-						case ocPlus:	Declared->SuggestValue(Used[0]->GetValue().Plus());				break;
-						case ocMinus:	Declared->SuggestValue(Used[0]->GetValue().Minus());			break;
-						case ocString:	Declared->SuggestValue(Used[0]->GetValue().CastToString());		break;
-						case ocBoolean:	Declared->SuggestValue(Used[0]->GetValue().CastToBoolean());	break;
-						case ocReal:	Declared->SuggestValue(Used[0]->GetValue().CastToReal());		break;
-						case ocInteger:	Declared->SuggestValue(Used[0]->GetValue().CastToInteger());	break;
-						case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet());		break;
+						RISA_FOLD_UNARY(LogNot)
+						RISA_FOLD_UNARY(BitNot)
+						RISA_FOLD_UNARY(Plus)
+						RISA_FOLD_UNARY(Minus)
+						case ocString:	Declared->SuggestValue(Used[0]->GetValue().CastToString	());			break;
+						case ocBoolean:	Declared->SuggestValue(Used[0]->GetValue().CastToBoolean());			break;
+						case ocReal:	Declared->SuggestValue(Used[0]->GetValue().CastToReal	());			break;
+						case ocInteger:	Declared->SuggestValue(Used[0]->GetValue().CastToInteger());			break;
+						case ocOctet:	Declared->SuggestValue(Used[0]->GetValue().CastToOctet	());			break;
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
 					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ
@@ -1051,6 +1055,17 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	//-- 二項
 	case ocAdd:
 	case ocSub:
+	case ocBitOr:
+	case ocBitXor:
+	case ocBitAnd:
+	case ocNotEqual:
+	case ocEqual:
+	case ocDiscNotEqual:
+	case ocDiscEqual:
+	case ocLesser:
+	case ocGreater:
+	case ocLesserOrEqual:
+	case ocGreaterOrEqual:
 		RISSE_ASSERT(Declared);
 
 		{
@@ -1065,10 +1080,23 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 			tVariant::tGuessType input_gt_l = Used[0]->GetGuessType();
 			tVariant::tGuessType input_gt_r = Used[1]->GetGuessType();
 			int gt;
+#define RISA_GUESS_BINARY(C) \
+	case oc##C:			gt = tVariant::GuessType##C			(input_gt_l, input_gt_r); break;
 			switch(Code)
 			{
-				case ocAdd:			gt = tVariant::GuessTypeAdd(input_gt_l, input_gt_r);	break;
-				case ocSub:			gt = tVariant::GuessTypeSub(input_gt_l, input_gt_r);	break;
+				RISA_GUESS_BINARY(Add)
+				RISA_GUESS_BINARY(Sub)
+				RISA_GUESS_BINARY(BitOr)
+				RISA_GUESS_BINARY(BitXor)
+				RISA_GUESS_BINARY(BitAnd)
+				RISA_GUESS_BINARY(NotEqual)
+				RISA_GUESS_BINARY(Equal)
+				RISA_GUESS_BINARY(DiscNotEqual)
+				RISA_GUESS_BINARY(DiscEqual)
+				RISA_GUESS_BINARY(Lesser)
+				RISA_GUESS_BINARY(Greater)
+				RISA_GUESS_BINARY(LesserOrEqual)
+				RISA_GUESS_BINARY(GreaterOrEqual)
 				default: RISSE_ASSERT(!"Unhandled type here!"); ;
 			}
 			Effective = gt & tVariant::gtEffective; // 副作用があるかどうか
@@ -1078,10 +1106,23 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 				// 定数畳み込みをする
 				try
 				{
+#define RISA_FOLD_BINARY(C) \
+	case oc##C:			Declared->SuggestValue(Used[0]->GetValue().C		(Used[1]->GetValue())); break;
 					switch(Code)
 					{
-						case ocAdd:			Declared->SuggestValue(Used[0]->GetValue().Add(Used[1]->GetValue()));	break;
-						case ocSub:			Declared->SuggestValue(Used[0]->GetValue().Sub(Used[1]->GetValue()));	break;
+						RISA_FOLD_BINARY(Add)
+						RISA_FOLD_BINARY(Sub)
+						RISA_FOLD_BINARY(BitOr)
+						RISA_FOLD_BINARY(BitXor)
+						RISA_FOLD_BINARY(BitAnd)
+						RISA_FOLD_BINARY(NotEqual)
+						RISA_FOLD_BINARY(Equal)
+						RISA_FOLD_BINARY(DiscNotEqual)
+						RISA_FOLD_BINARY(DiscEqual)
+						RISA_FOLD_BINARY(Lesser)
+						RISA_FOLD_BINARY(Greater)
+						RISA_FOLD_BINARY(LesserOrEqual)
+						RISA_FOLD_BINARY(GreaterOrEqual)
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
 					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ
@@ -1125,20 +1166,9 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 
 	case ocLogOr:
 	case ocLogAnd:
-	case ocNotEqual:
-	case ocEqual:
-	case ocDiscNotEqual:
-	case ocDiscEqual:
-	case ocLesser:
-	case ocGreater:
-	case ocLesserOrEqual:
-	case ocGreaterOrEqual:
 
 	case ocDecAssign:
 	case ocIncAssign:
-	case ocBitOr:
-	case ocBitXor:
-	case ocBitAnd:
 	case ocRBitShift:
 	case ocLShift:
 	case ocRShift:
@@ -1146,8 +1176,6 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocDiv:
 	case ocIdiv:
 	case ocMul:
-//	case ocAdd:
-//	case ocSub:
 	case ocInContextOf:
 	case ocInContextOfDyn:
 	case ocInstanceOf:

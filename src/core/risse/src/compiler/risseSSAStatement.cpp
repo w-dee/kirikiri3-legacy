@@ -370,11 +370,13 @@ void tSSAStatement::SetAssertType(tVariant::tType type)
 //---------------------------------------------------------------------------
 void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *, risse_size> &livemap)
 {
+	// TODO: ここの部分の高速化
+
 	// 一応このメソッドが実行時には SSA性が保持されていると見なす
 	RISSE_ASSERT(Block->GetForm()->GetState() == tSSAForm::ssSSA);
 	RISSE_ASSERT(Order != risse_size_max); // Order が設定されていること
 
-wxFprintf(stderr, wxT("at [%d]:"), (int)Order);
+//wxFprintf(stderr, wxT("at [%d]:"), (int)Order);
 
 	// この文で定義された変数があるならば livemap にその変数を追加する
 	bool has_new_declared = false;
@@ -389,11 +391,12 @@ wxFprintf(stderr, wxT("at [%d]:"), (int)Order);
 			// livemap に追加
 			livemap.insert(gc_map<const tSSAVariable *, risse_size>::value_type(Declared, risse_size_max));
 			has_new_declared = true;
-wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().c_str());
 		}
 	}
 
 	bool interf_added = false;
+
 	if(!(Code == ocAssign || Code == ocPhi))
 	{
 		// 一時的処置
@@ -410,11 +413,12 @@ wxFprintf(stderr, wxT("adding %s  "), Declared->GetQualifiedName().AsWxString().
 			{
 				if(li->first == Declared) continue;
 				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
-wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
 			}
 		}
 		interf_added = true;
 	}
+
 
 	// この文で使用された変数があり、それがこの文で使用が終了していればlivemapから削除する
 	// この文で使用が終了しているかどうかの判定は、
@@ -457,18 +461,18 @@ wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxStri
 			// livemapからこれを削除する
 			// φ関数などで前の関数と同じ順位の場合は
 			// 前の関数ですでに変数が削除されている可能性がある
-wxFprintf(stderr, wxT("deleting %s:"), (*i)->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("deleting %s:"), (*i)->GetQualifiedName().AsWxString().c_str());
 			gc_map<const tSSAVariable *, risse_size>::iterator fi =
 				livemap.find((*i));
 			RISSE_ASSERT(Code == ocPhi || fi != livemap.end());
 			if(fi != livemap.end())
 			{
-wxFprintf(stderr, wxT("deleted  "), (*i)->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("deleted  "), (*i)->GetQualifiedName().AsWxString().c_str());
 				livemap.erase(fi);
 			}
 			else
 			{
-wxFprintf(stderr, wxT("not found  "), (*i)->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("not found  "), (*i)->GetQualifiedName().AsWxString().c_str());
 			}
 		}
 	}
@@ -483,12 +487,12 @@ wxFprintf(stderr, wxT("not found  "), (*i)->GetQualifiedName().AsWxString().c_st
 			{
 				if(li->first == Declared) continue;
 				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
-wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
 			}
 		}
 	}
 
-wxFprintf(stderr, wxT("\n"));
+//wxFprintf(stderr, wxT("\n"));
 
 }
 //---------------------------------------------------------------------------
@@ -539,7 +543,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	// 精査しない
 	if(Code != ocPhi && !Block->GetAlive()) return;
 
-wxFprintf(stderr, wxT("at block %s : %s\n"), Block->GetName().AsWxString().c_str(), Dump().AsWxString().c_str());
+//wxFprintf(stderr, wxT("at block %s : %s\n"), Block->GetName().AsWxString().c_str(), Dump().AsWxString().c_str());
 
 	// まずは分岐系
 	switch(Code)
@@ -551,9 +555,9 @@ wxFprintf(stderr, wxT("at block %s : %s\n"), Block->GetName().AsWxString().c_str
 			tSSABlock * block = GetJumpTarget();
 			if(!block->GetAlive())
 			{
-wxFprintf(stderr, wxT("ocJump at %s, pushing the target %s\n"),
-		Block->GetName().AsWxString().c_str(),
-		block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("ocJump at %s, pushing the target %s\n"),
+//		Block->GetName().AsWxString().c_str(),
+//		block->GetName().AsWxString().c_str());
 				block->SetAlive(true);
 				blocks.push_back(block);
 			}
@@ -602,9 +606,9 @@ wxFprintf(stderr, wxT("ocJump at %s, pushing the target %s\n"),
 				block = GetFalseBranch();
 				if(!block->GetAlive())
 				{
-wxFprintf(stderr, wxT("ocBranch at %s, pushing the false target %s\n"),
-		Block->GetName().AsWxString().c_str(),
-		block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("ocBranch at %s, pushing the false target %s\n"),
+//		Block->GetName().AsWxString().c_str(),
+//		block->GetName().AsWxString().c_str());
 					block->SetAlive(true);
 					blocks.push_back(block);
 				}
@@ -614,9 +618,9 @@ wxFprintf(stderr, wxT("ocBranch at %s, pushing the false target %s\n"),
 				block = GetTrueBranch();
 				if(!block->GetAlive())
 				{
-wxFprintf(stderr, wxT("ocBranch at %s, pushing the true target %s\n"),
-		Block->GetName().AsWxString().c_str(),
-		block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("ocBranch at %s, pushing the true target %s\n"),
+//		Block->GetName().AsWxString().c_str(),
+//		block->GetName().AsWxString().c_str());
 					block->SetAlive(true);
 					blocks.push_back(block);
 				}
@@ -631,9 +635,9 @@ wxFprintf(stderr, wxT("ocBranch at %s, pushing the true target %s\n"),
 		{
 			if(!(*i)->GetAlive())
 			{
-wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
-		Block->GetName().AsWxString().c_str(),
-		(*i)->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
+//		Block->GetName().AsWxString().c_str(),
+//		(*i)->GetName().AsWxString().c_str());
 				(*i)->SetAlive(true);
 				blocks.push_back(*i);
 			}
@@ -1253,6 +1257,7 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 		// variables に Declared を push する
 		if(old_value_state < Declared->GetValueState())
 		{
+/*
 wxFprintf(stderr, wxT("changing state of %s from %s to %s\n"),
 Declared->GetQualifiedName().AsWxString().c_str(),
 
@@ -1267,6 +1272,7 @@ Declared->GetValueState()==tSSAVariable::vsTypeConstant ? wxT("type constant"):
 Declared->GetValueState()==tSSAVariable::vsVarying ? wxT("varying") : wxT("")
 
 );
+*/
 			variables.push_back(Declared);
 		}
 	}

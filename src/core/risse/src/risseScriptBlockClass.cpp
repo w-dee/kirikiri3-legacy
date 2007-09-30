@@ -309,6 +309,7 @@ void tScriptBlockInstance::Evaluate(const tBindingInfo & binding, tVariant * res
 				NULL,
 				binding.GetFrames(),
 				result);
+
 }
 //---------------------------------------------------------------------------
 

@@ -240,11 +240,13 @@ void tSSAVariable::Coalesce()
 //---------------------------------------------------------------------------
 void tSSAVariable::AssignRegister(gc_vector<void*> & assign_work)
 {
+	// TODO: ここの部分の高速化
+
 	if(AssignedRegister != risse_size_max) return; // 既に割り当たっている
 
 	if(!InterferenceEdgeMap)
 	{
-wxFprintf(stderr, wxT("no interference map for %s\n"), GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("no interference map for %s\n"), GetQualifiedName().AsWxString().c_str());
 		AssignedRegister = 0;
 		return; // 干渉マップがない; そもそも干渉がないということなので遠慮無く 0 番を割り当てる
 	}
@@ -253,7 +255,7 @@ wxFprintf(stderr, wxT("no interference map for %s\n"), GetQualifiedName().AsWxSt
 	// 具体的には、InterferenceEdgeMap に列挙されている変数のうち、
 	// レジスタが既に割り当てられている変数のレジスタを除くレジスタのどれかを割り当てる。
 
-wxFprintf(stderr, wxT("with %s"), GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("with %s"), GetQualifiedName().AsWxString().c_str());
 	// 今までに割り当たっているうちの最大の番号のレジスタを得る
 	risse_size max_assigned_reg_num = risse_size_max;
 	for(tInterferenceEdgeMap::iterator i = InterferenceEdgeMap->begin();
@@ -266,13 +268,13 @@ wxFprintf(stderr, wxT("with %s"), GetQualifiedName().AsWxString().c_str());
 			if(assign_work.size() <= assigned_reg_num)
 				assign_work.resize(assigned_reg_num + 1);
 			assign_work[assigned_reg_num] = this;
-wxFprintf(stderr, wxT(", %s is at %d"), i->first->GetQualifiedName().AsWxString().c_str(), (int)assigned_reg_num);
+//wxFprintf(stderr, wxT(", %s is at %d"), i->first->GetQualifiedName().AsWxString().c_str(), (int)assigned_reg_num);
 
 			if(max_assigned_reg_num == risse_size_max || max_assigned_reg_num < assigned_reg_num)
 				max_assigned_reg_num = assigned_reg_num;
 		}
 	}
-wxFprintf(stderr, wxT("\n"));
+//wxFprintf(stderr, wxT("\n"));
 
 	// assign_work を見ていき、最初に this で無かったレジスタを割り当てる。
 	if(max_assigned_reg_num != risse_size_max)

@@ -127,6 +127,7 @@ void tCompilerFunction::RegisterSharedVariablesToCodeGenerator()
 void tCompilerFunction::GenerateVMCode()
 {
 	tString str;
+
 	// 関数名表示
 	FPrint(stderr, (RISSE_WS("######################################\n")));
 	FPrint(stderr, (RISSE_WS("function ") + Name +
@@ -159,7 +160,6 @@ void tCompilerFunction::GenerateVMCode()
 		str = cb->Dump();
 		FPrint(stderr, str.c_str());
 	}
-
 }
 //---------------------------------------------------------------------------
 
@@ -399,12 +399,13 @@ void tCompilerFunctionGroup::GenerateVMCode()
 void tCompiler::Compile(tASTNode * root, const tBindingInfo & binding,
 	bool need_result, bool is_expression)
 {
+/*
 	// (テスト) ASTのダンプを行う
 	FPrint(stderr, RISSE_WS("========== AST ==========\n"));
 	tString str;
 	root->Dump(str);
 	FPrint(stderr, str.c_str());
-
+*/
 	// トップレベルのSSA形式インスタンスを作成する
 	tSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"),
 		&binding, need_result, is_expression);
@@ -429,11 +430,12 @@ void tCompiler::Compile(tASTNode * root, const tBindingInfo & binding,
 
 	// ルートのコードブロックを設定する
 	ScriptBlockInstance->SetRootCodeBlock(form->GetCodeBlock());
-
+/*
 	// (テスト) 出力のフラッシュ
 	FPrint(stderr, RISSE_WS("=========================\n"));
 	fflush(stderr);
 	fflush(stdout);
+*/
 }
 //---------------------------------------------------------------------------
 

@@ -994,7 +994,7 @@ void tSSAForm::AnalyzeVariableBlockLiveness(tSSAVariable * var)
 	// マークされている箇所にまで逆順にブロックをたどる
 	// (すでにたどったブロックはたどらない)
 
-wxFprintf(stderr, wxT("for %s: "), var->GetQualifiedName().AsWxString().c_str());
+//wxFprintf(stderr, wxT("for %s: "), var->GetQualifiedName().AsWxString().c_str());
 	// この変数が宣言されている文
 	tSSAStatement * decl_stmt = var->GetDeclared();
 
@@ -1012,10 +1012,12 @@ wxFprintf(stderr, wxT("for %s: "), var->GetQualifiedName().AsWxString().c_str())
 		// この文のブロックは
 		tSSABlock * used_block = used_stmt->GetBlock();
 		RISSE_ASSERT(used_block != NULL);
+/*
 if(used_block->GetAlive() == false)
 {
 wxFprintf(stderr, wxT("%s is dead!!\n"), used_block->GetName().AsWxString().c_str());
 }
+*/
 		RISSE_ASSERT(used_block->GetAlive());
 
 		// ブロックを逆順にたどる
@@ -1025,7 +1027,7 @@ wxFprintf(stderr, wxT("%s is dead!!\n"), used_block->GetName().AsWxString().c_st
 		// ・すでにこの変数が使用されているとマークされているブロックにたどり着いた場合
 
 		gc_vector<tSSABlock *> Stack;
-wxFprintf(stderr, wxT(", starting from  %s"), used_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", starting from  %s"), used_block->GetName().AsWxString().c_str());
 		Stack.push_back(used_block); // 初期ノードを入れる
 		do
 		{
@@ -1034,7 +1036,7 @@ wxFprintf(stderr, wxT(", starting from  %s"), used_block->GetName().AsWxString()
 			// スタックから値を取り出す
 			tSSABlock * quest_block = Stack.back();
 			Stack.pop_back();
-wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxString().c_str());
 
 			if(quest_block == decl_block && used_stmt->GetCode() == ocPhi)
 			{
@@ -1056,11 +1058,11 @@ wxFprintf(stderr, wxT(", checking for block %s"), quest_block->GetName().AsWxStr
 				if(used_stmt->GetBlock() != decl_block)
 				{
 					stop = true;
-wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
 				}
 				else
 				{
-wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"), quest_block->GetName().AsWxString().c_str());
 				}
 
 				// φ関数の場合は、φ関数の先が既にliveoutになっているかどうかをみる
@@ -1079,7 +1081,7 @@ wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"),
 							if(pred->GetLiveness(var, true))
 							{
 								stop = true;
-	wxFprintf(stderr, wxT(", the phi pred block %s has liveness for the variable; stop"), pred->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", the phi pred block %s has liveness for the variable; stop"), pred->GetName().AsWxString().c_str());
 								break;
 							}
 						}
@@ -1093,7 +1095,7 @@ wxFprintf(stderr, wxT(", using stmt and declaring stmt are both phi; continue"),
 					// →このブロックとpredの間では変数は生存している
 					// つまり、LiveIn に変数を追加する
 					quest_block->AddLiveness(var, false);
-wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
 
 					// スタックに quest_block のpred を追加する
 					// また、pred の LiveOut にも変数を追加する
@@ -1110,7 +1112,7 @@ wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_
 						{
 							// var が見つかったのでその方向へ探索を続ける
 							tSSABlock * pred = quest_block->GetPred()[idx];
-wxFprintf(stderr, wxT(", found phi pred %s"), pred->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", found phi pred %s"), pred->GetName().AsWxString().c_str());
 							pred->AddLiveness(var, true);
 							Stack.push_back(pred);
 						}
@@ -1126,7 +1128,7 @@ wxFprintf(stderr, wxT(", found phi pred %s"), pred->GetName().AsWxString().c_str
 				if(quest_block == decl_block)
 				{
 					stop = true;
-wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetName().AsWxString().c_str());
 				}
 
 				// quest_block の LiveIn にこの変数が追加されているか
@@ -1136,7 +1138,7 @@ wxFprintf(stderr, wxT(", the block is declaring block; stop"), quest_block->GetN
 				if(!stop && quest_block->GetLiveness(var, false))
 				{
 					stop = true;
-wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
+//wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
 				}
 
 				if(!stop)
@@ -1146,7 +1148,7 @@ wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
 					// →このブロックとpredの間では変数は生存している
 					// つまり、LiveIn に変数を追加する
 					quest_block->AddLiveness(var, false);
-	wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
+//wxFprintf(stderr, wxT(", adding livein"), quest_block->GetName().AsWxString().c_str());
 
 					// スタックに quest_block のpred を追加する
 					// また、pred の LiveOut にも変数を追加する
@@ -1162,7 +1164,7 @@ wxFprintf(stderr, wxT(", the block has liveness for the variable; stop"));
 		} while(Stack.size() > 0);
 
 	}
-wxFprintf(stderr, wxT("\n")); fflush(stderr);
+//wxFprintf(stderr, wxT("\n")); fflush(stderr);
 }
 //---------------------------------------------------------------------------
 

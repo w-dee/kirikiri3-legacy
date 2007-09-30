@@ -2328,6 +2328,33 @@ public:
 	tVariantBlock Mod_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Mod_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
 
+	static int GuessTypeMod(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeMod_Void     (r);
+		case gtInteger:		return GuessTypeMod_Integer  (r);
+		case gtReal:		return GuessTypeMod_Real     (r);
+		case gtNull:		return GuessTypeMod_Null     (r);
+		case gtString:		return GuessTypeMod_String   (r);
+		case gtOctet:		return GuessTypeMod_Octet    (r);
+		case gtBoolean:		return GuessTypeMod_Boolean  (r);
+		case gtObject:		return GuessTypeMod_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeMod_Void     (tGuessType r);
+	static int GuessTypeMod_Integer  (tGuessType r);
+	static int GuessTypeMod_Real     (tGuessType r);
+	static int GuessTypeMod_Null     (tGuessType r);
+	static int GuessTypeMod_String   (tGuessType r);
+	static int GuessTypeMod_Octet    (tGuessType r);
+	static int GuessTypeMod_Boolean  (tGuessType r);
+	static int GuessTypeMod_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		%= 演算子		ModAssign
 	//! @return		演算後の*thisへの参照
@@ -2375,6 +2402,33 @@ public:
 	tVariantBlock Div_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Div_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
+	static int GuessTypeDiv(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeDiv_Void     (r);
+		case gtInteger:		return GuessTypeDiv_Integer  (r);
+		case gtReal:		return GuessTypeDiv_Real     (r);
+		case gtNull:		return GuessTypeDiv_Null     (r);
+		case gtString:		return GuessTypeDiv_String   (r);
+		case gtOctet:		return GuessTypeDiv_Octet    (r);
+		case gtBoolean:		return GuessTypeDiv_Boolean  (r);
+		case gtObject:		return GuessTypeDiv_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeDiv_Void     (tGuessType r);
+	static int GuessTypeDiv_Integer  (tGuessType r);
+	static int GuessTypeDiv_Real     (tGuessType r);
+	static int GuessTypeDiv_Null     (tGuessType r);
+	static int GuessTypeDiv_String   (tGuessType r);
+	static int GuessTypeDiv_Octet    (tGuessType r);
+	static int GuessTypeDiv_Boolean  (tGuessType r);
+	static int GuessTypeDiv_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		/= 演算子		DivAssign
 	//! @return		演算後の*thisへの参照
@@ -2419,6 +2473,33 @@ public:
 	tVariantBlock Idiv_Octet    (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
+
+	static int GuessTypeIdiv(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeIdiv_Void     (r);
+		case gtInteger:		return GuessTypeIdiv_Integer  (r);
+		case gtReal:		return GuessTypeIdiv_Real     (r);
+		case gtNull:		return GuessTypeIdiv_Null     (r);
+		case gtString:		return GuessTypeIdiv_String   (r);
+		case gtOctet:		return GuessTypeIdiv_Octet    (r);
+		case gtBoolean:		return GuessTypeIdiv_Boolean  (r);
+		case gtObject:		return GuessTypeIdiv_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeIdiv_Void     (tGuessType r);
+	static int GuessTypeIdiv_Integer  (tGuessType r);
+	static int GuessTypeIdiv_Real     (tGuessType r);
+	static int GuessTypeIdiv_Null     (tGuessType r);
+	static int GuessTypeIdiv_String   (tGuessType r);
+	static int GuessTypeIdiv_Octet    (tGuessType r);
+	static int GuessTypeIdiv_Boolean  (tGuessType r);
+	static int GuessTypeIdiv_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		\= 演算子		IdivAssign
@@ -2466,6 +2547,33 @@ public:
 	tVariantBlock Mul_Octet    (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
+
+	static int GuessTypeMul(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeMul_Void     (r);
+		case gtInteger:		return GuessTypeMul_Integer  (r);
+		case gtReal:		return GuessTypeMul_Real     (r);
+		case gtNull:		return GuessTypeMul_Null     (r);
+		case gtString:		return GuessTypeMul_String   (r);
+		case gtOctet:		return GuessTypeMul_Octet    (r);
+		case gtBoolean:		return GuessTypeMul_Boolean  (r);
+		case gtObject:		return GuessTypeMul_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeMul_Void     (tGuessType r);
+	static int GuessTypeMul_Integer  (tGuessType r);
+	static int GuessTypeMul_Real     (tGuessType r);
+	static int GuessTypeMul_Null     (tGuessType r);
+	static int GuessTypeMul_String   (tGuessType r);
+	static int GuessTypeMul_Octet    (tGuessType r);
+	static int GuessTypeMul_Boolean  (tGuessType r);
+	static int GuessTypeMul_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		*= 演算子		MulAssign

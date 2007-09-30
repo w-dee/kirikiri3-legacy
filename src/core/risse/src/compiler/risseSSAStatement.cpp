@@ -1066,6 +1066,13 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 	case ocGreater:
 	case ocLesserOrEqual:
 	case ocGreaterOrEqual:
+	case ocRBitShift:
+	case ocLShift:
+	case ocRShift:
+	case ocMod:
+	case ocDiv:
+	case ocIdiv:
+	case ocMul:
 		RISSE_ASSERT(Declared);
 
 		{
@@ -1100,6 +1107,10 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 				RISA_GUESS_BINARY(RBitShift)
 				RISA_GUESS_BINARY(LShift)
 				RISA_GUESS_BINARY(RShift)
+				RISA_GUESS_BINARY(Mod)
+				RISA_GUESS_BINARY(Div)
+				RISA_GUESS_BINARY(Idiv)
+				RISA_GUESS_BINARY(Mul)
 				default: RISSE_ASSERT(!"Unhandled type here!"); ;
 			}
 			Effective = gt & tVariant::gtEffective; // 副作用があるかどうか
@@ -1129,6 +1140,10 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 						RISA_FOLD_BINARY(RBitShift)
 						RISA_FOLD_BINARY(LShift)
 						RISA_FOLD_BINARY(RShift)
+						RISA_FOLD_BINARY(Mod)
+						RISA_FOLD_BINARY(Div)
+						RISA_FOLD_BINARY(Idiv)
+						RISA_FOLD_BINARY(Mul)
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
 					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ
@@ -1175,13 +1190,6 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 
 	case ocDecAssign:
 	case ocIncAssign:
-	case ocRBitShift:
-	case ocLShift:
-	case ocRShift:
-	case ocMod:
-	case ocDiv:
-	case ocIdiv:
-	case ocMul:
 	case ocInContextOf:
 	case ocInContextOfDyn:
 	case ocInstanceOf:

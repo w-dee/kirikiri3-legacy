@@ -395,31 +395,6 @@ void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *,
 		}
 	}
 
-	bool interf_added = false;
-
-	if(!(Code == ocAssign || Code == ocPhi))
-	{
-		// 一時的処置
-		// TODO: これあとで削除
-		// 現時点では各命令は3アドレス方式をとっており、また
-		// レジスタの read と write が同じレジスタにたいしておこると
-		// おかしくなる場合があるため、全面的に2アドレス方式をとるまでは
-		// 一時的に read と write が干渉している (=別のレジスタに割り当たる)
-		// ようにする。ただし ocAssign / ocPhi は別。
-		if(Declared)
-		{
-			for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
-				li != livemap.end(); li++)
-			{
-				if(li->first == Declared) continue;
-				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
-//wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
-			}
-		}
-		interf_added = true;
-	}
-
-
 	// この文で使用された変数があり、それがこの文で使用が終了していればlivemapから削除する
 	// この文で使用が終了しているかどうかの判定は、
 	// ・ブロックのLiveOut にその変数がない
@@ -478,20 +453,16 @@ void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *,
 	}
 
 	// 宣言された変数がある場合は、変数の干渉を追加する
-	if(!interf_added)
+	if(Declared)
 	{
-		if(Declared)
+		for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
+			li != livemap.end(); li++)
 		{
-			for(gc_map<const tSSAVariable *, risse_size>::iterator li = livemap.begin();
-				li != livemap.end(); li++)
-			{
-				if(li->first == Declared) continue;
-				Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
+			if(li->first == Declared) continue;
+			Declared->SetInterferenceWith(const_cast<tSSAVariable *>(li->first));
 //wxFprintf(stderr, wxT("interf %s - %s  "), Declared->GetQualifiedName().AsWxString().c_str(), li->first->GetQualifiedName().AsWxString().c_str());
-			}
 		}
 	}
-
 //wxFprintf(stderr, wxT("\n"));
 
 }
@@ -1367,44 +1338,11 @@ void tSSAStatement::Check3AddrAssignee()
 	if(!Declared) return;
 	if(Code == ocAssign || Code == ocPhi) return; // 単純コピーやφ関数は無視
 
-	bool do_save = false;
 	for(gc_vector<tSSAVariable*>::const_iterator i = Used.begin();
 		i != Used.end(); i++)
 	{
-		if((*i) == Declared)
-		{
-			do_save = true;
-			break;
-		}
-	}
-
-	if(do_save)
-	{
-		tSSAVariable * orig_decl_var = Declared;
-		tSSAVariable * tmp_var = new tSSAVariable(Form, NULL, orig_decl_var->GetName());
-wxFprintf(stderr, wxT("assignee is the same with the argument, inserting %s after [%d]\n"),
-tmp_var->GetQualifiedName().AsWxString().c_str(),
-(int)Order);
-		tSSAStatement * new_stmt =
-			new tSSAStatement(Form, Position, ocAssign);
-		new_stmt->AddUsed(const_cast<tSSAVariable*>(tmp_var));
-		orig_decl_var->SetDeclared(new_stmt);
-		new_stmt->SetDeclared(orig_decl_var);
-		tmp_var->SetDeclared(this);
-		this->SetDeclared(tmp_var);
-		tmp_var->SetValueState(orig_decl_var->GetValueState());
-		tmp_var->SetValue(orig_decl_var->GetValue());
-		Block->InsertStatement(new_stmt, this);
-
-		// 干渉グラフを更新する。
-		// tmp_var はここで生きているすべての文と干渉すると見なす。
-		// ここで生きているすべての文というのは、この文の使用と宣言
-		// そのものと、それが干渉している物すべて。
-		// ブロック単位の livein, liveout には影響しない。
-		for(gc_vector<tSSAVariable*>::iterator i =Used.begin();
-			i != Used.end(); i++)
-			tmp_var->SetInterferenceWithAll(*i);
-		tmp_var->SetInterferenceWithAll(orig_decl_var);
+		if((*i) != Declared)
+			Declared->SetInterferenceWith(*i);
 	}
 }
 //---------------------------------------------------------------------------

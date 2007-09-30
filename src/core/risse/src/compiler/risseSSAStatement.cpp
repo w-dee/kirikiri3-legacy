@@ -1097,6 +1097,9 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 				RISA_GUESS_BINARY(Greater)
 				RISA_GUESS_BINARY(LesserOrEqual)
 				RISA_GUESS_BINARY(GreaterOrEqual)
+				RISA_GUESS_BINARY(RBitShift)
+				RISA_GUESS_BINARY(LShift)
+				RISA_GUESS_BINARY(RShift)
 				default: RISSE_ASSERT(!"Unhandled type here!"); ;
 			}
 			Effective = gt & tVariant::gtEffective; // 副作用があるかどうか
@@ -1123,6 +1126,9 @@ wxFprintf(stderr, wxT("ocCatchBranch at %s, pushing the target %s\n"),
 						RISA_FOLD_BINARY(Greater)
 						RISA_FOLD_BINARY(LesserOrEqual)
 						RISA_FOLD_BINARY(GreaterOrEqual)
+						RISA_FOLD_BINARY(RBitShift)
+						RISA_FOLD_BINARY(LShift)
+						RISA_FOLD_BINARY(RShift)
 						default: RISSE_ASSERT(!"Unhandled type here!"); ;
 					}
 					Effective = false; // コンパイル時に定数畳込みができると言うことは実行時に副作用がないということ

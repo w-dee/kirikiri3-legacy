@@ -2106,6 +2106,33 @@ public:
 	tVariantBlock RBitShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock RBitShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
+	static int GuessTypeRBitShift(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeRBitShift_Void     (r);
+		case gtInteger:		return GuessTypeRBitShift_Integer  (r);
+		case gtReal:		return GuessTypeRBitShift_Real     (r);
+		case gtNull:		return GuessTypeRBitShift_Null     (r);
+		case gtString:		return GuessTypeRBitShift_String   (r);
+		case gtOctet:		return GuessTypeRBitShift_Octet    (r);
+		case gtBoolean:		return GuessTypeRBitShift_Boolean  (r);
+		case gtObject:		return GuessTypeRBitShift_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeRBitShift_Void     (tGuessType r);
+	static int GuessTypeRBitShift_Integer  (tGuessType r);
+	static int GuessTypeRBitShift_Real     (tGuessType r);
+	static int GuessTypeRBitShift_Null     (tGuessType r);
+	static int GuessTypeRBitShift_String   (tGuessType r);
+	static int GuessTypeRBitShift_Octet    (tGuessType r);
+	static int GuessTypeRBitShift_Boolean  (tGuessType r);
+	static int GuessTypeRBitShift_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		>>>= 演算子		RBitShiftAssign
 	//! @return		演算後の*thisへの参照
@@ -2153,6 +2180,33 @@ public:
 	tVariantBlock LShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock LShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
+	static int GuessTypeLShift(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeLShift_Void     (r);
+		case gtInteger:		return GuessTypeLShift_Integer  (r);
+		case gtReal:		return GuessTypeLShift_Real     (r);
+		case gtNull:		return GuessTypeLShift_Null     (r);
+		case gtString:		return GuessTypeLShift_String   (r);
+		case gtOctet:		return GuessTypeLShift_Octet    (r);
+		case gtBoolean:		return GuessTypeLShift_Boolean  (r);
+		case gtObject:		return GuessTypeLShift_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeLShift_Void     (tGuessType r);
+	static int GuessTypeLShift_Integer  (tGuessType r);
+	static int GuessTypeLShift_Real     (tGuessType r);
+	static int GuessTypeLShift_Null     (tGuessType r);
+	static int GuessTypeLShift_String   (tGuessType r);
+	static int GuessTypeLShift_Octet    (tGuessType r);
+	static int GuessTypeLShift_Boolean  (tGuessType r);
+	static int GuessTypeLShift_Object   (tGuessType r) { return gtAny|gtEffective; }
+
 	//-----------------------------------------------------------------------
 	//! @brief		<<= 演算子		LShiftAssign
 	//! @return		演算後の*thisへの参照
@@ -2199,6 +2253,33 @@ public:
 	tVariantBlock RShift_Octet    (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
+
+	static int GuessTypeRShift(tGuessType l, tGuessType r)
+	{
+		switch(l)
+		{
+		case gtVoid:		return GuessTypeRShift_Void     (r);
+		case gtInteger:		return GuessTypeRShift_Integer  (r);
+		case gtReal:		return GuessTypeRShift_Real     (r);
+		case gtNull:		return GuessTypeRShift_Null     (r);
+		case gtString:		return GuessTypeRShift_String   (r);
+		case gtOctet:		return GuessTypeRShift_Octet    (r);
+		case gtBoolean:		return GuessTypeRShift_Boolean  (r);
+		case gtObject:		return GuessTypeRShift_Object   (r);
+		case gtAny:			return gtAny;
+
+		default:		return gtAny|gtEffective;
+		}
+	}
+
+	static int GuessTypeRShift_Void     (tGuessType r);
+	static int GuessTypeRShift_Integer  (tGuessType r);
+	static int GuessTypeRShift_Real     (tGuessType r);
+	static int GuessTypeRShift_Null     (tGuessType r);
+	static int GuessTypeRShift_String   (tGuessType r);
+	static int GuessTypeRShift_Octet    (tGuessType r);
+	static int GuessTypeRShift_Boolean  (tGuessType r);
+	static int GuessTypeRShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
 	//! @brief		>>= 演算子		RShiftAssign

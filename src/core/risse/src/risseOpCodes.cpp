@@ -190,7 +190,7 @@ tString tVMCodeIterator::Dump() const
 			if(num_blocks != 0)
 			{
 				ret += RISSE_WC(' ');
-				for(risse_uint32 n = 0; n < num_args; n++)
+				for(risse_uint32 n = 0; n < num_blocks; n++)
 				{
 					if(n != 0) ret += RISSE_WS(", ");
 					ret += RISSE_WS("%") +

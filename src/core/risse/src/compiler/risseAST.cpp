@@ -1694,6 +1694,8 @@ void * tASTNode_Array::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 
 	// 配列の要素それぞれに対してprepareを行う
 	tPrepareSSA * data = new tPrepareSSA();
+	data->Mode = mode;
+
 	data->Elements.reserve(GetChildCount());
 	data->Indices.reserve(std::max(max_prepare_index, GetChildCount()));
 
@@ -1702,24 +1704,32 @@ void * tASTNode_Array::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 		// 各要素の準備
 		tASTNode * child = GetChildAt(i);
 		if(child)
-			data->Elements.push_back(child->PrepareSSA(form, mode));
+		{
+			// 本質的に 読み込みと書き込みが行われなければ先に
+			// 内容を prepare しておく必要はない
+			if(mode == pmReadWrite)
+				data->Elements.push_back(child->PrepareSSA(form, mode));
+			else
+				data->Elements.push_back(NULL);
+		}
 		else
+		{
 			data->Elements.push_back(NULL);
+		}
 
 		// インデックスの準備
-		if(mode == pmWrite && !child)
+		if(mode == pmReadWrite)
 		{
-			// 読み込みを伴わない 、かつ childが NULL の場合はインデックスを準備する必要はない
-			data->Indices.push_back(NULL);
-		}
-		else /* mode == pmRead || mode == pmReadWrite */
-		{
-			if(i < max_prepare_index)
+			if(child && i < max_prepare_index)
 			{
 				tSSAVariable * index_var =
 					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
 				data->Indices.push_back(index_var);
+			}
+			else
+			{
+				data->Indices.push_back(NULL);
 			}
 		}
 	}
@@ -1750,7 +1760,6 @@ XXXX: Array は内部的に deque を使っているので配列の予約はで�
 	}
 #endif
 
-	// 各配列の要素となる変数を作成しつつ、配列に設定していく
 	RISSE_ASSERT(data->Elements.size() == GetChildCount());
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
@@ -1758,16 +1767,24 @@ XXXX: Array は内部的に deque を使っているので配列の予約はで�
 		tSSAVariable * element_var;
 		tASTNode * child = GetChildAt(i);
 		if(child)
-			element_var = child->DoReadSSA(form, data->Elements[i]);
+		{
+			if(data->Elements[i])
+				element_var = child->DoReadSSA(form, data->Elements[i]);
+			else
+				element_var = child->GenerateReadSSA(form);
+		}
 		else
+		{
 			element_var =
 				form->AddConstantValueStatement(GetPosition(), tVariant());
+		}
 
 		// インデックス用数値定数
-		tSSAVariable * index_var;
+		tSSAVariable * index_var = NULL;
 		if(i < data->Indices.size())
 			index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
-		else
+
+		if(!index_var)
 			index_var =
 				form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
@@ -1789,6 +1806,7 @@ bool tASTNode_Array::DoWriteSSA(tSSAForm *form, void * param,
 	// インライン配列への書き込み
 	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
 
+	RISSE_ASSERT(data->Mode != pmRead);
 	RISSE_ASSERT(data->Elements.size() == GetChildCount());
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
@@ -1796,10 +1814,11 @@ bool tASTNode_Array::DoWriteSSA(tSSAForm *form, void * param,
 		if(child)
 		{
 			// インデックス用数値定数
-			tSSAVariable * index_var;
+			tSSAVariable * index_var = NULL;
 			if(i < data->Indices.size())
 				index_var = data->Indices[i]; // あらかじめインデックス用定数が用意されている
-			else
+
+			if(!index_var)
 				index_var =
 					form->AddConstantValueStatement(GetPosition(), (risse_int64)i);
 
@@ -1808,6 +1827,8 @@ bool tASTNode_Array::DoWriteSSA(tSSAForm *form, void * param,
 			form->AddStatement(GetPosition(), ocIGet, &elm_var, value, index_var);
 
 			// 各要素に対する代入文を生成
+			if(!data->Elements[i])
+				data->Elements[i] = child->PrepareSSA(form, pmWrite);
 			if(!child->DoWriteSSA(form, data->Elements[i], elm_var))
 			{
 				// 書き込みに失敗
@@ -1842,13 +1863,21 @@ void * tASTNode_Dict::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 		tASTNode_DictPair * pair_node =
 			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
-		// 名前と値を準備
-		void * name_prep_data = pair_node->GetName()->PrepareSSA(form, pmRead);
-													// 名前は常に読み込み扱い
-		void * value_prep_data = pair_node->GetValue()->PrepareSSA(form, mode);
+		if(mode == pmReadWrite)
+		{
+			// 名前と値を準備
+			void * name_prep_data = pair_node->GetName()->PrepareSSA(form, pmRead);
+														// 名前は常に読み込み扱い
+			void * value_prep_data = pair_node->GetValue()->PrepareSSA(form, mode);
 
-		data->Names.push_back(name_prep_data);
-		data->Values.push_back(value_prep_data);
+			data->Names.push_back(name_prep_data);
+			data->Values.push_back(value_prep_data);
+		}
+		else
+		{
+			data->Names.push_back(NULL);
+			data->Values.push_back(NULL);
+		}
 	}
 	return data;
 }
@@ -1875,12 +1904,18 @@ tSSAVariable * tASTNode_Dict::DoReadSSA(tSSAForm *form, void * param) const
 			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
-		tSSAVariable * name_var =
-			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+		tSSAVariable * name_var;
+		if(data->Names[i])
+			name_var = pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+		else
+			name_var = pair_node->GetName()->GenerateReadSSA(form);
 
 		// 値の値を得る
-		tSSAVariable * value_var =
-			pair_node->GetValue()->DoReadSSA(form, data->Values[i]);
+		tSSAVariable * value_var;
+		if(data->Values[i])
+			value_var = pair_node->GetValue()->DoReadSSA(form, data->Values[i]);
+		else
+			value_var = pair_node->GetValue()->GenerateReadSSA(form);
 
 		// 代入文を生成
 		form->AddStatement(GetPosition(), ocISet, NULL,
@@ -1908,8 +1943,11 @@ bool tASTNode_Dict::DoWriteSSA(tSSAForm *form, void * param,
 			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
-		tSSAVariable * name_var =
-			pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+		tSSAVariable * name_var;
+		if(data->Names[i])
+			name_var = pair_node->GetName()->DoReadSSA(form, data->Names[i]);
+		else
+			name_var = pair_node->GetName()->GenerateReadSSA(form);
 
 		// その名前に対する値を得る
 		tSSAVariable * value_var = NULL;
@@ -1917,6 +1955,7 @@ bool tASTNode_Dict::DoWriteSSA(tSSAForm *form, void * param,
 								value, name_var);
 
 		// 値を設定する
+		if(!data->Values[i]) data->Values[i] = pair_node->GetValue()->PrepareSSA(form, pmWrite);
 		if(!pair_node->GetValue()->DoWriteSSA(form, data->Values[i], value_var))
 		{
 			// 書き込みに失敗

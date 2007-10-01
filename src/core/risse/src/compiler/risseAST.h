@@ -1379,6 +1379,7 @@ class tASTNode_Array : public tASTNode_List
 	//! @brief		PrepareSSA() で返す構造体
 	struct tPrepareSSA : public tCollectee
 	{
+		tPrepareMode Mode;
 		gc_vector<void *> Elements; //!< 各要素の準備用データ
 		gc_vector<tSSAVariable *> Indices; //!< 各インデックスを表す数値定数
 	};

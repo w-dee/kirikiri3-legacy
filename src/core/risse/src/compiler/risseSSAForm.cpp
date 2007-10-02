@@ -192,6 +192,11 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 使用されていない変数を削除する
 	DeleteDeadVariables();
 
+	// 型チェック用コードを挿入する
+	if(GetFunction()->GetFunctionGroup()->
+				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->GetAssertionEnabled())
+		InsertTypeAssertion();
+
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -1273,11 +1278,6 @@ void tSSAForm::OptimizeStatement()
 
 	// 定数が代入されることが分かっている文を定数代入文に置き換える
 	ReplaceConstantAssign();
-
-	// 型チェック用コードを挿入する
-	if(GetFunction()->GetFunctionGroup()->
-				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->GetAssertionEnabled())
-		InsertTypeAssertion();
 }
 //---------------------------------------------------------------------------
 

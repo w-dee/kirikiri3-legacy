@@ -160,6 +160,7 @@ void tCompilerFunction::GenerateVMCode()
 		str = cb->Dump();
 		FPrint(stderr, str.c_str());
 	}
+	fflush(stderr);
 }
 //---------------------------------------------------------------------------
 

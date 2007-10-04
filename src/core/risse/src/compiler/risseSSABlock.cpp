@@ -829,27 +829,34 @@ void tSSABlock::TraceCoalescable()
 	// x0 が共通して使われている。この場合は x0 方向の pred の最後に x0' = x0 の文を
 	// 挿入し、a1 = phi(x0', y1) に置き換える。
 	// 条件としては、同じブロックに属するphi関数にまたがって、同じ変数が使われている
-	// 場合 (上記の場合はx0)。その変数が来る pred の方向は関係ない。
+	// あるいは同じ変数が宣言されている場合(上記の場合はx0)。その変数が来る pred
+	// の方向は関係ないみたい。
 	// 厳密には全く Used の構成が同じ phi 関数があった場合はこの処理はしなくていいが
 	// ここではかんがえていない
 
-	tSSAStatement *stmt = FirstStatement;
+	tSSAStatement *stmt;
 	risse_size pred_count = Pred.size();
-	if(stmt) stmt = stmt->GetSucc();
 	for(stmt = FirstStatement; stmt && stmt->GetCode() == ocPhi;
 		stmt = stmt->GetSucc())
 	{
 		const gc_vector<tSSAVariable*> & stmt_used  = stmt->GetUsed();
 		for(risse_size index = 0; index < pred_count; index ++)
 		{
-			for(tSSAStatement * prev = stmt->GetPred(); prev;
-				prev = prev->GetPred())
+			for(tSSAStatement * other = FirstStatement;
+				other && other->GetCode() == ocPhi; other = other->GetSucc())
 			{
-				RISSE_ASSERT(prev->GetUsed().size() == stmt->GetUsed().size());
-				const gc_vector<tSSAVariable*> & prev_used  = prev->GetUsed();
+				if(other == stmt) continue;
+				RISSE_ASSERT(other->GetUsed().size() == stmt->GetUsed().size());
+				RISSE_ASSERT(other->GetDeclared() != NULL);
+				const gc_vector<tSSAVariable*> & other_used  = other->GetUsed();
 				bool found = false;
+
+				// 変数の使用および宣言を調べる
 				for(risse_size j = 0; j < pred_count; j++)
-					if(stmt_used[index] == prev_used[j]) { found  = true; break; }
+					if(stmt_used[index] == other_used[j]) { found  = true; break; }
+				if(stmt_used[index] == other->GetDeclared()) { found = true; }
+
+				// みつかった？
 				if(found)
 				{
 					// 同じ変数を使ってることが分かった

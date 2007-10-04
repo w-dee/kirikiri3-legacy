@@ -1348,6 +1348,10 @@ void tSSAForm::DeleteDeadVariables()
 			// decl_stmt を削除する
 			decl_stmt->GetBlock()->DeleteStatement(decl_stmt);
 		}
+
+		// その文で宣言された変数がある場合はそれも push する
+		if(decl_stmt->GetDeclared() != NULL)
+			variables.push_back(decl_stmt->GetDeclared());
 	}
 
 	// 変数リストが空になるまで処理を続ける

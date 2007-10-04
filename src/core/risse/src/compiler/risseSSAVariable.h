@@ -183,6 +183,11 @@ public:
 	//! @return		この変数がとりうる値
 	const tVariant GetValue() const { return Value; }
 
+	//! @brief		この変数がとりうる値を boolean であるとみなし、
+	//!				その値を得る
+	//! @return		0:偽、1:真、2:どっちにもなりうる、3:未定義
+	int GetValueAsBoolean() const;
+
 	//! @brief		この変数がとりうる値の状態を設定する
 	//! @param		state		この変数がとりうる値の状態
 	void SetValueState(tValueState state) { ValueState = state; }

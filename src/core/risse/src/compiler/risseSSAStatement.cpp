@@ -540,35 +540,20 @@ void tSSAStatement::AnalyzeConstantPropagation(
 			// Used[0] の状態による
 			bool push_true = false;
 			bool push_false = false;
-			if(Used[0]->GetValueState() == tSSAVariable::vsConstant)
+			switch(Used[0]->GetValueAsBoolean())
 			{
-				// Used[0] が定数ならばどっちに行くかがわかるはず
-				if((bool)Used[0]->GetValue())
-					push_true = true;
-				else
-					push_false = true;
-			}
-			else if(Used[0]->GetValueState() == tSSAVariable::vsTypeConstant)
-			{
-				// タイプによっては必ずfalseとして評価される物がある
-				switch(Used[0]->GetValue().GetType())
-				{
-				case tVariant::vtVoid:
-				case tVariant::vtNull:
-					// この二つは必ず偽になる
-					push_false = true;
-					break;
-				default:
-					// どっちに行くかわからない
-					push_false = true;
-					push_true = true;
-				}
-			}
-			else if(Used[0]->GetValueState() == tSSAVariable::vsVarying)
-			{
-				// Used[0] がとる値が複数あり得るならば、どちらに行くかわからない
+			case 0: // 偽になる
+				push_false = true;
+				break;
+			case 1: // 真になる
+				push_true = true;
+				break;
+			case 2: // どっちにもなりうる
 				push_false = true;
 				push_true = true;
+				break;
+			case 3: // どっちかわからない
+				break;
 			}
 
 			tSSABlock * block;

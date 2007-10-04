@@ -191,12 +191,12 @@ void tSSAForm::OptimizeAndUnSSA()
 
 	// 使用されていない変数を削除する
 	DeleteDeadVariables();
-
+/*
 	// 型チェック用コードを挿入する
 	if(GetFunction()->GetFunctionGroup()->
 				GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->GetAssertionEnabled())
 		InsertTypeAssertion();
-
+*/
 	// 変数の有効範囲をブロック単位で解析
 	AnalyzeVariableBlockLiveness();
 
@@ -206,8 +206,24 @@ void tSSAForm::OptimizeAndUnSSA()
 	// 変数の干渉グラフを作成する
 	CreateVariableInterferenceGraph();
 
+	// SSA 形式のダンプ(デバッグ)
+	{
+		FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+								RISSE_WS(") ==========\n")).c_str());
+		tString str = Dump();
+		FPrint(stderr, str.c_str());
+	}
+
 	// 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
 	TraceCoalescable();
+
+	// SSA 形式のダンプ(デバッグ)
+	{
+		FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+								RISSE_WS(") ==========\n")).c_str());
+		tString str = Dump();
+		FPrint(stderr, str.c_str());
+	}
 
 	// 変数の合併を行う
 	Coalesce();
@@ -219,10 +235,12 @@ void tSSAForm::OptimizeAndUnSSA()
 	Check3AddrAssignee();
 
 	// SSA 形式のダンプ(デバッグ)
-	FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
-							RISSE_WS(") ==========\n")).c_str());
-	tString str = Dump();
-	FPrint(stderr, str.c_str());
+	{
+		FPrint(stderr,(	RISSE_WS("========== SSA (") + GetName() +
+								RISSE_WS(") ==========\n")).c_str());
+		tString str = Dump();
+		FPrint(stderr, str.c_str());
+	}
 
 	// レジスタの割り当て
 	AssignRegisters();

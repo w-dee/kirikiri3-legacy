@@ -433,6 +433,25 @@ void tSSABlock::DeleteDeadSucc()
 		if(i == 0) break;
 		i--;
 	}
+
+	// 最後が ocBranch でかつその条件が定数の場合は
+	// jump 命令に置き換える
+	if(Succ.size() == 2 && LastStatement && LastStatement->GetCode() == ocBranch)
+	{
+		RISSE_ASSERT(LastStatement->GetUsed().size() == 1);
+		tSSAVariable * cond_var = LastStatement->GetUsed()[0];
+		switch(cond_var->GetValueAsBoolean())
+		{
+		case 0: // 偽になる
+			DeleteSucc(0); // 真の分岐先を消す
+			break;
+		case 1: // 真になる
+			DeleteSucc(1); // 偽の分岐先を消す
+			break;
+		default: // そのほか (どっちにもなりうるか、値が不定の場合)
+			break;
+		}
+	}
 }
 //---------------------------------------------------------------------------
 

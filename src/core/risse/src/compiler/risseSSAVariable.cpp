@@ -324,6 +324,42 @@ void tSSAVariable::SuggestValue(tVariant::tType type)
 
 
 //---------------------------------------------------------------------------
+int tSSAVariable::GetValueAsBoolean() const
+{
+	if(ValueState == vsConstant)
+	{
+		// Used[0] が定数ならばどっちになるかわかる
+		if((bool)Value)
+			return 1;
+		else
+			return 0;
+	}
+	else if(ValueState == vsTypeConstant)
+	{
+		// タイプによっては必ずfalseとして評価される物がある
+		switch(Value.GetType())
+		{
+		case tVariant::vtVoid:
+		case tVariant::vtNull:
+			// この二つは必ず偽になる
+			return 0;
+
+		default:
+			// どっちになるかわからない
+			return 2;
+		}
+	}
+	else if(ValueState == vsVarying)
+	{
+		return 2; // どっちになるかわからない
+	}
+
+	return 3; // 未定義
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tVariant::tGuessType tSSAVariable::GetGuessType() const
 {
 	switch(ValueState)

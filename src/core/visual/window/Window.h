@@ -42,14 +42,26 @@ class tWindowInternal;
 //---------------------------------------------------------------------------
 class tWindowFrame : public wxFrame
 {
+	typedef wxFrame inherited;
+
+	tWindowInternal * Internal; //!< tWindowInternal のインスタンスへのポインタ
+
 public:
-	tWindowFrame();
+	//! @brief		コンストラクタ
+	//! @param		internal	tWindowInstance のインスタンスへのポインタ
+	tWindowFrame(tWindowInternal * internal);
+
+	//! @brief		デストラクタ
 	~tWindowFrame();
 
 public:
 	//! @brief		ウィンドウが閉じられようとするとき
 	//! @param		event イベントオブジェクト
 	void OnClose(wxCloseEvent & event);
+
+	//! @brief		ウィンドウを破棄する
+	//! @note		delete オペレータをフックしている訳ではないので注意
+	virtual bool Destroy();
 
 private:
 	//! @brief		イベントテーブルの定義
@@ -61,7 +73,50 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウインスタンス
+//! @brief	wxWindow 派生クラスは delete ではなくて Destroy メソッドを呼ばないとならない
+//---------------------------------------------------------------------------
+template <>
+class tDestructorCaller_Impl<wxWindow *> : public tMainThreadDestructorQueue::tDestructorCaller
+{
+	wxWindow * Ptr;
+public:
+	tDestructorCaller_Impl(wxWindow *  ptr) { Ptr = ptr; }
+	virtual ~tDestructorCaller_Impl() { Ptr->Destroy(); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+class tWindowInstance;
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウの内部実装クラス
+//---------------------------------------------------------------------------
+class tWindowInternal : public tDestructee
+{
+	tWindowInstance * Instance; //!< tWindowInstance へのポインタ
+
+private:
+	tMainThreadAutoPtr<tWindowFrame> Window; //!< ウィンドウへのポインタ
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		instance		tWindowInstance へのポインタ
+	tWindowInternal(tWindowInstance * instance);
+
+	//! @brief		デストラクタ
+	~tWindowInternal();
+
+	//! @brief		ウィンドウが破棄されたことを通知する(tWindowFrameから呼ばれる)
+	void NotifyDestroy();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウクラスのインスタンス
 //---------------------------------------------------------------------------
 class tWindowInstance : public tObjectBase
 {
@@ -75,6 +130,9 @@ public:
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tWindowInstance() {;}
+
+	//! @brief		ウィンドウが破棄されたことを通知する(tWindowInternalから呼ばれる)
+	void NotifyDestroy();
 
 public: // Risse用メソッドなど
 	void construct();

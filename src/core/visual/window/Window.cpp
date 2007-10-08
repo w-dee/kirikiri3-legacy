@@ -37,8 +37,9 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-tWindowFrame::tWindowFrame() : wxFrame(NULL, -1, wxT(""))
+tWindowFrame::tWindowFrame(tWindowInternal * internal) : wxFrame(NULL, -1, wxT(""))
 {
+	Internal = internal;
 }
 //---------------------------------------------------------------------------
 
@@ -68,6 +69,20 @@ void tWindowFrame::OnClose(wxCloseEvent & event)
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+bool tWindowFrame::Destroy()
+{
+	// Internal にウィンドウが破棄されたことを通知する
+	Internal->NotifyDestroy();
+
+	// Internal を一応切り離す
+	Internal = NULL;
+
+	// 親クラスのメソッドを呼び出す
+	return inherited::Destroy();
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -112,6 +127,7 @@ public:
 	{
 		volatile tCriticalSection::tLocker cs_holder(CS);
 		RISSE_ASSERT(std::find(WindowInternals.begin(), WindowInternals.end(), window) == WindowInternals.end());
+		WindowInternals.push_back(window);
 	}
 
 
@@ -134,39 +150,40 @@ public:
 
 
 
-
-
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウの内部実装クラス
-//---------------------------------------------------------------------------
-class tWindowInternal : public tDestructee
+tWindowInternal::tWindowInternal(tWindowInstance * instance)
 {
-	tWindowInstance * Instance; //!< tWindowInstance へのポインタ
+	Instance = instance;
+	Window = new tWindowFrame(this);
+	tWindowList::instance()->Add(this);
 
-private:
-	tMainThreadAutoPtr<tWindowFrame> Window; //!< ウィンドウへのポインタ
+	Window->Show();
+}
+//---------------------------------------------------------------------------
 
-public:
-	//! @brief		コンストラクタ
-	//! @param		instance		tWindowInstance へのポインタ
-	tWindowInternal(tWindowInstance * instance)
-	{
-		Instance = instance;
-		Window = new tWindowFrame();
-		tWindowList::instance()->Add(this);
 
-		Window->Show();
-	}
+//---------------------------------------------------------------------------
+tWindowInternal::~tWindowInternal()
+{
+	if(Instance)
+		tWindowList::instance()->Remove(this);
+}
+//---------------------------------------------------------------------------
 
-	//! @brief		デストラクタ
-	~tWindowInternal()
+
+//---------------------------------------------------------------------------
+void tWindowInternal::NotifyDestroy()
+{
+	// tWindowFrame からウィンドウの破棄が伝えられるとき。
+	if(Instance)
 	{
 		tWindowList::instance()->Remove(this);
+		Instance->NotifyDestroy(); // インスタンスにも通知する
+		Instance = NULL; // インスタンスへの参照を断ち切る
+		Window.set(NULL); // ウィンドウもすでに削除されることになっているので削除キューに登録する必要はない
 	}
-};
+}
 //---------------------------------------------------------------------------
-
-
 
 
 
@@ -180,6 +197,14 @@ public:
 
 //---------------------------------------------------------------------------
 tWindowInstance::tWindowInstance()
+{
+	Internal = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::NotifyDestroy()
 {
 	Internal = NULL;
 }

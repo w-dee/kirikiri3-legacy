@@ -102,6 +102,24 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
+//---------------------------------------------------------------------------
+/*
+	デストラクタの呼び出し規約を想定できないため、いったんこのクラスを挟む。
+*/
+template <typename T>
+class tDestructorCaller_Impl : public tMainThreadDestructorQueue::tDestructorCaller
+{
+	T Ptr;
+public:
+	tDestructorCaller_Impl(T ptr) { Ptr = ptr; }
+	virtual ~tDestructorCaller_Impl() { delete Ptr; }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持する自動ポインタ。
 //! @note		tDestructee 派生クラスなので注意(つまりデストラクタによる後処理が必要)。
 //!				あとあんまり効率のよい実装ではない。
@@ -111,20 +129,6 @@ class tMainThreadAutoPtr : public tDestructee, depends_on<tMainThreadDestructorQ
 {
 	T* Pointer; //!< ポインタ
 
-	//---------------------------------------------------------------------------
-	//! @brief		自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
-	//---------------------------------------------------------------------------
-	/*
-		デストラクタの呼び出し規約を想定できないため、いったんこのクラスを挟む。
-	*/
-	class tDestructorCaller_Impl : public tMainThreadDestructorQueue::tDestructorCaller
-	{
-		T* Ptr;
-	public:
-		tDestructorCaller_Impl(T * ptr) { Ptr = ptr; }
-		virtual ~tDestructorCaller_Impl() { delete Ptr; }
-	};
-	//---------------------------------------------------------------------------
 
 
 public:
@@ -158,7 +162,7 @@ public:
 	void dispose() { 
 		// キューに Pointer のデストラクタを登録
 		if(Pointer)
-			tMainThreadDestructorQueue::instance()->Enqueue(new tDestructorCaller_Impl(Pointer));
+			tMainThreadDestructorQueue::instance()->Enqueue(new tDestructorCaller_Impl<T*>(Pointer));
 		Pointer = NULL;
 		// ポインタをクリア
 	}

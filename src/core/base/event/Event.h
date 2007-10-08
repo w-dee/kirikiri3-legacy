@@ -238,7 +238,7 @@ private:
 	//! @param		queue		キュー
 	void DiscardQueue(tQueue & queue);
 
-	//! @brief		メインスレッド用のキューかどうか
+	//! @brief		メインスレッド用のキューかどうかを設定する
 	//! @param		b	メインスレッド用のキューかどうか
 	//! @note		メインのイベントキューにのみ用いる。通常はこのメソッドを利用しないこと。
 	void SetIsMainThreadQueue(bool b) { IsMainThreadQueue = b; }

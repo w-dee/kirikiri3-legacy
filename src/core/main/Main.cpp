@@ -271,6 +271,9 @@ bool tApplication::ProcessIdle()
 		cont = tIdleEventManager::instance()->Deliver(tick) || cont;
 	}
 
+	// デストラクタの呼び出し
+	tMainThreadDestructorQueue::instance()->CallDestructors();
+
 	cont = wxApp::ProcessIdle() || cont;
 	return cont;
 }

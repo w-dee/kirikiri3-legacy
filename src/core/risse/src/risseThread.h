@@ -435,6 +435,9 @@ public:
 
 	void Terminate() { Set_Terminated(); } //!< スレッドに終了を通知する
 
+	//! @brief		現在実行しているスレッドがメインスレッドかどうかを帰す
+	static bool IsMainThread() { return ::wxIsMainThread(); }
+
 protected:
 	//! @brief		スレッドが終了すべきかどうかを得る
 	//! @return		スレッドが終了すべきであれば真

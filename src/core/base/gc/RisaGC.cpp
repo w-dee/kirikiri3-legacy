@@ -187,6 +187,64 @@ void tCollectorThread::FinalizerNotifier()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tMainThreadDestructorQueue::~tMainThreadDestructorQueue()
+{
+	// とりあえずデストラクタを呼んでみる
+	CallDestructors();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tMainThreadDestructorQueue::Enqueue(tDestructorCaller * dtor)
+{
+	volatile tCriticalSection::tLocker cs_holder(CS);
+	if(Pointers.size() == 0) ::wxWakeUpIdle(); // アイドルイベントを起動する
+	Pointers.push_back(dtor);
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+void tMainThreadDestructorQueue::CallDestructors()
+{
+	// このメソッドは、主にアプリケーションのidleループ中に呼ばれる
+	while(true)
+	{
+		// キューから一個とってくる
+		tDestructorCaller * caller;
+		{
+			volatile tCriticalSection::tLocker cs_holder(CS);
+			if(Pointers.size() == 0) break;
+			caller = Pointers.front();
+			Pointers.pop_front();
+		}
+
+		// デストラクタを呼ぶために caller を delete する
+		delete caller;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
 //---------------------------------------------------------------------------
 } // namespace Risa
 

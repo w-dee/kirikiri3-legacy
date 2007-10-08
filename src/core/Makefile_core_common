@@ -6,6 +6,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/config        \
+	$(CORE_DIR)/visual/window      \
 	$(CORE_DIR)/sound              \
 	$(CORE_DIR)/base/system        \
 	$(CORE_DIR)/base/fs            \

@@ -22,11 +22,53 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
+/*
+	メモ
+
+	tWindowInstance::Internal -> tWindowInternal::Window -> tWindowFrame
+
+	の構成になっている。
+
+	tWindowInstance < tCollectee
+	tWindowInternal < tDestructee
+
+	で、tWindowFrame は GC 管理下のオブジェクトではないので注意。
+*/
+
+
+class tWindowInternal;
+//---------------------------------------------------------------------------
+//! @brief		Risaのウィンドウを表す wxFrame 派生クラス
+//---------------------------------------------------------------------------
+class tWindowFrame : public wxFrame
+{
+public:
+	tWindowFrame();
+	~tWindowFrame();
+
+public:
+	//! @brief		ウィンドウが閉じられようとするとき
+	//! @param		event イベントオブジェクト
+	void OnClose(wxCloseEvent & event);
+
+private:
+	//! @brief		イベントテーブルの定義
+	DECLARE_EVENT_TABLE()
+};
+//---------------------------------------------------------------------------
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		ウィンドウインスタンス
 //---------------------------------------------------------------------------
 class tWindowInstance : public tObjectBase
 {
+	friend class tWindowInternal;
+private:
+	tWindowInternal * Internal; //!< 内部実装クラスへのポインタ
+
 public:
 	//! @brief		コンストラクタ
 	tWindowInstance();

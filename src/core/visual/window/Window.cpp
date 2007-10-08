@@ -19,9 +19,169 @@ RISSE_DEFINE_SOURCE_ID(4811,32114,33460,19785,53925,19531,59339,65072);
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Risaのウィンドウを表す wxFrame 派生クラス用のイベントテーブル
+//---------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tWindowFrame, wxFrame)
+	EVT_CLOSE(						tWindowFrame::OnClose)
+END_EVENT_TABLE()
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tWindowFrame::tWindowFrame() : wxFrame(NULL, -1, wxT(""))
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tWindowFrame::~tWindowFrame()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowFrame::OnClose(wxCloseEvent & event)
+{
+	if(event.CanVeto())
+	{
+		int result = ::wxMessageBox(wxT("close?"), wxT("close?"), wxYES_NO, this);
+		if(result == wxNO)
+			event.Veto();
+		else
+			Destroy();
+	}
+	else
+	{
+		Destroy();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウリストを表すクラス
+//! @param		ウィンドウは dispose() されない限りこのリストに登録されたままになる。
+//!				つまり ウィンドウは明示的に dispose() しないと、
+//!				たとえインタプリタからの変数参照が亡くなったとしても永遠にメモリ上に残るので注意。
+//---------------------------------------------------------------------------
+class tWindowList : public singleton_base<tWindowList>
+{
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	gc_vector<tWindowInternal *> WindowInternals; //!< リスト
+
+public:
+	//! @brief		コンストラクタ
+	tWindowList()
+	{
+	}
+
+	//! @brief		デストラクタ
+	~tWindowList()
+	{
+	}
+
+	//! @brief		ウィンドウリストにウィンドウを登録する
+	//! @param		window		tWindowInternal のインスタンス
+	void Add(tWindowInternal * window)
+	{
+		volatile tCriticalSection::tLocker cs_holder(CS);
+		RISSE_ASSERT(std::find(WindowInternals.begin(), WindowInternals.end(), window) == WindowInternals.end());
+	}
+
+
+	//! @brief		ウィンドウリストからウィンドウを登録削除する
+	void Remove(tWindowInternal * window)
+	{
+		volatile tCriticalSection::tLocker cs_holder(CS);
+		gc_vector<tWindowInternal*>::iterator i;
+		i = std::find(WindowInternals.begin(), WindowInternals.end(), window);
+		RISSE_ASSERT(i != WindowInternals.end());
+		WindowInternals.erase(i);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウの内部実装クラス
+//---------------------------------------------------------------------------
+class tWindowInternal : public tDestructee
+{
+	tWindowInstance * Instance; //!< tWindowInstance へのポインタ
+
+private:
+	tMainThreadAutoPtr<tWindowFrame> Window; //!< ウィンドウへのポインタ
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		instance		tWindowInstance へのポインタ
+	tWindowInternal(tWindowInstance * instance)
+	{
+		Instance = instance;
+		Window = new tWindowFrame();
+		tWindowList::instance()->Add(this);
+
+		Window->Show();
+	}
+
+	//! @brief		デストラクタ
+	~tWindowInternal()
+	{
+		tWindowList::instance()->Remove(this);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tWindowInstance::tWindowInstance()
 {
+	Internal = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -41,8 +201,15 @@ void tWindowInstance::initialize(const tNativeCallInfo &info)
 
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
+
+	// ウィンドウを作成
+	Internal = new tWindowInternal(this);
 }
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 

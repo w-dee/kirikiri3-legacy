@@ -66,34 +66,20 @@ private:
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
-//---------------------------------------------------------------------------
-/*
-	デストラクタの呼び出し規約を想定できないため、いったんこのクラスを挟む。
-*/
-class tDestructorCaller
-{
-public:
-	virtual ~tDestructorCaller() {;}
-};
-
-template <typename T>
-class tDestructorCaller_Impl : public tDestructorCaller
-{
-	T* Ptr;
-public:
-	tDestructorCaller_Impl(T * ptr) { Ptr = ptr; }
-	virtual ~tDestructorCaller_Impl() { delete Ptr; }
-};
-//---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 //! @brief		メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持するキュー
 //---------------------------------------------------------------------------
 class tMainThreadDestructorQueue : public singleton_base<tMainThreadDestructorQueue>
 {
+public:
+	class tDestructorCaller
+	{
+	public:
+		virtual ~tDestructorCaller() {;}
+	};
+
+private:
 	std::deque<tDestructorCaller*> Pointers; // 削除まちオブジェクトへのポインタの配列
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 public:
@@ -117,12 +103,30 @@ public:
 
 //---------------------------------------------------------------------------
 //! @brief		メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持する自動ポインタ。
-//! @note		tDestructee 派生クラスなので注意。あとあんまり効率のよい実装ではない。
+//! @note		tDestructee 派生クラスなので注意(つまりデストラクタによる後処理が必要)。
+//!				あとあんまり効率のよい実装ではない。
 //---------------------------------------------------------------------------
 template <typename T>
 class tMainThreadAutoPtr : public tDestructee, depends_on<tMainThreadDestructorQueue>
 {
 	T* Pointer; //!< ポインタ
+
+	//---------------------------------------------------------------------------
+	//! @brief		自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
+	//---------------------------------------------------------------------------
+	/*
+		デストラクタの呼び出し規約を想定できないため、いったんこのクラスを挟む。
+	*/
+	class tDestructorCaller_Impl : public tMainThreadDestructorQueue::tDestructorCaller
+	{
+		T* Ptr;
+	public:
+		tDestructorCaller_Impl(T * ptr) { Ptr = ptr; }
+		virtual ~tDestructorCaller_Impl() { delete Ptr; }
+	};
+	//---------------------------------------------------------------------------
+
+
 public:
 	//! @brief コンストラクタ
 	tMainThreadAutoPtr()
@@ -140,18 +144,32 @@ public:
 	//! @brief		デストラクタ
 	~tMainThreadAutoPtr()
 	{
-		// キューに Pointer のデストラクタを登録
-		if(Pointer)
-			tMainThreadDestructorQueue::instance()->Enqueue(new tDestructorCaller_Impl<T>(Pointer));
+		dispose();
 	}
 
 	//! @brief		ポインタを設定する
 	//! @param		ptr		ポインタ
 	void set(T * ptr) { Pointer = ptr; }
 
-	// ポインタへの変換
+	//! @brief		ポインタを設定する
+	void operator = (T * ptr) { Pointer = ptr; }
+
+	//! @brief		ポインタで表されている内容を破棄し、ポインタをクリアする
+	void dispose() { 
+		// キューに Pointer のデストラクタを登録
+		if(Pointer)
+			tMainThreadDestructorQueue::instance()->Enqueue(new tDestructorCaller_Impl(Pointer));
+		Pointer = NULL;
+		// ポインタをクリア
+	}
+
+	//! @brief ポインタへの変換
 	T* get() const { return Pointer; }
+
+	//! @brief ポインタへの変換
 	operator T* () const { return Pointer; }
+
+	//! @brief ポインタへの変換
 	T* operator -> () const { return Pointer; }
 };
 //---------------------------------------------------------------------------

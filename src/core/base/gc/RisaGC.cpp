@@ -214,6 +214,10 @@ tMainThreadDestructorQueue::~tMainThreadDestructorQueue()
 void tMainThreadDestructorQueue::Enqueue(tDestructorCaller * dtor)
 {
 	volatile tCriticalSection::tLocker cs_holder(CS);
+
+fprintf(stderr, "enqueuing destructor %p ...\n", dtor);
+fflush(stderr);
+
 	if(Pointers.size() == 0) ::wxWakeUpIdle(); // アイドルイベントを起動する
 	Pointers.push_back(dtor);
 }
@@ -237,6 +241,9 @@ void tMainThreadDestructorQueue::CallDestructors()
 		}
 
 		// デストラクタを呼ぶために caller を delete する
+fprintf(stderr, "calling destructor %p ...\n", caller);
+fflush(stderr);
+
 		delete caller;
 	}
 }

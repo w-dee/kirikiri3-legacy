@@ -54,18 +54,9 @@ tWindowFrame::~tWindowFrame()
 //---------------------------------------------------------------------------
 void tWindowFrame::OnClose(wxCloseEvent & event)
 {
-	if(event.CanVeto())
-	{
-		int result = ::wxMessageBox(wxT("close?"), wxT("close?"), wxYES_NO, this);
-		if(result == wxNO)
-			event.Veto();
-		else
-			Destroy();
-	}
-	else
-	{
-		Destroy();
-	}
+	// onClose を呼び出す
+	Internal->GetInstance()->Operate(ocFuncCall, NULL, tSS<'o','n','C','l','o','s','e'>(),
+			0, tMethodArgument::New(!event.CanVeto()));
 }
 //---------------------------------------------------------------------------
 
@@ -234,6 +225,31 @@ void tWindowInstance::initialize(const tNativeCallInfo &info)
 
 
 
+//---------------------------------------------------------------------------
+void tWindowInstance::dispose()
+{
+	Internal->GetWindow()->Destroy();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::close(bool force)
+{
+	Internal->GetWindow()->Close(force);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::onClose(bool force)
+{
+	// デフォルトの動作は dispose メソッドを呼び出すこと
+	Operate(ocFuncCall, NULL, tSS<'d','i','s','p','o','s','e'>(),
+			0, tMethodArgument::Empty());
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -298,6 +314,9 @@ void tWindowClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tWindowClass::ovulate);
 	BindFunction(this, ss_construct, &tWindowInstance::construct);
 	BindFunction(this, ss_initialize, &tWindowInstance::initialize);
+	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tWindowInstance::dispose);
+	BindFunction(this, tSS<'c','l','o','s','e'>(), &tWindowInstance::close);
+	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tWindowInstance::onClose);
 }
 //---------------------------------------------------------------------------
 

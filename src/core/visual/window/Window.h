@@ -107,6 +107,12 @@ public:
 	//! @brief		デストラクタ
 	~tWindowInternal();
 
+	//! @brief		インスタンスを得る
+	tWindowInstance * GetInstance() const { return Instance; }
+
+	//! @brief		ウィンドウへのポインタを獲る
+	tMainThreadAutoPtr<tWindowFrame> & GetWindow() { return Window; }
+
 	//! @brief		ウィンドウが破棄されたことを通知する(tWindowFrameから呼ばれる)
 	void NotifyDestroy();
 };
@@ -137,6 +143,10 @@ public:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
+
+	void dispose(); //!< ウィンドウを破棄する
+	void close(bool force); //!< 「閉じる」ボタンをエミュレートする
+	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
 
 };
 //---------------------------------------------------------------------------

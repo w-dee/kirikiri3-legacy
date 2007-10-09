@@ -60,6 +60,7 @@ void tSystemClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tSystemClass::ovulate);
 	BindFunction(this, ss_construct, &tSystemClass::construct);
 	BindFunction(this, ss_initialize, &tSystemClass::initialize);
+	BindFunction(this, tSS<'c','o','n','f','i','r','m'>(), &tSystemClass::confirm);
 
 }
 //---------------------------------------------------------------------------
@@ -74,6 +75,22 @@ tVariant tSystemClass::ovulate()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+bool tSystemClass::confirm(const tString & message, const tMethodArgument & args)
+{
+	// TODO: メインスレッドからの呼び出しのみに限定した方がいいのでは？
+	// TODO: 親ウィンドウの指定は？
+	wxString caption = args.HasArgument(1) ?
+		args[1].operator tString().AsWxString() :
+		wxString(_("Confirmation"));
+	int result = ::wxMessageBox(message.AsWxString(), caption, wxYES_NO, NULL);
+	if(result == wxNO)
+		return false;
+	else
+		return true;
+}
+//---------------------------------------------------------------------------
 
 
 

@@ -46,6 +46,8 @@ public:
 public: // Risse 用メソッドなど
 	static void construct() { }
 	static void initialize() { }
+
+	static bool confirm(const tString & message, const tMethodArgument & args);
 };
 //---------------------------------------------------------------------------
 

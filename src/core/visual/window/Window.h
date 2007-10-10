@@ -145,7 +145,7 @@ public: // Risse用メソッドなど
 	void initialize(const tNativeCallInfo &info);
 
 	void dispose(); //!< ウィンドウを破棄する
-	void close(bool force); //!< 「閉じる」ボタンをエミュレートする
+	void close(const tMethodArgument &args); //!< 「閉じる」ボタンをエミュレートする
 	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
 
 };

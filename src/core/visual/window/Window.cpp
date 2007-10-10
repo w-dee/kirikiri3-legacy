@@ -219,6 +219,7 @@ void tWindowInstance::initialize(const tNativeCallInfo &info)
 	info.InitializeSuperClass();
 
 	// ウィンドウを作成
+	if(Internal) Internal->GetWindow()->Destroy();
 	Internal = new tWindowInternal(this);
 }
 //---------------------------------------------------------------------------
@@ -228,14 +229,24 @@ void tWindowInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 void tWindowInstance::dispose()
 {
+	// TODO: 呼び出すスレッドのチェックまたはロック
+
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
+
 	Internal->GetWindow()->Destroy();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::close(bool force)
+void tWindowInstance::close(const tMethodArgument &args)
 {
+	// TODO: 呼び出すスレッドのチェックまたはロック
+
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
+
+	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
+
 	Internal->GetWindow()->Close(force);
 }
 //---------------------------------------------------------------------------
@@ -244,6 +255,8 @@ void tWindowInstance::close(bool force)
 //---------------------------------------------------------------------------
 void tWindowInstance::onClose(bool force)
 {
+	// TODO: 呼び出すスレッドのチェックまたはロック
+
 	// デフォルトの動作は dispose メソッドを呼び出すこと
 	Operate(ocFuncCall, NULL, tSS<'d','i','s','p','o','s','e'>(),
 			0, tMethodArgument::Empty());

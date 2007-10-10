@@ -2131,7 +2131,7 @@ void tInaccessibleResourceExceptionClass::Throw(tScriptEngine * engine)
 {
 	tTemporaryException * e =
 		new tTemporaryException(ss_InaccessibleResourceException,
-					tString(RISSE_WS_TR("the object has already disposed")));
+					tString(RISSE_WS_TR("the resource is not accessible")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------

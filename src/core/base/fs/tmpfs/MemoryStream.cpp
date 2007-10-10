@@ -126,7 +126,7 @@ void tMemoryStreamInstance::SeekEnd()
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		volatile tCriticalSection::tLocker holder(Block->GetCS());
 
@@ -185,7 +185,7 @@ bool tMemoryStreamInstance::seek(risse_int64 offset, tOrigin whence)
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		volatile tCriticalSection::tLocker holder(Block->GetCS());
 
@@ -224,7 +224,7 @@ risse_uint64 tMemoryStreamInstance::tell()
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		return CurrentPos;
 	}
@@ -237,7 +237,7 @@ risse_size tMemoryStreamInstance::get(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		volatile tCriticalSection::tLocker holder(Block->GetCS());
 
@@ -270,7 +270,7 @@ risse_size tMemoryStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		volatile tCriticalSection::tLocker holder(Block->GetCS());
 
@@ -302,7 +302,7 @@ risse_size tMemoryStreamInstance::put(const tOctet & buf)
 void tMemoryStreamInstance::truncate()
 {
 	volatile tSynchronizer sync(this); // sync
-	if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 	volatile tCriticalSection::tLocker holder(Block->GetCS());
 
@@ -319,7 +319,7 @@ risse_uint64 tMemoryStreamInstance::get_size()
 {
 	volatile tSynchronizer sync(this); // sync
 	{
-		if(!Block) tIOExceptionClass::ThrowStreamIsClosed();
+		if(!Block) tInaccessibleResourceExceptionClass::Throw();
 
 		volatile tCriticalSection::tLocker holder(Block->GetCS());
 

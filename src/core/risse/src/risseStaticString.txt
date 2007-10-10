@@ -86,6 +86,8 @@ ss_NullObjectException				NullObjectException				#!< "NullObjectException" ク�
 ss_IllegalArgumentClassException	IllegalArgumentClassException	#!< "IllegalArgumentClassException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
 ss_ArithmeticException				ArithmeticException				#!< "ArithmeticException" クラス名
+ss_IllegalStateException			IllegalStateException			#!< "IllegalStateException" クラス名
+ss_InaccessibleResourceException	InaccessibleResourceException	#!< "InaccessibleResourceException" クラス名
 ss_extensible						extensible						#!< "extensible" プロパティ名
 ss_Binding							Binding							#!< "Binding" クラス名
 ss_eval								eval							#!< "eval" メソッド名

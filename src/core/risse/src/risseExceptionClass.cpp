@@ -52,6 +52,8 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
          NoSuchMemberException
          IllegalMemberAccessException
        CoroutineException
+       IllegalStateException
+         AlreadyDisposedException
 */
 
 
@@ -826,7 +828,8 @@ void tIOExceptionClass::ThrowTruncateError(tScriptEngine * engine,
 }
 //---------------------------------------------------------------------------
 
-
+/*
+see tInaccessibleResourceExceptionClass::Throw
 //---------------------------------------------------------------------------
 void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tString & name)
 {
@@ -838,7 +841,7 @@ void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tStrin
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
-
+*/
 
 
 
@@ -1923,6 +1926,10 @@ void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tScriptEng
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
 tCoroutineExceptionClass::tCoroutineExceptionClass(tScriptEngine * engine) :
 	tClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
@@ -2008,5 +2015,133 @@ void tCoroutineExceptionClass::ThrowCoroutineIsRunning(tScriptEngine * engine)
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tIllegalStateExceptionClass::tIllegalStateExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_IllegalStateException, engine->RuntimeExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalStateExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tIllegalStateExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tIllegalStateExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalStateExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tIllegalStateExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tInaccessibleResourceExceptionClass::tInaccessibleResourceExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_InaccessibleResourceException, engine->IllegalStateExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInaccessibleResourceExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tInaccessibleResourceExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tInaccessibleResourceExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInaccessibleResourceExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInaccessibleResourceExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInaccessibleResourceExceptionClass::Throw(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_InaccessibleResourceException,
+					tString(RISSE_WS_TR("the object has already disposed")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 } // namespace Risse

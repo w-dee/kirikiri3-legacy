@@ -62,7 +62,7 @@ risse_size tStandardIOStreamInstance::get(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Stream) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Stream) tInaccessibleResourceExceptionClass::Throw();
 
 	return fread(const_cast<risse_uint8 *>(buf.Pointer()), 1, buf.GetLength(), Stream);
 }
@@ -74,7 +74,7 @@ risse_size tStandardIOStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Stream) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Stream) tInaccessibleResourceExceptionClass::Throw();
 
 	return fwrite(buf.Pointer(), 1, buf.GetLength(), Stream);
 }
@@ -86,7 +86,7 @@ void tStandardIOStreamInstance::flush()
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Stream) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Stream) tInaccessibleResourceExceptionClass::Throw();
 
 	fflush(Stream);
 }

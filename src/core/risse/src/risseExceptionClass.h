@@ -446,7 +446,8 @@ public:
 	static void ThrowTruncateError(const tString & name =
 		tString::GetEmptyString(), risse_size pos = risse_size_max)
 		{ ThrowTruncateError(NULL, name, pos); }
-
+/*
+	See tInaccessibleResourceExceptionClass::Throw
 	//! @brief		「ストリームは閉じられている」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		ストリームなどの名前
@@ -456,7 +457,7 @@ public:
 	static void ThrowStreamIsClosed(const tString & name =
 		tString::GetEmptyString())
 		{ ThrowStreamIsClosed(NULL, name); }
-
+*/
 };
 //---------------------------------------------------------------------------
 
@@ -1194,6 +1195,66 @@ public:
 	static void ThrowCoroutineIsRunning()
 		{ ThrowCoroutineIsRunning(NULL); }
 
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"IllegalStateException" クラス
+//---------------------------------------------------------------------------
+class tIllegalStateExceptionClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tIllegalStateExceptionClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tNativeCallInfo & info);
+
+public:
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"InaccessibleResourceException" クラス
+//---------------------------------------------------------------------------
+class tInaccessibleResourceExceptionClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tInaccessibleResourceExceptionClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tNativeCallInfo & info);
+
+public:
+	//! @brief		「リソースにアクセスできない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void Throw(tScriptEngine * engine);
+	//! @brief		「リソースにアクセスできない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void Throw()
+		{ Throw(NULL); }
 };
 //---------------------------------------------------------------------------
 

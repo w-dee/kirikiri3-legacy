@@ -86,7 +86,7 @@ bool tOSNativeStreamInstance::seek(risse_int64 offset, tOrigin whence)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	wxSeekMode mode = wxFromCurrent;
 	switch(whence)
@@ -111,7 +111,7 @@ risse_uint64 tOSNativeStreamInstance::tell()
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	return Internal->File.Tell();
 }
@@ -123,7 +123,7 @@ risse_size tOSNativeStreamInstance::get(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	// buf の示すポインタに「直接」書き込みを行う。
 	// tOctet をメモリバッファとして使うかなり危ない使い方だが、
@@ -144,7 +144,7 @@ risse_size tOSNativeStreamInstance::put(const tOctet & buf)
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	return Internal->File.Write(buf.Pointer(), buf.GetLength());
 }
@@ -155,7 +155,7 @@ risse_size tOSNativeStreamInstance::put(const tOctet & buf)
 void tOSNativeStreamInstance::truncate()
 {
 	// TODO: implement this 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	tIOExceptionClass::Throw(RISSE_WS_TR("tOSNativeStreamInstance::Truncate not implemented"));
 }
@@ -167,7 +167,7 @@ risse_uint64 tOSNativeStreamInstance::get_size()
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	return Internal->File.Length();
 }
@@ -179,7 +179,7 @@ void tOSNativeStreamInstance::flush()
 {
 	volatile tSynchronizer sync(this); // sync
 
-	if(!Internal) tIOExceptionClass::ThrowStreamIsClosed();
+	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	Internal->File.Flush();
 }

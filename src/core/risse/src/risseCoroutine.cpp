@@ -630,6 +630,12 @@ tCoroutine::tCoroutine(tScriptEngine * engine,
 //---------------------------------------------------------------------------
 tVariant tCoroutine::Resume(const tVariant &arg)
 {
+	if(!Ptr)
+	{
+		// コルーチンは dispose() 済み
+		tInaccessibleResourceExceptionClass::Throw();
+	}
+
 	if(!GetAlive())
 	{
 		// コルーチンは無効
@@ -674,6 +680,12 @@ tVariant tCoroutine::DoYield(const tVariant &arg)
 	fprintf(stdout, "in tCoroutine::DoYield: tCoroutineImpl %p: Alive(%s), Running(%s)\n", Ptr->Impl, Ptr->Impl->Alive?"true":"false", Ptr->Impl->Running?"true":"false");
 	fflush(stdout); fflush(stderr);
 #endif
+	if(!Ptr)
+	{
+		// コルーチンは dispose() 済み
+		tInaccessibleResourceExceptionClass::Throw();
+	}
+
 
 	if(!GetAlive())
 	{

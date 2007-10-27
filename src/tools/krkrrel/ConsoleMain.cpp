@@ -76,6 +76,7 @@ public:
 protected:
 	static void LoadClassList(const wxString & filename, wxArrayString &pattern);
 	static void ListArchiveItems(const std::vector<tXP4WriterInputFile> & files);
+	wxLocale locale;
 };
 //---------------------------------------------------------------------------
 
@@ -88,7 +89,6 @@ protected:
 // リンカが main 関数を探してくれないようだ
 IMPLEMENT_APP_CONSOLE(Risa::wxKrkrReleaserConsoleApp)
 namespace Risa {
-wxLocale locale;
 //---------------------------------------------------------------------------
 
 

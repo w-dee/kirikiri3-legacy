@@ -62,6 +62,8 @@ private:
 	void OnActivate(wxActivateEvent & event);
 	void OnActivateApp(wxActivateEvent & event);
 
+	wxLocale locale;
+
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
@@ -71,7 +73,6 @@ private:
 // アプリケーションメインルーチン定義
 //---------------------------------------------------------------------------
 IMPLEMENT_APP(tApplication)
-wxLocale locale;
 //---------------------------------------------------------------------------
 
 

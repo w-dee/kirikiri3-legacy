@@ -201,6 +201,9 @@ class Application : public wxAppConsole
 public:
 	virtual bool OnInit();
 	virtual int OnRun();
+
+private:
+	wxLocale locale;
 };
 //---------------------------------------------------------------------------
 
@@ -210,7 +213,6 @@ public:
 // アプリケーションメインルーチン定義
 //---------------------------------------------------------------------------
 IMPLEMENT_APP_CONSOLE(Application)
-wxLocale locale;
 //---------------------------------------------------------------------------
 
 

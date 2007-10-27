@@ -25,6 +25,10 @@ class wxKrkrFontApp:public wxApp
 public:
 	bool OnInit();
 	int OnExit();
+
+private:
+	wxLocale locale;
+
 };
 //---------------------------------------------------------------------------
 

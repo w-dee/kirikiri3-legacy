@@ -54,6 +54,7 @@ public:
 
 
 class tGDSNodeBase;
+class tGDSNodeData;
 //---------------------------------------------------------------------------
 //! @brief		GDSグラフ
 //---------------------------------------------------------------------------
@@ -61,9 +62,10 @@ class tGDSGraph : public tCollectee
 {
 	tGDSGeneration		LastFreezedGeneration; //!< 一番最後にフリーズを行った世代
 	tCriticalSection * CS; //!< このグラフを保護するクリティカルセクション
-	tGDSNode * RootNode; //!< (現在の最新の)ルートノード
+	tGDSNodeBase * RootNode; //!< (現在の最新の)ルートノード
 
-	const int MaxGenerations = 3; //!< 最大で何世代までの管理を許すか(「最新の」世代も含める)
+public:
+	static const int MaxGenerations = 3; //!< 最大で何世代までの管理を許すか(「最新の」世代も含める)
 								//!< 3 = トリプルバッファリングを考慮した際の最大値
 
 public:
@@ -80,18 +82,18 @@ public:
 	//! @brief		(最新の)ルートノードデータを得る
 	//! @note		これで帰されたノードデータのCurrentは他のフリーズされたノード
 	//!				のことを気にせずに変更などをくわえることができるはず。
-	tGDSNode * GetRoot();
+	tGDSNodeBase * GetRoot();
 
 	//! @brief		ルートノードを設定する(ロックはしない)
-	//! @param		root		新しいルートノード
-	void SetRootNoLock(tGDSNodeBase * root) { Root = root; }
+	//! @param		rootnode	新しいルートノード
+	void SetRootNoLock(tGDSNodeBase * rootnode) { RootNode = rootnode; }
 
-	//! @brief		現在のルートノードをフリーズし、フリーズされた読み出し
-	//!				専用のノードを帰す
-	//! @return		フリーズされたノード
-	//! @note		これで帰されたノードは他のフリーズされたノード、あるいは
-	//!				最新のルートノードからは特にロックをせずに安全に参照できる。
-	tGDSNode * Freeze();
+	//! @brief		現在のルートノードデータをフリーズし、フリーズされた読み出し
+	//!				専用のノードデータを帰す
+	//! @return		フリーズされたノードデータ
+	//! @note		これで帰されたノードデータは他のフリーズされたノードデータ、あるいは
+	//!				最新のルートノードデータからは特にロックをせずに安全に参照できる。
+	tGDSNodeData * Freeze();
 };
 //---------------------------------------------------------------------------
 
@@ -100,18 +102,17 @@ public:
 
 
 
-
+class tGDSNodeData;
 //---------------------------------------------------------------------------
 //! @brief		ノード用の軽量プール(基底クラス)
 //---------------------------------------------------------------------------
 class tGDSPoolBase : public tCollectee
 {
 public:
-	virtual T & Allocate() = 0;
-	virtual void Deallocate(T & obj) = 0;
+	virtual tGDSNodeData * Allocate() = 0;
+	virtual void Deallocate(tGDSNodeData * obj) = 0;
 };
 //---------------------------------------------------------------------------
-
 
 
 
@@ -125,17 +126,7 @@ public:
 template <typename T>
 class tGDSPool : public tGDSPoolBase
 {
-	//! @brief		パディングも含めたTのサイズを特定するための簡単なクラス
-	struct tSizeDetector
-	{
-		T t1
-		T t2;
-	};
-	enum {
-		T_size = reinterpret_cast<int>(&reinterpret_cast<char &>(((T*)0)->t2));
-	};
-
-	char Data[tGDSGraph::MaxGenerations][T_size]; //!< データ
+	char Data[tGDSGraph::MaxGenerations][sizeof(T)]; //!< データ
 	tGDSGraph * Graph; //!< グラフインスタンス
 	risse_uint32 Using; //!< 使用中のビット = 1
 	risse_uint32 Instantiated; //!< インスタンス化済みビット = 1
@@ -147,7 +138,7 @@ public:
 
 	//! @brief		確保を行う
 	//! @return		確保されたオブジェクト
-	virtual T * Allocate()
+	virtual tGDSNodeData * Allocate()
 	{
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
@@ -172,9 +163,9 @@ public:
 	//! @brief		解放を行う
 	//! @param		obj		解放を行いたいオブジェクト
 	//! @note		obj.Free() が呼ばれる
-	virtual void Deallocate(T * obj)
+	virtual void Deallocate(tGDSNodeData * obj)
 	{
-		obj->Free();
+		reinterpret_cast<T*>(obj)->Free();
 
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
@@ -206,11 +197,40 @@ class tGDSNodeData : public tCollectee
 	tNodeVector Parents; //!< 親ノード
 	tNodeVector Children; //!< 子ノード
 	int RefCount; //!< 参照カウンタ
+	tGDSGeneration LastGeneration; //!< 最後に更新された世代
+
+public:
+	//! @brief		更新ロック
+	//! @note		このインスタンスの生存期間中に、GetNewNode() で取得できた
+	//!				ノードのデータを弄ること。
+	//!				スタック上に配置して使うこと！
+	class tUpdateLock
+	{
+		tGDSNodeData * NodeData; //!< 元のノードデータ
+		tGDSNodeData * NewNodeData; //!< 新しくクローンされたノードデータ
+		volatile tCriticalSection::tLocker Lock;
+
+	public:
+		//! @brief		コンストラクタ
+		//! @param		nodedata		ロックするノードデータ
+		tUpdateLock(tGDSNodeData * nodedata);
+
+		//! @brief		デストラクタ
+		~tUpdateLock();
+
+	public:
+		//! @brief		弄るべきノードデータを帰す
+		//! @return		弄るべきノードデータ
+		tGDSNodeData * GetNewNodeData() const { return NewNodeData; }
+	};
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		node		ノードインスタンスへのポインタ
-	tGDSNodeData(tGDSNodeBase * node) { Node = node; RefCount = 1; }
+	tGDSNodeData(tGDSNodeBase * node);
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tGDSNodeData() {;}
 
 	//! @brief		参照カウンタを減らす
 	void AddRef() { RefCount ++; }
@@ -222,7 +242,7 @@ public:
 	//! @param		n		インデックス
 	//! @return		その位置にある親ノード
 	//! @note		n の範囲チェックは行われないので注意
-	tGDSNodeBase * GetParentAt(risse_size n) const { return Parents[i]; }
+	tGDSNodeData * GetParentAt(risse_size n) const { return Parents[n]; }
 
 	//! @brief		親ノードの個数を得る
 	//! @return		親ノードの個数
@@ -232,11 +252,22 @@ public:
 	//! @param		n		インデックス
 	//! @return		その位置にある子ノード
 	//! @note		n の範囲チェックは行われないので注意
-	tGDSNodeBase * GetChildAt(risse_size n) const { return Children[i]; }
+	tGDSNodeData * GetChildAt(risse_size n) const { return Children[n]; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
 	risse_size GetChildCount() const { return Children.size(); }
+
+private:
+	//! @brief		modify を行うためにノードデータのコピーを行う(内部関数)
+	//! @param		oldchild		古い子ノードデータ
+	//! @param		newchild		新しい子ノードデータ
+	//! @return		コピーされたノードデータ
+	tGDSNodeData * BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData * newchild);
+
+	//! @brief		modify を行うためにノードデータのコピーを行う(内部関数)
+	//! @param		newnode			BeginIndepend() の戻りの値を渡す
+	void EndIndepend(tGDSNodeData * newnodedata);
 
 private:
 	//! @brief		子を付け替える
@@ -245,7 +276,7 @@ private:
 	//! @note		子の中からoldnodeを探し、newnodeに付け替える
 	void ReconnectChild(tGDSNodeData * oldnode, tGDSNodeData * newnode);
 
-protected: // サブクラスで実装してほしいもの
+public: // サブクラスで実装してほしいもの
 	//! @brief		コピーを行う
 	//! @param		rhs		コピー元オブジェクト
 	//! @note		もしサブクラスでオーバーライドしたならば、スーパークラスのこれを
@@ -255,10 +286,9 @@ protected: // サブクラスで実装してほしいもの
 	//! @brief		使用を終了する
 	//! @note		もしサブクラスでオーバーライドしたならば、スーパークラスのこれを
 	//!				呼ぶことを忘れないこと
-	virtual void Free() { RefCount = 1; }
+	virtual void Free();
 };
 //---------------------------------------------------------------------------
-
 
 
 
@@ -273,32 +303,9 @@ protected: // サブクラスで実装してほしいもの
 //---------------------------------------------------------------------------
 class tGDSNodeBase : public tCollectee
 {
+	tGDSGraph * Graph; //!< グラフインスタンスへのポインタ
 	tGDSNodeData * Current; //!< 最新のノードデータへのポインタ
 	tGDSPoolBase * Pool; //!< プール
-
-public:
-	//! @brief		更新ロック
-	//! @note		このインスタンスの生存期間中に、GetNewNode() で取得できた
-	//!				ノードのデータを弄ること。
-	//!				スタック上に配置して使うこと！
-	class tUpdateLock
-	{
-		tGDSNodeData * NewNodeData; //!< 新しくクローンされたノードデータ
-		volatile tCriticalSection::tLocker Lock;
-
-	public:
-		//! @brief		コンストラクタ
-		//! @param		node		ロックするノード
-		tUpdateLock(tGDSNodeBase * node);
-
-		//! @brief		デストラクタ
-		~tUpdateLock();
-
-	public:
-		//! @brief		弄るべきノードデータを帰す
-		//! @return		弄るべきノードデータ
-		tGDSNodeData * GetNewNodeData() const { return NewNodeData; }
-	};
 
 public:
 	//! @brief		コンストラクタ
@@ -306,20 +313,18 @@ public:
 	//! @param		pool			プール
 	tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool);
 
+	//! @brief		グラフインスタンスへのポインタを得る
+	//! @return		グラフインスタンスへのポインタ
+	tGDSGraph * GetGraph() const { return Graph; }
+
+	//! @brief		最新のノードデータを得る
+	//! @return		最新のノードデータ
+	tGDSNodeData * GetCurrent() const { return Current; }
+
 	//! @brief		プールインスタンスを得る
 	//! @return		プールインスタンス
-	tGFSPoolBase * GetPool() const { return Pool; }
+	tGDSPoolBase * GetPool() const { return Pool; }
 
-private:
-	//! @brief			modify を行うためにノードデータのコピーを行う(内部関数)
-	//! @param			oldchild		古い子ノードデータ
-	//! @param			newchild		新しい子ノードデータ
-	//! @return			コピーされたノードデータ
-	tGDSNodeData * BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData * newchild);
-
-	//! @brief			modify を行うためにノードデータのコピーを行う(内部関数)
-	//! @param			newnode			BeginIndepend() の戻りの値を渡す
-	void EndIndepend(tGDSNodeData * newnodedata);
 };
 //---------------------------------------------------------------------------
 
@@ -339,8 +344,8 @@ template <typename NodeDataT> // NodeDataT = ノードデータの型
 class tGDSNode : public tGDSNodeBase
 {
 public:
-	//! @brief			コンストラクタ
-	//! @param			graph			グラフインスタンスへのポインタ
+	//! @brief		コンストラクタ
+	//! @param		graph			グラフインスタンスへのポインタ
 	tGDSNode(tGDSGraph * graph) : tGDSNodeBase(graph, new tGDSPool<NodeDataT>) {;}
 };
 //---------------------------------------------------------------------------

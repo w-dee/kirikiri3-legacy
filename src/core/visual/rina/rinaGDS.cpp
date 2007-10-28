@@ -30,7 +30,7 @@ tGDSGraph::tGDSGraph()
 
 
 //---------------------------------------------------------------------------
-tGDSNode * tGDSGraph::GetRoot()
+tGDSNodeBase * tGDSGraph::GetRoot()
 {
 	volatile tCriticalSection::tLocker lock(*CS);
 	return Root;
@@ -39,7 +39,7 @@ tGDSNode * tGDSGraph::GetRoot()
 
 
 //---------------------------------------------------------------------------
-tGDSNode * tGDSGraph::Freeze()
+tGDSNodeBase * tGDSGraph::Freeze()
 {
 	volatile tCriticalSection::tLocker lock(*CS);
 
@@ -56,18 +56,74 @@ tGDSNode * tGDSGraph::Freeze()
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-tGDSNode::tUpdateLock::tUpdateLock(tGDSNode * node) : Node(node), Lock(node->Graph->GetCS())
+void tGDSNodeData::Release()
 {
-	NewNode = node->BeginIndepend(NULL, NULL);
+	if(--RefCount == 0)
+	{
+		// 参照カウンタが 0 になった
+		Node->GetPool()->Deallocate(this);
+	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tGDSNode::tUpdateLock::~tUpdateLock()
+void tGDSNodeData::ReconnectChild(tGDSNodeData * oldnodedata, tGDSNodeData * newnodedata)
 {
-	node->EndIndepend(NewNode);
+	// TODO: これ線形検索でいいんかいな
+	tNodeVector::iterator i = std::find(Children.begin(), Children.end(), oldnodedata);
+	RISSE_ASSERT(i != Children.end());
+	oldnodedata->Release();
+	newnodedata->AddRef();
+	(*i) = newnode;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSNodeData::Copy(const tGDSNodeData * rhs)
+{
+	Node = rhs->Node;
+	Parents = rhs->Parents;
+	Children = rhs->Children;
+	// 参照カウンタはコピーしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSNodeData::Free()
+{
+	// 何もしない
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tGDSNodeBase::tUpdateLock::tUpdateLock(tGDSNodeBase * node) : Lock(node->Graph->GetCS())
+{
+	NewNodeData = node->BeginIndepend(NULL, NULL);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tGDSNodeBase::tUpdateLock::~tUpdateLock()
+{
+	node->EndIndepend(NewNodeData);
 }
 //---------------------------------------------------------------------------
 
@@ -75,35 +131,46 @@ tGDSNode::tUpdateLock::~tUpdateLock()
 
 
 //---------------------------------------------------------------------------
-tGDSNode::tGDSNode(tGDSGraph * graph)
+tGDSNodeBase::tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool)
 {
 	Graph = graph;
+	Pool = pool;
 	LastGeneration = Graph->GetLastFreezedGeneration();
+	Current = Pool->Allocate();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tGDSNode * tGDSNode::BeginIndepend(tGDSNode * oldchild, tGDSNode * oldchild)
+tGDSNodeData * tGDSNodeBase::BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData * newchild);
 {
 	// このノードが記録している最終フリーズ世代とグラフ全体の最終フリーズ世代を比べる。
 	// もしそれらが同じならばコピーは行わなくてよいが、異なっていればコピーを行う
 	bool need_clone = LastGeneration != Graph->GetLastFreezedGeneration();
 
-	// 必要ならば自分自身のクローンを作成
-	tGDSNode * newnode = need_clone ? Clone() : this;
+	// 必要ならば最新状態のクローンを作成
+	tGDSNodeBase * newnodedata;
+	if(need_clone)
+	{
+		newnodedata = Pool->Allocate();
+		Pool->Copy(Current);
+	}
+	else
+	{
+		newnodedata = Current;
+	}
 
-	// クローン/あるいは自分自身の子ノードのうち、oldchild に向いている
+	// クローン/あるいはCurrentの子ノードのうち、oldchild に向いている
 	// ポインタを newchild に置き換える
-	if(oldchild) newnode->ReconnectChild(oldchild, newchild);
+	if(oldchild) newnodedata->ReconnectChild(oldchild, newchild);
 
-	return newnode;
+	return newnodedata;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tGDSNode::EndIndepend(tGDSNode * newnode)
+void tGDSNodeBase::EndIndepend(tGDSNodeData * newnodedata);
 {
 	// クローンを行わなかった場合は親ノードに再帰する必要はないので、ここで戻る
 	if(newnode == this) return this;
@@ -112,7 +179,6 @@ void tGDSNode::EndIndepend(tGDSNode * newnode)
 	if(Parents.size() == 0)
 	{
 		// 自分がルート
-		Graph->SetRootNoLock(newnode);
 	}
 	else
 	{
@@ -121,32 +187,14 @@ void tGDSNode::EndIndepend(tGDSNode * newnode)
 		{
 			if(*i)
 			{
-				tGDSNode * parent_node = (*i)->BeginIndepend(this, newnode);
-				(*i)->EndIndepend(parent_node, this, newnode);
+				tGDSNodeData * parent_node_data = (*i)->BeginIndepend(Current, newnodedata);
+				(*i)->EndIndepend(parent_node_data);
 			}
 		}
 	}
 }
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-void tGDSNode::ReconnectChild(tGDSNode * oldnode, tGDSNode * newnode)
-{
-	// TODO: これ線形検索でいいんかいな
-	tNodeVector::iterator i = std::find(Children.begin(), Children.end(), oldnode);
-	RISSE_ASSERT(i != Children.end());
-	(*i) = newnode;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tGDSNode * tGDSNode::Clone() const
-{
-	return new tGDSNode(*this);
-}
-//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

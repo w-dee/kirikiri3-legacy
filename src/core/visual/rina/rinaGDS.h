@@ -119,22 +119,21 @@ public:
 
 
 
-
 //---------------------------------------------------------------------------
 //! @brief		ノード用の軽量プール(実装)
 //---------------------------------------------------------------------------
-template <typename T>
+template <typename NodeT, typename NodeDataT>
 class tGDSPool : public tGDSPoolBase
 {
-	char Data[tGDSGraph::MaxGenerations][sizeof(T)]; //!< データ
-	tGDSGraph * Graph; //!< グラフインスタンス
+	char Data[tGDSGraph::MaxGenerations][sizeof(NodeDataT)]; //!< データ
+	NodeT * Node; //!< ノードインスタンス
 	risse_uint32 Using; //!< 使用中のビット = 1
 	risse_uint32 Instantiated; //!< インスタンス化済みビット = 1
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph			グラフインスタンス
-	tGDSPool(tGDSGraph * graph) { Graph = graph; Using = 0; Instantiated = 0; }
+	//! @param		node	ノードインスタンス
+	tGDSPool(NodeT * node) { Node = node; Using = 0; Instantiated = 0; }
 
 	//! @brief		確保を行う
 	//! @return		確保されたオブジェクト
@@ -150,14 +149,14 @@ public:
 				{
 					// インスタンス化されていない
 					Instantiated |= bit;
-					new (Data[i]) T(Graph);
+					new (Data[i]) NodeDataT(Node);
 				}
 				Using |= bit;
-				return reinterpret_cast<T*>(Data[i]);
+				return reinterpret_cast<NodeDataT*>(Data[i]);
 			}
 		}
 		// 見つからなかった (ロジックがおかしいので致命的なエラー)
-		return reinterpret_cast<T*>(NULL);
+		return reinterpret_cast<NodeDataT*>(NULL);
 	}
 
 	//! @brief		解放を行う
@@ -165,11 +164,11 @@ public:
 	//! @note		obj.Free() が呼ばれる
 	virtual void Deallocate(tGDSNodeData * obj)
 	{
-		reinterpret_cast<T*>(obj)->Free();
+		reinterpret_cast<NodeDataT*>(obj)->Free();
 
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
-			if(Data[i] == obj)
+			if(Data[i] == reinterpret_cast<char *>(obj))
 			{
 				// そこのフラグを倒す
 				Using &= ~(1<<i);
@@ -238,24 +237,30 @@ public:
 	//! @brief		参照カウンタを減らす
 	void Release();
 
-	//! @brief		N番目にある親ノードを得る
+	//! @brief		N番目にある親ノードデータを得る
 	//! @param		n		インデックス
-	//! @return		その位置にある親ノード
+	//! @return		その位置にある親ノードデータ
 	//! @note		n の範囲チェックは行われないので注意
 	tGDSNodeData * GetParentAt(risse_size n) const { return Parents[n]; }
 
-	//! @brief		親ノードの個数を得る
-	//! @return		親ノードの個数
+	//! @brief		N番目にある親ノードデータを設定する
+	//! @param		pn			(このノードデータ内の)親のインデックス
+	//! @param		nodedata	親として設定するノードデータ
+	//! @param		cn			(親のノードデータ内の)子のインデックス
+	void SetParentAt(risse_size pn, tGDSNodeData * nodedata, risse_size cn);
+
+	//! @brief		親ノードデータの個数を得る
+	//! @return		親ノードデータの個数
 	risse_size GetParentCount() const { return Parents.size(); }
 
-	//! @brief		N番目にある子ノードを得る
+	//! @brief		N番目にある子ノードデータを得る
 	//! @param		n		インデックス
-	//! @return		その位置にある子ノード
+	//! @return		その位置にある子ノードデータ
 	//! @note		n の範囲チェックは行われないので注意
 	tGDSNodeData * GetChildAt(risse_size n) const { return Children[n]; }
 
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
+	//! @brief		子ノードデータの個数を得る
+	//! @return		子ノードデータの個数
 	risse_size GetChildCount() const { return Children.size(); }
 
 private:
@@ -271,12 +276,16 @@ private:
 
 private:
 	//! @brief		子を付け替える
-	//! @param		oldnode		古い子ノード
-	//! @param		newnode		新しい子ノード
+	//! @param		oldnode		古い子ノードデータ
+	//! @param		newnode		新しい子ノードデータ
 	//! @note		子の中からoldnodeを探し、newnodeに付け替える
 	void ReconnectChild(tGDSNodeData * oldnode, tGDSNodeData * newnode);
 
-public: // サブクラスで実装してほしいもの
+public:
+	// graphviz 形式でのダンプを行う
+	void DumpGraphviz() const;
+
+public: // サブクラスで実装しても良い物
 	//! @brief		コピーを行う
 	//! @param		rhs		コピー元オブジェクト
 	//! @note		もしサブクラスでオーバーライドしたならば、スーパークラスのこれを
@@ -287,6 +296,12 @@ public: // サブクラスで実装してほしいもの
 	//! @note		もしサブクラスでオーバーライドしたならば、スーパークラスのこれを
 	//!				呼ぶことを忘れないこと
 	virtual void Free();
+
+	//! @brief		名前を得る
+	virtual tString GetName() const;
+
+	//! @brief		(テキスト形式の)ダンプを得る
+	virtual tString DumpText() const;
 };
 //---------------------------------------------------------------------------
 
@@ -325,6 +340,14 @@ public:
 	//! @return		プールインスタンス
 	tGDSPoolBase * GetPool() const { return Pool; }
 
+public: // サブクラスでオーバーライドして良い物
+
+	//! @brief		名前を得る
+	virtual tString GetName() const;
+
+	//! @brief		(テキスト形式の)ダンプを得る
+	virtual tString DumpText() const;
+
 };
 //---------------------------------------------------------------------------
 
@@ -343,10 +366,16 @@ public:
 template <typename NodeDataT> // NodeDataT = ノードデータの型
 class tGDSNode : public tGDSNodeBase
 {
+	typedef tGDSNodeBase inherited;
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph			グラフインスタンスへのポインタ
-	tGDSNode(tGDSGraph * graph) : tGDSNodeBase(graph, new tGDSPool<NodeDataT>) {;}
+	tGDSNode(tGDSGraph * graph) : tGDSNodeBase(graph, new tGDSPool<tGDSNode<NodeDataT>, NodeDataT>(this)) {;}
+
+	//! @brief		最新のノードデータを得る
+	//! @return		最新のノードデータ
+	NodeDataT * GetCurrent() const { return reinterpret_cast<NodeDataT*>(inherited::GetCurrent()); }
+
 };
 //---------------------------------------------------------------------------
 

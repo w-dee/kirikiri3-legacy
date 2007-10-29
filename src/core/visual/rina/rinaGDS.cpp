@@ -87,7 +87,7 @@ tGDSNodeData::tUpdateLock::~tUpdateLock()
 tGDSNodeData::tGDSNodeData(tGDSNodeBase * node)
 {
 	Node = node;
-	RefCount = 1;
+	RefCount = 0;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
 }
 //---------------------------------------------------------------------------
@@ -101,6 +101,30 @@ void tGDSNodeData::Release()
 		// 参照カウンタが 0 になった
 		Node->GetPool()->Deallocate(this);
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSNodeData::SetParentAt(risse_size pn, tGDSNodeData * nodedata, risse_size cn)
+{
+	// ノードデータの親を設定する
+
+	// 親子の領域は空いてる？
+	if(Parents.size() <= pn)
+		Parents.resize(pn + 1, NULL);
+	if(nodedata->Children.size() <= cn)
+		nodedata->Children.resize(cn + 1, NULL);
+
+	// 置き換える場所に既に子が設定されている場合は その子を Release する
+	if(nodedata->Children[cn] != NULL) nodedata->Children[cn]->Release();
+
+	// 子を書き込み、子 (this) を AddRef する
+	nodedata->Children[cn] = this;
+	AddRef();
+
+	// 親を書き込む
+	Parents[pn] = nodedata;
 }
 //---------------------------------------------------------------------------
 
@@ -174,6 +198,49 @@ void tGDSNodeData::ReconnectChild(tGDSNodeData * oldnodedata, tGDSNodeData * new
 
 
 //---------------------------------------------------------------------------
+void tGDSNodeData::DumpGraphviz() const
+{
+	// ヘッダを出力
+	wxPrintf(wxT("digraph GDS {\n"));
+
+	gc_vector<const tGDSNodeData *> nodedatas;
+
+	// phase 1: すべてのノードを書き出す
+	nodedatas.push_back(this);
+	while(nodedatas.size() > 0)
+	{
+		const tGDSNodeData * nodedata = nodedatas.back();
+		nodedatas.pop_back();
+		wxPrintf(wxT("\t0x%p [label=\"%s\", shape=box];\n"),
+			nodedata, nodedata->GetName().AsWxString().c_str());
+
+		for(tNodeVector::const_iterator i = nodedata->Children.begin();
+			i != nodedata->Children.end(); i++)
+			nodedatas.push_back(*i);
+	}
+
+	// phase 2: すべてのエッジを書き出す
+	nodedatas.push_back(this);
+	while(nodedatas.size() > 0)
+	{
+		const tGDSNodeData * nodedata = nodedatas.back();
+		nodedatas.pop_back();
+		for(tNodeVector::const_iterator i = nodedata->Children.begin();
+			i != nodedata->Children.end(); i++)
+		{
+			wxPrintf(wxT("\t0x%p -> 0x%p;\n"),
+				nodedata, (*i));
+			nodedatas.push_back(*i);
+		}
+	}
+
+	// フッタを出力
+	wxPrintf(wxT("}\n"));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 {
 	Node = rhs->Node;
@@ -181,6 +248,12 @@ void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 	Children = rhs->Children;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
 	// 参照カウンタはコピーしない
+
+	// コピーした時点で子の参照カウンタがそれぞれ増える
+	for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
+	{
+		(*i)->AddRef();
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -188,9 +261,28 @@ void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 //---------------------------------------------------------------------------
 void tGDSNodeData::Free()
 {
-	RefCount = 1; // 参照カウンタを 1 にリセットしておく
+	RefCount = 0; // 参照カウンタを 0 にリセットしておく
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tGDSNodeData::GetName() const
+{
+	return tString(RISSE_WS("Generation ")) +
+		tString::AsString((int)LastGeneration.operator risse_uint32());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tGDSNodeData::DumpText() const
+{
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -212,5 +304,88 @@ tGDSNodeBase::tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool)
 
 
 //---------------------------------------------------------------------------
+tString tGDSNodeBase::GetName() const
+{
+	risse_char tmp[25];
+	pointer_to_str(this, tmp);
+
+	return tString(RISSE_WS("Node@0x")) + tmp;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tGDSNodeBase::DumpText() const
+{
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 } // namespace Rina
+
+
+
+
+
+#define RINA_GDS_TRIVIAL_TEST
+#ifdef RINA_GDS_TRIVIAL_TEST
+//---------------------------------------------------------------------------
+namespace Risa {
+
+using namespace Rina;
+//---------------------------------------------------------------------------
+class tTestNodeData : public tGDSNodeData
+{
+	tString Text; //!< データとして持つテキスト
+public:
+	tTestNodeData(tGDSNodeBase * node) : tGDSNodeData(node) {;}
+	const tString & GetText() const { return Text; }
+	void SetText(const tString & text) { Text = text; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+class tTestNode : public tGDSNode<tTestNodeData>
+{
+	typedef tGDSNode<tTestNodeData> inherited;
+public:
+	tTestNode(tGDSGraph * graph) : inherited(graph) {;}
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+class tGDSTester : public singleton_base<tGDSTester>
+{
+public:
+	tGDSTester();
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tGDSTester::tGDSTester()
+{
+	tGDSGraph * graph = new tGDSGraph();
+
+	tTestNode * node1 = new tTestNode(graph); // will be root
+	tTestNode * node2 = new tTestNode(graph);
+	tTestNode * node3 = new tTestNode(graph);
+
+	node2->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 0);
+	node3->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 1);
+
+	node1->GetCurrent()->DumpGraphviz();
+}
+//---------------------------------------------------------------------------
+}
+//---------------------------------------------------------------------------
+#endif
+
+
 

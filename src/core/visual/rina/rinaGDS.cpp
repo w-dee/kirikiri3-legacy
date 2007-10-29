@@ -168,6 +168,9 @@ void tGDSNodeData::EndIndepend(tGDSNodeData * newnodedata)
 			}
 		}
 	}
+
+	// current を設定する
+	Node->SetCurrent(newnodedata);
 }
 //---------------------------------------------------------------------------
 
@@ -331,11 +334,18 @@ using namespace Rina;
 //---------------------------------------------------------------------------
 class tTestNodeData : public tGDSNodeData
 {
+	typedef tGDSNodeData inherited;
 	tString Text; //!< データとして持つテキスト
 public:
 	tTestNodeData(tGDSNodeBase * node) : tGDSNodeData(node) {;}
 	const tString & GetText() const { return Text; }
 	void SetText(const tString & text) { Text = text; }
+
+	void Copy(const tGDSNodeData * rhs)
+	{
+		Text = reinterpret_cast<const tTestNodeData*>(rhs)->Text;
+		inherited::Copy(rhs);
+	}
 
 	tString DumpText() const { return Text; }
 };

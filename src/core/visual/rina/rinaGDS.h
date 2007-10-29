@@ -315,6 +315,10 @@ public:
 	//! @return		最新のノードデータ
 	tGDSNodeData * GetCurrent() const { return Current; }
 
+	//! @brief		最新のノードデータを設定する
+	//! @param		nodedata		最新のノードデータ
+	void SetCurrent(tGDSNodeData * nodedata)  { Current = nodedata; }
+
 	//! @brief		プールインスタンスを得る
 	//! @return		プールインスタンス
 	tGDSPoolBase * GetPool() const { return Pool; }

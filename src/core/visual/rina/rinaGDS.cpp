@@ -32,6 +32,15 @@ tGDSGraph::tGDSGraph()
 
 
 //---------------------------------------------------------------------------
+void tGDSGraph::SetRoot(tGDSNodeBase * root)
+{
+	volatile tCriticalSection::tLocker lock(*CS);
+	RootNode = root;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tGDSNodeBase * tGDSGraph::GetRoot()
 {
 	volatile tCriticalSection::tLocker lock(*CS);
@@ -56,27 +65,6 @@ tGDSNodeData * tGDSGraph::Freeze()
 
 
 
-
-
-
-
-//---------------------------------------------------------------------------
-tGDSNodeData::tUpdateLock::tUpdateLock(tGDSNodeData * nodedata) :
-	NodeData(nodedata),
-	NewNodeData(NULL),
-	Lock(nodedata->Node->GetGraph()->GetCS())
-{
-	NewNodeData = nodedata->BeginIndepend(NULL, NULL);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tGDSNodeData::tUpdateLock::~tUpdateLock()
-{
-	NodeData->EndIndepend(NewNodeData);
-}
-//---------------------------------------------------------------------------
 
 
 
@@ -212,7 +200,8 @@ void tGDSNodeData::DumpGraphviz() const
 		const tGDSNodeData * nodedata = nodedatas.back();
 		nodedatas.pop_back();
 		wxPrintf(wxT("\t0x%p [label=\"%s\", shape=box];\n"),
-			nodedata, nodedata->GetName().AsWxString().c_str());
+			nodedata,
+			(nodedata->GetName() + RISSE_WS("\\n") + nodedata->DumpText()).AsWxString().c_str());
 
 		for(tNodeVector::const_iterator i = nodedata->Children.begin();
 			i != nodedata->Children.end(); i++)
@@ -236,6 +225,9 @@ void tGDSNodeData::DumpGraphviz() const
 
 	// フッタを出力
 	wxPrintf(wxT("}\n"));
+
+	// 標準出力をフラッシュ
+	fflush(stdout);
 }
 //---------------------------------------------------------------------------
 
@@ -344,6 +336,8 @@ public:
 	tTestNodeData(tGDSNodeBase * node) : tGDSNodeData(node) {;}
 	const tString & GetText() const { return Text; }
 	void SetText(const tString & text) { Text = text; }
+
+	tString DumpText() const { return Text; }
 };
 //---------------------------------------------------------------------------
 
@@ -377,10 +371,40 @@ tGDSTester::tGDSTester()
 	tTestNode * node2 = new tTestNode(graph);
 	tTestNode * node3 = new tTestNode(graph);
 
+	graph->SetRoot(node1);
+
+	node1->GetCurrent()->SetText(RISSE_WS("A"));
+	node2->GetCurrent()->SetText(RISSE_WS("A"));
+	node3->GetCurrent()->SetText(RISSE_WS("A"));
+
 	node2->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 0);
 	node3->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 1);
 
 	node1->GetCurrent()->DumpGraphviz();
+
+	// change node value
+	{
+		tTestNode::tUpdateLock lock(node2);
+		lock.GetNewNodeData()->SetText(RISSE_WS("B"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	// freeze
+	tTestNodeData * g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	// change node value
+	{
+		tTestNode::tUpdateLock lock(node2);
+		lock.GetNewNodeData()->SetText(RISSE_WS("C"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	// display freezed node
+	g1->DumpGraphviz();
+
+
 }
 //---------------------------------------------------------------------------
 }

@@ -79,9 +79,11 @@ public:
 	//! @brief		このグラフを保護するクリティカルセクションを得る
 	tCriticalSection & GetCS() { return *CS; }
 
-	//! @brief		(最新の)ルートノードデータを得る
-	//! @note		これで帰されたノードデータのCurrentは他のフリーズされたノード
-	//!				のことを気にせずに変更などをくわえることができるはず。
+	//! @brief		ルートノードを設定する
+	//! @param		root	ルートノード
+	void SetRoot(tGDSNodeBase * root);
+
+	//! @brief		ルートノードを得る
 	tGDSNodeBase * GetRoot();
 
 	//! @brief		ルートノードを設定する(ロックはしない)
@@ -191,37 +193,14 @@ class tGDSNodeBase;
 //---------------------------------------------------------------------------
 class tGDSNodeData : public tCollectee
 {
+	friend class tGDSNodeBase;
+
 	tGDSNodeBase * Node; //!< ノードインスタンスへのポインタ
 	typedef gc_vector<tGDSNodeData *> tNodeVector;
 	tNodeVector Parents; //!< 親ノード
 	tNodeVector Children; //!< 子ノード
 	int RefCount; //!< 参照カウンタ
 	tGDSGeneration LastGeneration; //!< 最後に更新された世代
-
-public:
-	//! @brief		更新ロック
-	//! @note		このインスタンスの生存期間中に、GetNewNode() で取得できた
-	//!				ノードのデータを弄ること。
-	//!				スタック上に配置して使うこと！
-	class tUpdateLock
-	{
-		tGDSNodeData * NodeData; //!< 元のノードデータ
-		tGDSNodeData * NewNodeData; //!< 新しくクローンされたノードデータ
-		volatile tCriticalSection::tLocker Lock;
-
-	public:
-		//! @brief		コンストラクタ
-		//! @param		nodedata		ロックするノードデータ
-		tUpdateLock(tGDSNodeData * nodedata);
-
-		//! @brief		デストラクタ
-		~tUpdateLock();
-
-	public:
-		//! @brief		弄るべきノードデータを帰す
-		//! @return		弄るべきノードデータ
-		tGDSNodeData * GetNewNodeData() const { return NewNodeData; }
-	};
 
 public:
 	//! @brief		コンストラクタ
@@ -263,7 +242,7 @@ public:
 	//! @return		子ノードデータの個数
 	risse_size GetChildCount() const { return Children.size(); }
 
-private:
+public:
 	//! @brief		modify を行うためにノードデータのコピーを行う(内部関数)
 	//! @param		oldchild		古い子ノードデータ
 	//! @param		newchild		新しい子ノードデータ
@@ -367,6 +346,42 @@ template <typename NodeDataT> // NodeDataT = ノードデータの型
 class tGDSNode : public tGDSNodeBase
 {
 	typedef tGDSNodeBase inherited;
+
+public:
+	//! @brief		更新ロック
+	//! @note		このインスタンスの生存期間中に、GetNewNode() で取得できた
+	//!				ノードのデータを弄ること。
+	//!				スタック上に配置して使うこと！
+	class tUpdateLock
+	{
+		NodeDataT * NodeData; //!< 元のノードデータ
+		NodeDataT * NewNodeData; //!< 新しくクローンされたノードデータ
+		volatile tCriticalSection::tLocker Lock;
+
+	public:
+		//! @brief		コンストラクタ
+		//! @param		node		ロックするノード
+		tUpdateLock(tGDSNode<NodeDataT> * node) :
+			NodeData(node->GetCurrent()),
+			NewNodeData(NULL),
+			Lock(node->GetGraph()->GetCS())
+		{
+			NewNodeData = reinterpret_cast<NodeDataT*>(NodeData->BeginIndepend(NULL, NULL));
+		}
+
+		//! @brief		デストラクタ
+		~tUpdateLock()
+		{
+			NodeData->EndIndepend(NewNodeData);
+		}
+
+	public:
+		//! @brief		弄るべきノードデータを帰す
+		//! @return		弄るべきノードデータ
+		NodeDataT * GetNewNodeData() const { return NewNodeData; }
+	};
+
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph			グラフインスタンスへのポインタ

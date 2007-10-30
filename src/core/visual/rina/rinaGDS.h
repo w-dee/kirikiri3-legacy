@@ -13,7 +13,6 @@
 //! @brief RINA GDS (Generational Data Structure)
 //---------------------------------------------------------------------------
 
-
 namespace Rina {
 //---------------------------------------------------------------------------
 
@@ -127,7 +126,13 @@ public:
 template <typename NodeT, typename NodeDataT>
 class tGDSPool : public tGDSPoolBase
 {
-	char Data[tGDSGraph::MaxGenerations][sizeof(NodeDataT)]; //!< データ
+	struct alignment_check
+	{
+		char a;
+		NodeDataT t;
+	};
+
+	char *Data;
 	NodeT * Node; //!< ノードインスタンス
 	risse_uint32 Using; //!< 使用中のビット = 1
 	risse_uint32 Instantiated; //!< インスタンス化済みビット = 1
@@ -135,7 +140,16 @@ class tGDSPool : public tGDSPoolBase
 public:
 	//! @brief		コンストラクタ
 	//! @param		node	ノードインスタンス
-	tGDSPool(NodeT * node) { Node = node; Using = 0; Instantiated = 0; }
+	tGDSPool(NodeT * node)
+	{
+		Node = node; Using = 0; Instantiated = 0;
+		risse_size align_size =
+			reinterpret_cast<size_t>(&reinterpret_cast<const char &>(((alignment_check*)1) -> t)) - 1;
+		int align = 0;
+		while(align_size) align ++, align_size >>= 1;
+		// アライメントされたメモリ領域に確保を行う
+		Data = (char*)AlignedMallocCollectee(tGDSGraph::MaxGenerations * sizeof(NodeDataT), align);
+	}
 
 	//! @brief		確保を行う
 	//! @return		確保されたオブジェクト
@@ -151,10 +165,10 @@ public:
 				{
 					// インスタンス化されていない
 					Instantiated |= bit;
-					new (Data[i]) NodeDataT(Node);
+					new (Data + i * sizeof(NodeDataT)) NodeDataT(Node);
 				}
 				Using |= bit;
-				return reinterpret_cast<NodeDataT*>(Data[i]);
+				return reinterpret_cast<NodeDataT*>(Data + i * sizeof(NodeDataT));
 			}
 		}
 		// 見つからなかった (ロジックがおかしいので致命的なエラー)
@@ -170,7 +184,7 @@ public:
 
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
-			if(Data[i] == reinterpret_cast<char *>(obj))
+			if(Data + i * sizeof(NodeDataT) == reinterpret_cast<char *>(obj))
 			{
 				// そこのフラグを倒す
 				Using &= ~(1<<i);

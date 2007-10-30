@@ -197,7 +197,6 @@ class tGDSNodeData : public tCollectee
 
 	tGDSNodeBase * Node; //!< ノードインスタンスへのポインタ
 	typedef gc_vector<tGDSNodeData *> tNodeVector;
-	tNodeVector Parents; //!< 親ノード(常に最新の情報を持つ)
 	tNodeVector Children; //!< 子ノード(その世代での情報を持つ)
 	int RefCount; //!< 参照カウンタ
 	tGDSGeneration LastGeneration; //!< 最後に更新された世代
@@ -216,31 +215,22 @@ public:
 	//! @brief		参照カウンタを減らす
 	void Release();
 
-	//! @brief		N番目にある親ノードデータを得る
-	//! @param		n		インデックス
-	//! @return		その位置にある親ノードデータ
-	//! @note		n の範囲チェックは行われないので注意
-	tGDSNodeData * GetParentAt(risse_size n) const { return Parents[n]; }
-
-	//! @brief		親ノードデータの個数を得る
-	//! @return		親ノードデータの個数
-	risse_size GetParentCount() const { return Parents.size(); }
-
 	//! @brief		N番目にある子ノードデータを得る
 	//! @param		n		インデックス
 	//! @return		その位置にある子ノードデータ
 	//! @note		n の範囲チェックは行われないので注意
 	tGDSNodeData * GetChildAt(risse_size n) const { return Children[n]; }
 
+	//! @brief		子ノードデータの個数を得る
+	//! @return		子ノードデータの個数
+	risse_size GetChildCount() const { return Children.size(); }
+
+private:
 	//! @brief		N番目にある子ノードデータを設定する
 	//! @param		cn			(このノードデータ内の)子のインデックス
 	//! @param		nodedata	子として設定するノードデータ
 	//! @param		pn			(子のノードデータ内の)親のインデックス
 	void SetChildAt(risse_size cn, tGDSNodeData * nodedata, risse_size pn);
-
-	//! @brief		子ノードデータの個数を得る
-	//! @return		子ノードデータの個数
-	risse_size GetChildCount() const { return Children.size(); }
 
 public:
 	//! @brief		modify を行うためにノードデータのコピーを行う(内部関数)
@@ -254,12 +244,6 @@ public:
 	void EndIndepend(tGDSNodeData * newnodedata);
 
 private:
-	//! @brief		親を付け替える
-	//! @param		oldnodedata		古い親ノードデータ
-	//! @param		newnodedata		新しい親ノードデータ
-	//! @note		親の中からoldnodedataを探し、newnodedataに付け替える
-	void ReconnectParent(tGDSNodeData * oldnodedata, tGDSNodeData * newnodedata);
-
 	//! @brief		子を付け替える
 	//! @param		oldnodedata		古い子ノードデータ
 	//! @param		newnodedata		新しい子ノードデータ
@@ -306,12 +290,17 @@ class tGDSNodeBase : public tCollectee
 	tGDSGraph * Graph; //!< グラフインスタンスへのポインタ
 	tGDSNodeData * Current; //!< 最新のノードデータへのポインタ
 	tGDSPoolBase * Pool; //!< プール
+	typedef gc_vector<tGDSNodeBase *> tNodeVector;
+	tNodeVector Parents; //!< 親ノード(常に最新の情報を持つ)
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph			グラフインスタンスへのポインタ
 	//! @param		pool			プール
 	tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool);
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tGDSNodeBase() {;}
 
 	//! @brief		グラフインスタンスへのポインタを得る
 	//! @return		グラフインスタンスへのポインタ
@@ -328,6 +317,37 @@ public:
 	//! @brief		プールインスタンスを得る
 	//! @return		プールインスタンス
 	tGDSPoolBase * GetPool() const { return Pool; }
+
+	//! @brief		N番目にある親ノードを得る
+	//! @param		n		インデックス
+	//! @return		その位置にある親ノード
+	//! @note		n の範囲チェックは行われないので注意
+	tGDSNodeBase * GetParentAt(risse_size n) const { return Parents[n]; }
+
+	//! @brief		N番目にある親ノードを設定する
+	//! @param		n		インデックス
+	//! @param		node	ノード
+	//! @note		n が範囲外だった場合は配列サイズが拡張される
+	void SetParentAt(risse_size n, tGDSNodeBase * node);
+
+	//! @brief		親ノードの個数を得る
+	//! @return		親ノードの個数
+	risse_size GetParentCount() const { return Parents.size(); }
+
+	//! @brief		親を付け替える
+	//! @param		oldnode		古い親ノード
+	//! @param		newnode		新しい親ノード
+	//! @note		親の中からoldnodeを探し、newnodeに付け替える
+	void ReconnectParent(tGDSNodeBase * oldnode, tGDSNodeBase * newnode);
+
+	//! @brief		N番目にある子ノードを設定する
+	//! @param		cn			(このノードデータ内の)子のインデックス
+	//! @param		node		子として設定するノード
+	//! @param		pn			(子のノードデータ内の)親のインデックス
+	void SetChildAt(risse_size cn, tGDSNodeBase * node, risse_size pn)
+	{
+		Current->SetChildAt(cn, node->Current, pn);
+	}
 
 public: // サブクラスでオーバーライドして良い物
 

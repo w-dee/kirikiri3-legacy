@@ -197,8 +197,8 @@ class tGDSNodeData : public tCollectee
 
 	tGDSNodeBase * Node; //!< ノードインスタンスへのポインタ
 	typedef gc_vector<tGDSNodeData *> tNodeVector;
-	tNodeVector Parents; //!< 親ノード
-	tNodeVector Children; //!< 子ノード
+	tNodeVector Parents; //!< 親ノード(常に最新の情報を持つ)
+	tNodeVector Children; //!< 子ノード(その世代での情報を持つ)
 	int RefCount; //!< 参照カウンタ
 	tGDSGeneration LastGeneration; //!< 最後に更新された世代
 
@@ -222,12 +222,6 @@ public:
 	//! @note		n の範囲チェックは行われないので注意
 	tGDSNodeData * GetParentAt(risse_size n) const { return Parents[n]; }
 
-	//! @brief		N番目にある親ノードデータを設定する
-	//! @param		pn			(このノードデータ内の)親のインデックス
-	//! @param		nodedata	親として設定するノードデータ
-	//! @param		cn			(親のノードデータ内の)子のインデックス
-	void SetParentAt(risse_size pn, tGDSNodeData * nodedata, risse_size cn);
-
 	//! @brief		親ノードデータの個数を得る
 	//! @return		親ノードデータの個数
 	risse_size GetParentCount() const { return Parents.size(); }
@@ -237,6 +231,12 @@ public:
 	//! @return		その位置にある子ノードデータ
 	//! @note		n の範囲チェックは行われないので注意
 	tGDSNodeData * GetChildAt(risse_size n) const { return Children[n]; }
+
+	//! @brief		N番目にある子ノードデータを設定する
+	//! @param		cn			(このノードデータ内の)子のインデックス
+	//! @param		nodedata	子として設定するノードデータ
+	//! @param		pn			(子のノードデータ内の)親のインデックス
+	void SetChildAt(risse_size cn, tGDSNodeData * nodedata, risse_size pn);
 
 	//! @brief		子ノードデータの個数を得る
 	//! @return		子ノードデータの個数
@@ -254,11 +254,17 @@ public:
 	void EndIndepend(tGDSNodeData * newnodedata);
 
 private:
+	//! @brief		親を付け替える
+	//! @param		oldnodedata		古い親ノードデータ
+	//! @param		newnodedata		新しい親ノードデータ
+	//! @note		親の中からoldnodedataを探し、newnodedataに付け替える
+	void ReconnectParent(tGDSNodeData * oldnodedata, tGDSNodeData * newnodedata);
+
 	//! @brief		子を付け替える
-	//! @param		oldnode		古い子ノードデータ
-	//! @param		newnode		新しい子ノードデータ
-	//! @note		子の中からoldnodeを探し、newnodeに付け替える
-	void ReconnectChild(tGDSNodeData * oldnode, tGDSNodeData * newnode);
+	//! @param		oldnodedata		古い子ノードデータ
+	//! @param		newnodedata		新しい子ノードデータ
+	//! @note		子の中からoldnodedataを探し、newnodedataに付け替える
+	void ReconnectChild(tGDSNodeData * oldnodedata, tGDSNodeData * newnodedata);
 
 public:
 	// graphviz 形式でのダンプを行う

@@ -94,25 +94,25 @@ void tGDSNodeData::Release()
 
 
 //---------------------------------------------------------------------------
-void tGDSNodeData::SetParentAt(risse_size pn, tGDSNodeData * nodedata, risse_size cn)
+void tGDSNodeData::SetChildAt(risse_size cn, tGDSNodeData * nodedata, risse_size pn)
 {
 	// ノードデータの親を設定する
 
 	// 親子の領域は空いてる？
-	if(Parents.size() <= pn)
-		Parents.resize(pn + 1, NULL);
-	if(nodedata->Children.size() <= cn)
-		nodedata->Children.resize(cn + 1, NULL);
+	if(Children.size() <= cn)
+		Children.resize(cn + 1, NULL);
+	if(nodedata->Parents.size() <= pn)
+		nodedata->Parents.resize(pn + 1, NULL);
 
 	// 置き換える場所に既に子が設定されている場合は その子を Release する
-	if(nodedata->Children[cn] != NULL) nodedata->Children[cn]->Release();
+	if(Children[cn] != NULL) Children[cn]->Release();
 
-	// 子を書き込み、子 (this) を AddRef する
-	nodedata->Children[cn] = this;
-	AddRef();
+	// 子を書き込み、子 (nodedata) を AddRef する
+	Children[cn] = nodedata;
+	nodedata->AddRef();
 
 	// 親を書き込む
-	Parents[pn] = nodedata;
+	nodedata->Parents[pn] = this;
 }
 //---------------------------------------------------------------------------
 
@@ -128,7 +128,16 @@ tGDSNodeData * tGDSNodeData::BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData
 	tGDSNodeData * newnodedata;
 	if(need_clone)
 	{
+		// メモリ領域を確保
 		newnodedata = Node->GetPool()->Allocate();
+
+		// すべての子のうち、this を向いている親を newnodedata を向くように置き換える
+		for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
+		{
+			(*i)->ReconnectParent(this, newnodedata);
+		}
+
+		// 内容をコピー
 		newnodedata->Copy(this);
 	}
 	else
@@ -171,6 +180,17 @@ void tGDSNodeData::EndIndepend(tGDSNodeData * newnodedata)
 
 	// current を設定する
 	Node->SetCurrent(newnodedata);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSNodeData::ReconnectParent(tGDSNodeData * oldnodedata, tGDSNodeData * newnodedata)
+{
+	// TODO: これ線形検索でいいんかいな
+	tNodeVector::iterator i = std::find(Parents.begin(), Parents.end(), oldnodedata);
+	RISSE_ASSERT(i != Parents.end());
+	(*i) = newnodedata;
 }
 //---------------------------------------------------------------------------
 
@@ -383,37 +403,61 @@ tGDSTester::tGDSTester()
 
 	graph->SetRoot(node1);
 
-	node1->GetCurrent()->SetText(RISSE_WS("A"));
-	node2->GetCurrent()->SetText(RISSE_WS("A"));
-	node3->GetCurrent()->SetText(RISSE_WS("A"));
+	node1->GetCurrent()->SetText(RISSE_WS("node1:A"));
+	node2->GetCurrent()->SetText(RISSE_WS("node2:A"));
+	node3->GetCurrent()->SetText(RISSE_WS("node3:A"));
 
-	node2->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 0);
-	node3->GetCurrent()->SetParentAt(0, node1->GetCurrent(), 1);
+	node1->GetCurrent()->SetChildAt(0, node2->GetCurrent(), 0);
+	node1->GetCurrent()->SetChildAt(1, node3->GetCurrent(), 0);
 
 	node1->GetCurrent()->DumpGraphviz();
 
-	// change node value
+	printf("change node value\n");
+
 	{
 		tTestNode::tUpdateLock lock(node2);
-		lock.GetNewNodeData()->SetText(RISSE_WS("B"));
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:B"));
 	}
 
 	node1->GetCurrent()->DumpGraphviz();
 
-	// freeze
+	printf("freeze\n");
+
 	tTestNodeData * g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
 
-	// change node value
+	printf("change node value\n");
+
 	{
 		tTestNode::tUpdateLock lock(node2);
-		lock.GetNewNodeData()->SetText(RISSE_WS("C"));
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:C"));
 	}
 
 	node1->GetCurrent()->DumpGraphviz();
 
-	// display freezed node
+	printf("display freezed node\n");
 	g1->DumpGraphviz();
 
+	printf("change node value again\n");
+	{
+		tTestNode::tUpdateLock lock(node2);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:D"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("change another node value\n");
+	{
+		tTestNode::tUpdateLock lock(node3);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node3:E"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
 
 }
 //---------------------------------------------------------------------------

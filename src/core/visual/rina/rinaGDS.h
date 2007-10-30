@@ -326,7 +326,7 @@ public:
 
 	//! @brief		最新のノードデータを設定する
 	//! @param		nodedata		最新のノードデータ
-	void SetCurrent(tGDSNodeData * nodedata)  { Current = nodedata; }
+	void SetCurrent(tGDSNodeData * nodedata);
 
 	//! @brief		プールインスタンスを得る
 	//! @return		プールインスタンス

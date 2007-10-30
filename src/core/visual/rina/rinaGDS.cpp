@@ -56,7 +56,9 @@ tGDSNodeData * tGDSGraph::Freeze()
 
 	++LastFreezedGeneration;
 
-	return RootNode->GetCurrent();
+	tGDSNodeData * newroot = RootNode->GetCurrent();
+	newroot->AddRef();
+	return newroot;
 }
 //---------------------------------------------------------------------------
 
@@ -87,6 +89,11 @@ void tGDSNodeData::Release()
 	if(--RefCount == 0)
 	{
 		// 参照カウンタが 0 になった
+		// 子をすべて解放する
+		for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
+		{
+			(*i)->Release();
+		}
 		Node->GetPool()->Deallocate(this);
 	}
 }
@@ -238,7 +245,7 @@ void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 	Node = rhs->Node;
 	Children = rhs->Children;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
-	// 参照カウンタはコピーしない
+	RefCount = 0; // 参照カウンタはコピーされた時点で0になる
 
 	// コピーした時点で子の参照カウンタがそれぞれ増える
 	for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
@@ -260,8 +267,10 @@ void tGDSNodeData::Free()
 //---------------------------------------------------------------------------
 tString tGDSNodeData::GetName() const
 {
-	return tString(RISSE_WS("Generation ")) +
-		tString::AsString((int)LastGeneration.operator risse_uint32());
+	return tString(RISSE_WS("G:")) +
+		tString::AsString((int)LastGeneration.operator risse_uint32()) +
+		RISSE_WS(" R:") +
+		tString::AsString(RefCount);
 }
 //---------------------------------------------------------------------------
 
@@ -290,6 +299,17 @@ tGDSNodeBase::tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool)
 	Graph = graph;
 	Pool = pool;
 	Current = Pool->Allocate();
+	Current->AddRef();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSNodeBase::SetCurrent(tGDSNodeData * nodedata)
+{
+	Current->Release();
+	Current = nodedata;
+	Current->AddRef();
 }
 //---------------------------------------------------------------------------
 
@@ -460,6 +480,36 @@ tGDSTester::tGDSTester()
 
 	printf("display freezed node\n");
 	g1->DumpGraphviz();
+
+	printf("relesae freezed node\n");
+	g1->Release();
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("freeze\n");
+
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node2);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:C"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+
+	printf("relesae freezed node\n");
+	g1->Release();
+	node1->GetCurrent()->DumpGraphviz();
+
+
 
 }
 //---------------------------------------------------------------------------

@@ -260,7 +260,7 @@ void tGDSNodeData::DumpGraphviz() const
 			i != nodedata->Children.end(); i++)
 		{
 			wxPrintf(wxT("\t0x%p -> 0x%p;\n"),
-				nodedata, (*i));
+				(*i), nodedata);
 			if((*i)->DumpMark != dumpmark)
 				nodedatas.push_back(*i);
 		}

@@ -91,6 +91,7 @@ tGDSNodeData::tGDSNodeData(tGDSNodeBase * node)
 	Node = node;
 	RefCount = 0;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
+	DumpMark = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -212,33 +213,46 @@ void tGDSNodeData::DumpGraphviz() const
 
 	gc_vector<const tGDSNodeData *> nodedatas;
 
+	void * dumpmark;
+
 	// phase 1: すべてのノードを書き出す
+	dumpmark = MallocAtomicCollectee(1);
 	nodedatas.push_back(this);
 	while(nodedatas.size() > 0)
 	{
 		const tGDSNodeData * nodedata = nodedatas.back();
 		nodedatas.pop_back();
+		nodedata->DumpMark = dumpmark;
+
 		wxPrintf(wxT("\t0x%p [label=\"%s\", shape=box];\n"),
 			nodedata,
 			(nodedata->GetName() + RISSE_WS("\\n") + nodedata->DumpText()).AsWxString().c_str());
 
 		for(tNodeVector::const_iterator i = nodedata->Children.begin();
 			i != nodedata->Children.end(); i++)
-			nodedatas.push_back(*i);
+		{
+			if((*i)->DumpMark != dumpmark)
+				nodedatas.push_back(*i);
+		}
 	}
 
+
 	// phase 2: すべてのエッジを書き出す
+	dumpmark = MallocAtomicCollectee(1);
 	nodedatas.push_back(this);
 	while(nodedatas.size() > 0)
 	{
 		const tGDSNodeData * nodedata = nodedatas.back();
 		nodedatas.pop_back();
+		nodedata->DumpMark = dumpmark;
+
 		for(tNodeVector::const_iterator i = nodedata->Children.begin();
 			i != nodedata->Children.end(); i++)
 		{
 			wxPrintf(wxT("\t0x%p -> 0x%p;\n"),
 				nodedata, (*i));
-			nodedatas.push_back(*i);
+			if((*i)->DumpMark != dumpmark)
+				nodedatas.push_back(*i);
 		}
 	}
 
@@ -258,6 +272,7 @@ void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 	Children = rhs->Children;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
 	RefCount = 0; // 参照カウンタはコピーされた時点で0になる
+	DumpMark = NULL;
 
 	// コピーした時点で子の参照カウンタがそれぞれ増える
 	for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
@@ -422,12 +437,29 @@ class tGDSTester : public singleton_base<tGDSTester>
 {
 public:
 	tGDSTester();
+	void test1();
+	void test2();
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 tGDSTester::tGDSTester()
+{
+	printf("------------- test1 -------------\n");
+	fflush(stdout);
+	test1();
+	fflush(stdout);
+	printf("------------- test2 -------------\n");
+	fflush(stdout);
+	test2();
+	fflush(stdout);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tGDSTester::test1()
 {
 	tGDSGraph * graph = new tGDSGraph();
 
@@ -570,10 +602,158 @@ tGDSTester::tGDSTester()
 	{
 		printf("successfully crashed\n");
 	}
+}
+//---------------------------------------------------------------------------
 
 
-//--
-	fflush(stdout);
+//---------------------------------------------------------------------------
+void tGDSTester::test2()
+{
+	tGDSGraph * graph = new tGDSGraph();
+
+	tTestNodeData * g1;
+	tTestNodeData * g2;
+
+	tTestNode * node1 = new tTestNode(graph); // will be root
+	tTestNode * node2 = new tTestNode(graph);
+	tTestNode * node3 = new tTestNode(graph);
+	tTestNode * node4 = new tTestNode(graph);
+
+	graph->SetRoot(node1);
+
+	node1->GetCurrent()->SetText(RISSE_WS("node1:A"));
+	node2->GetCurrent()->SetText(RISSE_WS("node2:A"));
+	node3->GetCurrent()->SetText(RISSE_WS("node3:A"));
+	node4->GetCurrent()->SetText(RISSE_WS("node4:A"));
+
+	node1->SetChildAt(0, node2, 0);
+	node1->SetChildAt(1, node3, 0);
+	node2->SetChildAt(0, node4, 0);
+	node3->SetChildAt(0, node4, 1);
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:B"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("freeze\n");
+
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:C"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("change node value again\n");
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:D"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("change another node value\n");
+	{
+		tTestNode::tUpdateLock lock(node3);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node3:E"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("relesae freezed node\n");
+	g1->Release();
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("freeze\n");
+
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:F"));
+	}
+
+	node1->GetCurrent()->DumpGraphviz();
+
+	printf("display freezed node\n");
+	g1->DumpGraphviz();
+
+
+	printf("relesae freezed node\n");
+	g1->Release();
+	node1->GetCurrent()->DumpGraphviz();
+
+
+	printf("freeze g1\n");
+
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:G"));
+	}
+
+
+	printf("freeze g2\n");
+
+	g2 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node3);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node3:H"));
+	}
+
+	printf("dump current\n");
+	node1->GetCurrent()->DumpGraphviz();
+	printf("dump g1\n");
+	g1->DumpGraphviz();
+	printf("dump g2\n");
+	g2->DumpGraphviz();
+
+	printf("freeze more\n");
+
+	tTestNodeData * g3 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("attempt to change node value ...");
+
+	try
+	{
+		tTestNode::tUpdateLock lock(node4);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node4:I"));
+	}
+	catch(...)
+	{
+		printf("successfully crashed\n");
+	}
 }
 //---------------------------------------------------------------------------
 }

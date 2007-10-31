@@ -218,6 +218,7 @@ class tGDSNodeData : public tCollectee
 	tNodeVector Children; //!< 子ノード(その世代での情報を持つ)
 	int RefCount; //!< 参照カウンタ
 	tGDSGeneration LastGeneration; //!< 最後に更新された世代
+	mutable void * DumpMark; //!< ダンプしたかどうかをチェックするためのマーク
 
 public:
 	//! @brief		コンストラクタ

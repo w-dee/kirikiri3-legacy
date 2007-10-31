@@ -70,6 +70,18 @@ tGDSNodeData * tGDSGraph::Freeze()
 
 
 
+//---------------------------------------------------------------------------
+void tGDSPoolBase::ThrowAllocationLogicError()
+{
+	RISSE_ASSERT(!"Allocation logic error in tGDSPool::Allocate()");
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -419,6 +431,9 @@ tGDSTester::tGDSTester()
 {
 	tGDSGraph * graph = new tGDSGraph();
 
+	tTestNodeData * g1;
+	tTestNodeData * g2;
+
 	tTestNode * node1 = new tTestNode(graph); // will be root
 	tTestNode * node2 = new tTestNode(graph);
 	tTestNode * node3 = new tTestNode(graph);
@@ -445,7 +460,7 @@ tGDSTester::tGDSTester()
 
 	printf("freeze\n");
 
-	tTestNodeData * g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
 
 	printf("change node value\n");
 
@@ -496,7 +511,7 @@ tGDSTester::tGDSTester()
 
 	{
 		tTestNode::tUpdateLock lock(node2);
-		lock.GetNewNodeData()->SetText(RISSE_WS("node2:C"));
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:F"));
 	}
 
 	node1->GetCurrent()->DumpGraphviz();
@@ -510,7 +525,55 @@ tGDSTester::tGDSTester()
 	node1->GetCurrent()->DumpGraphviz();
 
 
+	printf("freeze g1\n");
 
+	g1 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node2);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node2:G"));
+	}
+
+
+	printf("freeze g2\n");
+
+	g2 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("change node value\n");
+
+	{
+		tTestNode::tUpdateLock lock(node3);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node3:H"));
+	}
+
+	printf("dump current\n");
+	node1->GetCurrent()->DumpGraphviz();
+	printf("dump g1\n");
+	g1->DumpGraphviz();
+	printf("dump g2\n");
+	g2->DumpGraphviz();
+
+	printf("freeze more\n");
+
+	tTestNodeData * g3 = reinterpret_cast<tTestNodeData*>(graph->Freeze());
+
+	printf("attempt to change node value ...");
+
+	try
+	{
+		tTestNode::tUpdateLock lock(node3);
+		lock.GetNewNodeData()->SetText(RISSE_WS("node3:I"));
+	}
+	catch(...)
+	{
+		printf("successfully crashed\n");
+	}
+
+
+//--
+	fflush(stdout);
 }
 //---------------------------------------------------------------------------
 }

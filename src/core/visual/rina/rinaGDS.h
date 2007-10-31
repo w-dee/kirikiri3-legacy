@@ -112,6 +112,9 @@ class tGDSPoolBase : public tCollectee
 public:
 	virtual tGDSNodeData * Allocate() = 0;
 	virtual void Deallocate(tGDSNodeData * obj) = 0;
+
+protected:
+	void ThrowAllocationLogicError();
 };
 //---------------------------------------------------------------------------
 
@@ -172,7 +175,8 @@ public:
 			}
 		}
 		// 見つからなかった (ロジックがおかしいので致命的なエラー)
-		return reinterpret_cast<NodeDataT*>(NULL);
+		ThrowAllocationLogicError();
+		return NULL;
 	}
 
 	//! @brief		解放を行う

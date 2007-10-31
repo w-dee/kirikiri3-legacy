@@ -88,8 +88,9 @@ void tGDSPoolBase::ThrowAllocationLogicError()
 //---------------------------------------------------------------------------
 tGDSNodeData::tGDSNodeData(tGDSNodeBase * node)
 {
+	CS = new tCriticalSection();
 	Node = node;
-	RefCount = 0;
+	RefCount.reset();
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
 	DumpMark = NULL;
 }
@@ -99,8 +100,10 @@ tGDSNodeData::tGDSNodeData(tGDSNodeBase * node)
 //---------------------------------------------------------------------------
 void tGDSNodeData::Release()
 {
-	if(--RefCount == 0)
+	if(-- RefCount == 0)
 	{
+		volatile tCriticalSection::tLocker lock(*CS);
+
 		// 参照カウンタが 0 になった
 		// 子をすべて解放する
 		for(tNodeVector::iterator i = Children.begin(); i != Children.end(); i++)
@@ -117,6 +120,7 @@ void tGDSNodeData::Release()
 void tGDSNodeData::SetChildAt(risse_size cn, tGDSNodeData * nodedata, risse_size pn)
 {
 	// ノードデータの親を設定する
+	volatile tCriticalSection::tLocker lock(*CS);
 
 	// 親子の領域は空いてる？
 	if(Children.size() <= cn)
@@ -138,6 +142,8 @@ void tGDSNodeData::SetChildAt(risse_size cn, tGDSNodeData * nodedata, risse_size
 //---------------------------------------------------------------------------
 tGDSNodeData * tGDSNodeData::BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData * newchild)
 {
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	// このノードが記録している最終フリーズ世代とグラフ全体の最終フリーズ世代を比べる。
 	// もしそれらが同じならばコピーは行わなくてよいが、異なっていればコピーを行う
 	bool need_clone = LastGeneration != Node->GetGraph()->GetLastFreezedGeneration();
@@ -169,6 +175,8 @@ tGDSNodeData * tGDSNodeData::BeginIndepend(tGDSNodeData * oldchild, tGDSNodeData
 //---------------------------------------------------------------------------
 void tGDSNodeData::EndIndepend(tGDSNodeData * newnodedata)
 {
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	// クローンを行わなかった場合は親ノードに再帰する必要はないので、ここで戻る
 	if(newnodedata == this) return;
 
@@ -209,6 +217,8 @@ void tGDSNodeData::ReconnectChild(tGDSNodeData * oldnodedata, tGDSNodeData * new
 void tGDSNodeData::DumpGraphviz() const
 {
 	// ヘッダを出力
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	wxPrintf(wxT("digraph GDS {\n"));
 
 	gc_vector<const tGDSNodeData *> nodedatas;
@@ -268,10 +278,14 @@ void tGDSNodeData::DumpGraphviz() const
 //---------------------------------------------------------------------------
 void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 {
+	// AddRef/Release と同時に実行するとクラッシュする可能性があるので注意
+	// (ロジック上はそういうことがないようにできるはずだが)
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	Node = rhs->Node;
 	Children = rhs->Children;
 	LastGeneration = Node->GetGraph()->GetLastFreezedGeneration();
-	RefCount = 0; // 参照カウンタはコピーされた時点で0になる
+	RefCount.reset(); // 参照カウンタはコピーされた時点で0になる
 	DumpMark = NULL;
 
 	// コピーした時点で子の参照カウンタがそれぞれ増える
@@ -286,7 +300,9 @@ void tGDSNodeData::Copy(const tGDSNodeData * rhs)
 //---------------------------------------------------------------------------
 void tGDSNodeData::Free()
 {
-	RefCount = 0; // 参照カウンタを 0 にリセットしておく
+	// AddRef/Release と同時に実行するとクラッシュする可能性があるので注意
+	// (ロジック上はそういうことがないようにできるはずだが)
+	RefCount.reset(); // 参照カウンタを 0 にリセットしておく
 }
 //---------------------------------------------------------------------------
 
@@ -294,10 +310,12 @@ void tGDSNodeData::Free()
 //---------------------------------------------------------------------------
 tString tGDSNodeData::GetName() const
 {
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	return tString(RISSE_WS("G:")) +
 		tString::AsString((int)LastGeneration.operator risse_uint32()) +
 		RISSE_WS(" R:") +
-		tString::AsString(RefCount);
+		tString::AsString((int)(RefCount.operator long()));
 }
 //---------------------------------------------------------------------------
 
@@ -305,6 +323,8 @@ tString tGDSNodeData::GetName() const
 //---------------------------------------------------------------------------
 tString tGDSNodeData::DumpText() const
 {
+	volatile tCriticalSection::tLocker lock(*CS);
+
 	return tString();
 }
 //---------------------------------------------------------------------------
@@ -334,6 +354,7 @@ tGDSNodeBase::tGDSNodeBase(tGDSGraph * graph, tGDSPoolBase * pool)
 //---------------------------------------------------------------------------
 void tGDSNodeBase::SetCurrent(tGDSNodeData * nodedata)
 {
+	tCriticalSection::tLocker lock(Graph->GetCS());
 	Current->Release();
 	Current = nodedata;
 	Current->AddRef();
@@ -344,6 +365,7 @@ void tGDSNodeBase::SetCurrent(tGDSNodeData * nodedata)
 //---------------------------------------------------------------------------
 void tGDSNodeBase::SetParentAt(risse_size n, tGDSNodeBase * node)
 {
+	tCriticalSection::tLocker lock(Graph->GetCS());
 	// ノードの親を設定する
 
 	// 親の領域は空いてる？
@@ -359,6 +381,8 @@ void tGDSNodeBase::SetParentAt(risse_size n, tGDSNodeBase * node)
 //---------------------------------------------------------------------------
 void tGDSNodeBase::ReconnectParent(tGDSNodeBase * oldnode, tGDSNodeBase * newnode)
 {
+	tCriticalSection::tLocker lock(Graph->GetCS());
+
 	// TODO: これ線形検索でいいんかいな
 	tNodeVector::iterator i = std::find(Parents.begin(), Parents.end(), oldnode);
 	RISSE_ASSERT(i != Parents.end());
@@ -370,6 +394,8 @@ void tGDSNodeBase::ReconnectParent(tGDSNodeBase * oldnode, tGDSNodeBase * newnod
 //---------------------------------------------------------------------------
 tString tGDSNodeBase::GetName() const
 {
+	tCriticalSection::tLocker lock(Graph->GetCS());
+
 	risse_char tmp[25];
 	pointer_to_str(this, tmp);
 
@@ -381,6 +407,8 @@ tString tGDSNodeBase::GetName() const
 //---------------------------------------------------------------------------
 tString tGDSNodeBase::DumpText() const
 {
+	tCriticalSection::tLocker lock(Graph->GetCS());
+
 	return tString();
 }
 //---------------------------------------------------------------------------

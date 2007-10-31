@@ -139,12 +139,14 @@ class tGDSPool : public tGDSPoolBase
 	NodeT * Node; //!< ノードインスタンス
 	risse_uint32 Using; //!< 使用中のビット = 1
 	risse_uint32 Instantiated; //!< インスタンス化済みビット = 1
+	tCriticalSection * CS; //!< このインスタンスを保護するクリティカルセクション
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		node	ノードインスタンス
 	tGDSPool(NodeT * node)
 	{
+		CS = new tCriticalSection();
 		Node = node; Using = 0; Instantiated = 0;
 		risse_size align_size =
 			reinterpret_cast<size_t>(&reinterpret_cast<const char &>(((alignment_check*)1) -> t)) - 1;
@@ -158,6 +160,7 @@ public:
 	//! @return		確保されたオブジェクト
 	virtual tGDSNodeData * Allocate()
 	{
+		volatile tCriticalSection::tLocker lock(*CS);
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
 			risse_uint32 bit = 1 << i;
@@ -186,6 +189,8 @@ public:
 	{
 		reinterpret_cast<NodeDataT*>(obj)->Free();
 
+		volatile tCriticalSection::tLocker lock(*CS);
+
 		for(int i = 0; i < tGDSGraph::MaxGenerations; i++)
 		{
 			if(Data + i * sizeof(NodeDataT) == reinterpret_cast<char *>(obj))
@@ -213,10 +218,11 @@ class tGDSNodeData : public tCollectee
 {
 	friend class tGDSNodeBase;
 
+	tCriticalSection * CS; //!< このインスタンスを保護するクリティカルセクション
 	tGDSNodeBase * Node; //!< ノードインスタンスへのポインタ
 	typedef gc_vector<tGDSNodeData *> tNodeVector;
 	tNodeVector Children; //!< 子ノード(その世代での情報を持つ)
-	int RefCount; //!< 参照カウンタ
+	tAtomicCounter RefCount; //!< 参照カウンタ
 	tGDSGeneration LastGeneration; //!< 最後に更新された世代
 	mutable void * DumpMark; //!< ダンプしたかどうかをチェックするためのマーク
 
@@ -228,8 +234,8 @@ public:
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tGDSNodeData() {;}
 
-	//! @brief		参照カウンタを減らす
-	void AddRef() { RefCount ++; }
+	//! @brief		参照カウンタを増やす
+	void AddRef() { ++ RefCount; }
 
 	//! @brief		参照カウンタを減らす
 	void Release();
@@ -238,11 +244,19 @@ public:
 	//! @param		n		インデックス
 	//! @return		その位置にある子ノードデータ
 	//! @note		n の範囲チェックは行われないので注意
-	tGDSNodeData * GetChildAt(risse_size n) const { return Children[n]; }
+	tGDSNodeData * GetChildAt(risse_size n) const
+	{
+		volatile tCriticalSection::tLocker lock(*CS);
+		return Children[n];
+	}
 
 	//! @brief		子ノードデータの個数を得る
 	//! @return		子ノードデータの個数
-	risse_size GetChildCount() const { return Children.size(); }
+	risse_size GetChildCount() const
+	{
+		volatile tCriticalSection::tLocker lock(*CS);
+		return Children.size();
+	}
 
 private:
 	//! @brief		N番目にある子ノードデータを設定する

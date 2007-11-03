@@ -12,12 +12,13 @@
 //! @file
 //! @brief RINA ピン管理
 //---------------------------------------------------------------------------
-
+#include "visual/rina/rinaGDS.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
-
+class tPinNode;
+class tPropertyNodeData;
 //---------------------------------------------------------------------------
 //! @brief		ピンノードデータ
 //---------------------------------------------------------------------------
@@ -27,7 +28,8 @@ class tPinNodeData : public tGDSNodeData
 
 public:
 	//! @brief		コンストラクタ
-	tPinNodeData();
+	//! @param		node		ノード
+	tPinNodeData(tGDSNodeBase * node);
 };
 //---------------------------------------------------------------------------
 
@@ -36,9 +38,9 @@ public:
 //! @brief		ピンノード
 //! @param		ピンノードは、GDS 上ではノードの子として表現される
 //---------------------------------------------------------------------------
-class tPinNode : public tGDSNode<tPinNode>
+class tPinNode : public tGDSNode<tPinNodeData>
 {
-	typedef tGDSNode<tNode> inherited;
+	typedef tGDSNode<tPinNodeData> inherited;
 
 public:
 	//! @brief		コンストラクタ
@@ -52,7 +54,7 @@ public:
 
 
 
-
+class tOutputPinNodeData;
 //---------------------------------------------------------------------------
 //! @brief		入力ピンノードデータ
 //---------------------------------------------------------------------------
@@ -67,25 +69,26 @@ class tInputPinNodeData : public tPinNodeData
 			・プロセスノード
 	*/
 
-	typedef tGDSNodeData inherited;
+	typedef tPinNodeData inherited;
 
 public:
 	//! @brief		コンストラクタ
-	tInputPinNodeData();
+	//! @param		node		ノード
+	tInputPinNodeData(tGDSNodeBase * node);
 
 
 	//! @brief		プロパティノードを得る
-	tPropertyNode * GetPropertyNode() const
+	tPropertyNodeData * GetPropertyNodeData() const
 	{
 		// プロパティノードは必ず 0 番のノードになる
-		return reinterpret_cast<tPropertyNode*>(GetChildAt(0));
+		return reinterpret_cast<tPropertyNodeData*>(GetChildAt(0));
 	}
 
 	//! @brief		出力ピンノードを得る
-	tPropertyNode * GetOutputPinNode() const
+	tOutputPinNodeData * GetOutputPinNodeData() const
 	{
 		// 出力ピンノードは必ず 1 番のノードになる
-		return reinterpret_cast<tPropertyNode*>(GetChildAt(1));
+		return reinterpret_cast<tOutputPinNodeData*>(GetChildAt(1));
 	}
 };
 //---------------------------------------------------------------------------
@@ -111,6 +114,7 @@ public:
 
 
 
+class tProcessNodeData;
 //---------------------------------------------------------------------------
 //! @brief		出力ピンノードデータ
 //---------------------------------------------------------------------------
@@ -125,24 +129,25 @@ class tOutputPinNodeData : public tPinNodeData
 			・入力ピンノード
 	*/
 
-	typedef tGDSNodeData inherited;
+	typedef tPinNodeData inherited;
 
 public:
 	//! @brief		コンストラクタ
-	tOutputPinNodeData();
+	//! @param		node		ノード
+	tOutputPinNodeData(tGDSNodeBase * node);
 
 	//! @brief		プロパティノードを得る
-	tPropertyNode * GetPropertyNode() const
+	tPropertyNodeData * GetPropertyNodeData() const
 	{
 		// プロパティノードは必ず 0 番のノードになる
-		return reinterpret_cast<tPropertyNode*>(GetChildAt(0));
+		return reinterpret_cast<tPropertyNodeData*>(GetChildAt(0));
 	}
 
 	//! @brief		プロセスノードを得る
-	tPropertyNode * GetProcessNode() const
+	tProcessNodeData * GetProcessNodeData() const
 	{
 		// プロセスノードは必ず 1 番のノードになる
-		return reinterpret_cast<tPropertyNode*>(GetChildAt(1));
+		return reinterpret_cast<tProcessNodeData*>(GetChildAt(1));
 	}
 };
 //---------------------------------------------------------------------------

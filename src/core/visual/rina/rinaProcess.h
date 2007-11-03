@@ -12,14 +12,15 @@
 //! @file
 //! @brief RINA ノード管理
 //---------------------------------------------------------------------------
+#include "visual/rina/rinaGDS.h"
 
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
+class tProcessNode;
 class tPropertyNodeData;
 class tPinNodeData;
-
 //---------------------------------------------------------------------------
 //! @brief		プロセスノードデータ
 //---------------------------------------------------------------------------
@@ -29,13 +30,14 @@ class tProcessNodeData : public tGDSNodeData
 
 public:
 	//! @brief		コンストラクタ
-	tProcessNodeData();
+	//! @param		node		ノード
+	tProcessNodeData(tGDSNodeBase * node);
 
 	//! @brief		プロパティノードを得る
-	tPropertyNode * GetPropertyNode() const
+	tPropertyNodeData * GetPropertyNodeData() const
 	{
 		// プロパティノードは必ず 0 番のノードになる
-		return reinterpret_cast<tPropertyNode*>(GetChildAt(0));
+		return reinterpret_cast<tPropertyNodeData*>(GetChildAt(0));
 	}
 
 	//! @brief		入力ピンの個数を得る
@@ -51,12 +53,13 @@ protected: // サブクラスで実装するもの
 //---------------------------------------------------------------------------
 
 
+
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
-class tProcessNode : public tGDSNode<tProcessNode>
+class tProcessNode : public tGDSNode<tProcessNodeData>
 {
-	typedef tGDSNode<tProcessNode> inherited;
+	typedef tGDSNode<tProcessNodeData> inherited;
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph		GDS グラフインスタンス

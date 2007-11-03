@@ -12,8 +12,10 @@
 //! @file
 //! @brief RINA プロパティ管理
 //---------------------------------------------------------------------------
-
+#include "prec.h"
 #include "visual/rina/rinaProperty.h"
+
+
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(3478,15043,22410,19932,47798,13946,43130,61571);
@@ -22,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(3478,15043,22410,19932,47798,13946,43130,61571);
 
 
 //---------------------------------------------------------------------------
-tPropertyNodeData::tPropertyNodeData()
+tPropertyNodeData::tPropertyNodeData(tGDSNodeBase * node) : inherited(node)
 {
 }
 //---------------------------------------------------------------------------

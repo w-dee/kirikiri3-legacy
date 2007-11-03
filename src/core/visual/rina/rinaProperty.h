@@ -12,12 +12,14 @@
 //! @file
 //! @brief RINA プロパティ管理
 //---------------------------------------------------------------------------
+#include "visual/rina/rinaGDS.h"
 
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
+class tPropertyNode;
 //---------------------------------------------------------------------------
 //! @brief		プロパティノードデータ
 //---------------------------------------------------------------------------
@@ -27,7 +29,8 @@ class tPropertyNodeData : public tGDSNodeData
 
 public:
 	//! @brief		コンストラクタ
-	tPropertyNodeData();
+	//! @param		node		ノード
+	tPropertyNodeData(tGDSNodeBase * node);
 };
 //---------------------------------------------------------------------------
 
@@ -36,9 +39,9 @@ public:
 //! @brief		プロパティノード
 //! @param		プロパティノードは、GDS 上ではノードの子として表現される
 //---------------------------------------------------------------------------
-class tPropertyNode : public tGDSNode<tPropertyNode>
+class tPropertyNode : public tGDSNode<tPropertyNodeData>
 {
-	typedef tGDSNode<tNode> inherited;
+	typedef tGDSNode<tPropertyNodeData> inherited;
 
 public:
 	//! @brief		コンストラクタ

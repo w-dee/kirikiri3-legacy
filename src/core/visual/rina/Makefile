@@ -12,7 +12,10 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 # このディレクトリにあるソースファイルを列挙
 #-----------------------------------------
 CPPFILES=\
-	rinaGDS.cpp                   
+	rinaGDS.cpp                   \
+	rinaProcess.cpp               \
+	rinaProperty.cpp              \
+	rinaPin.cpp                   
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

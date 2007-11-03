@@ -12,8 +12,9 @@
 //! @file
 //! @brief RINA ピン管理
 //---------------------------------------------------------------------------
+#include "prec.h"
+#include "visual/rina/rinaPin.h"
 
-#include "visual/rina/rinaNode.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(31046,8618,37955,16475,39331,46428,7001,14742);
@@ -23,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(31046,8618,37955,16475,39331,46428,7001,14742);
 
 
 //---------------------------------------------------------------------------
-tPinNodeData::tPinNodeData()
+tPinNodeData::tPinNodeData(tGDSNodeBase * node) : inherited(node)
 {
 }
 //---------------------------------------------------------------------------
@@ -48,7 +49,7 @@ tPinNode::tPinNode(tGDSGraph * graph) : inherited(graph)
 
 
 //---------------------------------------------------------------------------
-tInputPinNodeData::tInputPinNodeData()
+tInputPinNodeData::tInputPinNodeData(tGDSNodeBase * node) : inherited(node)
 {
 }
 //---------------------------------------------------------------------------
@@ -73,7 +74,7 @@ tInputPinNode::tInputPinNode(tGDSGraph * graph) : inherited(graph)
 
 
 //---------------------------------------------------------------------------
-tOutputPinNodeData::tOutputPinNodeData()
+tOutputPinNodeData::tOutputPinNodeData(tGDSNodeBase * node) : inherited(node)
 {
 }
 //---------------------------------------------------------------------------

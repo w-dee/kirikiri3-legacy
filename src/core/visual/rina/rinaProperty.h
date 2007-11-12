@@ -19,36 +19,19 @@ namespace Rina {
 //---------------------------------------------------------------------------
 
 
-class tPropertyNode;
 //---------------------------------------------------------------------------
-//! @brief		プロパティノードデータ
+//! @brief		プロパティ
 //---------------------------------------------------------------------------
-class tPropertyNodeData : public tGDSNodeData
+class tProperty : public tCollectee
 {
-	typedef tGDSNodeData inherited;
+	typedef tCollectee inherited;
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		node		ノード
-	tPropertyNodeData(tGDSNodeBase * node);
+	tProperty();
 };
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-//! @brief		プロパティノード
-//! @param		プロパティノードは、GDS 上ではノードの子として表現される
-//---------------------------------------------------------------------------
-class tPropertyNode : public tGDSNode<tPropertyNodeData>
-{
-	typedef tGDSNode<tPropertyNodeData> inherited;
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		graph		GDS グラフインスタンス
-	tPropertyNode(tGDSGraph * graph);
-};
-//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

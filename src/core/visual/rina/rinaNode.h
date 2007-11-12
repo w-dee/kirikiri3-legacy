@@ -18,54 +18,71 @@
 namespace Rina {
 //---------------------------------------------------------------------------
 
-class tProcessNode;
-class tPropertyNodeData;
-class tPinNodeData;
-//---------------------------------------------------------------------------
-//! @brief		プロセスノードデータ
-//---------------------------------------------------------------------------
-class tProcessNodeData : public tGDSNodeData
-{
-	typedef tGDSNodeData inherited;
 
-public:
-	//! @brief		コンストラクタ
-	//! @param		node		ノード
-	tProcessNodeData(tGDSNodeBase * node);
-
-	//! @brief		プロパティノードを得る
-	tPropertyNodeData * GetPropertyNodeData() const
-	{
-		// プロパティノードは必ず 0 番のノードになる
-		return reinterpret_cast<tPropertyNodeData*>(GetChildAt(0));
-	}
-
-	//! @brief		入力ピンの個数を得る
-	//! @return		入力ピンの個数
-	risse_size GetInputPinCount() const
-	{
-		// 0 番目の子はプロパティノードなのでそれを除いた数を返す
-		return GetChildCount() - 1;
-	}
-
-protected: // サブクラスで実装するもの
-};
-//---------------------------------------------------------------------------
-
-
-
+class tGDSGraph;
+class tInputPin;
+class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
-class tProcessNode : public tGDSNode<tProcessNodeData>
+class tProcessNode : public tCollectee
 {
-	typedef tGDSNode<tProcessNodeData> inherited;
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph		GDS グラフインスタンス
 	tProcessNode(tGDSGraph * graph);
+
+public: // サブクラスで実装すべき物
+
+	//! @brief		親ノードの個数を得る
+	//! @return		親ノードの個数
+	virtual risse_size GetParentCount() = 0;
+
+	//! @brief		指定位置の親ノードを得る
+	//! @param		n		指定位置
+	//! @return		指定位置の親ノード
+	virtual tProcessNode * GetParentAt(risse_size n) = 0;
+
+	//! @brief		指定位置に親ノードを設定する
+	//! @param		n		指定位置
+	//! @param		node	親ノード
+	virtual void SetParentAt(risse_size n, tProcessNode * node) = 0;
+
+	//! @brief		指定位置に新規親ノード用ピンを挿入する
+	//! @param		n		指定位置
+	virtual void InsertParentPinAt(risse_size n) = 0;
+
+	//! @brief		指定位置から親ノード用ピンを削除する
+	//! @param		n		指定位置
+	virtual void DeleteParentPinAt(risse_size n) = 0;
+
+
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	virtual risse_size GetChildCount() = 0;
+
+	//! @brief		指定位置の子ノードを得る
+	//! @param		n		指定位置
+	//! @return		指定位置の子ノード
+	virtual tInputPin * GetChildAt(risse_size n) = 0;
+
+	//! @brief		指定位置に子ノードを設定する
+	//! @param		n		指定位置
+	//! @param		node	子ノード
+	virtual void SetChildAt(risse_size n, tProcessNode * node) = 0;
+
+	//! @brief		指定位置に子ノード用ピンを挿入する
+	//! @param		n		指定位置
+	virtual void InsertChildPinAt(risse_size n) = 0;
+
+	//! @brief		指定位置から子ノード用ピンを削除する
+	//! @param		n		指定位置
+	virtual void DeleteChildPinAt(risse_size n) = 0;
+
 };
 //---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
 }

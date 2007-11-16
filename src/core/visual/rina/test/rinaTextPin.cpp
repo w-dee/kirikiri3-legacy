@@ -10,22 +10,30 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA プロパティ管理
+//! @brief テスト用のテキストピン管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/rinaProperty.h"
-
+#include "visual/rina/test/rinaTextPin.h"
 
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(3478,15043,22410,19932,47798,13946,43130,61571);
+RISSE_DEFINE_SOURCE_ID();
 //---------------------------------------------------------------------------
 
 
 
+
 //---------------------------------------------------------------------------
-tPropertyNodeData::tPropertyNodeData(tGraph * node) : inherited(node)
+tTextInputPin::tTextInputPin()
 {
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tTextInputPin::CanConnect(risse_uint32 type)
+{
+	return type == TextEdgeType;
 }
 //---------------------------------------------------------------------------
 
@@ -33,12 +41,25 @@ tPropertyNodeData::tPropertyNodeData(tGraph * node) : inherited(node)
 
 
 
+
+
+
+
+
 //---------------------------------------------------------------------------
-tPropertyNode::tPropertyNode(tGraph * graph) : inherited(graph)
+tTextOutputPin::tTextOutputPin()
 {
-	
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tTextOutputPin::CanConnect(risse_uint32 type)
+{
+	return type == TextEdgeType;
+}
+//---------------------------------------------------------------------------
+
 
 
 

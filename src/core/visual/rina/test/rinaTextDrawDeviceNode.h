@@ -10,9 +10,9 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA ノード管理
+//! @brief テスト用のテキスト描画デバイスプロセスノード管理
 //---------------------------------------------------------------------------
-#include "visual/rina/rinaGraph.h"
+#include "visual/rina/rinaNode.h"
 
 
 namespace Rina {
@@ -23,62 +23,66 @@ class tGraph;
 class tInputPin;
 class tOutputPin;
 //---------------------------------------------------------------------------
-//! @brief		プロセスノード
+//! @brief		テスト用のテキスト描画デバイスプロセスノード
 //---------------------------------------------------------------------------
-class tProcessNode : public tCollectee
+class tTextDrawDeviceNode : public tProcessNode
 {
+	typedef tProcessNode inherited;
+
+	gc_vector<tInputPin *> Children; //!< 子ノード用ピンの配列
+
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph		グラフインスタンス
-	tProcessNode(tGraph * graph);
+	//! @param		graph		GDS グラフインスタンス
+	tTextDrawDeviceNode(tGraph * graph);
 
 public: // サブクラスで実装すべき物
 
 	//! @brief		親ノードの個数を得る
 	//! @return		親ノードの個数
-	virtual risse_size GetParentCount() = 0;
+	virtual risse_size GetParentCount();
 
 	//! @brief		指定位置の親ノードを得る
 	//! @param		n		指定位置
 	//! @return		指定位置の親ノード
-	virtual tProcessNode * GetParentAt(risse_size n) = 0;
+	virtual tProcessNode * GetParentAt(risse_size n);
 
 	//! @brief		指定位置に親ノードを設定する
 	//! @param		n		指定位置
 	//! @param		node	親ノード
-	virtual void SetParentAt(risse_size n, tProcessNode * node) = 0;
+	virtual void SetParentAt(risse_size n, tProcessNode * node);
 
 	//! @brief		指定位置に新規親ノード用ピンを挿入する
 	//! @param		n		指定位置
-	virtual void InsertParentPinAt(risse_size n) = 0;
+	virtual void InsertParentPinAt(risse_size n);
 
 	//! @brief		指定位置から親ノード用ピンを削除する
 	//! @param		n		指定位置
-	virtual void DeleteParentPinAt(risse_size n) = 0;
+	virtual void DeleteParentPinAt(risse_size n);
 
 
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数
-	virtual risse_size GetChildCount() = 0;
+	virtual risse_size GetChildCount();
 
 	//! @brief		指定位置の子ノードを得る
 	//! @param		n		指定位置
 	//! @return		指定位置の子ノード
-	virtual tInputPin * GetChildAt(risse_size n) = 0;
+	virtual tInputPin * GetChildAt(risse_size n);
 
 	//! @brief		指定位置に子ノードを設定する
 	//! @param		n		指定位置
 	//! @param		node	子ノード
-	virtual void SetChildAt(risse_size n, tProcessNode * node) = 0;
+	virtual void SetChildAt(risse_size n, tProcessNode * node);
 
 	//! @brief		指定位置に子ノード用ピンを挿入する
 	//! @param		n		指定位置
-	virtual void InsertChildPinAt(risse_size n) = 0;
+	virtual void InsertChildPinAt(risse_size n);
 
 	//! @brief		指定位置から子ノード用ピンを削除する
 	//! @param		n		指定位置
-	virtual void DeleteChildPinAt(risse_size n) = 0;
+	virtual void DeleteChildPinAt(risse_size n);
 
 };
 //---------------------------------------------------------------------------

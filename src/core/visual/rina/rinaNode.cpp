@@ -24,17 +24,7 @@ RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 
 
 //---------------------------------------------------------------------------
-tProcessNodeData::tProcessNodeData(tGDSNodeBase * node) : inherited(node)
-{
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-//---------------------------------------------------------------------------
-tProcessNode::tProcessNode(tGDSGraph * graph) : inherited(graph)
+tProcessNode::tProcessNode(tGraph * graph) : inherited(graph)
 {
 	
 }

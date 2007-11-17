@@ -34,51 +34,41 @@ public:
 
 public: // サブクラスで実装すべき物
 
-	//! @brief		親ノードの個数を得る
-	//! @return		親ノードの個数
-	virtual risse_size GetParentCount() = 0;
+	//! @brief		出力ピンの個数を得る
+	//! @return		出力ピンの個数
+	virtual risse_size GetOutputPinCount() = 0;
 
-	//! @brief		指定位置の親ノードを得る
+	//! @brief		指定位置の出力ピンを得る
 	//! @param		n		指定位置
-	//! @return		指定位置の親ノード
-	virtual tProcessNode * GetParentAt(risse_size n) = 0;
+	//! @return		指定位置の出力ピン
+	virtual tOutputPin * GetOutputPinAt(risse_size n) = 0;
 
-	//! @brief		指定位置に親ノードを設定する
+	//! @brief		指定位置に新規出力ピンを挿入する
 	//! @param		n		指定位置
-	//! @param		node	親ノード
-	virtual void SetParentAt(risse_size n, tProcessNode * node) = 0;
+	virtual void InsertOutputPinAt(risse_size n) = 0;
 
-	//! @brief		指定位置に新規親ノード用ピンを挿入する
+	//! @brief		指定位置から出力ピンを削除する
 	//! @param		n		指定位置
-	virtual void InsertParentPinAt(risse_size n) = 0;
+	virtual void DeleteOutputPinAt(risse_size n) = 0;
 
-	//! @brief		指定位置から親ノード用ピンを削除する
+
+
+	//! @brief		入力ピンの個数を得る
+	//! @return		入力ピンの個数
+	virtual risse_size GetInputPinCount() = 0;
+
+	//! @brief		指定位置の入力ピンを得る
 	//! @param		n		指定位置
-	virtual void DeleteParentPinAt(risse_size n) = 0;
+	//! @return		指定位置の入力ピン
+	virtual tInputPin * GetInputPinAt(risse_size n) = 0;
 
-
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	virtual risse_size GetChildCount() = 0;
-
-	//! @brief		指定位置の子ノードを得る
+	//! @brief		指定位置に入力ピンを挿入する
 	//! @param		n		指定位置
-	//! @return		指定位置の子ノード
-	virtual tInputPin * GetChildAt(risse_size n) = 0;
+	virtual void InsertInputPinAt(risse_size n) = 0;
 
-	//! @brief		指定位置に子ノードを設定する
+	//! @brief		指定位置から入力ピンを削除する
 	//! @param		n		指定位置
-	//! @param		node	子ノード
-	virtual void SetChildAt(risse_size n, tProcessNode * node) = 0;
-
-	//! @brief		指定位置に子ノード用ピンを挿入する
-	//! @param		n		指定位置
-	virtual void InsertChildPinAt(risse_size n) = 0;
-
-	//! @brief		指定位置から子ノード用ピンを削除する
-	//! @param		n		指定位置
-	virtual void DeleteChildPinAt(risse_size n) = 0;
+	virtual void DeleteInputPinAt(risse_size n) = 0;
 
 };
 //---------------------------------------------------------------------------

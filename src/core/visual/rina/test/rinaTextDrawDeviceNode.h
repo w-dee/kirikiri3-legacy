@@ -29,7 +29,7 @@ class tTextDrawDeviceNode : public tProcessNode
 {
 	typedef tProcessNode inherited;
 
-	gc_vector<tInputPin *> Children; //!< 子ノード用ピンの配列
+	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
 public:
 	//! @brief		コンストラクタ
@@ -38,51 +38,42 @@ public:
 
 public: // サブクラスで実装すべき物
 
-	//! @brief		親ノードの個数を得る
-	//! @return		親ノードの個数
-	virtual risse_size GetParentCount();
+	//! @brief		出力ピンの個数を得る
+	//! @return		出力ピンの個数
+	virtual risse_size GetOutputPinCount();
 
-	//! @brief		指定位置の親ノードを得る
+	//! @brief		指定位置の出力ピンを得る
 	//! @param		n		指定位置
-	//! @return		指定位置の親ノード
-	virtual tProcessNode * GetParentAt(risse_size n);
+	//! @return		指定位置の出力ピン
+	virtual tOutputPin * GetOutputPinAt(risse_size n);
 
-	//! @brief		指定位置に親ノードを設定する
+	//! @brief		指定位置に新規出力ピンを挿入する
 	//! @param		n		指定位置
-	//! @param		node	親ノード
-	virtual void SetParentAt(risse_size n, tProcessNode * node);
+	virtual void InsertOutputPinAt(risse_size n);
 
-	//! @brief		指定位置に新規親ノード用ピンを挿入する
+	//! @brief		指定位置から出力ピンを削除する
 	//! @param		n		指定位置
-	virtual void InsertParentPinAt(risse_size n);
+	virtual void DeleteOutputPinAt(risse_size n);
 
-	//! @brief		指定位置から親ノード用ピンを削除する
+
+
+	//! @brief		入力ピンの個数を得る
+	//! @return		入力ピンの個数
+	virtual risse_size GetInputPinCount();
+
+	//! @brief		指定位置の入力ピンを得る
 	//! @param		n		指定位置
-	virtual void DeleteParentPinAt(risse_size n);
+	//! @return		指定位置の入力ピン
+	virtual tInputPin * GetInputPinAt(risse_size n);
 
-
-
-	//! @brief		子ノードの個数を得る
-	//! @return		子ノードの個数
-	virtual risse_size GetChildCount();
-
-	//! @brief		指定位置の子ノードを得る
+	//! @brief		指定位置に入力ピンを挿入する
 	//! @param		n		指定位置
-	//! @return		指定位置の子ノード
-	virtual tInputPin * GetChildAt(risse_size n);
+	virtual void InsertInputPinAt(risse_size n);
 
-	//! @brief		指定位置に子ノードを設定する
+	//! @brief		指定位置から入力ピンを削除する
 	//! @param		n		指定位置
-	//! @param		node	子ノード
-	virtual void SetChildAt(risse_size n, tProcessNode * node);
+	virtual void DeleteInputPinAt(risse_size n);
 
-	//! @brief		指定位置に子ノード用ピンを挿入する
-	//! @param		n		指定位置
-	virtual void InsertChildPinAt(risse_size n);
-
-	//! @brief		指定位置から子ノード用ピンを削除する
-	//! @param		n		指定位置
-	virtual void DeleteChildPinAt(risse_size n);
 
 };
 //---------------------------------------------------------------------------

@@ -61,9 +61,11 @@ public:
 	tInputPin();
 
 	//! @brief		出力ピンを接続する
-	//! @param		output_pin		出力ピン
+	//! @param		output_pin		出力ピン(NULL=接続解除)
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
-	//! @note		実際に形式が合うかどうかのチェックはここでは行わない。強制的につないでしまうので注意
+	//! @note		実際に形式が合うかどうかのチェックはここでは行わない。強制的につないでしまうので注意。
+	//! @note		ピンは入力ピンがかならず何かの出力ピンを接続するという方式なので
+	//!				出力ピン側のこのメソッドはprotectedになっていて外部かｒアクセスできない。
 	virtual void Connect(tOutputPin * output_pin);
 };
 //---------------------------------------------------------------------------
@@ -75,6 +77,7 @@ public:
 //---------------------------------------------------------------------------
 class tOutputPin : public tPin
 {
+	friend class tInputPin;
 	typedef tPin inherited;
 
 	tInputPin * InputPin; //!< この出力ピンにつながっている入力ピン
@@ -84,11 +87,11 @@ public:
 	//! @param		node		ノード
 	tOutputPin();
 
-	//! @brief		入力ピンを接続する
-	//! @param		input_pin		入力ピン
+protected:
+	//! @brief		入力ピンを接続する(tInputPin::Connectから呼ばれる)
+	//! @param		input_pin	入力ピン
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
-	//! @note		実際に形式が合うかどうかのチェックはここでは行わない。強制的につないでしまうので注意
-	virtual void Connect(tOutputPin * input_pin);
+	virtual void Connect(tInputPin * input_pin);
 };
 //---------------------------------------------------------------------------
 

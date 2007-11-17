@@ -26,98 +26,77 @@ RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 //---------------------------------------------------------------------------
 tTextProviderNode::tTextProviderNode(tGraph * graph) : inherited(graph)
 {
-	Parent = new tTextOutputPin();
+	OutputPin = new tTextOutputPin();
+	OutputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tTextProviderNode::GetParentCount()
+risse_size tTextProviderNode::GetOutputPinCount();
 {
-	return 1; // 一つの親にしか情報を提供しない
- }
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tProcessNode * tTextProviderNode::GetParentAt(risse_size n)
-{
-	if(n == 0) return Parent; // 親を返す
-	return NULL; // TODO: 例外
+	return 1; // 出力ピンは１個
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::SetParentAt(risse_size n, tProcessNode * node)
+tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n);
 {
-	// 親は無いので設定できない
+	// TODO: 例外
+	if(n == 0) return OutputPin;
+	return NULL; // 出力ピンはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTextProviderNode::InsertOutputPinAt(risse_size n);
+{
+	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::InsertParentPinAt(risse_size n)
+void tTextProviderNode::DeleteOutputPinAt(risse_size n)
 {
-	// 親を追加することはできない
+	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::DeleteParentPinAt(risse_size n)
+risse_size tTextProviderNode::GetInputPinCount()
 {
-	// 親を削除することはできない
-	// TODO: 例外
+	return 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tTextProviderNode::GetChildCount()
-{
-	return Children.size();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tTextProviderNode::GetChildAt(risse_size n)
+tInputPin * tTextProviderNode::GetInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	return Children[n];
+	return NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::SetChildAt(risse_size n, tProcessNode * node)
+void tTextProviderNode::InsertInputPinAt(risse_size n)
 {
-	// XXX: ピンのタイプのチェック
-	// XXX: 範囲外例外
-	Children[n] = node;
+	// XXX: 入力ピンを追加することはできない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::InsertChildPinAt(risse_size n)
+void tTextProviderNode::DeleteInputPinAt(risse_size n)
 {
-	// XXX: 範囲外例外
-	tTextInputPin * newpin = new tTextInputPin();
-	newpin->Attatch(this);
-	Children.insert(Children.begin() + n, newpin);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTextProviderNode::DeleteChildPinAt(risse_size n)
-{
-	// XXX: 範囲外例外
-	Children.erase(Children.begin() + n);
+	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
 

@@ -32,92 +32,73 @@ tTextDrawDeviceNode::tTextDrawDeviceNode(tGraph * graph) : inherited(graph)
 
 
 //---------------------------------------------------------------------------
-risse_size tTextDrawDeviceNode::GetParentCount()
+risse_size tTextDrawDeviceNode::GetOutputPinCount();
 {
-	return 0; // 親はない
+	return 0; // 出力ピンはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tProcessNode * tTextDrawDeviceNode::GetParentAt(risse_size n)
+tOutputPin * tTextDrawDeviceNode::GetOutputPinAt(risse_size n);
 {
-	return NULL; // 親はない
+	// TODO: 例外
+	return NULL; // 出力ピンはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::SetParentAt(risse_size n, tProcessNode * node)
+void tTextDrawDeviceNode::InsertOutputPinAt(risse_size n);
 {
-	// 親は無いので設定できない
+	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::InsertParentPinAt(risse_size n)
+void tTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
 {
-	// 親を追加することはできない
+	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::DeleteParentPinAt(risse_size n)
+risse_size tTextDrawDeviceNode::GetInputPinCount()
 {
-	// 親を削除することはできない
-	// TODO: 例外
+	return InputPins.size();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tTextDrawDeviceNode::GetChildCount()
-{
-	return Children.size();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tTextDrawDeviceNode::GetChildAt(risse_size n)
+tInputPin * tTextDrawDeviceNode::GetInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	return Children[n];
+	return InputPins[n];
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::SetChildAt(risse_size n, tProcessNode * node)
-{
-	// XXX: ピンのタイプのチェック
-	// XXX: 範囲外例外
-	if(!Children[n]) Childrenn] = new tTextInputPin();
-	Children[n]->Attach(node);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTextDrawDeviceNode::InsertChildPinAt(risse_size n)
+void tTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
 	tTextInputPin * newpin = new tTextInputPin();
 	newpin->Attatch(this);
-	Children.insert(Children.begin() + n, newpin);
+	InputPins.insert(InputPins.begin() + n, newpin);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::DeleteChildPinAt(risse_size n)
+void tTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	Children.erase(Children.begin() + n);
+	InputPins.erase(InputPins.begin() + n);
 }
 //---------------------------------------------------------------------------
 

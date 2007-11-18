@@ -46,7 +46,7 @@ tInputPin::tInputPin()
 void tInputPin::Connect(tOutputPin * output_pin)
 {
 	OutputPin = output_pin;
-	output_pin 
+	output_pin->Connect(this);
 }
 //---------------------------------------------------------------------------
 

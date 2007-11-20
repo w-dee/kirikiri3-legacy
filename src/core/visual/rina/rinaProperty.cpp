@@ -75,17 +75,75 @@ const tPropertyInfo::tItemInfo * tPropertyInfo::Find(const tString & name) const
 
 
 
+//---------------------------------------------------------------------------
+tPropertySet::tPropertySet()
+{
+	TotalCount = 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPropertySet::Add(tPropertyInfo * info)
+{
+	// info をフリーズ
+	info->Freeze();
+
+	// Infos に追加
+	risse_size infos_index = Infos.size();
+	tInfoAndStartIndex is;
+	is.Info = info;
+	is.StartIndex = TotalCount;
+	Infos.push_back(is);
+
+	// 総数を加算
+	risse_size count = info->GetCount();
+	TotalCount += count;
+
+	// InfoMap に、インデックスとそれに対応するInfos内インデックスの組を追加
+	for(risse_size i = 0; i < count; i++)
+		InfoMap.insert(tInfoMap::value_type(i + info->GetBaseIndex(), infos_index));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const tPropertySet::tInfoAndStartIndex *
+	tPropertySet::GetInfoAndStartIndex(risse_size index) const
+{
+	tInfoMap::iterator i = InfoMap.find(index);
+	if(i == InfoMap.end()) return NULL;
+	return &(Infos[i->second]);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 //---------------------------------------------------------------------------
-tProperty::tProperty(tPropertyInfo * info)
+tProperty::tProperty(PropertySet * prop_set)
 {
-	Info = info;
-	info->Freeze();
-	Properties.resize(Info->GetCount());
+	PropertySet = prop_set;
+	Properties.resize(PropertySet->GetTotalCount());
 }
 //---------------------------------------------------------------------------
 
@@ -93,8 +151,10 @@ tProperty::tProperty(tPropertyInfo * info)
 //---------------------------------------------------------------------------
 tVariant tProperty::GetValueAt(risse_size index)
 {
-	// XXX 範囲チェック
-	index -= Info->GetBaseIndex();
+	tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
+	if(!is) { /* XXX: プロパティが見つからない例外 */ }
+	index -= is->Info->GetBaseIndex();
+	index += is->StartIndex;
 	return Properties[index];
 }
 //---------------------------------------------------------------------------
@@ -103,8 +163,10 @@ tVariant tProperty::GetValueAt(risse_size index)
 //---------------------------------------------------------------------------
 void tProperty::SetValueAt(risse_size index, tVariant & value)
 {
-	// XXX 範囲チェック
-	index -= Info->GetBaseIndex();
+	tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
+	if(!is) { /* XXX: プロパティが見つからない例外 */ }
+	index -= is->Info->GetBaseIndex();
+	index += is->StartIndex;
 	Properties[index] = value;
 }
 //---------------------------------------------------------------------------

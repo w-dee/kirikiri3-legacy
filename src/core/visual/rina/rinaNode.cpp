@@ -13,7 +13,7 @@
 //! @brief RINA ノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/rinaProcess.h"
+#include "visual/rina/rinaNode.h"
 
 
 namespace Rina {
@@ -24,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 
 
 //---------------------------------------------------------------------------
-tProcessNode::tProcessNode(tGraph * graph) : inherited(graph)
+tProcessNode::tProcessNode() : inherited()
 {
 	Property = NULL;
 }

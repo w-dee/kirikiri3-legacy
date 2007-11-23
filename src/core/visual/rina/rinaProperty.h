@@ -12,6 +12,9 @@
 //! @file
 //! @brief RINA プロパティ管理
 //---------------------------------------------------------------------------
+#ifndef RINAPROPERTY_H
+#define RINAPROPERTY_H
+
 #include "visual/rina/rinaNode.h"
 
 namespace Rina {
@@ -58,7 +61,7 @@ public:
 
 	//! @brief		利用可能なプロパティの序数の基数を得る
 	//! @return		利用可能なプロパティの序数の基数
-	risse_size GetBaseIndex() const { return IndexBase; }
+	risse_size GetBaseIndex() const { return BaseIndex; }
 
 	//! @brief		プロパティを一つ追加する
 	//! @param		name		プロパティ名
@@ -114,7 +117,7 @@ public:
 
 	//! @brief		プロパティの総数を得る
 	//! @return		プロパティの総数
-	void GetTotalCount() const { return TotalCount; }
+	risse_size GetTotalCount() const { return TotalCount; }
 
 	//! @brief		セットにプロパティ情報を追加する
 	//! @param		info		プロパティ情報
@@ -137,19 +140,20 @@ class tProperty : public tCollectee
 {
 	typedef tCollectee inherited;
 
-	tPropertySet * PropertySet; //!< プロパティ情報
+	tPropertySet * PropertySet; //!< プロパティセット
 	gc_vector<tVariant> Properties; //!< プロパティ配列
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		prop_set		プロパティセット
-	tProperty(PropertySet * prop_set);
+	tProperty(tPropertySet * prop_set);
 
-	//! @brief		プロパティ情報を得る
-	//! @param		index		序数(基数が加算されていると見なす)
-	//! @return		そこの序数に対応する位置にあるプロパティ情報
-	//! @return		プロパティ情報
-	const tPropertyInfo * GetInfo() const { return Info; }
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tProperty() {;}
+
+	//! @brief		プロパティセットを得る
+	//! @return		プロパティセット
+	const tPropertySet * GetPropertySet() const { return PropertySet; }
 
 	//! @brief		指定位置の序数のプロパティを得る
 	//! @param		index		序数(基数が加算されていると見なす)
@@ -172,3 +176,4 @@ public:
 //---------------------------------------------------------------------------
 }
 
+#endif

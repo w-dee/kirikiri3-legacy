@@ -12,6 +12,10 @@
 //! @file
 //! @brief RINA ID管理
 //---------------------------------------------------------------------------
+#ifndef RINAIDREGISTRY_H
+#define RINAIDREGISTRY_H
+
+#include "base/utils/Singleton.h"
 #include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
@@ -22,9 +26,9 @@ namespace Rina {
 //---------------------------------------------------------------------------
 //! @brief		IDレジストリ
 //---------------------------------------------------------------------------
-class tIdRegistry : public singleton_base<tIdRegistry>, manual_start<tIdRegistry>
+class tIdRegistry : public Risa::singleton_base<tIdRegistry>, Risa::manual_start<tIdRegistry>
 {
-	typedef tCollectee inherited;
+	typedef Risa::singleton_base<tIdRegistry> inherited;
 
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_size PropertyIndex; //!< プロパティのインデックス
@@ -48,3 +52,4 @@ public:
 //---------------------------------------------------------------------------
 }
 
+#endif

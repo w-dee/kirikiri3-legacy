@@ -12,6 +12,9 @@
 //! @file
 //! @brief RINA ピン管理
 //---------------------------------------------------------------------------
+#ifndef RINAPIN_H
+#define RINAPIN_H
+
 #include "visual/rina/rinaNode.h"
 
 namespace Rina {
@@ -100,3 +103,4 @@ protected:
 //---------------------------------------------------------------------------
 }
 
+#endif

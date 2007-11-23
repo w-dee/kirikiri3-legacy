@@ -12,14 +12,15 @@
 //! @file
 //! @brief RINA ノード管理
 //---------------------------------------------------------------------------
-#include "visual/rina/rinaGraph.h"
+#ifndef RINANODE_H
+#define RINANODE_H
+
 
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
-class tGraph;
 class tInputPin;
 class tOutputPin;
 class tProperty;
@@ -28,12 +29,13 @@ class tProperty;
 //---------------------------------------------------------------------------
 class tProcessNode : public tCollectee
 {
+	typedef tCollectee inherited;
+
 	tProperty * Property; //!< このノードのプロパティ
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph		グラフインスタンス
-	tProcessNode(tGraph * graph);
+	tProcessNode();
 
 protected:
 	//! @brief		プロパティインスタンスを設定する
@@ -89,3 +91,4 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 }
 
+#endif

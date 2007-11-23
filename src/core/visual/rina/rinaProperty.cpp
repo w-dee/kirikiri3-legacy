@@ -18,7 +18,7 @@
 
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(42562,1057,1230,20298,51884,29457,5182,53557);
 //---------------------------------------------------------------------------
 
 
@@ -32,7 +32,7 @@ tPropertyInfo::tPropertyInfo()
 
 
 //---------------------------------------------------------------------------
-const tPropertyInfo::tItemInfo & tPropertyInfo::Add(const tString & name, const tString & short_desc)
+risse_size tPropertyInfo::Add(const tString & name, const tString & short_desc)
 {
 	RISSE_ASSERT(!Freezed);
 	risse_size newindex = Vector.size();
@@ -59,7 +59,7 @@ const tPropertyInfo::tItemInfo * tPropertyInfo::At(risse_size index) const
 //---------------------------------------------------------------------------
 const tPropertyInfo::tItemInfo * tPropertyInfo::Find(const tString & name) const
 {
-	tMap::iterator i = Map.find(name);
+	tMap::const_iterator i = Map.find(name);
 	if(i == Map.end()) return NULL;
 	return i->second;
 }
@@ -112,7 +112,7 @@ void tPropertySet::Add(tPropertyInfo * info)
 const tPropertySet::tInfoAndStartIndex *
 	tPropertySet::GetInfoAndStartIndex(risse_size index) const
 {
-	tInfoMap::iterator i = InfoMap.find(index);
+	tInfoMap::const_iterator i = InfoMap.find(index);
 	if(i == InfoMap.end()) return NULL;
 	return &(Infos[i->second]);
 }
@@ -141,7 +141,7 @@ const tPropertySet::tInfoAndStartIndex *
 
 
 //---------------------------------------------------------------------------
-tProperty::tProperty(PropertySet * prop_set)
+tProperty::tProperty(tPropertySet * prop_set)
 {
 	PropertySet = prop_set;
 	Properties.resize(PropertySet->GetTotalCount());
@@ -152,7 +152,7 @@ tProperty::tProperty(PropertySet * prop_set)
 //---------------------------------------------------------------------------
 tVariant tProperty::GetValueAt(risse_size index)
 {
-	tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
+	const tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
 	if(!is) { /* XXX: プロパティが見つからない例外 */ }
 	index -= is->Info->GetBaseIndex();
 	index += is->StartIndex;
@@ -164,7 +164,7 @@ tVariant tProperty::GetValueAt(risse_size index)
 //---------------------------------------------------------------------------
 void tProperty::SetValueAt(risse_size index, tVariant & value)
 {
-	tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
+	const tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
 	if(!is) { /* XXX: プロパティが見つからない例外 */ }
 	index -= is->Info->GetBaseIndex();
 	index += is->StartIndex;

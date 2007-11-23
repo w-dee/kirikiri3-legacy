@@ -14,17 +14,18 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/rina/test/rinaTextDrawDeviceNode.h"
+#include "visual/rina/test/rinaTextPin.h"
 
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
+RISSE_DEFINE_SOURCE_ID(10207,53962,31748,17392,1438,46335,5173,19226);
 //---------------------------------------------------------------------------
 
 
 
 
 //---------------------------------------------------------------------------
-tTextDrawDeviceNode::tTextDrawDeviceNode(tGraph * graph) : inherited(graph)
+tTextDrawDeviceNode::tTextDrawDeviceNode() : inherited()
 {
 	
 }
@@ -32,7 +33,7 @@ tTextDrawDeviceNode::tTextDrawDeviceNode(tGraph * graph) : inherited(graph)
 
 
 //---------------------------------------------------------------------------
-risse_size tTextDrawDeviceNode::GetOutputPinCount();
+risse_size tTextDrawDeviceNode::GetOutputPinCount()
 {
 	return 0; // 出力ピンはない
 }
@@ -40,7 +41,7 @@ risse_size tTextDrawDeviceNode::GetOutputPinCount();
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tTextDrawDeviceNode::GetOutputPinAt(risse_size n);
+tOutputPin * tTextDrawDeviceNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
 	return NULL; // 出力ピンはない
@@ -49,7 +50,7 @@ tOutputPin * tTextDrawDeviceNode::GetOutputPinAt(risse_size n);
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::InsertOutputPinAt(risse_size n);
+void tTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外
@@ -88,7 +89,7 @@ void tTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
 	tTextInputPin * newpin = new tTextInputPin();
-	newpin->Attatch(this);
+	newpin->Attach(this);
 	InputPins.insert(InputPins.begin() + n, newpin);
 }
 //---------------------------------------------------------------------------

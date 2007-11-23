@@ -49,9 +49,9 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tTextOutputPin : public tOuputPin
+class tTextOutputPin : public tOutputPin
 {
-	typedef tInputPin inherited;
+	typedef tOutputPin inherited;
 
 public:
 	//! @brief		コンストラクタ

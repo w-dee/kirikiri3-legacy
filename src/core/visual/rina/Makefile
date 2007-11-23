@@ -15,7 +15,12 @@ CPPFILES=\
 	rinaNode.cpp                  \
 	rinaProperty.cpp              \
 	rinaPin.cpp                   \
-	rinaIdRegistry.cpp            
+	rinaIdRegistry.cpp            \
+	test/rina1DPositionProperty.cpp \
+	test/rinaTextDrawDeviceNode.cpp \
+	test/rinaTextPin.cpp          \
+	test/rinaTextProperty.cpp     \
+	test/rinaTextProviderNode.cpp 
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

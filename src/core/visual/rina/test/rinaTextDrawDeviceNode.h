@@ -36,8 +36,10 @@ class tTextDrawDeviceNode : public tProcessNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph		GDS グラフインスタンス
-	tTextDrawDeviceNode(tGraph * graph);
+	tTextDrawDeviceNode();
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tTextDrawDeviceNode() {;}
 
 public: // サブクラスで実装すべき物
 

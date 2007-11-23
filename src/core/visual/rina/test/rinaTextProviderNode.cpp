@@ -16,9 +16,10 @@
 #include "visual/rina/test/rinaTextProviderNode.h"
 #include "visual/rina/test/rinaTextProperty.h"
 #include "visual/rina/test/rina1DPositionProperty.h"
+#include "visual/rina/test/rinaTextPin.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
+RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
 //---------------------------------------------------------------------------
 
 
@@ -37,7 +38,7 @@ tTextPropertySet::tTextPropertySet()
 
 
 //---------------------------------------------------------------------------
-tTextProviderNode::tTextProviderNode(tGraph * graph) : inherited(graph)
+tTextProviderNode::tTextProviderNode()
 {
 	OutputPin = new tTextOutputPin();
 	OutputPin->Attach(this);
@@ -46,7 +47,7 @@ tTextProviderNode::tTextProviderNode(tGraph * graph) : inherited(graph)
 
 
 //---------------------------------------------------------------------------
-risse_size tTextProviderNode::GetOutputPinCount();
+risse_size tTextProviderNode::GetOutputPinCount()
 {
 	return 1; // 出力ピンは１個
 }
@@ -54,7 +55,7 @@ risse_size tTextProviderNode::GetOutputPinCount();
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n);
+tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
 	if(n == 0) return OutputPin;
@@ -64,7 +65,7 @@ tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n);
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::InsertOutputPinAt(risse_size n);
+void tTextProviderNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外

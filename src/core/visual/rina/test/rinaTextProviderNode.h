@@ -16,7 +16,7 @@
 #define RINATEXTPROVIDERNODE_H
 
 #include "visual/rina/rinaNode.h"
-
+#include "visual/rina/rinaProperty.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -28,8 +28,8 @@ namespace Rina {
 //---------------------------------------------------------------------------
 class tTextPropertySet :
 	public tPropertySet,
-	public Risa::singleton_base<tPropertySet>,
-	Risa::manual_start<tPropertySet>
+	public Risa::singleton_base<tTextPropertySet>,
+	Risa::manual_start<tTextPropertySet>
 {
 public:
 	//! @brief		コンストラクタ
@@ -51,8 +51,7 @@ class tTextProviderNode : public tProcessNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph		グラフインスタンス
-	tTextDrawDeviceProcessNode(tGraph * graph);
+	tTextProviderNode();
 
 public: // サブクラスで実装すべき物
 

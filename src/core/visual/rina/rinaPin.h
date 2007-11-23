@@ -42,7 +42,7 @@ public:
 
 	//! @brief		プロセスノードにこのピンをアタッチする
 	//! @param		node		プロセスノード (NULL=デタッチ)
-	void Attatch(tProcessNode * node) { Node = node; }
+	void Attach(tProcessNode * node) { Node = node; }
 };
 //---------------------------------------------------------------------------
 

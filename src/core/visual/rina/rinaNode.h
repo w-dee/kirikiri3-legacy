@@ -22,17 +22,29 @@ namespace Rina {
 class tGraph;
 class tInputPin;
 class tOutputPin;
+class tProperty;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
 class tProcessNode : public tCollectee
 {
+	tProperty * Property; //!< このノードのプロパティ
+
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph		グラフインスタンス
 	tProcessNode(tGraph * graph);
 
+protected:
+	//! @brief		プロパティインスタンスを設定する
+	//! @param		prop		プロパティインスタンス
+	void SetProperty(tProperty * prop) { Property = prop; }
+
 public: // サブクラスで実装すべき物
+	//! @brief		プロパティインスタンスを得る
+	//! @return		プロパティインスタンス
+	virtual tProperty * GetProperty() = 0;
+
 
 	//! @brief		出力ピンの個数を得る
 	//! @return		出力ピンの個数

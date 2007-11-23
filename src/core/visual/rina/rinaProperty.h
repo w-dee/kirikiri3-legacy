@@ -63,8 +63,8 @@ public:
 	//! @brief		プロパティを一つ追加する
 	//! @param		name		プロパティ名
 	//! @param		short_desc	短い説明
-	//! @return		プロパティ情報構造体へのポインタ
-	const tItemInfo * Add(const tString & name, const tString & short_desc);
+	//! @return		プロパティのインデックス (BaseIndexが加算された値)
+	risse_size Add(const tString & name, const tString & short_desc);
 
 	//! @brief		プロパティ数を得る
 	//! @return		プロパティ数
@@ -93,7 +93,7 @@ class tPropertySet : public tCollectee
 
 public:
 	//! @brief プロパティ情報とこのセット内におけるプロパティ序数の開始値の組
-	struct tInfoAndStartIndex
+	struct tInfoAndStartIndex : public tCollectee
 	{
 		tPropertyInfo * Info; //!< プロパティ情報
 		risse_size StartIndex; //!< このセット内におけるプロパティ序数の開始値

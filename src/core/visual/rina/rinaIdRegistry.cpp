@@ -10,26 +10,33 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA ノード管理
+//! @brief RINA ID管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/rinaProcess.h"
+#include "visual/rina/rinaIdRegistry.h"
 
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
+RISSE_DEFINE_SOURCE_ID();
 //---------------------------------------------------------------------------
 
 
-
-
 //---------------------------------------------------------------------------
-tProcessNode::tProcessNode(tGraph * graph) : inherited(graph)
+tIdRegistry::tIdRegistry()
 {
-	Property = NULL;
+	PropertyIndex = 0;
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+risse_size tIdRegistry::GetNewPropertyIndex()
+{
+	volatile tCriticalSection::tLocker lock(CS);
+	PropertyIndex += PropertyIndexIncrement;
+	return PropertyIndex;
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

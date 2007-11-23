@@ -14,6 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/rina/rinaProperty.h"
+#include "visual/rina/rinaIdRegistry.h"
 
 
 namespace Rina {
@@ -25,7 +26,7 @@ RISSE_DEFINE_SOURCE_ID();
 tPropertyInfo::tPropertyInfo()
 {
 	Freezed = false;
-	BaseIndex = 0; // XXX: 正しい基数の取得
+	BaseIndex = tIdRegistry::instance()->GetNewPropertyIndex(); // XXX: 正しい基数の取得
 }
 //---------------------------------------------------------------------------
 
@@ -41,7 +42,7 @@ const tPropertyInfo::tItemInfo & tPropertyInfo::Add(const tString & name, const 
 	newinfo->ShortDesc = short_desc;
 	Map.insert(tMap::value_type(name, newinfo));
 	Vector.push_back(newinfo);
-	return newinfo;
+	return newinfo->Index + BaseIndex;
 }
 //---------------------------------------------------------------------------
 

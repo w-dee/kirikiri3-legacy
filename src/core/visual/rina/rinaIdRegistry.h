@@ -10,27 +10,41 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA ノード管理
+//! @brief RINA ID管理
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "visual/rina/rinaProcess.h"
-
+#include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 //---------------------------------------------------------------------------
 
 
 
-
 //---------------------------------------------------------------------------
-tProcessNode::tProcessNode(tGraph * graph) : inherited(graph)
+//! @brief		IDレジストリ
+//---------------------------------------------------------------------------
+class tIdRegistry : public singleton_base<tIdRegistry>, manual_start<tIdRegistry>
 {
-	Property = NULL;
-}
+	typedef tCollectee inherited;
+
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	risse_size PropertyIndex; //!< プロパティのインデックス
+
+public:
+	static const risse_size PropertyIndexIncrement = 0x100;
+		//!< プロパティインデックスの増分 ( = 一度に確保できるプロパティの個数の最大値)
+
+public:
+	//! @brief		コンストラクタ
+	tIdRegistry();
+
+	//! @brief		新しいプロパティ序数の基数を得る
+	risse_size GetNewPropertyIndex();
+};
 //---------------------------------------------------------------------------
 
 
 
+
 //---------------------------------------------------------------------------
 }
+

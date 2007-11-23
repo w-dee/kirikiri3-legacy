@@ -10,59 +10,41 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストピン管理
+//! @brief テスト用の1次元位置プロパティ
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "visual/rina/test/rinaTextPin.h"
+#ifndef RINA1DPOSITIONPROPERTY_H
+#define RINA1DPOSITIONPROPERTY_H
 
+#include "base/utils/Singleton.h"
+#include "visual/rina/rinaProperty.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
 //---------------------------------------------------------------------------
 
 
 
-
 //---------------------------------------------------------------------------
-tTextInputPin::tTextInputPin()
+//! @brief		1次元位置プロパティ情報
+//---------------------------------------------------------------------------
+class t1DPositionPropertyInfo :
+	public tPropertyInfo,
+	public Risa::singleton_base<t1DPositionPropertyInfo>,
+	Risa::manual_start<t1DPositionPropertyInfo>
 {
-}
+	typedef tPropertyInfo inherited;
+
+public:
+	const risse_size ID_Position; // "position" プロパティの ID
+
+	//! @brief		コンストラクタ
+	t1DPositionPropertyInfo();
+};
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tTextInputPin::CanConnect(risse_uint32 type)
-{
-	return type == TextEdgeType;
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tTextOutputPin::tTextOutputPin()
-{
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tTextOutputPin::CanConnect(risse_uint32 type)
-{
-	return type == TextEdgeType;
-}
-//---------------------------------------------------------------------------
-
 
 
 
 
 //---------------------------------------------------------------------------
 }
+
+#endif

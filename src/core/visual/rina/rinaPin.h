@@ -60,7 +60,6 @@ class tInputPin : public tPin
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		node		ノード
 	tInputPin();
 
 	//! @brief		出力ピンを接続する
@@ -87,7 +86,6 @@ class tOutputPin : public tPin
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		node		ノード
 	tOutputPin();
 
 protected:

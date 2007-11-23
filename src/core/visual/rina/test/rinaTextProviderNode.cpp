@@ -13,12 +13,25 @@
 //! @brief テスト用のテキストプロバイダノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/rinaProcess.h"
-
+#include "visual/rina/test/rinaTextProviderNode.h"
+#include "visual/rina/test/rinaTextProperty.h"
+#include "visual/rina/test/rina1DPositionProperty.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tTextPropertySet::tTextPropertySet()
+{
+	Add(tCaptionPropertyInfo::instance());
+	Add(t1DPositionPropertyInfo::instance());
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

@@ -13,7 +13,7 @@
 //! @brief テスト用のテキスト描画デバイスプロセスノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/rinaProcess.h"
+#include "visual/rina/test/rinaTextDrawDeviceNode.h"
 
 
 namespace Rina {

@@ -10,54 +10,36 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストピン管理
+//! @brief テスト用のテキストプロパティ
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "visual/rina/test/rinaTextPin.h"
+#ifndef RINATEXTPROPERTY_H
+#define RINATEXTPROPERTY_H
 
+#include "visual/rina/rinaProperty.h"
+#include "visual/rina/test/rina1DPositionProperty.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
 //---------------------------------------------------------------------------
 
 
 
 
 //---------------------------------------------------------------------------
-tTextInputPin::tTextInputPin()
+//! @brief		キャプションプロパティ情報
+//---------------------------------------------------------------------------
+class tCaptionPropertyInfo :
+	public tPropertyInfo,
+	public Risa::singleton_base<tCaptionPropertyInfo>,
+	Risa::manual_start<tCaptionPropertyInfo>
 {
-}
-//---------------------------------------------------------------------------
+	typedef tPropertyInfo inherited;
 
+public:
+	const risse_size ID_Caption; // "caption" プロパティの ID
 
-//---------------------------------------------------------------------------
-bool tTextInputPin::CanConnect(risse_uint32 type)
-{
-	return type == TextEdgeType;
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tTextOutputPin::tTextOutputPin()
-{
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tTextOutputPin::CanConnect(risse_uint32 type)
-{
-	return type == TextEdgeType;
-}
+	//! @brief		コンストラクタ
+	tCaptionPropertyInfo();
+};
 //---------------------------------------------------------------------------
 
 
@@ -66,3 +48,5 @@ bool tTextOutputPin::CanConnect(risse_uint32 type)
 
 //---------------------------------------------------------------------------
 }
+
+#endif

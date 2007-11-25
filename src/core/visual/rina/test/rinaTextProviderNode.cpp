@@ -40,6 +40,10 @@ tTextPropertySet::tTextPropertySet()
 //---------------------------------------------------------------------------
 tTextProviderNode::tTextProviderNode()
 {
+	// プロパティオブジェクトを作成
+	SetProperty(new tProperty(tTextPropertySet::instance()));
+
+	// 出力ピンを作成
 	OutputPin = new tTextOutputPin();
 	OutputPin->Attach(this);
 }

@@ -158,7 +158,7 @@ public:
 	//! @brief		指定位置の序数のプロパティを得る
 	//! @param		index		序数(基数が加算されていると見なす)
 	//! @return		その位置にあるプロパティ
-	virtual tVariant GetValueAt(risse_size index) = 0;
+	virtual tVariant GetValueAt(risse_size index);
 
 	//! @brief		指定位置の序数のプロパティを設定する
 	//! @param		index		序数(基数が加算されていると見なす)
@@ -168,7 +168,7 @@ public:
 	//!				(親クラスのこれを改めて呼ぶ必要は特にない)
 	//!				ただしその場合は GetValueAt もオーバーライド
 	//!				しないとたぶん変なことになる
-	virtual void SetValueAt(risse_size index, tVariant & value) = 0;
+	virtual void SetValueAt(risse_size index, const tVariant & value);
 };
 //---------------------------------------------------------------------------
 

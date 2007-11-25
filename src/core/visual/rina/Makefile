@@ -20,7 +20,8 @@ CPPFILES=\
 	test/rinaTextDrawDeviceNode.cpp \
 	test/rinaTextPin.cpp          \
 	test/rinaTextProperty.cpp     \
-	test/rinaTextProviderNode.cpp 
+	test/rinaTextProviderNode.cpp \
+	test/rinaTest.cpp
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

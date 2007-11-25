@@ -162,7 +162,7 @@ tVariant tProperty::GetValueAt(risse_size index)
 
 
 //---------------------------------------------------------------------------
-void tProperty::SetValueAt(risse_size index, tVariant & value)
+void tProperty::SetValueAt(risse_size index, const tVariant & value)
 {
 	const tPropertySet::tInfoAndStartIndex * is = PropertySet->GetInfoAndStartIndex(index);
 	if(!is) { /* XXX: プロパティが見つからない例外 */ }

@@ -42,12 +42,12 @@ protected:
 	//! @param		prop		プロパティインスタンス
 	void SetProperty(tProperty * prop) { Property = prop; }
 
-public: // サブクラスで実装すべき物
+public:
 	//! @brief		プロパティインスタンスを得る
 	//! @return		プロパティインスタンス
-	virtual tProperty * GetProperty() = 0;
+	tProperty * GetProperty() const { return Property; }
 
-
+public: // サブクラスで実装すべき物
 	//! @brief		出力ピンの個数を得る
 	//! @return		出力ピンの個数
 	virtual risse_size GetOutputPinCount() = 0;

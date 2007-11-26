@@ -18,6 +18,7 @@
 #include "visual/rina/test/rinaTextProperty.h"
 #include "visual/rina/test/rina1DPositionProperty.h"
 #include "visual/rina/test/rinaTextPin.h"
+#include "visual/rina/test/rinaTextDrawDeviceNode.h"
 
 using namespace Risa;
 
@@ -56,6 +57,14 @@ tTester::tTester()
 	wxFprintf(stdout, wxT("provider2: pos=%s cap=%s\n"),
 		provider_node2->GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position).AsHumanReadable().AsWxString().c_str(),
 		provider_node2->GetProperty()->GetValueAt(tCaptionPropertyInfo::instance()->ID_Caption    ).AsHumanReadable().AsWxString().c_str() );
+
+	tTextDrawDeviceNode * dd_node = new tTextDrawDeviceNode();
+	dd_node->InsertInputPinAt(0);
+	dd_node->InsertInputPinAt(1);
+
+	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
+	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
+
 }
 //---------------------------------------------------------------------------
 

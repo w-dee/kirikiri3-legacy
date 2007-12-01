@@ -66,7 +66,6 @@ public: // サブクラスで実装すべき物
 	virtual void DeleteOutputPinAt(risse_size n) = 0;
 
 
-
 	//! @brief		入力ピンの個数を得る
 	//! @return		入力ピンの個数
 	virtual risse_size GetInputPinCount() = 0;
@@ -83,6 +82,10 @@ public: // サブクラスで実装すべき物
 	//! @brief		指定位置から入力ピンを削除する
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n) = 0;
+
+	//! @brief		コマンドキューを組み立てる
+	//! @param		parent	親のコマンドキュー
+	virtual void BuildComandQueue(tQueueNode * parent) { return ; }
 
 };
 //---------------------------------------------------------------------------

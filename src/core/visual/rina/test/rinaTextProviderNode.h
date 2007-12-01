@@ -17,6 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaProperty.h"
+#include "visual/rina/rinaQueue.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -90,6 +91,46 @@ public: // サブクラスで実装すべき物
 	//! @brief		指定位置から入力ピンを削除する
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n);
+
+	//! @brief		コマンドキューを組み立てる
+	//! @param		parent	親のコマンドキュー
+	virtual void BuildComandQueue(tQueueNode * parent);
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		テスト用のテキストコマンドキュー
+//---------------------------------------------------------------------------
+class tTextProviderQueueNode : public tQueueNode
+{
+	typedef tQueueNode inherited;
+
+	risse_int32 Position; //!< 位置
+	tString Text; //!< テキスト
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		pos		位置
+	//! @param		text	テキスト
+	tTextProviderQueueNode(risse_int32 pos, const tString & text) : Position(pos), Text(text) {;}
+
+	//! @brief		位置を得る
+	//! @return		位置
+	risse_int32 GetPosition() const { return Position; }
+
+	//! @brief		テキストを得る
+	//! @return		テキスト
+	const tString & GetText() const { return Text; }
+
+protected: //!< サブクラスでオーバーライドして使う物
+
+	//! @brief		ノードの処理の最初に行う処理
+	virtual void BeginProcess() {;}
+
+	//! @brief		ノードの処理の最後に行う処理
+	virtual void EndProcess() {;}
 };
 //---------------------------------------------------------------------------
 

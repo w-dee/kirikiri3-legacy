@@ -16,6 +16,7 @@
 #define RINATEXTDRAWDEVICENODE_H
 
 #include "visual/rina/rinaNode.h"
+#include "visual/rina/rinaQueue.h"
 
 
 namespace Rina {
@@ -80,10 +81,38 @@ public: // サブクラスで実装すべき物
 	virtual void DeleteInputPinAt(risse_size n);
 
 
+
+	//! @brief		コマンドキューを組み立てる
+	//! @param		parent	親のコマンドキュー
+	virtual void BuildComandQueue(tQueueNode * parent);
+
 };
 //---------------------------------------------------------------------------
 
 
+
+//---------------------------------------------------------------------------
+//! @brief		テスト用のテキスト描画デバイスコマンドキュー
+//---------------------------------------------------------------------------
+class tTextDrawDeviceQueueNode : public tQueueNode
+{
+	typedef tQueueNode inherited;
+
+	static const risse_size CanvasSize = 75; //!< キャンバスのサイズ
+	const risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
+
+public:
+	//! @brief		コンストラクタ
+	tTextDrawDeviceQueueNode();
+
+protected: //!< サブクラスでオーバーライドして使う物
+
+	//! @brief		ノードの処理の最初に行う処理
+	virtual void BeginProcess() {;}
+
+	//! @brief		ノードの処理の最後に行う処理
+	virtual void EndProcess() {;}
+};
 //---------------------------------------------------------------------------
 }
 

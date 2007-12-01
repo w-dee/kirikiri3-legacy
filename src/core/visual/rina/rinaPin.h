@@ -29,6 +29,7 @@ class tPin : public tCollectee
 {
 	typedef tCollectee inherited;
 
+protected:
 	tProcessNode * Node; //!< このピンを保有しているノード
 
 public:
@@ -67,8 +68,12 @@ public:
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
 	//! @note		実際に形式が合うかどうかのチェックはここでは行わない。強制的につないでしまうので注意。
 	//! @note		ピンは入力ピンがかならず何かの出力ピンを接続するという方式なので
-	//!				出力ピン側のこのメソッドはprotectedになっていて外部かｒアクセスできない。
+	//!				出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
 	virtual void Connect(tOutputPin * output_pin);
+
+	//! @brief		コマンドキューを組み立てる
+	//! @param		parent	親のコマンドキュー
+	void BuildComandQueue(tQueueNode * parent) { if(OutputPin) OutputPin->BuildComandQueue(parent); }
 };
 //---------------------------------------------------------------------------
 
@@ -93,6 +98,13 @@ protected:
 	//! @param		input_pin	入力ピン
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
 	virtual void Connect(tInputPin * input_pin);
+
+	//! @brief		レンダリングキューの作成の開始を伝える
+	void BeginQueuing() { if(Node) Node->BeginQueuing(); }
+
+	//! @brief		コマンドキューを組み立てる
+	//! @param		parent	親のコマンドキュー
+	void BuildComandQueue(tQueueNode * parent) { if(Node) Node->BuildComandQueue(parent); }
 };
 //---------------------------------------------------------------------------
 

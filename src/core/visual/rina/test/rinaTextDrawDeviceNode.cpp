@@ -108,7 +108,7 @@ void tTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextDrawDeviceNode::BuildComandQueue(tQueueNode * parent)
 {
-	tQueueNode * new_parent = new tTextDrawDeviceQueueNode()
+	tQueueNode * new_parent = new tTextDrawDeviceQueueNode();
 	parent->AddChild(new_parent);
 
 	// 入力ピンに再帰

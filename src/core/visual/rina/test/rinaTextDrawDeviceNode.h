@@ -99,7 +99,7 @@ class tTextDrawDeviceQueueNode : public tQueueNode
 	typedef tQueueNode inherited;
 
 	static const risse_size CanvasSize = 75; //!< キャンバスのサイズ
-	const risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
+	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:
 	//! @brief		コンストラクタ
@@ -108,10 +108,10 @@ public:
 protected: //!< サブクラスでオーバーライドして使う物
 
 	//! @brief		ノードの処理の最初に行う処理
-	virtual void BeginProcess() {;}
+	virtual void BeginProcess();
 
 	//! @brief		ノードの処理の最後に行う処理
-	virtual void EndProcess() {;}
+	virtual void EndProcess();
 };
 //---------------------------------------------------------------------------
 }

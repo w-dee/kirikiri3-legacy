@@ -16,6 +16,7 @@ CPPFILES=\
 	rinaProperty.cpp              \
 	rinaPin.cpp                   \
 	rinaIdRegistry.cpp            \
+	rinaQueue.cpp                 \
 	test/rina1DPositionProperty.cpp \
 	test/rinaTextDrawDeviceNode.cpp \
 	test/rinaTextPin.cpp          \

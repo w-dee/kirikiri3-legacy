@@ -73,7 +73,7 @@ public:
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
-	void BuildComandQueue(tQueueNode * parent) { if(OutputPin) OutputPin->BuildComandQueue(parent); }
+	void BuildComandQueue(tQueueNode * parent);
 };
 //---------------------------------------------------------------------------
 
@@ -98,9 +98,6 @@ protected:
 	//! @param		input_pin	入力ピン
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
 	virtual void Connect(tInputPin * input_pin);
-
-	//! @brief		レンダリングキューの作成の開始を伝える
-	void BeginQueuing() { if(Node) Node->BeginQueuing(); }
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー

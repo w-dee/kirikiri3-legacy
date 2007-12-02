@@ -12,8 +12,8 @@
 //! @file
 //! @brief RINA コマンドキュー管理
 //---------------------------------------------------------------------------
-#ifndef RINAPROPERTY_H
-#define RINAPROPERTY_H
+#ifndef RINAQUEUE_H
+#define RINAQUEUE_H
 
 #include "visual/rina/rinaNode.h"
 
@@ -41,6 +41,9 @@ protected:
 public:
 	//! @brief		コンストラクタ
 	tQueueNode();
+
+	//! @brief		デストラクタ (おそらく呼ばれない)
+	virtual ~tQueueNode() {;}
 
 	//! @brief		ノードの処理を行う(仮実装)
 	void Process();

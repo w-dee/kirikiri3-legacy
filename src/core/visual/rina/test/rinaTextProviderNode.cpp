@@ -120,7 +120,7 @@ void tTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::BuildComandQueue(tQueueNode * parent)
+void tTextProviderNode::BuildQueue(tQueueNode * parent)
 {
 	parent->AddChild(new tTextProviderQueueNode(
 		(risse_int32)(risse_int64)(GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position)),

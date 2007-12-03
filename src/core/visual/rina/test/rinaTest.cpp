@@ -43,13 +43,13 @@ tTester::tTester()
 	provider_node1->GetProperty()->SetValueAt(
 		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)1);
 	provider_node1->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("a"));
+		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("aaaaaa"));
 
 	tTextProviderNode * provider_node2 = new tTextProviderNode();
 	provider_node2->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)2);
+		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)10);
 	provider_node2->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("b"));
+		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("bbbbbbbb"));
 
 	wxFprintf(stdout, wxT("provider1: pos=%s cap=%s\n"),
 		provider_node1->GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position).AsHumanReadable().AsWxString().c_str(),
@@ -64,6 +64,11 @@ tTester::tTester()
 
 	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
+
+	// render
+	tRootQueueNode * rootqueue = new tRootQueueNode();
+	dd_node->BuildQueue(rootqueue);
+	rootqueue->Process();
 
 }
 //---------------------------------------------------------------------------

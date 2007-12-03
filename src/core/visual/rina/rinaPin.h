@@ -73,7 +73,7 @@ public:
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
-	void BuildComandQueue(tQueueNode * parent);
+	void BuildQueue(tQueueNode * parent);
 };
 //---------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ protected:
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
-	void BuildComandQueue(tQueueNode * parent) { if(Node) Node->BuildComandQueue(parent); }
+	void BuildQueue(tQueueNode * parent) { if(Node) Node->BuildQueue(parent); }
 };
 //---------------------------------------------------------------------------
 

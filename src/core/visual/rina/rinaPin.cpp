@@ -52,9 +52,9 @@ void tInputPin::Connect(tOutputPin * output_pin)
 
 
 //---------------------------------------------------------------------------
-void tInputPin::BuildComandQueue(tQueueNode * parent)
+void tInputPin::BuildQueue(tQueueNode * parent)
 {
-	if(OutputPin) OutputPin->BuildComandQueue(parent);
+	if(OutputPin) OutputPin->BuildQueue(parent);
 }
 //---------------------------------------------------------------------------
 

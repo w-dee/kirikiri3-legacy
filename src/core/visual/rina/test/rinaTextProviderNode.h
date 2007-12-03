@@ -94,7 +94,7 @@ public: // サブクラスで実装すべき物
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
-	virtual void BuildComandQueue(tQueueNode * parent);
+	virtual void BuildQueue(tQueueNode * parent);
 };
 //---------------------------------------------------------------------------
 

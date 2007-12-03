@@ -75,7 +75,7 @@ class tRootQueueNode : public tQueueNode
 
 public:
 	//! @brief		コンストラクタ
-	tRootQueueNode();
+	tRootQueueNode() {;}
 
 protected: //!< サブクラスでオーバーライドして使う物
 

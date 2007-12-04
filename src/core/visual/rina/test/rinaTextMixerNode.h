@@ -10,49 +10,55 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストプロバイダノード管理
+//! @brief テスト用のテキストミキサノード管理
 //---------------------------------------------------------------------------
-#ifndef RINATEXTPROVIDERNODE_H
-#define RINATEXTPROVIDERNODE_H
+#ifndef RINATEXTMIXERNODE_H
+#define RINATEXTMIXERNODE_H
 
 #include "visual/rina/rinaNode.h"
-#include "visual/rina/rinaProperty.h"
 #include "visual/rina/rinaQueue.h"
+#include "visual/rina/test/rinaTextProviderNode.h"
+
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
-
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストプロパティセット
+//! @brief		テスト用のミキサノード用プロパティセット
 //---------------------------------------------------------------------------
-class tTextPropertySet :
+class tTextMixerPropertySet :
 	public tPropertySet,
 	public Risa::singleton_base<tTextPropertySet>,
 	Risa::manual_start<tTextPropertySet>
 {
 public:
 	//! @brief		コンストラクタ
-	tTextPropertySet();
+	tTextMixerPropertySet();
 };
 //---------------------------------------------------------------------------
 
 
-
-class tTextOutputPin;
+class tGraph;
+class tInputPin;
+class tOutputPin;
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストプロバイダノード
+//! @brief		テスト用のミキサノード
 //---------------------------------------------------------------------------
-class tTextProviderNode : public tProcessNode
+class tTextMixerNode : public tProcessNode
 {
 	typedef tProcessNode inherited;
+
+	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
 	tTextOutputPin * OutputPin; //!< 出力ピン
 
 public:
 	//! @brief		コンストラクタ
-	tTextProviderNode();
+	tTextMixerNode();
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tTextMixerNode() {;}
 
 public: // サブクラスで実装すべき物
 
@@ -92,50 +98,48 @@ public: // サブクラスで実装すべき物
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n);
 
+
+
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
 	virtual void BuildQueue(tQueueNode * parent);
+
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストコマンドキュー
+//! @brief		テスト用のミキサコマンドキュー
 //---------------------------------------------------------------------------
-class tTextProviderQueueNode : public tQueueNode
+class tTextMixerQueueNode : public tTextProviderQueueNode
 {
-	typedef tQueueNode inherited;
+	typedef tTextProviderQueueNode inherited;
 
-protected:
-	risse_int32 Position; //!< 位置
-	tString Text; //!< テキスト
+	static const risse_size CanvasSize = 30; //!< キャンバスのサイズ
+	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		pos		位置
-	//! @param		text	テキスト
-	tTextProviderQueueNode(risse_int32 pos, const tString & text) : Position(pos), Text(text) {;}
+	tTextMixerQueueNode(risse_int32 pos);
 
 	//! @brief		位置を得る
 	//! @return		位置
-	virtual risse_int32 GetPosition() const { return Position; }
+	risse_int32 GetPosition() const { return Position; }
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const tString & GetText() const { return Text; }
+	const tString & GetText() const { return Text; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 
 	//! @brief		ノードの処理の最初に行う処理
-	virtual void BeginProcess() {;}
+	virtual void BeginProcess();
 
 	//! @brief		ノードの処理の最後に行う処理
-	virtual void EndProcess() {;}
+	virtual void EndProcess();
 };
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 }
 

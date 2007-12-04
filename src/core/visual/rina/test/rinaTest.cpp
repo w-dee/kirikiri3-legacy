@@ -19,6 +19,7 @@
 #include "visual/rina/test/rina1DPositionProperty.h"
 #include "visual/rina/test/rinaTextPin.h"
 #include "visual/rina/test/rinaTextDrawDeviceNode.h"
+#include "visual/rina/test/rinaTextMixerNode.h"
 
 using namespace Risa;
 
@@ -32,12 +33,22 @@ class tTester : public singleton_base<tTester>
 {
 public:
 	tTester();
+private:
+	void Test();
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 tTester::tTester()
+{
+	Test();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tTester::Test()
 {
 	tTextProviderNode * provider_node1 = new tTextProviderNode();
 	provider_node1->GetProperty()->SetValueAt(
@@ -64,6 +75,33 @@ tTester::tTester()
 
 	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
+
+	tTextMixerNode * mixer_node = new tTextMixerNode();
+	mixer_node->GetProperty()->SetValueAt(
+		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)30);
+
+	tTextProviderNode * provider_node3 = new tTextProviderNode();
+	provider_node3->GetProperty()->SetValueAt(
+		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)3);
+	provider_node3->GetProperty()->SetValueAt(
+		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("ccc"));
+
+	tTextProviderNode * provider_node4 = new tTextProviderNode();
+	provider_node4->GetProperty()->SetValueAt(
+		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)12);
+	provider_node4->GetProperty()->SetValueAt(
+		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("dddd"));
+
+	mixer_node->InsertInputPinAt(0);
+	mixer_node->InsertInputPinAt(1);
+
+	mixer_node->GetInputPinAt(0)->Connect(provider_node3->GetOutputPinAt(0));
+	mixer_node->GetInputPinAt(1)->Connect(provider_node4->GetOutputPinAt(0));
+
+	dd_node->InsertInputPinAt(2);
+
+	dd_node->GetInputPinAt(2)->Connect(mixer_node->GetOutputPinAt(0));
+
 
 	// render
 	tRootQueueNode * rootqueue = new tRootQueueNode();

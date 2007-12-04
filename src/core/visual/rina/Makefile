@@ -22,6 +22,7 @@ CPPFILES=\
 	test/rinaTextPin.cpp          \
 	test/rinaTextProperty.cpp     \
 	test/rinaTextProviderNode.cpp \
+	test/rinaTextMixerNode.cpp    \
 	test/rinaTest.cpp
 
 #-----------------------------------------

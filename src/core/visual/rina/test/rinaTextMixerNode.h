@@ -24,21 +24,6 @@ namespace Rina {
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		テスト用のミキサノード用プロパティセット
-//---------------------------------------------------------------------------
-class tTextMixerPropertySet :
-	public tPropertySet,
-	public Risa::singleton_base<tTextPropertySet>,
-	Risa::manual_start<tTextPropertySet>
-{
-public:
-	//! @brief		コンストラクタ
-	tTextMixerPropertySet();
-};
-//---------------------------------------------------------------------------
-
-
 class tGraph;
 class tInputPin;
 class tOutputPin;
@@ -53,12 +38,23 @@ class tTextMixerNode : public tProcessNode
 
 	tTextOutputPin * OutputPin; //!< 出力ピン
 
+	risse_int32 Position; //!< ミキサの結果表示位置
+
 public:
 	//! @brief		コンストラクタ
 	tTextMixerNode();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tTextMixerNode() {;}
+
+	//! @brief		表示位置を取得する
+	//! @return		表示位置
+	risse_int32 GetPosition() const { return Position; }
+
+	//! @brief		表示位置を設定する
+	//! @return		position 表示位置
+	void SetPosition(risse_int32 position) { Position = position; }
+
 
 public: // サブクラスで実装すべき物
 

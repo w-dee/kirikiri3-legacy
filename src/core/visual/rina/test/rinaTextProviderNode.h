@@ -16,26 +16,9 @@
 #define RINATEXTPROVIDERNODE_H
 
 #include "visual/rina/rinaNode.h"
-#include "visual/rina/rinaProperty.h"
 #include "visual/rina/rinaQueue.h"
 
 namespace Rina {
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		テスト用のテキストプロパティセット
-//---------------------------------------------------------------------------
-class tTextPropertySet :
-	public tPropertySet,
-	public Risa::singleton_base<tTextPropertySet>,
-	Risa::manual_start<tTextPropertySet>
-{
-public:
-	//! @brief		コンストラクタ
-	tTextPropertySet();
-};
 //---------------------------------------------------------------------------
 
 
@@ -50,9 +33,29 @@ class tTextProviderNode : public tProcessNode
 
 	tTextOutputPin * OutputPin; //!< 出力ピン
 
+	risse_int32 Position; //!< テキストの結果表示位置
+	tString Caption; //!< 表示するテキスト(キャプション)
+
 public:
 	//! @brief		コンストラクタ
 	tTextProviderNode();
+
+	//! @brief		表示位置を取得する
+	//! @return		表示位置
+	risse_int32 GetPosition() const { return Position; }
+
+	//! @brief		表示位置を設定する
+	//! @return		position 表示位置
+	void SetPosition(risse_int32 position) { Position = position; }
+
+	//! @brief		キャプションを取得する
+	//! @return		キャプション
+	const tString & GetCaption() const { return Caption; }
+
+	//! @brief		キャプションを設定する
+	//! @return		caption キャプション
+	void SetCaption(const tString & caption) { Caption = caption; }
+
 
 public: // サブクラスで実装すべき物
 

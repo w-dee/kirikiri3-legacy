@@ -13,14 +13,11 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES=\
 	rinaNode.cpp                  \
-	rinaProperty.cpp              \
 	rinaPin.cpp                   \
 	rinaIdRegistry.cpp            \
 	rinaQueue.cpp                 \
-	test/rina1DPositionProperty.cpp \
 	test/rinaTextDrawDeviceNode.cpp \
 	test/rinaTextPin.cpp          \
-	test/rinaTextProperty.cpp     \
 	test/rinaTextProviderNode.cpp \
 	test/rinaTextMixerNode.cpp    \
 	test/rinaTest.cpp

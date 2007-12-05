@@ -14,8 +14,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/rina/test/rinaTextProviderNode.h"
-#include "visual/rina/test/rinaTextProperty.h"
-#include "visual/rina/test/rina1DPositionProperty.h"
 #include "visual/rina/test/rinaTextPin.h"
 
 namespace Rina {
@@ -24,24 +22,11 @@ RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
 
 
 
-//---------------------------------------------------------------------------
-tTextPropertySet::tTextPropertySet()
-{
-	Add(tCaptionPropertyInfo::instance());
-	Add(t1DPositionPropertyInfo::instance());
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
 
 //---------------------------------------------------------------------------
 tTextProviderNode::tTextProviderNode()
 {
-	// プロパティオブジェクトを作成
-	SetProperty(new tProperty(tTextPropertySet::instance()));
+	Position = 0;
 
 	// 出力ピンを作成
 	OutputPin = new tTextOutputPin();
@@ -122,11 +107,7 @@ void tTextProviderNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextProviderNode::BuildQueue(tQueueNode * parent)
 {
-	parent->AddChild(new tTextProviderQueueNode(
-		(risse_int32)(risse_int64)(GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position)),
-		                           GetProperty()->GetValueAt(tCaptionPropertyInfo::instance()->ID_Caption    )
-		));
-
+	parent->AddChild(new tTextProviderQueueNode(Position, Caption));
 }
 //---------------------------------------------------------------------------
 

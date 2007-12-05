@@ -31,18 +31,10 @@ class tIdRegistry : public Risa::singleton_base<tIdRegistry>, Risa::manual_start
 	typedef Risa::singleton_base<tIdRegistry> inherited;
 
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	risse_size PropertyIndex; //!< プロパティのインデックス
-
-public:
-	static const risse_size PropertyIndexIncrement = 0x100;
-		//!< プロパティインデックスの増分 ( = 一度に確保できるプロパティの個数の最大値)
 
 public:
 	//! @brief		コンストラクタ
 	tIdRegistry();
-
-	//! @brief		新しいプロパティ序数の基数を得る
-	risse_size GetNewPropertyIndex();
 };
 //---------------------------------------------------------------------------
 

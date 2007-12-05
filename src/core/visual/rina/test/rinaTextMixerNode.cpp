@@ -16,7 +16,6 @@
 #include "visual/rina/test/rinaTextMixerNode.h"
 #include "visual/rina/test/rinaTextPin.h"
 #include "visual/rina/test/rinaTextProviderNode.h"
-#include "visual/rina/test/rina1DPositionProperty.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
@@ -25,19 +24,9 @@ RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
 
 
 //---------------------------------------------------------------------------
-tTextMixerPropertySet::tTextMixerPropertySet()
-{
-	Add(t1DPositionPropertyInfo::instance());
-}
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
 tTextMixerNode::tTextMixerNode() : inherited()
 {
-	// プロパティオブジェクトを作成
-	SetProperty(new tProperty(tTextMixerPropertySet::instance()));
+	Position = 0;
 
 	// 出力ピンを作成
 	OutputPin = new tTextOutputPin();
@@ -122,9 +111,7 @@ void tTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextMixerNode::BuildQueue(tQueueNode * parent)
 {
-	tQueueNode * new_parent = new tTextMixerQueueNode(
-		(risse_int32)(risse_int64)(
-			GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position)));
+	tQueueNode * new_parent = new tTextMixerQueueNode(Position);
 	parent->AddChild(new_parent);
 
 	// 入力ピンに再帰

@@ -23,7 +23,6 @@ namespace Rina {
 
 class tInputPin;
 class tOutputPin;
-class tProperty;
 class tQueueNode;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
@@ -32,21 +31,9 @@ class tProcessNode : public tCollectee
 {
 	typedef tCollectee inherited;
 
-	tProperty * Property; //!< このノードのプロパティ
-
 public:
 	//! @brief		コンストラクタ
 	tProcessNode();
-
-protected:
-	//! @brief		プロパティインスタンスを設定する
-	//! @param		prop		プロパティインスタンス
-	void SetProperty(tProperty * prop) { Property = prop; }
-
-public:
-	//! @brief		プロパティインスタンスを得る
-	//! @return		プロパティインスタンス
-	tProperty * GetProperty() const { return Property; }
 
 public: // サブクラスで実装すべき物
 	//! @brief		出力ピンの個数を得る

@@ -24,17 +24,6 @@ RISSE_DEFINE_SOURCE_ID(47046,39674,50984,17886,46749,51427,61988,64154);
 //---------------------------------------------------------------------------
 tIdRegistry::tIdRegistry()
 {
-	PropertyIndex = 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tIdRegistry::GetNewPropertyIndex()
-{
-	volatile tCriticalSection::tLocker lock(CS);
-	PropertyIndex += PropertyIndexIncrement;
-	return PropertyIndex;
 }
 //---------------------------------------------------------------------------
 

@@ -15,8 +15,6 @@
 #include "prec.h"
 #include "base/utils/Singleton.h"
 #include "visual/rina/test/rinaTextProviderNode.h"
-#include "visual/rina/test/rinaTextProperty.h"
-#include "visual/rina/test/rina1DPositionProperty.h"
 #include "visual/rina/test/rinaTextPin.h"
 #include "visual/rina/test/rinaTextDrawDeviceNode.h"
 #include "visual/rina/test/rinaTextMixerNode.h"
@@ -51,23 +49,12 @@ tTester::tTester()
 void tTester::Test()
 {
 	tTextProviderNode * provider_node1 = new tTextProviderNode();
-	provider_node1->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)1);
-	provider_node1->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("aaaaaa"));
+	provider_node1->SetPosition(1);
+	provider_node1->SetCaption(RISSE_WS("aaaaaa"));
 
 	tTextProviderNode * provider_node2 = new tTextProviderNode();
-	provider_node2->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)10);
-	provider_node2->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("bbbbbbbb"));
-
-	wxFprintf(stdout, wxT("provider1: pos=%s cap=%s\n"),
-		provider_node1->GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position).AsHumanReadable().AsWxString().c_str(),
-		provider_node1->GetProperty()->GetValueAt(tCaptionPropertyInfo::instance()->ID_Caption    ).AsHumanReadable().AsWxString().c_str() );
-	wxFprintf(stdout, wxT("provider2: pos=%s cap=%s\n"),
-		provider_node2->GetProperty()->GetValueAt(t1DPositionPropertyInfo::instance()->ID_Position).AsHumanReadable().AsWxString().c_str(),
-		provider_node2->GetProperty()->GetValueAt(tCaptionPropertyInfo::instance()->ID_Caption    ).AsHumanReadable().AsWxString().c_str() );
+	provider_node2->SetPosition(10);
+	provider_node2->SetCaption(RISSE_WS("bbbbbbbb"));
 
 	tTextDrawDeviceNode * dd_node = new tTextDrawDeviceNode();
 	dd_node->InsertInputPinAt(0);
@@ -77,20 +64,15 @@ void tTester::Test()
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
 
 	tTextMixerNode * mixer_node = new tTextMixerNode();
-	mixer_node->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)30);
+	mixer_node->SetPosition(30);
 
 	tTextProviderNode * provider_node3 = new tTextProviderNode();
-	provider_node3->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)3);
-	provider_node3->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("ccc"));
+	provider_node3->SetPosition(3);
+	provider_node3->SetCaption(RISSE_WS("ccc"));
 
 	tTextProviderNode * provider_node4 = new tTextProviderNode();
-	provider_node4->GetProperty()->SetValueAt(
-		t1DPositionPropertyInfo::instance()->ID_Position, (risse_int64)12);
-	provider_node4->GetProperty()->SetValueAt(
-		tCaptionPropertyInfo::instance()->ID_Caption, RISSE_WS("dddd"));
+	provider_node4->SetPosition(12);
+	provider_node4->SetCaption(RISSE_WS("dddd"));
 
 	mixer_node->InsertInputPinAt(0);
 	mixer_node->InsertInputPinAt(1);

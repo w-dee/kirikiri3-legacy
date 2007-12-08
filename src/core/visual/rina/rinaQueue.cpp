@@ -22,29 +22,67 @@ RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);
 
 
 //---------------------------------------------------------------------------
-tQueueNode::tQueueNode()
+tQueueNode::tQueueNode(tQueueNode * parent)
 {
+	WaitingChildren = 0;
+	WaitingParents = 0;
+
+	if(parent)
+	{
+		parent->AddChild(this);
+		Parents.push_back(parent);
+		WaitingParents ++;
+	}
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::Process()
+void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 {
-	// まず BeginProcess を呼び出す
-	BeginProcess();
+	if(is_begin)
+	{
+		// BeginProcess を呼び出す
+		BeginProcess();
 
-	// Children を呼び出す。本質的にはここは(子の間には依存関係がないと見なせるので)
-	// 並列処理ができるところである。
-	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
-		(*i)->Process(); // 子に再帰する
+		// Children の WaitingParents をデクリメントする。
+		// それが 0 になった子はキューに push する。
+		for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
+		{
+			if(-- (*i)->WaitingParents == 0) // TODO: アトミックなデクリメント
+				queue->Push(*i, true);
+		}
 
-	// 最後に EndProcess を呼び出す
-	EndProcess();
+		if(Children.size() == 0)
+		{
+			// 子を持たないノードの場合は EndProcess を即呼び出す
+			Process(queue, false);
+		}
+	}
+	else
+	{
+		// EndProcess を呼び出す
+		EndProcess();
+
+		// Parents の WaitingChildren をデクリメントする。
+		// それが 0 になった親はキューに push する。
+		for(tNodes::iterator i = Parents.begin(); i != Parents.end(); i++)
+		{
+			if(-- (*i)->WaitingChildren == 0) // TODO: アトミックなデクリメント
+				queue->Push(*i, false);
+		}
+	}
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tQueueNode::AddChild(tQueueNode * child)
+{
+	Children.push_back(child);
+	WaitingChildren++;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -65,6 +103,56 @@ void tRootQueueNode::EndProcess()
 	// なにもしない
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tCommandQueue::tCommandQueue()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCommandQueue::Process(tProcessNode * node)
+{
+	// ルートのキューノードを作成する
+	tRootQueueNode * rootqueuenode = new tRootQueueNode();
+
+	// それを頂点にキューノードを作成する
+	node->BuildQueue(rootqueuenode);
+
+	// ルートのキューノードを最初にキューに積む
+	Push(rootqueuenode, true);
+
+	// キューというかスタックが空になるまで
+	while(Items.size() > 0)
+	{
+		const tItem & item = Items.front();
+		item.Node->Process(this, item.IsBegin);
+		Items.pop_front();
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCommandQueue::Push(tQueueNode * node, bool is_begin)
+{
+	tItem item;
+	item.Node = node;
+	item.IsBegin = is_begin;
+	Items.push_back(item);
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

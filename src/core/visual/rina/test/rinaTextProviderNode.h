@@ -116,9 +116,12 @@ protected:
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		parent		親ノード
 	//! @param		pos		位置
 	//! @param		text	テキスト
-	tTextProviderQueueNode(risse_int32 pos, const tString & text) : Position(pos), Text(text) {;}
+	tTextProviderQueueNode(tQueueNode * parent,	risse_int32 pos, const tString & text) :
+		inherited(parent),
+		Position(pos), Text(text) {;}
 
 	//! @brief		位置を得る
 	//! @return		位置

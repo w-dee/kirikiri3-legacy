@@ -108,8 +108,7 @@ void tTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextDrawDeviceNode::BuildQueue(tQueueNode * parent)
 {
-	tQueueNode * new_parent = new tTextDrawDeviceQueueNode();
-	parent->AddChild(new_parent);
+	tQueueNode * new_parent = new tTextDrawDeviceQueueNode(parent);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
@@ -125,7 +124,7 @@ void tTextDrawDeviceNode::BuildQueue(tQueueNode * parent)
 
 
 //---------------------------------------------------------------------------
-tTextDrawDeviceQueueNode::tTextDrawDeviceQueueNode()
+tTextDrawDeviceQueueNode::tTextDrawDeviceQueueNode(tQueueNode * parent) : inherited(parent)
 {
 	Canvas = NULL;
 }
@@ -149,7 +148,7 @@ void tTextDrawDeviceQueueNode::BeginProcess()
 void tTextDrawDeviceQueueNode::EndProcess()
 {
 	// 子ノードを合成する
-	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
+	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 	{
 		tTextProviderQueueNode * provider = reinterpret_cast<tTextProviderQueueNode *>(*i);
 		const tString & text = provider->GetText();

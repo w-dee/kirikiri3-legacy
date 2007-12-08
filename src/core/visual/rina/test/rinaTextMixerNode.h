@@ -117,8 +117,9 @@ class tTextMixerQueueNode : public tTextProviderQueueNode
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		parent		親ノード
 	//! @param		pos		位置
-	tTextMixerQueueNode(risse_int32 pos);
+	tTextMixerQueueNode(tQueueNode * parent, risse_int32 pos);
 
 	//! @brief		位置を得る
 	//! @return		位置

@@ -111,8 +111,7 @@ void tTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextMixerNode::BuildQueue(tQueueNode * parent)
 {
-	tQueueNode * new_parent = new tTextMixerQueueNode(Position);
-	parent->AddChild(new_parent);
+	tQueueNode * new_parent = new tTextMixerQueueNode(parent, Position);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
@@ -128,7 +127,8 @@ void tTextMixerNode::BuildQueue(tQueueNode * parent)
 
 
 //---------------------------------------------------------------------------
-tTextMixerQueueNode::tTextMixerQueueNode(risse_int32 pos) : inherited(pos, tString())
+tTextMixerQueueNode::tTextMixerQueueNode(tQueueNode * parent, risse_int32 pos) :
+	inherited(parent, pos, tString())
 {
 	Canvas = NULL;
 }
@@ -152,7 +152,7 @@ void tTextMixerQueueNode::BeginProcess()
 void tTextMixerQueueNode::EndProcess()
 {
 	// 子ノードを合成する
-	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
+	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 	{
 		tTextProviderQueueNode * provider = reinterpret_cast<tTextProviderQueueNode *>(*i);
 		const tString & text = provider->GetText();

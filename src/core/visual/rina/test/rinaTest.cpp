@@ -86,10 +86,8 @@ void tTester::Test()
 
 
 	// render
-	tRootQueueNode * rootqueue = new tRootQueueNode();
-	dd_node->BuildQueue(rootqueue);
-	rootqueue->Process();
-
+	tCommandQueue queue;
+	queue.Process(dd_node);
 }
 //---------------------------------------------------------------------------
 

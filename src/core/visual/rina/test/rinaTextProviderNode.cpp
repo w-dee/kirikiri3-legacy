@@ -107,7 +107,7 @@ void tTextProviderNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tTextProviderNode::BuildQueue(tQueueNode * parent)
 {
-	parent->AddChild(new tTextProviderQueueNode(Position, Caption));
+	new tTextProviderQueueNode(parent, Position, Caption);
 }
 //---------------------------------------------------------------------------
 

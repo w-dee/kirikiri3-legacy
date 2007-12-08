@@ -27,6 +27,7 @@ namespace Rina {
 	ツリー状のキューとなる
 */
 
+class tCommandQueue;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューノード
 //---------------------------------------------------------------------------
@@ -35,22 +36,30 @@ class tQueueNode : public tCollectee
 	typedef tCollectee inherited;
 
 protected:
-	typedef gc_vector<tQueueNode*> tChildren; //!< 子ノードの配列のtypedef
-	tChildren Children; //!< 子ノード
+	typedef gc_vector<tQueueNode*> tNodes; //!< 子ノードの配列のtypedef
+	tNodes Children; //!< 子ノード
+	tNodes Parents; //!< 親ノード
+
+	risse_size WaitingChildren; //!< 子ノードを待っているカウント
+	risse_size WaitingParents; //!< 親ノードを待っているカウント
 
 public:
 	//! @brief		コンストラクタ
-	tQueueNode();
+	//! @param		parent		親ノード
+	tQueueNode(tQueueNode * parent);
 
 	//! @brief		デストラクタ (おそらく呼ばれない)
 	virtual ~tQueueNode() {;}
 
-	//! @brief		ノードの処理を行う(仮実装)
-	void Process();
+	//! @brief		ノードの処理を行う
+	//! @param		queue		コマンドキューインスタンス
+	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	void Process(tCommandQueue * queue, bool is_begin);
 
+protected:
 	//! @brief		ノードの子を追加する
 	//! @param		child		子
-	void AddChild(tQueueNode * child) { Children.push_back(child); }
+	void AddChild(tQueueNode * child);
 
 protected: //!< サブクラスでオーバーライドして使う物
 
@@ -75,7 +84,7 @@ class tRootQueueNode : public tQueueNode
 
 public:
 	//! @brief		コンストラクタ
-	tRootQueueNode() {;}
+	tRootQueueNode() : inherited(NULL) {;}
 
 protected: //!< サブクラスでオーバーライドして使う物
 
@@ -87,6 +96,44 @@ protected: //!< サブクラスでオーバーライドして使う物
 
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		コマンドキュー
+//---------------------------------------------------------------------------
+class tCommandQueue : public tCollectee
+{
+	typedef tCollectee inherited;
+
+	//! @brief		アイテム構造体
+	struct tItem
+	{
+		tQueueNode * Node; //!< ノード
+		bool IsBegin; //!< BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	};
+
+	typedef gc_deque<tItem> tItems; //!< アイテム構造体のキューの typedef
+	tItems Items; //!< アイテム構造体のキュー
+
+public:
+	//! @brief		コンストラクタ
+	tCommandQueue();
+
+	//! @brief		処理を実行する
+	//! @param		node		ルートのプロセスノード
+	void Process(tProcessNode * node);
+
+	//! @brief		キューにコマンドを積む
+	//! @param		node		キューノード
+	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	void Push(tQueueNode * node, bool is_begin);
+
+};
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

@@ -103,7 +103,8 @@ class tTextDrawDeviceQueueNode : public tQueueNode
 
 public:
 	//! @brief		コンストラクタ
-	tTextDrawDeviceQueueNode();
+	//! @param		parent		親ノード
+	tTextDrawDeviceQueueNode(tQueueNode * parent);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

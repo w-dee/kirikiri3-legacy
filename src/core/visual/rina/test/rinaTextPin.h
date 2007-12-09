@@ -16,12 +16,31 @@
 #define RINATEXTPIN_H
 
 #include "visual/rina/rinaPin.h"
+#include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
-static const risse_uint32 TextEdgeType = 1; // テキストデータのエッジタイプ
+static const risse_uint32 TextEdgeType = tFourCharId<'t','x','t','w'>::value;
+	//!< テキストデータのエッジタイプ
+
+//---------------------------------------------------------------------------
+//! @brief		テキストピンのエッジタイプを登録するためのシングルトン
+//---------------------------------------------------------------------------
+class tTextEdgeTypeRegisterer : public Risa::singleton_base<tTextEdgeTypeRegisterer>
+{
+public:
+	//! @brief		コンストラクタ
+	tTextEdgeTypeRegisterer();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

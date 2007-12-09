@@ -22,6 +22,19 @@ RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
 
 
 
+//---------------------------------------------------------------------------
+tTextEdgeTypeRegisterer::tTextEdgeTypeRegisterer()
+{
+	tIdRegistry::tEdgeData data;
+	data.Id = TextEdgeType;
+	data.ShortName = RISSE_WS("wideText");
+	data.ShortDesc = RISSE_WS("wide string");
+	data.LongDesc = RISSE_WS("wide text string as in Risse internal text format");
+	tIdRegistry::instance()->RegisterEdgeData(data);
+}
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 tTextInputPin::tTextInputPin()

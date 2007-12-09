@@ -28,5 +28,16 @@ tIdRegistry::tIdRegistry()
 //---------------------------------------------------------------------------
 
 
+
+//---------------------------------------------------------------------------
+bool tIdRegistry::RegisterEdgeData(const tEdgeData & data)
+{
+	std::pair<tEdgeDataMap::iterator, bool> result =
+		EdgeDataMap.insert(tEdgeDataMap::value_type(data.Id, data));
+	return result.second;
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 }

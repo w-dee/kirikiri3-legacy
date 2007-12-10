@@ -24,7 +24,13 @@ namespace Rina {
 /*!
 	@note
 	コマンドキューとは言っても線形キューではなくて、依存関係を表せるように
-	ツリー状のキューとなる
+	DAGによる依存グラフを作成した後、それぞれの BeginProcess と EndProcess を
+	実行単位として 順々に tCommandQueue 内のキューに push していき、
+	キューからその実行単位を取り出しながら実行を行っていく。
+	DAGの各ノードは、依存しているノードが実行される前に実行したい内容である
+	BeginProcess と、依存しているノードが実行された後に実行したい内容である
+	EndProcess をもち、大まかには ルートの BeginProcess から末端のBeginProcessへ、
+	末端のEndProcessからルートのEndProcessへの順に実行が行われる。
 */
 
 class tCommandQueue;
@@ -41,7 +47,7 @@ protected:
 	tNodes Parents; //!< 親ノード
 
 	risse_size WaitingChildren; //!< 子ノードを待っているカウント
-	risse_size WaitingParents; //!< 親ノードを待っているカウント
+	risse_size WaitingParents; //!< 親ノードを待っているカウント TODO: より効率的な実装
 
 public:
 	//! @brief		コンストラクタ

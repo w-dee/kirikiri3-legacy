@@ -46,7 +46,7 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 		BeginProcess();
 
 		// Children の WaitingParents をデクリメントする。
-		// それが 0 になった子はキューに push する。
+		// それが 0 になった子は(依存関係が解決された子は)キューに push する。
 		for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 		{
 			if(-- (*i)->WaitingParents == 0) // TODO: アトミックなデクリメント
@@ -65,7 +65,7 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 		EndProcess();
 
 		// Parents の WaitingChildren をデクリメントする。
-		// それが 0 になった親はキューに push する。
+		// それが 0 になった親は(依存関係が解決された親は)キューに push する。
 		for(tNodes::iterator i = Parents.begin(); i != Parents.end(); i++)
 		{
 			if(-- (*i)->WaitingChildren == 0) // TODO: アトミックなデクリメント
@@ -83,6 +83,11 @@ void tQueueNode::AddChild(tQueueNode * child)
 	WaitingChildren++;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
 
 
 
@@ -131,9 +136,12 @@ void tCommandQueue::Process(tProcessNode * node)
 	// ルートのキューノードを最初にキューに積む
 	Push(rootqueuenode, true);
 
-	// キューというかスタックが空になるまで
+	// キューというかスタックが空になるまで実行を続ける。
+	// 依存関係が解決された実行単位のみがここのキューにはいるため、
+	// 基本的にここにたまっている実行単位はすべて同時実行が可能なもののみ。
 	while(Items.size() > 0)
 	{
+		// TODO: 複数スレッドによる同時実行
 		const tItem & item = Items.front();
 		item.Node->Process(this, item.IsBegin);
 		Items.pop_front();

@@ -36,14 +36,28 @@ public:
 	//! @brief		コンストラクタ
 	tPin();
 
-	//! @brief		指定された形式が接続可能かどうかを判断する
-	//! @param		type		接続形式
-	//! @return		接続可能かどうか
-	virtual bool CanConnect(risse_uint32 type) = 0;
-
 	//! @brief		プロセスノードにこのピンをアタッチする
 	//! @param		node		プロセスノード (NULL=デタッチ)
 	void Attach(tProcessNode * node) { Node = node; }
+
+	//! @brief		Attachと同じ
+	//! @param		node		プロセスノード (NULL=デタッチ)
+	void SetNode(tProcessNode * node) { Attach(node); }
+
+	//! @brief		このピンを保有しているノードを得る
+	//! @return		このピンを保有しているノード
+	tProcessNode * GetNode() const { return Node; }
+
+	//! @brief		このピンがサポートするタイプの一覧を得る
+	//! @return		このピンがサポートするタイプの一覧
+	//! @note		返される配列は、最初の物ほど優先度が高い
+	virtual const gc_vector<risse_uint32> & GetSupportedTypes() = 0;
+
+	//! @brief		タイプの提案を行う
+	//! @param		pin		接続先のピン
+	//! @param		strong_suggest	この提案が強い提案であれば *strong_suggest に真が入る(NULL=イラナイ)
+	//! @return		提案されたタイプ (0=提案なし)
+	virtual risse_uint32 SuggestType(tPin * pin, bool * strong_suggest = NULL);
 };
 //---------------------------------------------------------------------------
 
@@ -58,18 +72,43 @@ class tInputPin : public tPin
 	typedef tPin inherited;
 
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
+	risse_uint32 AgreedType; //!< 同意されたタイプを得る
 
 public:
 	//! @brief		コンストラクタ
 	tInputPin();
 
+	//! @brief		ネゴシエーションを行う
+	//! @param		output_pin		接続先の出力ピン
+	//! @return		同意のとれたタイプ (0=同意無し)
+	//! @note		出力ピントの間でネゴシエーションを行い、同意のとれたタイプを返す。
+	//!				実際に接続したりはしない。
+	//! @note		出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
+	//!				入力ピンと出力ピンに対して行う SuggestType() のうち、
+	//! @note		片方が strong_suggest を真にした場合は
+	//!				そちらの結果が優先される。両方とも strong_suggest を真にした場合や
+	//!				両方とも偽の場合は入力ピンの結果が優先される。
+	//!				どちらかが 0 (提案なし) を返した場合は 0 が帰る。
+	virtual risse_uint32 Negotiate(tOutputPin * output_pin);
+
 	//! @brief		出力ピンを接続する
 	//! @param		output_pin		出力ピン(NULL=接続解除)
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
-	//! @note		実際に形式が合うかどうかのチェックはここでは行わない。強制的につないでしまうので注意。
+	//! @note		ネゴシエーションに失敗した場合は例外が発生する。
 	//! @note		ピンは入力ピンがかならず何かの出力ピンを接続するという方式なので
 	//!				出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
 	virtual void Connect(tOutputPin * output_pin);
+
+protected:
+
+	//! @brief		同意されたタイプを設定する
+	//! @param		type	同意されたタイプ
+	void SetAgreedType(risse_uint32 type) { AgreedType = type; }
+
+public:
+	//! @brief		同意されたタイプを得る
+	//! @return		同意されたタイプ
+	risse_uint32 GetAgreedType() const { return AgreedType; }
 
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー

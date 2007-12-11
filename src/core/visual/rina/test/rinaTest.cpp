@@ -63,6 +63,8 @@ void tTester::Test()
 	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
 
+	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
+
 	tTextMixerNode * mixer_node = new tTextMixerNode();
 	mixer_node->SetPosition(30);
 

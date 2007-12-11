@@ -26,10 +26,16 @@ RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
 tTextEdgeTypeRegisterer::tTextEdgeTypeRegisterer()
 {
 	tIdRegistry::tEdgeData data;
-	data.Id = TextEdgeType;
+	data.Id = WideTextEdgeType;
 	data.ShortName = RISSE_WS("wideText");
 	data.ShortDesc = RISSE_WS("wide string");
 	data.LongDesc = RISSE_WS("wide text string as in Risse internal text format");
+	tIdRegistry::instance()->RegisterEdgeData(data);
+
+	data.Id = NarrowTextEdgeType;
+	data.ShortName = RISSE_WS("narrowText");
+	data.ShortDesc = RISSE_WS("narrow string");
+	data.LongDesc = RISSE_WS("narrow text string (UTF-8)");
 	tIdRegistry::instance()->RegisterEdgeData(data);
 }
 //---------------------------------------------------------------------------
@@ -44,11 +50,15 @@ tTextInputPin::tTextInputPin()
 
 
 //---------------------------------------------------------------------------
-bool tTextInputPin::CanConnect(risse_uint32 type)
+const gc_vector<risse_uint32> & tTextInputPin::GetSupportedTypes()
 {
-	return type == TextEdgeType;
+	// 暫定実装、できれば static かシングルトン上の配列への参照を返した方がよい
+	gc_vector<risse_uint32> * arr = new gc_vector<risse_uint32>();
+	arr->push_back(WideTextEdgeType);
+	return *arr;
 }
 //---------------------------------------------------------------------------
+
 
 
 
@@ -67,11 +77,15 @@ tTextOutputPin::tTextOutputPin()
 
 
 //---------------------------------------------------------------------------
-bool tTextOutputPin::CanConnect(risse_uint32 type)
+const gc_vector<risse_uint32> & tTextOutputPin::GetSupportedTypes()
 {
-	return type == TextEdgeType;
+	// 暫定実装、できれば static かシングルトン上の配列への参照を返した方がよい
+	gc_vector<risse_uint32> * arr = new gc_vector<risse_uint32>();
+	arr->push_back(WideTextEdgeType);
+	return *arr;
 }
 //---------------------------------------------------------------------------
+
 
 
 

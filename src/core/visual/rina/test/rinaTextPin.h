@@ -22,7 +22,8 @@ namespace Rina {
 //---------------------------------------------------------------------------
 
 
-static const risse_uint32 TextEdgeType = tFourCharId<'t','x','t','w'>::value;
+static const risse_uint32 WideTextEdgeType = tFourCharId<'t','x','t','w'>::value;
+static const risse_uint32 NarrowTextEdgeType = tFourCharId<'t','x','t','n'>::value;
 	//!< テキストデータのエッジタイプ
 
 //---------------------------------------------------------------------------
@@ -53,20 +54,19 @@ class tTextInputPin : public tInputPin
 public:
 
 	//! @brief		コンストラクタ
-	//! @param		node		ノード
 	tTextInputPin();
 
-	//! @brief		指定された形式が接続可能かどうかを判断する
-	//! @param		type		接続形式
-	//! @return		接続可能かどうか
-	virtual bool CanConnect(risse_uint32 type);
+	//! @brief		このピンがサポートするタイプの一覧を得る
+	//! @return		このピンがサポートするタイプの一覧
+	//! @note		返される配列は、最初の物ほど優先度が高い
+	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		入力ピン
+//! @brief		出力ピン
 //---------------------------------------------------------------------------
 class tTextOutputPin : public tOutputPin
 {
@@ -74,13 +74,12 @@ class tTextOutputPin : public tOutputPin
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		node		ノード
 	tTextOutputPin();
 
-	//! @brief		指定された形式が接続可能かどうかを判断する
-	//! @param		type		接続形式
-	//! @return		接続可能かどうか
-	virtual bool CanConnect(risse_uint32 type);
+	//! @brief		このピンがサポートするタイプの一覧を得る
+	//! @return		このピンがサポートするタイプの一覧
+	//! @note		返される配列は、最初の物ほど優先度が高い
+	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
 };
 //---------------------------------------------------------------------------
 

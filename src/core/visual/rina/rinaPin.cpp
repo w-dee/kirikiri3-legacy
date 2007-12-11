@@ -30,6 +30,34 @@ tPin::tPin()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+risse_uint32 tPin::SuggestType(tPin * pin, bool * strong_suggest)
+{
+	const gc_vector<risse_uint32> & this_types = GetSupportedTypes();
+	const gc_vector<risse_uint32> &  his_types = pin->GetSupportedTypes();
+
+	// こちらの対応するタイプを基準にあちらのタイプと一致している物が
+	// あるかどうかを見ていく。タイプはそれほど多くならないと考えられるので
+	// 非常に原始的なアルゴリズムでマッチングを行う
+	for(gc_vector<risse_uint32>::const_iterator ti = this_types.begin();
+		ti != this_types.end(); ti++)
+	{
+		for(gc_vector<risse_uint32>::const_iterator hi = his_types.begin();
+			hi != his_types.end(); hi++)
+			if(*ti == *hi)
+			{
+				if(strong_suggest) *strong_suggest = false;
+				// このメソッドをオーバーライドしない限り
+				// *strong_suggest が真になることはない ...
+				return *ti;
+			}
+	}
+	return 0;
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -43,8 +71,33 @@ tInputPin::tInputPin()
 
 
 //---------------------------------------------------------------------------
+risse_uint32 tInputPin::Negotiate(tOutputPin * output_pin)
+{
+	bool this_strong_suggestion;
+	risse_uint32 this_suggested_type = SuggestType(output_pin, &this_strong_suggestion);
+	bool  his_strong_suggestion;
+	risse_uint32  his_suggested_type = output_pin->SuggestType(this, & his_strong_suggestion);
+
+	// どちらかが 0 を返した場合は同意に至らなかったと見なす
+	if(this_suggested_type == 0 || his_suggested_type == 0) return 0;
+
+	// どちらかが strong suggestion を示した場合はそちらを採用する
+	if(this_strong_suggestion && !his_strong_suggestion) return this_suggested_type;
+	if(!this_strong_suggestion && his_strong_suggestion) return  his_suggested_type;
+
+	// どちらも strong suggestion では無かった場合や どちらも strong suggestion だった場合は
+	// 入力ピン側の結果を優先する
+	return this_suggested_type;
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 void tInputPin::Connect(tOutputPin * output_pin)
 {
+	AgreedType = Negotiate(output_pin);
+	if(AgreedType == 0) { /* TODO: 例外 */ }
 	OutputPin = output_pin;
 	output_pin->Connect(this);
 }

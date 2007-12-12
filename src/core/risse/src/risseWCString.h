@@ -23,7 +23,7 @@
 		+ シンプル(あんまり機能がない)
 		+ tString が wchar_t が 16bit での環境でも 32bit 幅のコードポイントを
 		  扱うのに対し、tWCString はあくまで wchar_t 型の文字列を扱う
-	wxString にくらめ:
+	wxString にくらべ:
 		+ GC aware である
 
 	これらの特徴から、tString であつかう UTF-32 文字列よりも wchar_t 指向

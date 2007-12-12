@@ -17,7 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
-#include "visual/rina/test/rinaWideTextProviderNode.h"
+#include "rinaWideTextProviderNode.h"
 
 
 namespace Rina {

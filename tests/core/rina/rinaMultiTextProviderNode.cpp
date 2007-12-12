@@ -13,10 +13,10 @@
 //! @brief テスト用の複数形式をサポートするテキストプロバイダノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaMultiTextProviderNode.h"
-#include "visual/rina/test/rinaMultiTextPin.h"
-#include "visual/rina/test/rinaWideTextPin.h"
-#include "visual/rina/test/rinaWideTextProviderNode.h"
+#include "rinaMultiTextProviderNode.h"
+#include "rinaMultiTextPin.h"
+#include "rinaWideTextPin.h"
+#include "rinaWideTextProviderNode.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(47508,49325,57519,19588,18101,2946,50970,8610);

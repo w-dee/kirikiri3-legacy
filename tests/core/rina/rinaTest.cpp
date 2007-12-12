@@ -14,12 +14,12 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/utils/Singleton.h"
-#include "visual/rina/test/rinaWideTextProviderNode.h"
-#include "visual/rina/test/rinaWideTextPin.h"
-#include "visual/rina/test/rinaMultiTextProviderNode.h"
-#include "visual/rina/test/rinaMultiTextPin.h"
-#include "visual/rina/test/rinaWideTextDrawDeviceNode.h"
-#include "visual/rina/test/rinaWideTextMixerNode.h"
+#include "rinaWideTextProviderNode.h"
+#include "rinaWideTextPin.h"
+#include "rinaMultiTextProviderNode.h"
+#include "rinaMultiTextPin.h"
+#include "rinaWideTextDrawDeviceNode.h"
+#include "rinaWideTextMixerNode.h"
 
 using namespace Risa;
 

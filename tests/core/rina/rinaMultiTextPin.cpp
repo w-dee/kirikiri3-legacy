@@ -13,8 +13,8 @@
 //! @brief テスト用の複数形式をサポートするテキストピン管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaMultiTextPin.h"
-#include "visual/rina/test/rinaWideTextPin.h"
+#include "rinaMultiTextPin.h"
+#include "rinaWideTextPin.h"
 
 
 namespace Rina {

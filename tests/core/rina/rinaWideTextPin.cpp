@@ -13,7 +13,7 @@
 //! @brief テスト用のテキストピン管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaWideTextPin.h"
+#include "rinaWideTextPin.h"
 
 
 namespace Rina {

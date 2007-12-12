@@ -16,12 +16,12 @@ CPPFILES=\
 	rinaPin.cpp                   \
 	rinaIdRegistry.cpp            \
 	rinaQueue.cpp                 \
-	test/rinaTextDrawDeviceNode.cpp \
-	test/rinaTextPin.cpp          \
-	test/rinaTextProviderNode.cpp \
+	test/rinaWideTextDrawDeviceNode.cpp \
+	test/rinaWideTextPin.cpp          \
+	test/rinaWideTextProviderNode.cpp \
 	test/rinaMultiTextPin.cpp          \
 	test/rinaMultiTextProviderNode.cpp \
-	test/rinaTextMixerNode.cpp    \
+	test/rinaWideTextMixerNode.cpp    \
 	test/rinaTest.cpp
 
 #-----------------------------------------

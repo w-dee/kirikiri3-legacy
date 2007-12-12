@@ -13,7 +13,7 @@
 //! @brief テスト用のテキストピン管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaTextPin.h"
+#include "visual/rina/test/rinaWideTextPin.h"
 
 
 namespace Rina {
@@ -23,7 +23,7 @@ RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
 
 
 //---------------------------------------------------------------------------
-tTextEdgeTypeRegisterer::tTextEdgeTypeRegisterer()
+tWideTextEdgeTypeRegisterer::tWideTextEdgeTypeRegisterer()
 {
 	tIdRegistry::tEdgeData data;
 	data.Id = WideTextEdgeType;
@@ -43,14 +43,14 @@ tTextEdgeTypeRegisterer::tTextEdgeTypeRegisterer()
 
 
 //---------------------------------------------------------------------------
-tTextInputPin::tTextInputPin()
+tWideTextInputPin::tWideTextInputPin()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const gc_vector<risse_uint32> & tTextInputPin::GetSupportedTypes()
+const gc_vector<risse_uint32> & tWideTextInputPin::GetSupportedTypes()
 {
 	// 暫定実装、できれば static かシングルトン上の配列への参照を返した方がよい
 	gc_vector<risse_uint32> * arr = new gc_vector<risse_uint32>();
@@ -70,14 +70,14 @@ const gc_vector<risse_uint32> & tTextInputPin::GetSupportedTypes()
 
 
 //---------------------------------------------------------------------------
-tTextOutputPin::tTextOutputPin()
+tWideTextOutputPin::tWideTextOutputPin()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const gc_vector<risse_uint32> & tTextOutputPin::GetSupportedTypes()
+const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 {
 	// 暫定実装、できれば static かシングルトン上の配列への参照を返した方がよい
 	gc_vector<risse_uint32> * arr = new gc_vector<risse_uint32>();

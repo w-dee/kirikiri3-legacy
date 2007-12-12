@@ -12,8 +12,8 @@
 //! @file
 //! @brief テスト用のテキストピン管理
 //---------------------------------------------------------------------------
-#ifndef RINATEXTPIN_H
-#define RINATEXTPIN_H
+#ifndef RINAWIDETEXTPIN_H
+#define RINAWIDETEXTPIN_H
 
 #include "visual/rina/rinaPin.h"
 #include "visual/rina/rinaIdRegistry.h"
@@ -29,11 +29,11 @@ static const risse_uint32 NarrowTextEdgeType = tFourCharId<'t','x','t','n'>::val
 //---------------------------------------------------------------------------
 //! @brief		テキストピンのエッジタイプを登録するためのシングルトン
 //---------------------------------------------------------------------------
-class tTextEdgeTypeRegisterer : public Risa::singleton_base<tTextEdgeTypeRegisterer>
+class tWideTextEdgeTypeRegisterer : public Risa::singleton_base<tWideTextEdgeTypeRegisterer>
 {
 public:
 	//! @brief		コンストラクタ
-	tTextEdgeTypeRegisterer();
+	tWideTextEdgeTypeRegisterer();
 };
 //---------------------------------------------------------------------------
 
@@ -47,14 +47,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tTextInputPin : public tInputPin
+class tWideTextInputPin : public tInputPin
 {
 	typedef tInputPin inherited;
 
 public:
 
 	//! @brief		コンストラクタ
-	tTextInputPin();
+	tWideTextInputPin();
 
 	//! @brief		このピンがサポートするタイプの一覧を得る
 	//! @return		このピンがサポートするタイプの一覧
@@ -68,13 +68,13 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		出力ピン
 //---------------------------------------------------------------------------
-class tTextOutputPin : public tOutputPin
+class tWideTextOutputPin : public tOutputPin
 {
 	typedef tOutputPin inherited;
 
 public:
 	//! @brief		コンストラクタ
-	tTextOutputPin();
+	tWideTextOutputPin();
 
 	//! @brief		このピンがサポートするタイプの一覧を得る
 	//! @return		このピンがサポートするタイプの一覧

@@ -15,8 +15,8 @@
 #include "prec.h"
 #include "visual/rina/test/rinaMultiTextProviderNode.h"
 #include "visual/rina/test/rinaMultiTextPin.h"
-#include "visual/rina/test/rinaTextPin.h"
-#include "visual/rina/test/rinaTextProviderNode.h"
+#include "visual/rina/test/rinaWideTextPin.h"
+#include "visual/rina/test/rinaWideTextProviderNode.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(47508,49325,57519,19588,18101,2946,50970,8610);
@@ -113,7 +113,7 @@ void tMultiTextProviderNode::BuildQueue(tQueueNode * parent)
 	risse_uint32 target_type = OutputPin->GetInputPin()->GetAgreedType();
 
 	RISSE_ASSERT(target_type = WideTextEdgeType); // 暫定
-	new tTextProviderQueueNode(parent, Position, Caption);
+	new tWideTextProviderQueueNode(parent, Position, Caption);
 }
 //---------------------------------------------------------------------------
 

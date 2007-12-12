@@ -10,35 +10,42 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストプロバイダノード管理
+//! @brief テスト用のテキストミキサノード管理
 //---------------------------------------------------------------------------
-#ifndef RINATEXTPROVIDERNODE_H
-#define RINATEXTPROVIDERNODE_H
+#ifndef RINAWIDETEXTMIXERNODE_H
+#define RINAWIDETEXTMIXERNODE_H
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
+#include "visual/rina/test/rinaWideTextProviderNode.h"
+
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
-
-class tTextOutputPin;
+class tGraph;
+class tInputPin;
+class tOutputPin;
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストプロバイダノード
+//! @brief		テスト用のミキサノード
 //---------------------------------------------------------------------------
-class tTextProviderNode : public tProcessNode
+class tWideTextMixerNode : public tProcessNode
 {
 	typedef tProcessNode inherited;
 
-	tTextOutputPin * OutputPin; //!< 出力ピン
+	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
-	risse_int32 Position; //!< テキストの結果表示位置
-	tString Caption; //!< 表示するテキスト(キャプション)
+	tWideTextOutputPin * OutputPin; //!< 出力ピン
+
+	risse_int32 Position; //!< ミキサの結果表示位置
 
 public:
 	//! @brief		コンストラクタ
-	tTextProviderNode();
+	tWideTextMixerNode();
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tWideTextMixerNode() {;}
 
 	//! @brief		表示位置を取得する
 	//! @return		表示位置
@@ -47,14 +54,6 @@ public:
 	//! @brief		表示位置を設定する
 	//! @return		position 表示位置
 	void SetPosition(risse_int32 position) { Position = position; }
-
-	//! @brief		キャプションを取得する
-	//! @return		キャプション
-	const tString & GetCaption() const { return Caption; }
-
-	//! @brief		キャプションを設定する
-	//! @return		caption キャプション
-	void SetCaption(const tString & caption) { Caption = caption; }
 
 
 public: // サブクラスで実装すべき物
@@ -95,53 +94,49 @@ public: // サブクラスで実装すべき物
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n);
 
+
+
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
 	virtual void BuildQueue(tQueueNode * parent);
+
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストコマンドキュー
+//! @brief		テスト用のミキサコマンドキュー
 //---------------------------------------------------------------------------
-class tTextProviderQueueNode : public tQueueNode
+class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
 {
-	typedef tQueueNode inherited;
+	typedef tWideTextProviderQueueNode inherited;
 
-protected:
-	risse_int32 Position; //!< 位置
-	tString Text; //!< テキスト
+	static const risse_size CanvasSize = 30; //!< キャンバスのサイズ
+	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
 	//! @param		pos		位置
-	//! @param		text	テキスト
-	tTextProviderQueueNode(tQueueNode * parent,	risse_int32 pos, const tString & text) :
-		inherited(parent),
-		Position(pos), Text(text) {;}
+	tWideTextMixerQueueNode(tQueueNode * parent, risse_int32 pos);
 
 	//! @brief		位置を得る
 	//! @return		位置
-	virtual risse_int32 GetPosition() const { return Position; }
+	risse_int32 GetPosition() const { return Position; }
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const tString & GetText() const { return Text; }
+	const tString & GetText() const { return Text; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 
 	//! @brief		ノードの処理の最初に行う処理
-	virtual void BeginProcess() {;}
+	virtual void BeginProcess();
 
 	//! @brief		ノードの処理の最後に行う処理
-	virtual void EndProcess() {;}
+	virtual void EndProcess();
 };
-//---------------------------------------------------------------------------
-
-
 //---------------------------------------------------------------------------
 }
 

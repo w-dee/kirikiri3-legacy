@@ -10,14 +10,13 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストミキサノード管理
+//! @brief テスト用のテキスト描画デバイスプロセスノード管理
 //---------------------------------------------------------------------------
-#ifndef RINATEXTMIXERNODE_H
-#define RINATEXTMIXERNODE_H
+#ifndef RINAWIDETEXTDRAWDEVICENODE_H
+#define RINAWIDETEXTDRAWDEVICENODE_H
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
-#include "visual/rina/test/rinaTextProviderNode.h"
 
 
 namespace Rina {
@@ -28,33 +27,20 @@ class tGraph;
 class tInputPin;
 class tOutputPin;
 //---------------------------------------------------------------------------
-//! @brief		テスト用のミキサノード
+//! @brief		テスト用のテキスト描画デバイスプロセスノード
 //---------------------------------------------------------------------------
-class tTextMixerNode : public tProcessNode
+class tWideTextDrawDeviceNode : public tProcessNode
 {
 	typedef tProcessNode inherited;
 
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
-	tTextOutputPin * OutputPin; //!< 出力ピン
-
-	risse_int32 Position; //!< ミキサの結果表示位置
-
 public:
 	//! @brief		コンストラクタ
-	tTextMixerNode();
+	tWideTextDrawDeviceNode();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	virtual ~tTextMixerNode() {;}
-
-	//! @brief		表示位置を取得する
-	//! @return		表示位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		表示位置を設定する
-	//! @return		position 表示位置
-	void SetPosition(risse_int32 position) { Position = position; }
-
+	virtual ~tWideTextDrawDeviceNode() {;}
 
 public: // サブクラスで実装すべき物
 
@@ -106,28 +92,19 @@ public: // サブクラスで実装すべき物
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のミキサコマンドキュー
+//! @brief		テスト用のテキスト描画デバイスコマンドキュー
 //---------------------------------------------------------------------------
-class tTextMixerQueueNode : public tTextProviderQueueNode
+class tWideTextDrawDeviceQueueNode : public tQueueNode
 {
-	typedef tTextProviderQueueNode inherited;
+	typedef tQueueNode inherited;
 
-	static const risse_size CanvasSize = 30; //!< キャンバスのサイズ
+	static const risse_size CanvasSize = 75; //!< キャンバスのサイズ
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
-	//! @param		pos		位置
-	tTextMixerQueueNode(tQueueNode * parent, risse_int32 pos);
-
-	//! @brief		位置を得る
-	//! @return		位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		テキストを得る
-	//! @return		テキスト
-	const tString & GetText() const { return Text; }
+	tWideTextDrawDeviceQueueNode(tQueueNode * parent);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

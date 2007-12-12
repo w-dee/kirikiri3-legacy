@@ -13,8 +13,8 @@
 //! @brief テスト用のテキストプロバイダノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaTextProviderNode.h"
-#include "visual/rina/test/rinaTextPin.h"
+#include "visual/rina/test/rinaWideTextProviderNode.h"
+#include "visual/rina/test/rinaWideTextPin.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
@@ -24,19 +24,19 @@ RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
 
 
 //---------------------------------------------------------------------------
-tTextProviderNode::tTextProviderNode()
+tWideTextProviderNode::tWideTextProviderNode()
 {
 	Position = 0;
 
 	// 出力ピンを作成
-	OutputPin = new tTextOutputPin();
+	OutputPin = new tWideTextOutputPin();
 	OutputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tTextProviderNode::GetOutputPinCount()
+risse_size tWideTextProviderNode::GetOutputPinCount()
 {
 	return 1; // 出力ピンは１個
 }
@@ -44,7 +44,7 @@ risse_size tTextProviderNode::GetOutputPinCount()
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n)
+tOutputPin * tWideTextProviderNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
 	if(n == 0) return OutputPin;
@@ -54,7 +54,7 @@ tOutputPin * tTextProviderNode::GetOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::InsertOutputPinAt(risse_size n)
+void tWideTextProviderNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外
@@ -63,7 +63,7 @@ void tTextProviderNode::InsertOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::DeleteOutputPinAt(risse_size n)
+void tWideTextProviderNode::DeleteOutputPinAt(risse_size n)
 {
 	// 出力ピンを削除することはできない
 	// TODO: 例外
@@ -72,7 +72,7 @@ void tTextProviderNode::DeleteOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-risse_size tTextProviderNode::GetInputPinCount()
+risse_size tWideTextProviderNode::GetInputPinCount()
 {
 	return 0;
 }
@@ -80,7 +80,7 @@ risse_size tTextProviderNode::GetInputPinCount()
 
 
 //---------------------------------------------------------------------------
-tInputPin * tTextProviderNode::GetInputPinAt(risse_size n)
+tInputPin * tWideTextProviderNode::GetInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
 	return NULL;
@@ -89,7 +89,7 @@ tInputPin * tTextProviderNode::GetInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::InsertInputPinAt(risse_size n)
+void tWideTextProviderNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 入力ピンを追加することはできない
 }
@@ -97,7 +97,7 @@ void tTextProviderNode::InsertInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::DeleteInputPinAt(risse_size n)
+void tWideTextProviderNode::DeleteInputPinAt(risse_size n)
 {
 	// XXX: 入力ピンを削除することはできない
 }
@@ -105,9 +105,9 @@ void tTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextProviderNode::BuildQueue(tQueueNode * parent)
+void tWideTextProviderNode::BuildQueue(tQueueNode * parent)
 {
-	new tTextProviderQueueNode(parent, Position, Caption);
+	new tWideTextProviderQueueNode(parent, Position, Caption);
 }
 //---------------------------------------------------------------------------
 

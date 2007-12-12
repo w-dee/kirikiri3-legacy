@@ -10,48 +10,51 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキスト描画デバイスプロセスノード管理
+//! @brief テスト用のテキストミキサノード管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/rina/test/rinaTextDrawDeviceNode.h"
-#include "visual/rina/test/rinaTextPin.h"
-#include "visual/rina/test/rinaTextProviderNode.h"
-
+#include "visual/rina/test/rinaWideTextMixerNode.h"
+#include "visual/rina/test/rinaWideTextPin.h"
+#include "visual/rina/test/rinaWideTextProviderNode.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(10207,53962,31748,17392,1438,46335,5173,19226);
+RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
 //---------------------------------------------------------------------------
 
 
 
-
 //---------------------------------------------------------------------------
-tTextDrawDeviceNode::tTextDrawDeviceNode() : inherited()
+tWideTextMixerNode::tWideTextMixerNode() : inherited()
 {
-	
+	Position = 0;
+
+	// 出力ピンを作成
+	OutputPin = new tWideTextOutputPin();
+	OutputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tTextDrawDeviceNode::GetOutputPinCount()
+risse_size tWideTextMixerNode::GetOutputPinCount()
 {
-	return 0; // 出力ピンはない
+	return 1; // 出力ピンは1個
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tTextDrawDeviceNode::GetOutputPinAt(risse_size n)
+tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
+	if(n == 0) return OutputPin;
 	return NULL; // 出力ピンはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
+void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外
@@ -60,7 +63,7 @@ void tTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
+void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
 {
 	// 出力ピンを削除することはできない
 	// TODO: 例外
@@ -69,7 +72,7 @@ void tTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-risse_size tTextDrawDeviceNode::GetInputPinCount()
+risse_size tWideTextMixerNode::GetInputPinCount()
 {
 	return InputPins.size();
 }
@@ -77,7 +80,7 @@ risse_size tTextDrawDeviceNode::GetInputPinCount()
 
 
 //---------------------------------------------------------------------------
-tInputPin * tTextDrawDeviceNode::GetInputPinAt(risse_size n)
+tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
 	return InputPins[n];
@@ -86,10 +89,10 @@ tInputPin * tTextDrawDeviceNode::GetInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::InsertInputPinAt(risse_size n)
+void tWideTextMixerNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	tTextInputPin * newpin = new tTextInputPin();
+	tWideTextInputPin * newpin = new tWideTextInputPin();
 	newpin->Attach(this);
 	InputPins.insert(InputPins.begin() + n, newpin);
 }
@@ -97,7 +100,7 @@ void tTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
+void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
 	InputPins.erase(InputPins.begin() + n);
@@ -106,9 +109,9 @@ void tTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceNode::BuildQueue(tQueueNode * parent)
+void tWideTextMixerNode::BuildQueue(tQueueNode * parent)
 {
-	tQueueNode * new_parent = new tTextDrawDeviceQueueNode(parent);
+	tQueueNode * new_parent = new tWideTextMixerQueueNode(parent, Position);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
@@ -124,7 +127,8 @@ void tTextDrawDeviceNode::BuildQueue(tQueueNode * parent)
 
 
 //---------------------------------------------------------------------------
-tTextDrawDeviceQueueNode::tTextDrawDeviceQueueNode(tQueueNode * parent) : inherited(parent)
+tWideTextMixerQueueNode::tWideTextMixerQueueNode(tQueueNode * parent, risse_int32 pos) :
+	inherited(parent, pos, tString())
 {
 	Canvas = NULL;
 }
@@ -132,7 +136,7 @@ tTextDrawDeviceQueueNode::tTextDrawDeviceQueueNode(tQueueNode * parent) : inheri
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceQueueNode::BeginProcess()
+void tWideTextMixerQueueNode::BeginProcess()
 {
 	// キャンバス用にメモリを確保
 	Canvas = (risse_char *)MallocAtomicCollectee(sizeof(risse_char) * (CanvasSize + 1));
@@ -145,12 +149,12 @@ void tTextDrawDeviceQueueNode::BeginProcess()
 
 
 //---------------------------------------------------------------------------
-void tTextDrawDeviceQueueNode::EndProcess()
+void tWideTextMixerQueueNode::EndProcess()
 {
 	// 子ノードを合成する
 	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tTextProviderQueueNode * provider = reinterpret_cast<tTextProviderQueueNode *>(*i);
+		tWideTextProviderQueueNode * provider = reinterpret_cast<tWideTextProviderQueueNode *>(*i);
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
@@ -164,8 +168,8 @@ void tTextDrawDeviceQueueNode::EndProcess()
 		}
 	}
 
-	// 結果を出力する
-	wxFprintf(stdout, wxT("%s\n"), tString(Canvas).AsWxString().c_str());
+	// 結果をTextに格納
+	Text = Canvas;
 }
 //---------------------------------------------------------------------------
 

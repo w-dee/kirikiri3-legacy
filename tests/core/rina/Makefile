@@ -13,11 +13,13 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES=\
 	rinaWideTextDrawDeviceNode.cpp \
-	rinaWideTextPin.cpp          \
-	rinaWideTextProviderNode.cpp \
-	rinaMultiTextPin.cpp          \
-	rinaMultiTextProviderNode.cpp \
-	rinaWideTextMixerNode.cpp    \
+	rinaWideTextPin.cpp            \
+	rinaWideTextProviderNode.cpp   \
+	rinaNarrowTextPin.cpp          \
+	rinaNarrowTextProviderNode.cpp \
+	rinaMultiTextPin.cpp           \
+	rinaMultiTextProviderNode.cpp  \
+	rinaWideTextMixerNode.cpp      \
 	rinaTest.cpp
 
 #-----------------------------------------

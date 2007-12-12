@@ -10,10 +10,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストピン管理
+//! @brief テスト用のナローテキストピン管理
 //---------------------------------------------------------------------------
-#ifndef RINAWIDETEXTPIN_H
-#define RINAWIDETEXTPIN_H
+#ifndef RINANARROWTEXTPIN_H
+#define RINANARROWTEXTPIN_H
 
 #include "visual/rina/rinaPin.h"
 #include "visual/rina/rinaIdRegistry.h"
@@ -22,17 +22,17 @@ namespace Rina {
 //---------------------------------------------------------------------------
 
 
-static const risse_uint32 WideTextEdgeType = tFourCharId<'t','x','t','w'>::value;
+static const risse_uint32 NarrowTextEdgeType = tFourCharId<'t','x','t','n'>::value;
 	//!< テキストデータのエッジタイプ
 
 //---------------------------------------------------------------------------
 //! @brief		テキストピンのエッジタイプを登録するためのシングルトン
 //---------------------------------------------------------------------------
-class tWideTextEdgeTypeRegisterer : public Risa::singleton_base<tWideTextEdgeTypeRegisterer>
+class tNarrowTextEdgeTypeRegisterer : public Risa::singleton_base<tNarrowTextEdgeTypeRegisterer>
 {
 public:
 	//! @brief		コンストラクタ
-	tWideTextEdgeTypeRegisterer();
+	tNarrowTextEdgeTypeRegisterer();
 };
 //---------------------------------------------------------------------------
 
@@ -46,14 +46,14 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tWideTextInputPin : public tInputPin
+class tNarrowTextInputPin : public tInputPin
 {
 	typedef tInputPin inherited;
 
 public:
 
 	//! @brief		コンストラクタ
-	tWideTextInputPin();
+	tNarrowTextInputPin();
 
 	//! @brief		このピンがサポートするタイプの一覧を得る
 	//! @return		このピンがサポートするタイプの一覧
@@ -67,13 +67,13 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		出力ピン
 //---------------------------------------------------------------------------
-class tWideTextOutputPin : public tOutputPin
+class tNarrowTextOutputPin : public tOutputPin
 {
 	typedef tOutputPin inherited;
 
 public:
 	//! @brief		コンストラクタ
-	tWideTextOutputPin();
+	tNarrowTextOutputPin();
 
 	//! @brief		このピンがサポートするタイプの一覧を得る
 	//! @return		このピンがサポートするタイプの一覧

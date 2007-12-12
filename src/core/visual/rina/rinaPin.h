@@ -78,6 +78,10 @@ public:
 	//! @brief		コンストラクタ
 	tInputPin();
 
+	//! @brief		接続先の出力ピンを取得する
+	//! @return		接続先の出力ピン
+	tOutputPin * GetOutputPin() const { return OutputPin; }
+
 	//! @brief		ネゴシエーションを行う
 	//! @param		output_pin		接続先の出力ピン
 	//! @return		同意のとれたタイプ (0=同意無し)
@@ -131,6 +135,10 @@ class tOutputPin : public tPin
 public:
 	//! @brief		コンストラクタ
 	tOutputPin();
+
+	//! @brief		接続先の入力ピンを取得する
+	//! @return		接続先の入力ピン
+	tInputPin * GetInputPin() const { return InputPin; }
 
 protected:
 	//! @brief		入力ピンを接続する(tInputPin::Connectから呼ばれる)

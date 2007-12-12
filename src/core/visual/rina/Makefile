@@ -19,6 +19,8 @@ CPPFILES=\
 	test/rinaTextDrawDeviceNode.cpp \
 	test/rinaTextPin.cpp          \
 	test/rinaTextProviderNode.cpp \
+	test/rinaMultiTextPin.cpp          \
+	test/rinaMultiTextProviderNode.cpp \
 	test/rinaTextMixerNode.cpp    \
 	test/rinaTest.cpp
 

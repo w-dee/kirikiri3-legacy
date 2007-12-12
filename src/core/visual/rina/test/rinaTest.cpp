@@ -16,6 +16,8 @@
 #include "base/utils/Singleton.h"
 #include "visual/rina/test/rinaTextProviderNode.h"
 #include "visual/rina/test/rinaTextPin.h"
+#include "visual/rina/test/rinaMultiTextProviderNode.h"
+#include "visual/rina/test/rinaMultiTextPin.h"
 #include "visual/rina/test/rinaTextDrawDeviceNode.h"
 #include "visual/rina/test/rinaTextMixerNode.h"
 
@@ -76,11 +78,17 @@ void tTester::Test()
 	provider_node4->SetPosition(12);
 	provider_node4->SetCaption(RISSE_WS("dddd"));
 
+	tMultiTextProviderNode * provider_node5 = new tMultiTextProviderNode();
+	provider_node5->SetPosition(17);
+	provider_node5->SetCaption(RISSE_WS("mmmm"));
+
 	mixer_node->InsertInputPinAt(0);
 	mixer_node->InsertInputPinAt(1);
+	mixer_node->InsertInputPinAt(2);
 
 	mixer_node->GetInputPinAt(0)->Connect(provider_node3->GetOutputPinAt(0));
 	mixer_node->GetInputPinAt(1)->Connect(provider_node4->GetOutputPinAt(0));
+	mixer_node->GetInputPinAt(2)->Connect(provider_node5->GetOutputPinAt(0));
 
 	dd_node->InsertInputPinAt(2);
 

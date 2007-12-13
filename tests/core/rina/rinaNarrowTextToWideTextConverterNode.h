@@ -10,50 +10,35 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストミキサノード管理
+//! @brief テスト用のナロー文字列→ワイド文字列変換ノード
 //---------------------------------------------------------------------------
-#ifndef RINAWIDETEXTMIXERNODE_H
-#define RINAWIDETEXTMIXERNODE_H
+#ifndef RINANARROWTEXTTOWIDETEXTCONVERTERNODE_H
+#define RINANARROWTEXTTOWIDETEXTCONVERTERNODE_H
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
 #include "rinaWideTextProviderNode.h"
 
-
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
-class tGraph;
-class tInputPin;
-class tOutputPin;
+
+class tWideTextOutputPin;
+class tNarrowTextInputPin;
 //---------------------------------------------------------------------------
-//! @brief		テスト用のミキサノード
+//! @brief		テスト用のテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tWideTextMixerNode : public tProcessNode
+class tNarrowTextToWideTextConverterNode : public tProcessNode
 {
 	typedef tProcessNode inherited;
 
-	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
-
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
-
-	risse_int32 Position; //!< ミキサの結果表示位置
+	tNarrowTextInputPin * InputPin; //!< 入力ピン
 
 public:
 	//! @brief		コンストラクタ
-	tWideTextMixerNode();
-
-	//! @brief		デストラクタ(おそらく呼ばれない)
-	virtual ~tWideTextMixerNode() {;}
-
-	//! @brief		表示位置を取得する
-	//! @return		表示位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		表示位置を設定する
-	//! @return		position 表示位置
-	void SetPosition(risse_int32 position) { Position = position; }
+	tNarrowTextToWideTextConverterNode();
 
 
 public: // サブクラスで実装すべき物
@@ -94,32 +79,27 @@ public: // サブクラスで実装すべき物
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n);
 
-
-
 	//! @brief		コマンドキューを組み立てる
 	//! @param		parent	親のコマンドキュー
 	virtual void BuildQueue(tQueueNode * parent);
-
 };
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のミキサコマンドキュー
+//! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
+class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNode
 {
 	typedef tWideTextProviderQueueNode inherited;
-
-	static const risse_size CanvasSize = 30; //!< キャンバスのサイズ
-	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
 	//! @param		pos		位置
-	tWideTextMixerQueueNode(tQueueNode * parent, risse_int32 pos);
+	//! @param		text	テキスト
+	tNarrowTextToWideTextConverterQueueNode(tQueueNode * parent);
 
 protected: //!< サブクラスでオーバーライドして使う物
 
@@ -129,6 +109,9 @@ protected: //!< サブクラスでオーバーライドして使う物
 	//! @brief		ノードの処理の最後に行う処理
 	virtual void EndProcess();
 };
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 }
 

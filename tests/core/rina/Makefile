@@ -20,6 +20,7 @@ CPPFILES=\
 	rinaMultiTextPin.cpp           \
 	rinaMultiTextProviderNode.cpp  \
 	rinaWideTextMixerNode.cpp      \
+	rinaNarrowTextToWideTextConverterNode.cpp \
 	rinaTest.cpp
 
 #-----------------------------------------

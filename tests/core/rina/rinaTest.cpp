@@ -20,6 +20,8 @@
 #include "rinaMultiTextPin.h"
 #include "rinaWideTextDrawDeviceNode.h"
 #include "rinaWideTextMixerNode.h"
+#include "rinaNarrowTextToWideTextConverterNode.h"
+#include "rinaNarrowTextProviderNode.h"
 
 using namespace Risa;
 
@@ -68,7 +70,7 @@ void tTester::Test()
 	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
 
 	tWideTextMixerNode * mixer_node = new tWideTextMixerNode();
-	mixer_node->SetPosition(30);
+	mixer_node->SetPosition(20);
 
 	tWideTextProviderNode * provider_node3 = new tWideTextProviderNode();
 	provider_node3->SetPosition(3);
@@ -80,7 +82,7 @@ void tTester::Test()
 
 	tMultiTextProviderNode * provider_node5 = new tMultiTextProviderNode();
 	provider_node5->SetPosition(17);
-	provider_node5->SetCaption(RISSE_WS("mmmm"));
+	provider_node5->SetCaption(RISSE_WS("mmm"));
 
 	mixer_node->InsertInputPinAt(0);
 	mixer_node->InsertInputPinAt(1);
@@ -91,8 +93,30 @@ void tTester::Test()
 	mixer_node->GetInputPinAt(2)->Connect(provider_node5->GetOutputPinAt(0));
 
 	dd_node->InsertInputPinAt(2);
-
 	dd_node->GetInputPinAt(2)->Connect(mixer_node->GetOutputPinAt(0));
+
+
+	tNarrowTextProviderNode * narrow_provider_node = new tNarrowTextProviderNode();
+	narrow_provider_node->SetPosition(50);
+	narrow_provider_node->SetCaption("narrow");
+
+	tNarrowTextToWideTextConverterNode * converter_node1 = new tNarrowTextToWideTextConverterNode();
+	converter_node1->GetInputPinAt(0)->Connect(narrow_provider_node->GetOutputPinAt(0));
+
+	dd_node->InsertInputPinAt(3);
+	dd_node->GetInputPinAt(3)->Connect(converter_node1->GetOutputPinAt(0));
+
+
+
+	tMultiTextProviderNode * multi_provider_node = new tMultiTextProviderNode();
+	multi_provider_node->SetPosition(60);
+	multi_provider_node->SetCaption(RISSE_WS("multi"));
+
+	tNarrowTextToWideTextConverterNode * converter_node2 = new tNarrowTextToWideTextConverterNode();
+	converter_node2->GetInputPinAt(0)->Connect(multi_provider_node->GetOutputPinAt(0));
+
+	dd_node->InsertInputPinAt(4);
+	dd_node->GetInputPinAt(4)->Connect(converter_node2->GetOutputPinAt(0));
 
 
 	// render

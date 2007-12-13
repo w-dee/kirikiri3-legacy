@@ -10,37 +10,35 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用の複数形式をサポートするテキストプロバイダノード管理
+//! @brief テスト用のナロー文字列→ワイド文字列変換ノード
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "rinaMultiTextProviderNode.h"
-#include "rinaMultiTextPin.h"
+#include "rinaNarrowTextToWideTextConverterNode.h"
 #include "rinaWideTextPin.h"
-#include "rinaWideTextProviderNode.h"
 #include "rinaNarrowTextPin.h"
 #include "rinaNarrowTextProviderNode.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(47508,49325,57519,19588,18101,2946,50970,8610);
+RISSE_DEFINE_SOURCE_ID(46687,10373,53420,18577,17050,14358,44584,58654);
 //---------------------------------------------------------------------------
 
 
 
 
 //---------------------------------------------------------------------------
-tMultiTextProviderNode::tMultiTextProviderNode()
+tNarrowTextToWideTextConverterNode::tNarrowTextToWideTextConverterNode()
 {
-	Position = 0;
-
 	// 出力ピンを作成
-	OutputPin = new tMultiTextOutputPin();
+	OutputPin = new tWideTextOutputPin();
 	OutputPin->Attach(this);
+	InputPin = new tNarrowTextInputPin();
+	InputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tMultiTextProviderNode::GetOutputPinCount()
+risse_size tNarrowTextToWideTextConverterNode::GetOutputPinCount()
 {
 	return 1; // 出力ピンは１個
 }
@@ -48,7 +46,7 @@ risse_size tMultiTextProviderNode::GetOutputPinCount()
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tMultiTextProviderNode::GetOutputPinAt(risse_size n)
+tOutputPin * tNarrowTextToWideTextConverterNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
 	if(n == 0) return OutputPin;
@@ -58,7 +56,7 @@ tOutputPin * tMultiTextProviderNode::GetOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::InsertOutputPinAt(risse_size n)
+void tNarrowTextToWideTextConverterNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外
@@ -67,7 +65,7 @@ void tMultiTextProviderNode::InsertOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::DeleteOutputPinAt(risse_size n)
+void tNarrowTextToWideTextConverterNode::DeleteOutputPinAt(risse_size n)
 {
 	// 出力ピンを削除することはできない
 	// TODO: 例外
@@ -76,24 +74,25 @@ void tMultiTextProviderNode::DeleteOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-risse_size tMultiTextProviderNode::GetInputPinCount()
+risse_size tNarrowTextToWideTextConverterNode::GetInputPinCount()
 {
-	return 0;
+	return 1; // 入力ピンは一個
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tInputPin * tMultiTextProviderNode::GetInputPinAt(risse_size n)
+tInputPin * tNarrowTextToWideTextConverterNode::GetInputPinAt(risse_size n)
 {
-	// XXX: 範囲外例外
-	return NULL;
+	// TODO: 例外
+	if(n == 0) return InputPin;
+	return NULL; // 出力ピンはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::InsertInputPinAt(risse_size n)
+void tNarrowTextToWideTextConverterNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 入力ピンを追加することはできない
 }
@@ -101,7 +100,7 @@ void tMultiTextProviderNode::InsertInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
+void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 {
 	// XXX: 入力ピンを削除することはできない
 }
@@ -109,18 +108,58 @@ void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::BuildQueue(tQueueNode * parent)
+void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueNode * parent)
 {
-	// TODO: output pin の特定
-	risse_uint32 target_type = OutputPin->GetInputPin()->GetAgreedType();
+	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(parent);
 
-	RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
-	if(target_type == WideTextEdgeType)
-		new tWideTextProviderQueueNode(parent, Position, Caption);
-	else if(target_type == NarrowTextEdgeType)
-		new tNarrowTextProviderQueueNode(parent, Position, Caption.AsNarrowString());
+	// 入力ピンに再帰
+	InputPin->BuildQueue(new_parent);
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode(tQueueNode * parent) :
+	inherited(parent, 0, tString())
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNarrowTextToWideTextConverterQueueNode::BeginProcess()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNarrowTextToWideTextConverterQueueNode::EndProcess()
+{
+	// 子ノードを変換する
+	RISSE_ASSERT(Children.size() == 1);
+
+	tNarrowTextProviderQueueNode * child = reinterpret_cast<tNarrowTextProviderQueueNode *>(Children[0]);
+
+	// 結果をPositionとTextに格納
+	Position = child->GetPosition();
+	Text = tString(child->GetText());
+}
+//---------------------------------------------------------------------------
+
 
 
 

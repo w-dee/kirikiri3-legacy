@@ -97,7 +97,8 @@ risse_uint32 tInputPin::Negotiate(tOutputPin * output_pin)
 void tInputPin::Connect(tOutputPin * output_pin)
 {
 	AgreedType = Negotiate(output_pin);
-	if(AgreedType == 0) { /* TODO: 例外 */ }
+//	if(AgreedType == 0) { /* TODO: 例外 */ }
+	RISSE_ASSERT(AgreedType != 0);
 	OutputPin = output_pin;
 	output_pin->Connect(this);
 }

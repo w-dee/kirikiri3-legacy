@@ -68,8 +68,8 @@ template <class T>
 class gc_deque : public std::deque<T, gc_allocator<T> >, public gc { };
 
 //! @brief	map の gc 版
-template <class T1, class T2>
-class gc_map : public std::map<T1, T2, std::less<T1>, gc_allocator<std::pair<T1, T2> > >, public gc { };
+template <class T1, class T2, class COMP=std::less<T1> >
+class gc_map : public std::map<T1, T2, COMP, gc_allocator<std::pair<T1, T2> > >, public gc { };
 
 
 //---------------------------------------------------------------------------

@@ -106,13 +106,13 @@ void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::BuildQueue(tQueueNode * parent)
+void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(parent);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-		(*i)->BuildQueue(new_parent);
+		state->PushNextBuildQueueNode(*i, new_parent);
 }
 //---------------------------------------------------------------------------
 

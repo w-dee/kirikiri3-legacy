@@ -109,10 +109,10 @@ void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::BuildQueue(tQueueNode * parent)
+void tMultiTextProviderNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	// TODO: output pin の特定
-	risse_uint32 target_type = OutputPin->GetInputPin()->GetAgreedType();
+	risse_uint32 target_type = input_pin->GetAgreedType();
 
 	RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
 	if(target_type == WideTextEdgeType)

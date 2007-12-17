@@ -109,13 +109,13 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::BuildQueue(tQueueNode * parent)
+void tWideTextMixerNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	tQueueNode * new_parent = new tWideTextMixerQueueNode(parent, Position);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-		(*i)->BuildQueue(new_parent);
+		state->PushNextBuildQueueNode(*i, new_parent);
 }
 //---------------------------------------------------------------------------
 

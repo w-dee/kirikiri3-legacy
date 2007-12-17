@@ -108,12 +108,12 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueNode * parent)
+void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(parent);
 
 	// 入力ピンに再帰
-	InputPin->BuildQueue(new_parent);
+	state->PushNextBuildQueueNode(InputPin, new_parent);
 }
 //---------------------------------------------------------------------------
 

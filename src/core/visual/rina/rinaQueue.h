@@ -155,7 +155,7 @@ class tRenderState : public tCollectee
 
 	//!@brief 最長距離で比較する比較関数を用いたマップのtypedef
 	typedef
-		gc_map<tProcessNode *, tInputPin *, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
+		gc_map<tProcessNode *, std::pair<tInputPin *, tQueueNode *>, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
 
 	//!@brief 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
 	tBuildQueueMap BuildQueueMap;
@@ -175,7 +175,8 @@ public:
 
 	//! @brief		キュー組み立てを行うための次のノードをpushする
 	//! @param		input_pin		入力ピン(この入力ピンの先にあるノードがpushされる)
-	void PushNextBuildQueueNode(tInputPin * input_pin);
+	//! @param		parent			親となるであろうキューノード
+	void PushNextBuildQueueNode(tInputPin * input_pin, tQueueNode * parent);
 
 };
 //---------------------------------------------------------------------------

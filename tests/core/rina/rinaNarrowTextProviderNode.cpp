@@ -116,7 +116,7 @@ void tNarrowTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tNarrowTextProviderNode::BuildQueue(tQueueNode * parent)
+void tNarrowTextProviderNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	new tNarrowTextProviderQueueNode(parent, Position, Caption);
 }

@@ -66,12 +66,6 @@ public:
 	//! @note		このメソッドは入力ピン(子ノード)に再帰して、子すべての最長距離を更新する
 	void CalcLongestDistance();
 
-public:
-	//! @brief		コマンドキューの組み立てを行う
-	//! @param		state			レンダリングステート
-	//! @param		input_pin		この情報を必要としているノードの入力ピン
-	void BuildQueue(tRenderState * state, tInputPin * input_pin) { return ; }
-
 public: // サブクラスで実装すべき物
 	//! @brief		出力ピンの個数を得る
 	//! @return		出力ピンの個数
@@ -107,6 +101,12 @@ public: // サブクラスで実装すべき物
 	//! @brief		指定位置から入力ピンを削除する
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n) = 0;
+
+	//! @brief		コマンドキューの組み立てを行う
+	//! @param		state			レンダリングステート
+	//! @param		input_pin		この情報を必要としているノードの入力ピン
+	//! @param		parent			親となるであろうキューノード
+	virtual void BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent) { return ; }
 
 
 };

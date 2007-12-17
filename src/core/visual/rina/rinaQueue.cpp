@@ -98,6 +98,7 @@ void tQueueNode::AddChild(tQueueNode * child)
 void tRootQueueNode::BeginProcess()
 {
 	// なにもしない
+wxFprintf(stderr, wxT("%d\n"), (int)Children.size());
 	RISSE_ASSERT(Children.size() == 1);
 }
 //---------------------------------------------------------------------------
@@ -177,23 +178,33 @@ tRenderState::tRenderState()
 void tRenderState::Render(tProcessNode * node)
 {
 	// root を Map に挿入
-	BuildQueueMap.insert(tBuildQueueMap::value_type(node, NULL));
+	tRootQueueNode * root_queue_node = new tRootQueueNode();
+	BuildQueueMap.insert(tBuildQueueMap::value_type(node, std::pair<tInputPin *, tQueueNode *>(NULL,root_queue_node)));
 
 	// map が空になるまでループ
 	while(BuildQueueMap.size() > 0)
 	{
 		// 先頭、すなわち最長距離が最も小さいノードから処理を行う
 		tBuildQueueMap::iterator i = BuildQueueMap.begin();
-		i->first->BuildQueue(this, i->second);
+		i->first->BuildQueue(this, i->second.first, i->second.second);
+			// この間に PushNextBuildQueueNode() が呼ばれる可能性があることに注意
+		BuildQueueMap.erase(i); // Map の場合は insert 後もイテレータは有効なのでここでeraseは可
 	}
+
+	// キューを作成し終わったということで
+	tCommandQueue command_queue;
+	command_queue.Process(root_queue_node);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRenderState::PushNextBuildQueueNode(tInputPin * input_pin)
+void tRenderState::PushNextBuildQueueNode(tInputPin * input_pin, tQueueNode * parent)
 {
-	BuildQueueMap.insert(tBuildQueueMap::value_type(input_pin->GetOutputPin()->GetNode(), input_pin));
+	BuildQueueMap.insert(
+		tBuildQueueMap::value_type(
+				input_pin->GetOutputPin()->GetNode(),
+				std::pair<tInputPin *, tQueueNode *>(input_pin, parent)));
 }
 //---------------------------------------------------------------------------
 

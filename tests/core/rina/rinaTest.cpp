@@ -120,8 +120,8 @@ void tTester::Test()
 
 
 	// render
-	tCommandQueue queue;
-	queue.Process(dd_node);
+	tRenderState state;
+	state.Render(dd_node);
 }
 //---------------------------------------------------------------------------
 

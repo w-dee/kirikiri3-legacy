@@ -105,7 +105,7 @@ void tWideTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextProviderNode::BuildQueue(tQueueNode * parent)
+void tWideTextProviderNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
 {
 	new tWideTextProviderQueueNode(parent, Position, Caption);
 }

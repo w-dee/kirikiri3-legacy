@@ -80,12 +80,11 @@ public: // サブクラスで実装すべき物
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n);
 
-
-
-	//! @brief		コマンドキューを組み立てる
-	//! @param		parent	親のコマンドキュー
-	virtual void BuildQueue(tQueueNode * parent);
-
+	//! @brief		コマンドキューの組み立てを行う
+	//! @param		state			レンダリングステート
+	//! @param		input_pin		この情報を必要としているノードの入力ピン
+	//! @param		parent			親となるであろうキューノード
+	void BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent);
 };
 //---------------------------------------------------------------------------
 

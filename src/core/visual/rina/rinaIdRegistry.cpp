@@ -24,6 +24,7 @@ RISSE_DEFINE_SOURCE_ID(47046,39674,50984,17886,46749,51427,61988,64154);
 //---------------------------------------------------------------------------
 tIdRegistry::tIdRegistry()
 {
+	RenderGeneration = 1;
 }
 //---------------------------------------------------------------------------
 
@@ -32,9 +33,22 @@ tIdRegistry::tIdRegistry()
 //---------------------------------------------------------------------------
 bool tIdRegistry::RegisterEdgeData(const tEdgeData & data)
 {
+	volatile tCriticalSection::tLocker holder(CS);
+
 	std::pair<tEdgeDataMap::iterator, bool> result =
 		EdgeDataMap.insert(tEdgeDataMap::value_type(data.Id, data));
 	return result.second;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tIdRegistry::GetNewRenderGeneration()
+{
+	volatile tCriticalSection::tLocker holder(CS);
+	risse_uint32 gen = RenderGeneration++;
+	if(RenderGeneration == 0) RenderGeneration = 1; // 0 は使わない
+	return gen;
 }
 //---------------------------------------------------------------------------
 

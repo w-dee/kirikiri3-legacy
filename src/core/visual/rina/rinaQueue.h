@@ -16,6 +16,7 @@
 #define RINAQUEUE_H
 
 #include "visual/rina/rinaNode.h"
+#include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -130,7 +131,7 @@ public:
 
 	//! @brief		処理を実行する
 	//! @param		node		ルートのプロセスノード
-	void Process(tProcessNode * node);
+	void Process(tRootQueueNode * node);
 
 	//! @brief		キューにコマンドを積む
 	//! @param		node		キューノード
@@ -142,7 +143,44 @@ public:
 
 
 
+class tInputPin;
 //---------------------------------------------------------------------------
+//! @brief		レンダリングのステートを保持するオブジェクト
+//---------------------------------------------------------------------------
+class tRenderState : public tCollectee
+{
+	typedef tCollectee inherited;
+
+	tIdRegistry::tRenderGeneration	 RenderGeneration; //!< レンダリングした世代
+
+	//!@brief 最長距離で比較する比較関数を用いたマップのtypedef
+	typedef
+		gc_map<tProcessNode *, tInputPin *, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
+
+	//!@brief 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
+	tBuildQueueMap BuildQueueMap;
+
+
+public:
+	//! @brief		コンストラクタ
+	tRenderState();
+
+	//! @brief		レンダリング世代を得る
+	//! @return		レンダリング世代
+	tIdRegistry::tRenderGeneration GetRenderGeneration() const { return RenderGeneration; }
+
+	//! @brief		レンダリングを開始する
+	//! @param		node		ルートのプロセスノード
+	void Render(tProcessNode * node);
+
+	//! @brief		キュー組み立てを行うための次のノードをpushする
+	//! @param		input_pin		入力ピン(この入力ピンの先にあるノードがpushされる)
+	void PushNextBuildQueueNode(tInputPin * input_pin);
+
+};
+//---------------------------------------------------------------------------
+
+
 }
 
 #endif

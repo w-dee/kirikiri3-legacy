@@ -36,6 +36,9 @@ public:
 	//! @brief		コンストラクタ
 	tPin();
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tPin() {;}
+
 	//! @brief		プロセスノードにこのピンをアタッチする
 	//! @param		node		プロセスノード (NULL=デタッチ)
 	void Attach(tProcessNode * node) { Node = node; }
@@ -113,10 +116,6 @@ public:
 	//! @brief		同意されたタイプを得る
 	//! @return		同意されたタイプ
 	risse_uint32 GetAgreedType() const { return AgreedType; }
-
-	//! @brief		コマンドキューを組み立てる
-	//! @param		parent	親のコマンドキュー
-	void BuildQueue(tQueueNode * parent);
 };
 //---------------------------------------------------------------------------
 
@@ -130,15 +129,23 @@ class tOutputPin : public tPin
 	friend class tInputPin;
 	typedef tPin inherited;
 
-	tInputPin * InputPin; //!< この出力ピンにつながっている入力ピン
+public:
+	typedef gc_vector<tInputPin *> tInputPins; //!< 入力ピンの配列
+
+private:
+	tInputPins InputPins; //!< この出力ピンにつながっている入力ピンの配列
 
 public:
 	//! @brief		コンストラクタ
 	tOutputPin();
 
-	//! @brief		接続先の入力ピンを取得する
-	//! @return		接続先の入力ピン
-	tInputPin * GetInputPin() const { return InputPin; }
+	//! @brief		接続先の入力ピンの配列を取得する
+	//! @return		接続先の入力ピンの配列
+	const tInputPins & GetInputPins() const { return InputPins; }
+
+	//! @brief		このピンの先に繋がってる入力ピンに繋がってるノードのルートからの最長距離を求める
+	//! @return		ルートからの最長距離
+	risse_size GetLongestDistance() const;
 
 protected:
 	//! @brief		入力ピンを接続する(tInputPin::Connectから呼ばれる)
@@ -146,9 +153,10 @@ protected:
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
 	virtual void Connect(tInputPin * input_pin);
 
-	//! @brief		コマンドキューを組み立てる
-	//! @param		parent	親のコマンドキュー
-	void BuildQueue(tQueueNode * parent) { if(Node) Node->BuildQueue(parent); }
+	//! @brief		入力ピンの接続を解除する(tInputPin::Connectから呼ばれる)
+	//! @param		input_pin	入力ピン
+	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
+	virtual void Disconnect(tInputPin * input_pin);
 };
 //---------------------------------------------------------------------------
 

@@ -15,7 +15,7 @@
 #ifndef RINANODE_H
 #define RINANODE_H
 
-
+#include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -24,6 +24,7 @@ namespace Rina {
 class tInputPin;
 class tOutputPin;
 class tQueueNode;
+class tRenderState;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
@@ -31,9 +32,45 @@ class tProcessNode : public tCollectee
 {
 	typedef tCollectee inherited;
 
+	risse_size	LongestDistance;
+			//!< ルートノードからの最長距離(ステップ数)。
+			//!< 依存関係のクイックなチェックに用いる
+
+	risse_size	BuildQueueWaitingOutputPin; //!< BuildQueue にて待つべき出力/入力ピンの数
+
+public:
+	//! @brief		プロセスノードを LongestDistance で比較する関数
+	struct tLongestDistanceComparator :
+		public std::binary_function<bool, tProcessNode*, tProcessNode*>
+	{
+		bool operator ()(tProcessNode * a, tProcessNode * b)
+		{
+			if(a->GetLongestDistance() < b->GetLongestDistance()) return true;
+			if(a < b) return true;
+			return false;
+		}
+	};
+
+
 public:
 	//! @brief		コンストラクタ
 	tProcessNode();
+
+public:
+	//! @brief		ルートノードからの最長距離を得る
+	//! @return		ルートノードからの最長距離 (ルートノード = 0)
+	//! @note		どの出力ピンも接続されていない状態では返される値の内容は不定
+	risse_size GetLongestDistance() const { return LongestDistance; }
+
+	//! @brief		ルートノードからの最長距離を設定する
+	//! @note		このメソッドは入力ピン(子ノード)に再帰して、子すべての最長距離を更新する
+	void CalcLongestDistance();
+
+public:
+	//! @brief		コマンドキューの組み立てを行う
+	//! @param		state			レンダリングステート
+	//! @param		input_pin		この情報を必要としているノードの入力ピン
+	void BuildQueue(tRenderState * state, tInputPin * input_pin) { return ; }
 
 public: // サブクラスで実装すべき物
 	//! @brief		出力ピンの個数を得る
@@ -71,9 +108,6 @@ public: // サブクラスで実装すべき物
 	//! @param		n		指定位置
 	virtual void DeleteInputPinAt(risse_size n) = 0;
 
-	//! @brief		コマンドキューを組み立てる
-	//! @param		parent	親のコマンドキュー
-	virtual void BuildQueue(tQueueNode * parent) { return ; }
 
 };
 //---------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/rina/rinaQueue.h"
+#include "visual/rina/rinaPin.h"
 
 
 namespace Rina {
@@ -125,14 +126,8 @@ tCommandQueue::tCommandQueue()
 
 
 //---------------------------------------------------------------------------
-void tCommandQueue::Process(tProcessNode * node)
+void tCommandQueue::Process(tRootQueueNode * rootqueuenode)
 {
-	// ルートのキューノードを作成する
-	tRootQueueNode * rootqueuenode = new tRootQueueNode();
-
-	// それを頂点にキューノードを作成する
-	node->BuildQueue(rootqueuenode);
-
 	// ルートのキューノードを最初にキューに積む
 	Push(rootqueuenode, true);
 
@@ -163,6 +158,44 @@ void tCommandQueue::Push(tQueueNode * node, bool is_begin)
 
 
 
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRenderState::tRenderState()
+{
+	RenderGeneration = tIdRegistry::instance()->GetNewRenderGeneration();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRenderState::Render(tProcessNode * node)
+{
+	// root を Map に挿入
+	BuildQueueMap.insert(tBuildQueueMap::value_type(node, NULL));
+
+	// map が空になるまでループ
+	while(BuildQueueMap.size() > 0)
+	{
+		// 先頭、すなわち最長距離が最も小さいノードから処理を行う
+		tBuildQueueMap::iterator i = BuildQueueMap.begin();
+		i->first->BuildQueue(this, i->second);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRenderState::PushNextBuildQueueNode(tInputPin * input_pin)
+{
+	BuildQueueMap.insert(tBuildQueueMap::value_type(input_pin->GetOutputPin()->GetNode(), input_pin));
+}
+//---------------------------------------------------------------------------
 
 
 

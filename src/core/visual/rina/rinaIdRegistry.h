@@ -16,7 +16,6 @@
 #define RINAIDREGISTRY_H
 
 #include "base/utils/Singleton.h"
-#include "visual/rina/rinaIdRegistry.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -57,11 +56,16 @@ public:
 		tString LongDesc;	//!< 長い説明(i18n可)
 	};
 
+	typedef risse_uint32 tRenderGeneration;
+	static const tRenderGeneration UndefinedRenderGeneration = 0;
+
 private:
 	//! @brief		エッジを流れるデータの型のマップ
 	typedef gc_map<risse_uint32, tEdgeData> tEdgeDataMap;
 
 	tEdgeDataMap EdgeDataMap; //!< エッジを流れるデータの型のマップ
+
+	risse_uint32 RenderGeneration; //!< レンダリングの世代(普通1ずつふえ、前のレンダリングと次のレンダリングを区別する)
 
 public:
 	//! @brief		コンストラクタ
@@ -71,6 +75,11 @@ public:
 	//! @param		data		エッジを流れるデータの型の情報
 	//! @return		登録に成功したかどうか(真=成功,偽=すでにデータがあった)
 	bool RegisterEdgeData(const tEdgeData & data);
+
+	//! @brief		レンダリング世代をインクリメントして得る
+	//! @return		新しいレンダリング世代
+	risse_uint32 GetNewRenderGeneration();
+
 };
 //---------------------------------------------------------------------------
 

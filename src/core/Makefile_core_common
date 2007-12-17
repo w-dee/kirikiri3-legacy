@@ -6,8 +6,8 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/config        \
-	$(ADDITONAL_SUBSYS_DIRS)       \
 	$(CORE_DIR)/visual/rina        \
+	$(ADDITONAL_SUBSYS_DIRS)       \
 	$(CORE_DIR)/visual/window      \
 	$(CORE_DIR)/sound              \
 	$(CORE_DIR)/base/system        \

@@ -99,16 +99,14 @@ void tInputPin::Connect(tOutputPin * output_pin)
 	AgreedType = Negotiate(output_pin);
 //	if(AgreedType == 0) { /* TODO: 例外 */ }
 	RISSE_ASSERT(AgreedType != 0);
+	if(OutputPin)
+	{
+		OutputPin->Disconnect(this);
+		OutputPin->GetNode()->CalcLongestDistance();
+	}
 	OutputPin = output_pin;
 	output_pin->Connect(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tInputPin::BuildQueue(tQueueNode * parent)
-{
-	if(OutputPin) OutputPin->BuildQueue(parent);
+	OutputPin->GetNode()->CalcLongestDistance();
 }
 //---------------------------------------------------------------------------
 
@@ -120,7 +118,21 @@ void tInputPin::BuildQueue(tQueueNode * parent)
 //---------------------------------------------------------------------------
 tOutputPin::tOutputPin()
 {
-	InputPin = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tOutputPin::GetLongestDistance() const
+{
+	risse_size longest = risse_size_max;
+	for(tInputPins::const_iterator i = InputPins.begin(); i != InputPins.end(); i++)
+	{
+		risse_size dist = (*i)->GetNode()->GetLongestDistance();
+		if(longest == risse_size_max || longest < dist)
+			longest = dist;
+	}
+	return longest;
 }
 //---------------------------------------------------------------------------
 
@@ -128,11 +140,20 @@ tOutputPin::tOutputPin()
 //---------------------------------------------------------------------------
 void tOutputPin::Connect(tInputPin * input_pin)
 {
-	InputPin = input_pin;
+	if(std::find(InputPins.begin(), InputPins.end(), input_pin) == InputPins.end())
+		InputPins.push_back(input_pin);
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tOutputPin::Disconnect(tInputPin * input_pin)
+{
+	tInputPins::iterator i = std::find(InputPins.begin(), InputPins.end(), input_pin);
+	RISSE_ASSERT(i != InputPins.end());
+	InputPins.erase(i);
+}
+//---------------------------------------------------------------------------
 
 
 

@@ -96,9 +96,7 @@ public: // サブクラスで実装すべき物
 
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		state			レンダリングステート
-	//! @param		input_pin		この情報を必要としているノードの入力ピン
-	//! @param		parent			親となるであろうキューノード
-	void BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent);
+	void BuildQueue(tRenderState * state);
 };
 //---------------------------------------------------------------------------
 

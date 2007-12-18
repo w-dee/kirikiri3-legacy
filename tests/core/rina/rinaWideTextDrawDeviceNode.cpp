@@ -106,13 +106,20 @@ void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
+void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(parent);
+	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(NULL);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-		state->PushNextBuildQueueNode(*i, new_parent);
+	{
+		(*i)->SetRenderGeneration(state->GetRenderGeneration());
+		(*i)->SetParentQueueNode(new_parent);
+		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
+	}
+
+	// ルートのキューノードはnew_parentであると主張(ここは後から修正するかも………)
+	state->SetRootQueueNode(new_parent);
 }
 //---------------------------------------------------------------------------
 

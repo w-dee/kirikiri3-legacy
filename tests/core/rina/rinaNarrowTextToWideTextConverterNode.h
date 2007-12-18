@@ -81,9 +81,7 @@ public: // サブクラスで実装すべき物
 
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		state			レンダリングステート
-	//! @param		input_pin		この情報を必要としているノードの入力ピン
-	//! @param		parent			親となるであろうキューノード
-	void BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent);
+	void BuildQueue(tRenderState * state);
 };
 //---------------------------------------------------------------------------
 
@@ -98,10 +96,7 @@ class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNod
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	//! @param		pos		位置
-	//! @param		text	テキスト
-	tNarrowTextToWideTextConverterQueueNode(tQueueNode * parent);
+	tNarrowTextToWideTextConverterQueueNode();
 
 protected: //!< サブクラスでオーバーライドして使う物
 

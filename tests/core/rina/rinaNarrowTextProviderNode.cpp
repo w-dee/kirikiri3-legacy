@@ -116,9 +116,20 @@ void tNarrowTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tNarrowTextProviderNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
+void tNarrowTextProviderNode::BuildQueue(tRenderState * state)
 {
-	new tNarrowTextProviderQueueNode(parent, Position, Caption);
+	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
+		i != OutputPin->GetInputPins().end(); i++)
+	{
+		// レンダリング世代が最新の物かどうかをチェック
+		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+
+		// 入力ピンのタイプをチェック
+		RISSE_ASSERT((*i)->GetAgreedType() == NarrowTextEdgeType);
+
+		// コマンドキューノードを作成
+		new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption);
+	}
 }
 //---------------------------------------------------------------------------
 

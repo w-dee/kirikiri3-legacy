@@ -109,16 +109,24 @@ void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
+void tMultiTextProviderNode::BuildQueue(tRenderState * state)
 {
-	// TODO: output pin の特定
-	risse_uint32 target_type = input_pin->GetAgreedType();
+	// 出力ピンの先に繋がってる入力ピンそれぞれについて
+	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
+		i != OutputPin->GetInputPins().end(); i++)
+	{
+		// レンダリング世代が最新の物かどうかをチェック
+		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
 
-	RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
-	if(target_type == WideTextEdgeType)
-		new tWideTextProviderQueueNode(parent, Position, Caption);
-	else if(target_type == NarrowTextEdgeType)
-		new tNarrowTextProviderQueueNode(parent, Position, Caption.AsNarrowString());
+		// 入力ピンのタイプをチェックし、適切なキューノードを作成
+		risse_uint32 target_type = (*i)->GetAgreedType();
+
+		RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
+		if(target_type == WideTextEdgeType)
+			new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption);
+		else if(target_type == NarrowTextEdgeType)
+			new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption.AsNarrowString());
+	}
 }
 //---------------------------------------------------------------------------
 

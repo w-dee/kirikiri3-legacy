@@ -109,13 +109,31 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
+void tWideTextMixerNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tWideTextMixerQueueNode(parent, Position);
+	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL, Position);
 
-	// 入力ピンに再帰
+	// 出力ピンの先に繋がってる入力ピンそれぞれについて
+	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
+		i != OutputPin->GetInputPins().end(); i++)
+	{
+		// レンダリング世代が最新の物かどうかをチェック
+		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+
+		// 入力ピンのタイプをチェック
+		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
+
+		// 親を設定
+		new_parent->AddParent((*i)->GetParentQueueNode());
+	}
+
+	// 入力ピンに情報を設定
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-		state->PushNextBuildQueueNode(*i, new_parent);
+	{
+		(*i)->SetRenderGeneration(state->GetRenderGeneration());
+		(*i)->SetParentQueueNode(new_parent);
+		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -170,6 +188,8 @@ void tWideTextMixerQueueNode::EndProcess()
 
 	// 結果をTextに格納
 	Text = Canvas;
+
+	wxFprintf(stderr, wxT("mixed output : %s\n"), Text.AsWxString().c_str());
 }
 //---------------------------------------------------------------------------
 

@@ -78,6 +78,16 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 
 
 //---------------------------------------------------------------------------
+void tQueueNode::AddParent(tQueueNode * parent)
+{
+	parent->AddChild(this);
+	Parents.push_back(parent);
+	WaitingParents++;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tQueueNode::AddChild(tQueueNode * child)
 {
 	Children.push_back(child);
@@ -95,31 +105,6 @@ void tQueueNode::AddChild(tQueueNode * child)
 
 
 //---------------------------------------------------------------------------
-void tRootQueueNode::BeginProcess()
-{
-	// なにもしない
-wxFprintf(stderr, wxT("%d\n"), (int)Children.size());
-	RISSE_ASSERT(Children.size() == 1);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRootQueueNode::EndProcess()
-{
-	// なにもしない
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
 tCommandQueue::tCommandQueue()
 {
 }
@@ -127,7 +112,7 @@ tCommandQueue::tCommandQueue()
 
 
 //---------------------------------------------------------------------------
-void tCommandQueue::Process(tRootQueueNode * rootqueuenode)
+void tCommandQueue::Process(tQueueNode * rootqueuenode)
 {
 	// ルートのキューノードを最初にキューに積む
 	Push(rootqueuenode, true);
@@ -169,6 +154,7 @@ void tCommandQueue::Push(tQueueNode * node, bool is_begin)
 //---------------------------------------------------------------------------
 tRenderState::tRenderState()
 {
+	RootQueueNode = NULL;
 	RenderGeneration = tIdRegistry::instance()->GetNewRenderGeneration();
 }
 //---------------------------------------------------------------------------
@@ -178,33 +164,32 @@ tRenderState::tRenderState()
 void tRenderState::Render(tProcessNode * node)
 {
 	// root を Map に挿入
-	tRootQueueNode * root_queue_node = new tRootQueueNode();
-	BuildQueueMap.insert(tBuildQueueMap::value_type(node, std::pair<tInputPin *, tQueueNode *>(NULL,root_queue_node)));
+	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
+
+	RootQueueNode = NULL;
 
 	// map が空になるまでループ
 	while(BuildQueueMap.size() > 0)
 	{
 		// 先頭、すなわち最長距離が最も小さいノードから処理を行う
 		tBuildQueueMap::iterator i = BuildQueueMap.begin();
-		i->first->BuildQueue(this, i->second.first, i->second.second);
+		i->first->BuildQueue(this);
 			// この間に PushNextBuildQueueNode() が呼ばれる可能性があることに注意
 		BuildQueueMap.erase(i); // Map の場合は insert 後もイテレータは有効なのでここでeraseは可
 	}
 
 	// キューを作成し終わったということで
+	RISSE_ASSERT(RootQueueNode != NULL);
 	tCommandQueue command_queue;
-	command_queue.Process(root_queue_node);
+	command_queue.Process(RootQueueNode);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRenderState::PushNextBuildQueueNode(tInputPin * input_pin, tQueueNode * parent)
+void tRenderState::PushNextBuildQueueNode(tProcessNode * node)
 {
-	BuildQueueMap.insert(
-		tBuildQueueMap::value_type(
-				input_pin->GetOutputPin()->GetNode(),
-				std::pair<tInputPin *, tQueueNode *>(input_pin, parent)));
+	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
 }
 //---------------------------------------------------------------------------
 

@@ -63,6 +63,10 @@ public:
 	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
 	void Process(tCommandQueue * queue, bool is_begin);
 
+	//! @brief		ノードの親を追加する
+	//! @param		child		親
+	void AddParent(tQueueNode * parent);
+
 protected:
 	//! @brief		ノードの子を追加する
 	//! @param		child		子
@@ -78,32 +82,6 @@ protected: //!< サブクラスでオーバーライドして使う物
 
 };
 //---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		ルートコマンドキューノード
-//---------------------------------------------------------------------------
-class tRootQueueNode : public tQueueNode
-{
-	typedef tQueueNode inherited;
-
-public:
-	//! @brief		コンストラクタ
-	tRootQueueNode() : inherited(NULL) {;}
-
-protected: //!< サブクラスでオーバーライドして使う物
-
-	//! @brief		ノードの処理の最初に行う処理
-	virtual void BeginProcess();
-
-	//! @brief		ノードの処理の最後に行う処理
-	virtual void EndProcess();
-
-};
-//---------------------------------------------------------------------------
-
 
 
 
@@ -131,7 +109,7 @@ public:
 
 	//! @brief		処理を実行する
 	//! @param		node		ルートのプロセスノード
-	void Process(tRootQueueNode * node);
+	void Process(tQueueNode * node);
 
 	//! @brief		キューにコマンドを積む
 	//! @param		node		キューノード
@@ -155,11 +133,12 @@ class tRenderState : public tCollectee
 
 	//!@brief 最長距離で比較する比較関数を用いたマップのtypedef
 	typedef
-		gc_map<tProcessNode *, std::pair<tInputPin *, tQueueNode *>, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
+		gc_map<tProcessNode *, int, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
 
 	//!@brief 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
 	tBuildQueueMap BuildQueueMap;
 
+	tQueueNode * RootQueueNode; //!< ルートとなるコマンドキューノード
 
 public:
 	//! @brief		コンストラクタ
@@ -174,9 +153,12 @@ public:
 	void Render(tProcessNode * node);
 
 	//! @brief		キュー組み立てを行うための次のノードをpushする
-	//! @param		input_pin		入力ピン(この入力ピンの先にあるノードがpushされる)
-	//! @param		parent			親となるであろうキューノード
-	void PushNextBuildQueueNode(tInputPin * input_pin, tQueueNode * parent);
+	//! @param		node		ノード
+	void PushNextBuildQueueNode(tProcessNode * node);
+
+	//! @brief		ルートとなるコマンドキューノードを登録する
+	//! @param		node	ルートとなるコマンドキューノード
+	void SetRootQueueNode(tQueueNode * node) { RootQueueNode = node; }
 
 };
 //---------------------------------------------------------------------------

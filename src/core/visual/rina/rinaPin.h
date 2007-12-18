@@ -69,13 +69,20 @@ public:
 class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
+//! @note		一つの入力ピンは複数の出力ピンとは接続されない。このため
+//!				入力ピンはほぼ「エッジ」と同じと見なすことができる。このため
+//!				入力ピンごとに「エッジを流通するデータのタイプ」としての
+//!				tInputPin::AgreedTypeを持っている。
 //---------------------------------------------------------------------------
 class tInputPin : public tPin
 {
 	typedef tPin inherited;
 
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
-	risse_uint32 AgreedType; //!< 同意されたタイプを得る
+	risse_uint32 AgreedType; //!< 同意されたタイプ
+	tQueueNode * ParentQueueNode; //!< キュー組み立て時に親となるキューノード
+
+	tIdRegistry::tRenderGeneration RenderGeneration; //!< 最新の情報が設定されたレンダリング世代
 
 public:
 	//! @brief		コンストラクタ
@@ -84,6 +91,27 @@ public:
 	//! @brief		接続先の出力ピンを取得する
 	//! @return		接続先の出力ピン
 	tOutputPin * GetOutputPin() const { return OutputPin; }
+
+	//! @brief		キュー組み立て時に親となるキューノードを設定する
+	//! @param		node		親となるキューノード
+	//! @param		gen			このレンダリング世代
+	void SetParentQueueNode(tQueueNode * node)
+		{ ParentQueueNode = node; }
+
+	//! @brief		キュー組み立て時に親となるキューノードを取得する
+	//! @return		親となるキューノード
+	tQueueNode * GetParentQueueNode() const { return ParentQueueNode; }
+
+	//! @brief		最新の情報が設定されたレンダリング世代を設定する
+	//! @param		gen		最新の情報が設定されたレンダリング世代
+	void SetRenderGeneration(tIdRegistry::tRenderGeneration gen) { RenderGeneration = gen; }
+
+	//! @brief		最新の情報が設定されたレンダリング世代を得る
+	//! @return		最新の情報が設定されたレンダリング世代
+	//! @note		GetParentQueueNode() などを使う場合は、このレンダリング世代を必ず
+	//!				自分のレンダリング世代と比較し、古い世代を間違って使ってしまっていないかを
+	//!				チェックすること
+	tIdRegistry::tRenderGeneration GetRenderGeneration() const { return RenderGeneration; }
 
 	//! @brief		ネゴシエーションを行う
 	//! @param		output_pin		接続先の出力ピン

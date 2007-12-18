@@ -108,12 +108,28 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state, tInputPin * input_pin, tQueueNode * parent)
+void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(parent);
+	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode();
 
-	// 入力ピンに再帰
-	state->PushNextBuildQueueNode(InputPin, new_parent);
+	// 出力ピンの先に繋がってる入力ピンそれぞれについて
+	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
+		i != OutputPin->GetInputPins().end(); i++)
+	{
+		// レンダリング世代が最新の物かどうかをチェック
+		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+
+		// 入力ピンのタイプをチェック
+		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
+
+		// 親を設定
+		new_parent->AddParent((*i)->GetParentQueueNode());
+	}
+
+	// 入力ピンに情報を設定
+	InputPin->SetRenderGeneration(state->GetRenderGeneration());
+	InputPin->SetParentQueueNode(new_parent);
+	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
 }
 //---------------------------------------------------------------------------
 
@@ -132,8 +148,8 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state, tInput
 
 
 //---------------------------------------------------------------------------
-tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode(tQueueNode * parent) :
-	inherited(parent, 0, tString())
+tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode() :
+	inherited(NULL, 0, tString())
 {
 }
 //---------------------------------------------------------------------------

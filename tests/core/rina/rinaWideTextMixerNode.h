@@ -109,7 +109,7 @@ class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
 {
 	typedef tWideTextProviderQueueNode inherited;
 
-	static const risse_size CanvasSize = 30; //!< キャンバスのサイズ
+	static const risse_size CanvasSize = 20; //!< キャンバスのサイズ
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:

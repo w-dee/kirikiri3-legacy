@@ -95,7 +95,7 @@ class tWideTextDrawDeviceQueueNode : public tQueueNode
 {
 	typedef tQueueNode inherited;
 
-	static const risse_size CanvasSize = 75; //!< キャンバスのサイズ
+	static const risse_size CanvasSize = 78; //!< キャンバスのサイズ
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:

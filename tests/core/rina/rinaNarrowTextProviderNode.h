@@ -127,6 +127,10 @@ public:
 	//! @return		位置
 	virtual risse_int32 GetPosition() const { return Position; }
 
+	//! @brief		位置にオフセットを追加する
+	//! @param		pos	位置
+	virtual void AddPositionOffset(risse_int32 pos) { Position += pos; }
+
 	//! @brief		テキストを得る
 	//! @return		テキスト
 	virtual const char * GetText() const { return Text; }

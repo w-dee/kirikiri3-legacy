@@ -50,6 +50,8 @@ class tNarrowTextInputPin : public tInputPin
 {
 	typedef tInputPin inherited;
 
+	risse_int32		Position; //!< 位置
+
 public:
 
 	//! @brief		コンストラクタ
@@ -59,6 +61,14 @@ public:
 	//! @return		このピンがサポートするタイプの一覧
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
+
+	//! @brief		位置を設定する
+	//! @param		pos		位置
+	void SetPosition(int pos) { Position = pos; }
+
+	//! @brief		位置を取得する
+	//! @return		位置
+	risse_int32 GetPosition() { return Position; }
 };
 //---------------------------------------------------------------------------
 

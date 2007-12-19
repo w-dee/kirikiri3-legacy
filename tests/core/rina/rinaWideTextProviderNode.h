@@ -17,6 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
+#include "rinaWideTextPin.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -106,9 +107,9 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextProviderQueueNode : public tQueueNode
+class tWideTextProviderQueueNode : public tWideTextQueueNode
 {
-	typedef tQueueNode inherited;
+	typedef tWideTextQueueNode inherited;
 
 protected:
 	risse_int32 Position; //!< 位置

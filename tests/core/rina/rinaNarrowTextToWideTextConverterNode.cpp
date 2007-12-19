@@ -110,7 +110,7 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode();
+	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(InputPin->GetPosition());
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -148,8 +148,8 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 
 
 //---------------------------------------------------------------------------
-tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode() :
-	inherited(NULL, 0, tString())
+tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode(risse_int32 position) :
+	inherited(NULL, position, tString())
 {
 }
 //---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	tNarrowTextProviderQueueNode * child = reinterpret_cast<tNarrowTextProviderQueueNode *>(Children[0]);
 
 	// 結果をPositionとTextに格納
-	Position = child->GetPosition();
+	Position = child->GetPosition() + GetPosition();
 	Text = tString(child->GetText());
 }
 //---------------------------------------------------------------------------

@@ -131,7 +131,9 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
-		(*i)->SetParentQueueNode(new_parent);
+		tQueueNode * new_pin_node =
+			new tWideTextInputPinQueueNode(new_parent, ((tWideTextInputPin*)(*i))->GetPosition());
+		(*i)->SetParentQueueNode(new_pin_node);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
 }

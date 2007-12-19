@@ -39,6 +39,7 @@ tNarrowTextEdgeTypeRegisterer::tNarrowTextEdgeTypeRegisterer()
 //---------------------------------------------------------------------------
 tNarrowTextInputPin::tNarrowTextInputPin()
 {
+	Position = 0;
 }
 //---------------------------------------------------------------------------
 

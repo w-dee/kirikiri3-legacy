@@ -39,6 +39,7 @@ tWideTextEdgeTypeRegisterer::tWideTextEdgeTypeRegisterer()
 //---------------------------------------------------------------------------
 tWideTextInputPin::tWideTextInputPin()
 {
+	Position = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -80,6 +81,28 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+risse_int32 tWideTextInputPinQueueNode::GetPosition() const
+{
+	RISSE_ASSERT(Children.size() == 1);
+	return reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetPosition() + Position;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const tString & tWideTextInputPinQueueNode::GetText() const
+{
+	RISSE_ASSERT(Children.size() == 1);
+	return reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetText();
+}
+//---------------------------------------------------------------------------
 
 
 

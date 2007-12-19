@@ -3,7 +3,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 # サブディレクトリの定義
 
-SUBLIBS= gc boost zlib libpng libjpeg expat wxWidgets libtomcrypt freetype libogg libvorbis openal
+SUBLIBS= gc boost zlib libpng libjpeg expat wxWidgets libtomcrypt freetype libogg libvorbis openal hamigaki
 
 
 # デフォルトターゲット

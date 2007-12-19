@@ -152,9 +152,9 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 			echo  "BOOST_CXXFLAGS := -I$$boost_include_dir" ;\
 			echo  "BOOST_CPPFLAGS := -I$$boost_include_dir" ;\
 			echo  "BOOST_LIBS     := -L$$boost_lib_dir"     ;\
-			boost_libs=`cd $(BOOST_DIR)/lib/; echo libboost_*$$compiler$$mt$$static_debug.a`; \
+			boost_libs=`cd $(BOOST_DIR)/lib/; echo libboost_*-*$$mt$$static_debug-?_*.a`; \
 			for lib in $$boost_libs; do \
-				libname=`echo -n $$lib | sed -e "s|^lib||" -e "s|$$compiler$$mt$$static_debug.a\$$||" | tr '[a-z]' '[A-Z]'` ;\
+				libname=`echo -n $$lib | sed -e "s|^lib||" -e "s|-.*\\$$||" | tr '[a-z]' '[A-Z]'` ;\
 				echo    "$${libname}_CFLAGS   :=" ;\
 				echo    "$${libname}_CXXFLAGS :=" ;\
 				echo    "$${libname}_CPPFLAGS :=" ;\
@@ -162,8 +162,8 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 				echo $$lib | sed -e "s|^lib||" -e "s|.a\$$||" ;\
 			done ;\
 		};\
-		compiler="-gcc"; mt="-mt" static_debug="";   get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
-		compiler="-gcc"; mt="-mt" static_debug="-d"; get >> $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
+		mt="-mt" static_debug="";   get >> $(MAKEFILE_BUILD_CONFIG_RELEASE) ;\
+		mt="-mt" static_debug="-d"; get >> $(MAKEFILE_BUILD_CONFIG_DEBUG)   ;\
 		touch $(TOP_DIR)/config_success ;\
 	)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: boost configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi

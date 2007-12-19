@@ -50,9 +50,9 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 	したがって、Boehm GC にそのコンテキストと保存されているレジスタを教える
 	方法を考える必要がある。
 
-	今のところ boost.coroutineを使う方向でコーディングを行っている。
-	boost.coroutine側には手を入れずにBoehm GCとの相性を改善する方向で実装を
-	する。
+	今のところ boost.coroutine あるいは hamigaki.coroutine を使う方向で
+	コーディングを行っている。 boost.coroutine / hamigaki.coroutine 側には手
+	を入れずにBoehm GCとの相性を改善する方向で実装をする。
 
 
 	現状、このコードはGCより一部のコードを流用している。
@@ -89,11 +89,43 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 */
 
+//---------------------------------------------------------------------------
 // ここのプリプロセッサ分岐については
-// coroutines/detail/default_context_impl.hpp を参照のこと
+// boost の場合は coroutine/detail/default_context_impl.hpp を参照のこと
+// hamigaki の場合は coroutine/detail/default_context.hpp を参照のこと
 #include "boost/config.hpp"
 
-#if defined(__linux) || defined(linux) || defined(__linux__)
+#if defined(RISSE_CORO_USE_HAMIGAKI)
+	// hamigaki
+	#if defined(BOOST_WINDOWS)
+		#define RISSE_CORO_WINDOWS
+	#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 500)
+		#define RISSE_CORO_POSIX
+	#elif defined BOOST_HAS_PTHREADS
+		#define RISSE_CORO_PTHREADS
+	#else
+	    #error unsupported platform
+	#endif
+#else
+	// boost
+	#if defined(__linux) || defined(linux) || defined(__linux__)
+		#define RISSE_CORO_LINUX
+	#elif defined(_POSIX_VERSION)
+		#define RISSE_CORO_POSIX
+	#elif defined(BOOST_WINDOWS)
+		#define RISSE_CORO_WINDOWS
+	#else
+	    #error unsupported platform
+	#endif
+#endif
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+#if defined(RISSE_CORO_LINUX)
 
 /*
 	Linux/i386の場合:
@@ -102,14 +134,23 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 		posix::alloc_stack と posix::free_stack で確保されているので
 		これを置き換えて管理すれば何とかなると思う。
 */
+    #error unsupported platform for now
 
-#elif  defined(_POSIX_VERSION)
+#elif defined(RISSE_CORO_POSIX)
 
 /*
 	未調査
 */
+    #error unsupported platform for now
 
-#elif defined(BOOST_WINDOWS)
+#elif defined(RISSE_CORO_PTHREADS)
+
+/*
+	未調査
+*/
+    #error unsupported platform for now
+
+#elif defined(RISSE_CORO_WINDOWS)
 //========================================================================
 //                             Windowsの場合
 //========================================================================
@@ -117,10 +158,10 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 /*
 	Windowsの場合:
-		boost.coroutineはWindowsの場合、Fiberを用いている。Fiberからスタッ
-		クの場所を得るためには Boehm GC のようにVirtualQueryを使って探す方
-		法もあるが、ここではGetCurrentFiberの戻り値の構造体(内容の詳細は
-		MSからは公式にはドキュメント化されていない)を見ることにする。
+		boost.coroutine/hamigaki.coroutineはWindowsの場合、Fiberを用いている。
+		Fiberからスタックの場所を得るためには Boehm GC のようにVirtualQueryを
+		使って探す方法もあるが、ここではGetCurrentFiberの戻り値の構造体(
+		内容の詳細はMSからは公式にはドキュメント化されていない)を見ることにする。
 	TODO: Win9x でのチェック
 */
 
@@ -161,6 +202,8 @@ static void unregister_fiber(fiber_data * data)
 	fibers.erase(i);
 }
 
+extern "C" {
+
 WINBASEAPI BOOL WINAPI RISSE_NEW_ConvertFiberToThread(void)
 {
 	// スレッドであれはGCが探すことができるハズなので
@@ -176,7 +219,12 @@ WINBASEAPI PVOID WINAPI RISSE_NEW_ConvertThreadToFiber(PVOID arg1)
 	if(ret) register_fiber(reinterpret_cast<fiber_data*>(ret));
 	return ret;
 }
-#endif
+
+} // extern "C"
+
+#endif // #ifdef RISSE_TRACK_FIBERS
+
+extern "C" {
 
 WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 	SIZE_T arg1, LPFIBER_START_ROUTINE arg2, LPVOID arg3)
@@ -222,6 +270,11 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 }
 #endif
 
+
+} // extern "C"
+
+
+
 // 関数の置き換えを宣言する
 #ifdef RISSE_TRACK_FIBERS
 	#define ConvertFiberToThread Risse::RISSE_NEW_ConvertFiberToThread
@@ -232,7 +285,17 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 	#define DeleteFiber Risse::RISSE_NEW_DeleteFiber
 #endif
 
-// typedef など
+#if defined(RISSE_CORO_USE_HAMIGAKI)
+	// hamigaki.coroutine の中では CreateFiber などのプロトタイプを
+	// 定義しているが、この中で使われている __declspec(dllimport) が
+	// 問題を起こすために、hamigaki.coroutine をインクルードする前に
+	// この定義を無効にしてしまう。
+	// あまりいい方法ではありません。FIXME
+	#undef __declspec
+	#define __declspec(X)
+#endif
+
+// fiber_data の typedef など
 typedef fiber_data tCoroutineContext;
 
 //! @brief 現在実行中のコルーチンコンテキストを得る
@@ -350,19 +413,25 @@ struct GC_ms_entry *MarkCoroutineContext(
 
 #else
 
-#error No Boehm GC+boost.coroutine support available for this system
+	#error No Boehm GC + coroutine support available for this system
 
 #endif
 
 
 
 
-// boost.coroutine の include
+//---------------------------------------------------------------------------
+// boost.coroutine / hamigaki.coroutine の include
 // これは、関数の置き換えを #define で行っているためで、この位置で
 // include しなければならない
-#include "boost/coroutine/coroutine.hpp"
-namespace coro = boost::coroutines;
-
+#if defined(RISSE_CORO_USE_HAMIGAKI)
+	#include "hamigaki/coroutine/coroutine.hpp"
+	namespace coro = hamigaki::coroutines;
+#else
+	#include "boost/coroutine/coroutine.hpp"
+	namespace coro = boost::coroutines;
+#endif
+//---------------------------------------------------------------------------
 
 
 
@@ -655,7 +724,11 @@ tVariant tCoroutine::Resume(const tVariant &arg)
 		// コルーチンの実行
 		ret = Ptr->Impl->Coroutine(Ptr->Impl, this, arg);
 	}
+#if defined(RISSE_CORO_USE_HAMIGAKI)
+	catch(coro::coroutine_exited & e)
+#else
 	catch(coro::abnormal_exit & e)
+#endif
 	{
 		// コルーチン中で例外が発生した場合はこれ。
 		Ptr->Impl->Running = false;

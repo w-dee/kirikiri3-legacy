@@ -227,6 +227,18 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: Boehm GC configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "Hamigaki ..."
+	@(set -e ;\
+		echo "####  Hamigaki config  ####" ;\
+		echo "HAMIGAKI_CFLAGS   := -I$(HAMIGAKI_DIR)/include" ;\
+		echo "HAMIGAKI_CXXFLAGS := -I$(HAMIGAKI_DIR)/include" ;\
+		echo "HAMIGAKI_CPPFLAGS := -I$(HAMIGAKI_DIR)/include" ;\
+		echo "HAMIGAKI_LIBS     := " ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: Hamigaki configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
 
 ifeq ($(DEBUG),yes)
  -include $(TOP_DIR)/Makefile_build_config_debug

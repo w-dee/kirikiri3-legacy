@@ -14,10 +14,13 @@ Risse_BIN_OUTPUT_DIR := $(CURRENT_DIR)/bin
 BIN=$(Risse_LIB_OUTPUT_DIR)/librisse.a
 
 # このバイナリが依存しているライブラリ
-DEP_LIBS=BOOST WX GC
+DEP_LIBS=BOOST WX GC HAMIGAKI
 
 # 最終ターゲット (ふつう、出力バイナリや出力ライブラリ)
 default: $(BIN)
+
+# hamigaki coroutine を使う場合はこれを hamigaki に (boost の場合は boost)
+COROUTINE_LIBRARY=hamigaki
 
 #----------------------------#
 
@@ -40,7 +43,15 @@ CXXFLAGS += \
 	-DRISSE_SUPPORT_WX \
 	-DRISSE_SUPPORT_THREADS
 
+ifeq ($(COROUTINE_LIBRARY),boost)
+endif
+ifeq ($(COROUTINE_LIBRARY),hamigaki)
+	CXXFLAGS += -DRISSE_CORO_USE_HAMIGAKI
+endif
+
 CPPFLAGS = $(CXXFLAGS)
+
+INCLUDES = -I.
 
 #----------------------------#
 
@@ -109,8 +120,6 @@ CPPFILES =  \
 OBJS = $(CPPFILES:.cpp=.o)
 
 PREC_H_NAME = src/prec.h
-
-INCLUDES = -I. -Isrc/boost-coroutine
 
 # risseLexerMap.def のコンパイル
 BIN_DEPS += src/risse_parser/risseLexerMap.def

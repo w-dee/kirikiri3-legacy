@@ -1,4 +1,4 @@
-// openal を使って音声をストリーミング再生するテスト
+// Risse テスト用プログラム
 
 #include "prec.h"
 #include "risseString.h"

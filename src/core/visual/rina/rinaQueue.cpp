@@ -189,6 +189,9 @@ void tRenderState::Render(tProcessNode * node)
 //---------------------------------------------------------------------------
 void tRenderState::PushNextBuildQueueNode(tProcessNode * node)
 {
+	// insert 時にキーが同じ物、つまり同じノードインスタンスは
+	// 重複することはない。これにより同じノードインスタンスが２回以上
+	// 呼ばれないようにしている。
 	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
 }
 //---------------------------------------------------------------------------

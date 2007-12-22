@@ -76,7 +76,7 @@ tVariant tCoroutineInstance::resume(const tMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tCoroutineInstance::resume b: tCoroutine %p: tCoroutineInstance %p\n",
 					Coroutine, this);
@@ -93,7 +93,7 @@ tVariant tCoroutineInstance::yield(const tMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tCoroutineInstance::yield b: tCoroutine %p: tCoroutineInstance %p\n",
 					Coroutine, this);

@@ -251,7 +251,7 @@ WINBASEAPI LPVOID WINAPI RISSE_NEW_CreateFiber(
 		GC_generate_random_backtrace();
 #endif
 */
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 		fflush(stdout); fflush(stderr);
 		fprintf(stderr, "CreateFiber failed. fibers=%d, retried (%d)\n", (int)fibers.size(), (int)(i+1));
 		fflush(stdout); fflush(stderr);
@@ -280,6 +280,8 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 	#define ConvertFiberToThread Risse::RISSE_NEW_ConvertFiberToThread
 	#define ConvertThreadToFiber Risse::RISSE_NEW_ConvertThreadToFiber
 #endif
+// - RISSE_NEW_CreateFiber だけは必ず登録する。これはファイバの作成に失敗した時に
+// - GCして再試行するロジックが組み込まれているため。
 #define CreateFiber Risse::RISSE_NEW_CreateFiber
 #ifdef RISSE_TRACK_FIBERS
 	#define DeleteFiber Risse::RISSE_NEW_DeleteFiber
@@ -302,7 +304,7 @@ typedef fiber_data tCoroutineContext;
 tCoroutineContext * GetCurrentCoroutineContext()
 {
 	tCoroutineContext * p = (tCoroutineContext*)GetCurrentFiber();
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "fiber context %p created\n", p);
 	fflush(stdout); fflush(stderr);
@@ -388,7 +390,7 @@ struct GC_ms_entry *MarkCoroutineContext(
 	if(stack_min > stack_max) std::swap(stack_min, stack_max);
 
 	// ptr_t は char* で、GC_PTR は void * であることに注意
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fprintf(stderr, "pushing from %p to %p (%d words)\n", stack_min, stack_max, ((long)stack_max - (long)stack_min)/sizeof(void*));
 #endif
 
@@ -475,14 +477,14 @@ public:
 
 	~tCoroutineImpl()
 	{
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 		fflush(stdout); fflush(stderr);
 		fprintf(stdout, "tCoroutineImpl %p destructed\n", this);
 		fflush(stdout); fflush(stderr);
 #endif
 	}
 
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	void Dump()
 	{
 		fflush(stdout); fflush(stderr);
@@ -510,7 +512,7 @@ private:
 		}
 		catch(const tVariant * e)
 		{
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 			fflush(stdout); fflush(stderr);
 			fprintf(stdout, "tCoroutineImpl %p caught an exception tVariant: ", coroimpl);
 			FPrint(stdout, e->operator tString().c_str());
@@ -518,7 +520,7 @@ private:
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 			fflush(stdout); fflush(stderr);
 			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			coroimpl->Dump();
@@ -532,13 +534,13 @@ private:
 		}
 		catch(...)
 		{
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 			fflush(stdout); fflush(stderr);
 			fprintf(stdout, "tCoroutineImpl %p caught an unknown exception\n", coroimpl);
 			coroimpl->Dump();
 			fflush(stdout); fflush(stderr);
 #endif
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 			fflush(stdout); fflush(stderr);
 			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			fflush(stdout); fflush(stderr);
@@ -550,7 +552,7 @@ private:
 			throw;
 		}
 
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 			fflush(stdout); fflush(stderr);
 			fprintf(stdout, "tCoroutineImpl %p finished\n", coroimpl);
 			coroimpl->Dump();
@@ -644,7 +646,7 @@ struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
 
 	if(a->Impl)
 	{
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 		fflush(stdout); fflush(stderr);
 		fprintf(stdout, "marking Ptr %p, tCoroutineImpl %p\n", a, a->Impl);
 		a->Impl->Dump();
@@ -675,7 +677,7 @@ struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
 tCoroutine::tCoroutine(tScriptEngine * engine,
 	const tVariant & function, const tVariant arg)
 {
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "made tCoroutine %p\n", this);
 	fflush(stdout); fflush(stderr);
@@ -687,7 +689,7 @@ tCoroutine::tCoroutine(tScriptEngine * engine,
 
 	Ptr = new tCoroutinePtr();
 
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "made Ptr %p, tCoroutineImpl %p\n", Ptr, Ptr->Impl);
 	fflush(stdout); fflush(stderr);
@@ -748,7 +750,7 @@ tVariant tCoroutine::Resume(const tVariant &arg)
 //---------------------------------------------------------------------------
 tVariant tCoroutine::DoYield(const tVariant &arg)
 {
-#ifdef RISSE_COROUTINE_DEBUG
+#ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tCoroutine::DoYield: tCoroutineImpl %p: Alive(%s), Running(%s)\n", Ptr->Impl, Ptr->Impl->Alive?"true":"false", Ptr->Impl->Running?"true":"false");
 	fflush(stdout); fflush(stderr);

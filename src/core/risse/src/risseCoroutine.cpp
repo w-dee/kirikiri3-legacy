@@ -183,6 +183,12 @@ struct fiber_data
 };
 
 
+/*
+	RISSE_TRACK_FIBERS を定義すると、ファイバーの生成と消滅を
+	APIレベルでトラッキングするようになる。デバッグ用。
+*/
+
+
 #ifdef RISSE_TRACK_FIBERS
 typedef std::vector<fiber_data *> fibers_t;
 static fibers_t fibers;
@@ -288,13 +294,11 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 #endif
 
 #if defined(RISSE_CORO_USE_HAMIGAKI)
-	// hamigaki.coroutine の中では CreateFiber などのプロトタイプを
-	// 定義しているが、この中で使われている __declspec(dllimport) が
-	// 問題を起こすために、hamigaki.coroutine をインクルードする前に
-	// この定義を無効にしてしまう。
-	// あまりいい方法ではありません。FIXME
-	#undef __declspec
-	#define __declspec(X)
+	#define HAMIGAKI_COROUTINE_NO_DLLIMPORT
+	// HAMIGAKI_COROUTINE_NO_DLLIMPORT を定義すると hamigaki.coroutine
+	// 内での API の dllimport 定義が行われなくなる。今のところ
+	// mingw (g++ 3.4) では問題ないが、他のツールチェインでは問題を
+	// 起こす可能性があるかも………
 #endif
 
 // fiber_data の typedef など
@@ -452,7 +456,7 @@ void InitCoroutine()
 
 
 //---------------------------------------------------------------------------
-//! @param		コルーチンの本当の実装クラス
+//! @brief		コルーチンの本当の実装クラス
 //! @note		注意: このクラスのデストラクタはメインスレッド以外から非同期
 //!				に呼ばれる可能性があることに注意
 //---------------------------------------------------------------------------
@@ -726,11 +730,7 @@ tVariant tCoroutine::Resume(const tVariant &arg)
 		// コルーチンの実行
 		ret = Ptr->Impl->Coroutine(Ptr->Impl, this, arg);
 	}
-#if defined(RISSE_CORO_USE_HAMIGAKI)
-	catch(coro::coroutine_exited & e)
-#else
 	catch(coro::abnormal_exit & e)
-#endif
 	{
 		// コルーチン中で例外が発生した場合はこれ。
 		Ptr->Impl->Running = false;

@@ -132,7 +132,7 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		tQueueNode * new_pin_node =
-			new tWideTextInputPinQueueNode(new_parent, ((tWideTextInputPin*)(*i))->GetPosition());
+			new tWideTextInputPinQueueNode(new_parent, ((tWideTextInputPin*)(*i))->GetInheritableProperties());
 		(*i)->SetParentQueueNode(new_pin_node);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
@@ -147,8 +147,8 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 
 
 //---------------------------------------------------------------------------
-tWideTextMixerQueueNode::tWideTextMixerQueueNode(tQueueNode * parent, risse_int32 pos) :
-	inherited(parent, pos, tString())
+tWideTextMixerQueueNode::tWideTextMixerQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop) :
+	inherited(parent, prop, tString())
 {
 	Canvas = NULL;
 }
@@ -178,7 +178,7 @@ void tWideTextMixerQueueNode::EndProcess()
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
-		risse_int32 pos = provider->GetPosition();
+		risse_int32 pos = provider->GetInheritableProperties().GetPosition();
 		RISSE_ASSERT(pos >= 0);
 		RISSE_ASSERT(pos + text_size < CanvasSize);
 		for(risse_size i = 0 ; i < text_size; i++)

@@ -96,8 +96,7 @@ class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNod
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		position		位置に対するオフセット
-	tNarrowTextToWideTextConverterQueueNode(risse_int32 position);
+	tNarrowTextToWideTextConverterQueueNode();
 
 protected: //!< サブクラスでオーバーライドして使う物
 

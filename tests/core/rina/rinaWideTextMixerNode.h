@@ -38,7 +38,7 @@ class tWideTextMixerNode : public tProcessNode
 
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
 
-	risse_int32 Position; //!< ミキサの結果表示位置
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
 public:
 	//! @brief		コンストラクタ
@@ -47,13 +47,8 @@ public:
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tWideTextMixerNode() {;}
 
-	//! @brief		表示位置を取得する
-	//! @return		表示位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		表示位置を設定する
-	//! @return		position 表示位置
-	void SetPosition(risse_int32 position) { Position = position; }
+	//! @brief		継承可能プロパティを得る
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 
 public: // サブクラスで実装すべき物
@@ -115,8 +110,8 @@ class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
-	//! @param		pos		位置
-	tWideTextMixerQueueNode(tQueueNode * parent, risse_int32 pos);
+	//! @param		prop		継承可能プロパティ
+	tWideTextMixerQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

@@ -117,7 +117,7 @@ void tWideTextProviderNode::BuildQueue(tRenderState * state)
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
 
 		// コマンドキューノードを作成
-		new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption);
+		new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
 	}
 }
 //---------------------------------------------------------------------------

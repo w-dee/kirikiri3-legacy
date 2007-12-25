@@ -128,7 +128,7 @@ void tNarrowTextProviderNode::BuildQueue(tRenderState * state)
 		RISSE_ASSERT((*i)->GetAgreedType() == NarrowTextEdgeType);
 
 		// コマンドキューノードを作成
-		new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption);
+		new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
 	}
 }
 //---------------------------------------------------------------------------

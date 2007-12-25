@@ -17,6 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -33,20 +34,15 @@ class tNarrowTextProviderNode : public tProcessNode
 
 	tNarrowTextOutputPin * OutputPin; //!< 出力ピン
 
-	risse_int32 Position; //!< テキストの結果表示位置
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 	char * Caption; //!< 表示するテキスト(キャプション)
 
 public:
 	//! @brief		コンストラクタ
 	tNarrowTextProviderNode();
 
-	//! @brief		表示位置を取得する
-	//! @return		表示位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		表示位置を設定する
-	//! @return		position 表示位置
-	void SetPosition(risse_int32 position) { Position = position; }
+	//! @brief		継承可能プロパティを得る
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション
@@ -111,25 +107,20 @@ class tNarrowTextProviderQueueNode : public tQueueNode
 	typedef tQueueNode inherited;
 
 protected:
-	risse_int32 Position; //!< 位置
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 	const char * Text; //!< テキスト
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
-	//! @param		pos		位置
+	//! @param		prop		継承可能なプロパティ
 	//! @param		text	テキスト
-	tNarrowTextProviderQueueNode(tQueueNode * parent,	risse_int32 pos, const char * text) :
+	tNarrowTextProviderQueueNode(tQueueNode * parent,	const tTextInheritableProperties & prop, const char * text) :
 		inherited(parent),
-		Position(pos), Text(text) {;}
+		InheritableProperties(prop), Text(text) {;}
 
-	//! @brief		位置を得る
-	//! @return		位置
-	virtual risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		位置にオフセットを追加する
-	//! @param		pos	位置
-	virtual void AddPositionOffset(risse_int32 pos) { Position += pos; }
+	//! @brief		継承可能プロパティを得る
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		テキストを得る
 	//! @return		テキスト

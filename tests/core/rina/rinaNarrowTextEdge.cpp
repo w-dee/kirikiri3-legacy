@@ -36,6 +36,10 @@ tNarrowTextEdgeTypeRegisterer::tNarrowTextEdgeTypeRegisterer()
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
 tNarrowTextInputPin::tNarrowTextInputPin()
 {
@@ -80,6 +84,31 @@ const gc_vector<risse_uint32> & tNarrowTextOutputPin::GetSupportedTypes()
 	return *arr;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+const tNarrowTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableProperties()
+{
+	RISSE_ASSERT(Children.size() == 1);
+	InheritedProperty = reinterpret_cast<tNarrowTextQueueNode*>(Children[0])->GetInheritableProperties() + InheritableProperties;
+	return InheritedProperty;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const char * tNarrowTextInputPinQueueNode::GetText()
+{
+	RISSE_ASSERT(Children.size() == 1);
+	return reinterpret_cast<tNarrowTextQueueNode*>(Children[0])->GetText();
+}
+//---------------------------------------------------------------------------
+
 
 
 

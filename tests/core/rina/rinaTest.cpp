@@ -53,11 +53,11 @@ tTester::tTester()
 void tTester::Test()
 {
 	tWideTextProviderNode * provider_node1 = new tWideTextProviderNode();
-	provider_node1->SetPosition(1);
+	provider_node1->GetInheritableProperties().SetPosition(1);
 	provider_node1->SetCaption(RISSE_WS("aaa"));
 
 	tWideTextProviderNode * provider_node2 = new tWideTextProviderNode();
-	provider_node2->SetPosition(5);
+	provider_node2->GetInheritableProperties().SetPosition(5);
 	provider_node2->SetCaption(RISSE_WS("bbb"));
 
 	tWideTextDrawDeviceNode * dd_node = new tWideTextDrawDeviceNode();
@@ -70,18 +70,18 @@ void tTester::Test()
 	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
 
 	tWideTextMixerNode * mixer_node = new tWideTextMixerNode();
-	mixer_node->SetPosition(9);
+	mixer_node->GetInheritableProperties().SetPosition(9);
 
 	tWideTextProviderNode * provider_node3 = new tWideTextProviderNode();
-	provider_node3->SetPosition(0);
+	provider_node3->GetInheritableProperties().SetPosition(0);
 	provider_node3->SetCaption(RISSE_WS("ccc"));
 
 	tWideTextProviderNode * provider_node4 = new tWideTextProviderNode();
-	provider_node4->SetPosition(4);
+	provider_node4->GetInheritableProperties().SetPosition(4);
 	provider_node4->SetCaption(RISSE_WS("ddd"));
 
 	tMultiTextProviderNode * provider_node5 = new tMultiTextProviderNode();
-	provider_node5->SetPosition(8);
+	provider_node5->GetInheritableProperties().SetPosition(8);
 	provider_node5->SetCaption(RISSE_WS("mmm"));
 
 	mixer_node->InsertInputPinAt(0);
@@ -97,7 +97,7 @@ void tTester::Test()
 
 
 	tNarrowTextProviderNode * narrow_provider_node = new tNarrowTextProviderNode();
-	narrow_provider_node->SetPosition(21);
+	narrow_provider_node->GetInheritableProperties().SetPosition(21);
 	narrow_provider_node->SetCaption("narrow");
 
 	tNarrowTextToWideTextConverterNode * converter_node1 = new tNarrowTextToWideTextConverterNode();
@@ -109,7 +109,7 @@ void tTester::Test()
 
 
 	tMultiTextProviderNode * multi_provider_node = new tMultiTextProviderNode();
-	multi_provider_node->SetPosition(30);
+	multi_provider_node->GetInheritableProperties().SetPosition(30);
 	multi_provider_node->SetCaption(RISSE_WS("multi"));
 
 	tNarrowTextToWideTextConverterNode * converter_node2 = new tNarrowTextToWideTextConverterNode();
@@ -120,11 +120,11 @@ void tTester::Test()
 
 	dd_node->InsertInputPinAt(5);
 	dd_node->GetInputPinAt(5)->Connect(converter_node1->GetOutputPinAt(0));
-	reinterpret_cast<tWideTextInputPin*>(dd_node->GetInputPinAt(5))->SetPosition(16);
+	reinterpret_cast<tWideTextInputPin*>(dd_node->GetInputPinAt(5))->GetInheritableProperties().SetPosition(16);
 
 	dd_node->InsertInputPinAt(6);
 	dd_node->GetInputPinAt(6)->Connect(mixer_node->GetOutputPinAt(0));
-	reinterpret_cast<tWideTextInputPin*>(dd_node->GetInputPinAt(6))->SetPosition(37);
+	reinterpret_cast<tWideTextInputPin*>(dd_node->GetInputPinAt(6))->GetInheritableProperties().SetPosition(37);
 
 
 	// render

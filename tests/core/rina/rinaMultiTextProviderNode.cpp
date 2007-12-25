@@ -15,7 +15,7 @@
 #include "prec.h"
 #include "rinaMultiTextProviderNode.h"
 #include "rinaMultiTextPin.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 #include "rinaWideTextProviderNode.h"
 #include "rinaNarrowTextPin.h"
 #include "rinaNarrowTextProviderNode.h"
@@ -123,9 +123,9 @@ void tMultiTextProviderNode::BuildQueue(tRenderState * state)
 
 		RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
 		if(target_type == WideTextEdgeType)
-			new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption);
+			new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
 		else if(target_type == NarrowTextEdgeType)
-			new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), Position, Caption.AsNarrowString());
+			new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption.AsNarrowString());
 	}
 }
 //---------------------------------------------------------------------------

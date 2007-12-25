@@ -10,15 +10,16 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストピン管理
+//! @brief ワイドテキストのエッジタイプ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "rinaWideTextPin.h"
+#include "rina1DRegion.h"
 
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(6749,17670,63856,19872,29832,12572,34125,64681);
+RISSE_DEFINE_SOURCE_ID();
 //---------------------------------------------------------------------------
+
 
 
 
@@ -29,10 +30,14 @@ tWideTextEdgeTypeRegisterer::tWideTextEdgeTypeRegisterer()
 	data.Id = WideTextEdgeType;
 	data.ShortName = RISSE_WS("wideText");
 	data.ShortDesc = RISSE_WS("wide string");
-	data.LongDesc = RISSE_WS("wide text string as in Risse internal text format");
+	data.LongDesc = RISSE_WS("wide text string (risse internal)");
 	tIdRegistry::instance()->RegisterEdgeData(data);
 }
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -88,21 +93,25 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 
 
 //---------------------------------------------------------------------------
-risse_int32 tWideTextInputPinQueueNode::GetPosition() const
+const tWideTextInheritableProperties & tWideTextInputPinQueueNode::GetInheritableProperties()
 {
 	RISSE_ASSERT(Children.size() == 1);
-	return reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetPosition() + Position;
+	InheritedProperty = reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetInheritableProperties() + InheritableProperties;
+	return InheritedProperty;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-const tString & tWideTextInputPinQueueNode::GetText() const
+const tString & tWideTextInputPinQueueNode::GetText()
 {
 	RISSE_ASSERT(Children.size() == 1);
 	return reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetText();
 }
 //---------------------------------------------------------------------------
+
+
+
 
 
 

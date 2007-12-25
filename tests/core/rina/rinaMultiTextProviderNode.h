@@ -17,6 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -33,20 +34,16 @@ class tMultiTextProviderNode : public tProcessNode
 
 	tMultiTextOutputPin * OutputPin; //!< 出力ピン
 
-	risse_int32 Position; //!< テキストの結果表示位置
+	tTextInheritableProperties InheritableProperties; //!< テキストの継承可能なプロパティ
 	tString Caption; //!< 表示するテキスト(キャプション)
 
 public:
 	//! @brief		コンストラクタ
 	tMultiTextProviderNode();
 
-	//! @brief		表示位置を取得する
-	//! @return		表示位置
-	risse_int32 GetPosition() const { return Position; }
-
-	//! @brief		表示位置を設定する
-	//! @return		position 表示位置
-	void SetPosition(risse_int32 position) { Position = position; }
+	//! @brief		継承可能プロパティを取得する
+	//! @return		継承可能プロパティ
+	risse_int32 GetInheritableProperties() const { return InheritableProperties; }
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション

@@ -10,17 +10,16 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストピン管理
+//! @brief ワイドテキストのエッジタイプ
 //---------------------------------------------------------------------------
-#ifndef RINAWIDETEXTPIN_H
-#define RINAWIDETEXTPIN_H
+#ifndef RINAWIDETEXTEDGE_H
+#define RINAWIDETEXTEDGE_H
 
-#include "visual/rina/rinaPin.h"
-#include "visual/rina/rinaIdRegistry.h"
-#include "visual/rina/rinaQueue.h"
+#include "rina1DRegion.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
+
 
 
 static const risse_uint32 WideTextEdgeType = tFourCharId<'t','x','t','w'>::value;
@@ -42,6 +41,33 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		テキストの継承可能プロパティ
+//---------------------------------------------------------------------------
+class tTextInheritableProperties : public tCollectee
+{
+	typedef tCollectee inherited;
+
+	risse_offset Position; //!< 位置
+
+public:
+	//! @brief		コンストラクタ
+	tTextInheritableProperties() { Position = 0; }
+
+	//! @brief		位置を設定する
+	//! @param		pos		位置
+	void SetPosition(risse_offset pos) { Position = pos; }
+
+	//! @brief		位置を得る
+	//! @return		位置
+	risse_offset GetPosition() { return Position; }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -51,7 +77,7 @@ class tWideTextInputPin : public tInputPin
 {
 	typedef tInputPin inherited;
 
-	risse_int32		Position; //!< 位置
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
 public:
 
@@ -63,15 +89,13 @@ public:
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
 
-	//! @brief		位置を設定する
-	//! @param		pos		位置
-	void SetPosition(int pos) { Position = pos; }
-
-	//! @brief		位置を取得する
-	//! @return		位置
-	risse_int32 GetPosition() { return Position; }
+	//! @brief		継承可能プロパティを得る
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 };
 //---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -95,6 +119,11 @@ public:
 
 
 
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
@@ -110,13 +139,13 @@ public:
 	tWideTextQueueNode(tQueueNode * parent) :
 		inherited(parent) {;}
 
-	//! @brief		位置を得る
-	//! @return		位置
-	virtual risse_int32 GetPosition() const = 0;
+	//! @brief		継承可能プロパティを得る
+	//! @return		継承可能プロパティ
+	virtual const tTextInheritableProperties & GetInheritableProperties() = 0;
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const tString & GetText() const = 0;
+	virtual const tString & GetText() = 0;
 
 protected: //!< サブクラスでオーバーライドして使う物
 
@@ -129,30 +158,33 @@ protected: //!< サブクラスでオーバーライドして使う物
 //---------------------------------------------------------------------------
 
 
+
+
 //---------------------------------------------------------------------------
-//! @brief		オフセットなどのプロパティを加算するためのアダプタ的オブジェクト
+//! @brief		入力ピン用のテキストコマンドキュー
 //---------------------------------------------------------------------------
 class tWideTextInputPinQueueNode : public tWideTextQueueNode
 {
 	typedef tWideTextQueueNode inherited;
 
 protected:
-	risse_int32 Position; //!< 位置
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
+	tTextInheritableProperties		InheritedProperty; //!< 継承されたプロパティ TODO: これ非効率
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親ノード
-	//! @param		pos		位置
-	tWideTextInputPinQueueNode(tQueueNode * parent, risse_int32 pos) :
-		inherited(parent), Position(pos) {;}
+	//! @param		prop		継承可能なプロパティ
+	tWideTextInputPinQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop) :
+		inherited(parent), InheritableProperties(prop) {;}
 
-	//! @brief		位置を得る
-	//! @return		位置
-	virtual risse_int32 GetPosition() const;
+	//! @brief		継承可能プロパティを得る
+	//! @return		継承可能プロパティ
+	virtual const tTextInheritableProperties & GetInheritableProperties();
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const tString & GetText() const;
+	virtual const tString & GetText();
 
 protected: //!< サブクラスでオーバーライドして使う物
 
@@ -163,6 +195,13 @@ protected: //!< サブクラスでオーバーライドして使う物
 	virtual void EndProcess() {;}
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 

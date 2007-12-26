@@ -16,7 +16,11 @@
 #define RINANARROWTEXTPIN_H
 
 #include "visual/rina/rinaPin.h"
+#include "visual/rina/rinaQueue.h"
 #include "visual/rina/rinaIdRegistry.h"
+#include "rina1DRegion.h"
+#include "rinaTextProperty.h"
+
 
 namespace Rina {
 //---------------------------------------------------------------------------

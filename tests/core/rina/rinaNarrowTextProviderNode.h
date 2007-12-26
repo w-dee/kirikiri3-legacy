@@ -124,7 +124,7 @@ public:
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const char * GetText() const { return Text; }
+	virtual const char * GetText() { return Text; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 

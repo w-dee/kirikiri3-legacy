@@ -45,17 +45,17 @@ public:
 	bool Overlaps(const t1DArea & ref) const
 	{
 		if(End <= ref.Start) return false;
-		if(Start => ref.End) return false;
+		if(Start >= ref.End) return false;
 		return true;
 	}
 
 	//! @brief		範囲が重なっているか連続している場合は自分を相手に合わせて延長する
 	//! @param		ref			重なっているかを調べたい相手
 	//! @return		延長が行われた場合は真
-	void Extend(const t1DArea & ref)
+	bool Extend(const t1DArea & ref)
 	{
 		if(End < ref.Start) return false;
-		if(Start > ref.end) return false;
+		if(Start > ref.End) return false;
 		if(Start > ref.Start) Start = ref.Start;
 		if(End < ref.End) End = ref.End;
 		return true;

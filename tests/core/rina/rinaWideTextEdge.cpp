@@ -14,10 +14,10 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rina1DRegion.h"
-
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID();
+RISSE_DEFINE_SOURCE_ID(52443,53248,53438,18214,2474,63937,55669,59383);
 //---------------------------------------------------------------------------
 
 
@@ -44,7 +44,6 @@ tWideTextEdgeTypeRegisterer::tWideTextEdgeTypeRegisterer()
 //---------------------------------------------------------------------------
 tWideTextInputPin::tWideTextInputPin()
 {
-	Position = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -93,7 +92,7 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 
 
 //---------------------------------------------------------------------------
-const tWideTextInheritableProperties & tWideTextInputPinQueueNode::GetInheritableProperties()
+const tTextInheritableProperties & tWideTextInputPinQueueNode::GetInheritableProperties()
 {
 	RISSE_ASSERT(Children.size() == 1);
 	InheritedProperty = reinterpret_cast<tWideTextQueueNode*>(Children[0])->GetInheritableProperties() + InheritableProperties;

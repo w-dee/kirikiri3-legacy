@@ -13,7 +13,7 @@
 //! @brief テスト用のナローテキストピン管理
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "rinaNarrowTextPin.h"
+#include "rinaNarrowTextEdge.h"
 
 
 namespace Rina {
@@ -43,7 +43,6 @@ tNarrowTextEdgeTypeRegisterer::tNarrowTextEdgeTypeRegisterer()
 //---------------------------------------------------------------------------
 tNarrowTextInputPin::tNarrowTextInputPin()
 {
-	Position = 0;
 }
 //---------------------------------------------------------------------------
 
@@ -92,7 +91,7 @@ const gc_vector<risse_uint32> & tNarrowTextOutputPin::GetSupportedTypes()
 
 
 //---------------------------------------------------------------------------
-const tNarrowTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableProperties()
+const tTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableProperties()
 {
 	RISSE_ASSERT(Children.size() == 1);
 	InheritedProperty = reinterpret_cast<tNarrowTextQueueNode*>(Children[0])->GetInheritableProperties() + InheritableProperties;

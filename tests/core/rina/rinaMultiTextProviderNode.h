@@ -43,7 +43,7 @@ public:
 
 	//! @brief		継承可能プロパティを取得する
 	//! @return		継承可能プロパティ
-	risse_int32 GetInheritableProperties() const { return InheritableProperties; }
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション

@@ -15,7 +15,7 @@
 #include "prec.h"
 #include "base/utils/Singleton.h"
 #include "rinaWideTextProviderNode.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 #include "rinaMultiTextProviderNode.h"
 #include "rinaMultiTextPin.h"
 #include "rinaWideTextDrawDeviceNode.h"

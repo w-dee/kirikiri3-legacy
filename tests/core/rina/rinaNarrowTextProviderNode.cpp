@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaNarrowTextProviderNode.h"
-#include "rinaNarrowTextPin.h"
+#include "rinaNarrowTextEdge.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(12623,61035,35256,19759,45714,27702,3711,32168);
@@ -26,8 +26,6 @@ RISSE_DEFINE_SOURCE_ID(12623,61035,35256,19759,45714,27702,3711,32168);
 //---------------------------------------------------------------------------
 tNarrowTextProviderNode::tNarrowTextProviderNode()
 {
-	Position = 0;
-
 	// 出力ピンを作成
 	OutputPin = new tNarrowTextOutputPin();
 	OutputPin->Attach(this);

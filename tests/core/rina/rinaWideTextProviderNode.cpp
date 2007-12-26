@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaWideTextProviderNode.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
@@ -26,8 +26,6 @@ RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
 //---------------------------------------------------------------------------
 tWideTextProviderNode::tWideTextProviderNode()
 {
-	Position = 0;
-
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();
 	OutputPin->Attach(this);

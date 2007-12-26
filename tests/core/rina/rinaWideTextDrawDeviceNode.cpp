@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaWideTextDrawDeviceNode.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 #include "rinaWideTextProviderNode.h"
 
 
@@ -28,7 +28,7 @@ RISSE_DEFINE_SOURCE_ID(10207,53962,31748,17392,1438,46335,5173,19226);
 //---------------------------------------------------------------------------
 tWideTextDrawDeviceNode::tWideTextDrawDeviceNode() : inherited()
 {
-	
+
 }
 //---------------------------------------------------------------------------
 
@@ -115,7 +115,8 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		tQueueNode * new_pin_node =
-			new tWideTextInputPinQueueNode(new_parent, ((tWideTextInputPin*)(*i))->GetPosition());
+			new tWideTextInputPinQueueNode(new_parent,
+				((tWideTextInputPin*)(*i))->GetInheritableProperties());
 		(*i)->SetParentQueueNode(new_pin_node);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}

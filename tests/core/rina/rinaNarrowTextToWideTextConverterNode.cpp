@@ -14,8 +14,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaNarrowTextToWideTextConverterNode.h"
-#include "rinaWideTextPin.h"
-#include "rinaNarrowTextPin.h"
+#include "rinaWideTextEdge.h"
+#include "rinaNarrowTextEdge.h"
 #include "rinaNarrowTextProviderNode.h"
 
 namespace Rina {
@@ -110,7 +110,7 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(0);
+	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode();
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -128,7 +128,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 
 	// 入力ピンに情報を設定
 	tQueueNode * new_pin_node =
-			new tNarrowTextInputPinQueueNode(new_parent, ((tNarrowTextInputPin*)(*i))->GetPosition());
+			new tNarrowTextInputPinQueueNode(new_parent, ((tNarrowTextInputPin*)(InputPin))->GetInheritableProperties());
 	InputPin->SetRenderGeneration(state->GetRenderGeneration());
 	InputPin->SetParentQueueNode(new_pin_node);
 	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
@@ -151,7 +151,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 
 //---------------------------------------------------------------------------
 tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode() :
-	inherited(NULL, 0, tString())
+	inherited(NULL, tTextInheritableProperties(), tString())
 {
 }
 //---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	tNarrowTextProviderQueueNode * child = reinterpret_cast<tNarrowTextProviderQueueNode *>(Children[0]);
 
 	// 結果をPositionとTextに格納
-	Position = child->GetPosition() + GetPosition();
+	InheritableProperties += child->GetInheritableProperties();
 	Text = tString(child->GetText());
 }
 //---------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 #include "rinaMultiTextPin.h"
 #include "rinaWideTextEdge.h"
 #include "rinaWideTextProviderNode.h"
-#include "rinaNarrowTextPin.h"
+#include "rinaNarrowTextEdge.h"
 #include "rinaNarrowTextProviderNode.h"
 
 namespace Rina {
@@ -30,8 +30,6 @@ RISSE_DEFINE_SOURCE_ID(47508,49325,57519,19588,18101,2946,50970,8610);
 //---------------------------------------------------------------------------
 tMultiTextProviderNode::tMultiTextProviderNode()
 {
-	Position = 0;
-
 	// 出力ピンを作成
 	OutputPin = new tMultiTextOutputPin();
 	OutputPin->Attach(this);

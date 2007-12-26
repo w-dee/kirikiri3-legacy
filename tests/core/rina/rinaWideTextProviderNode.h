@@ -17,7 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -124,7 +124,7 @@ public:
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
-	virtual const tString & GetText() const { return Text; }
+	virtual const tString & GetText() { return Text; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 

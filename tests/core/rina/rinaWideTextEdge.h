@@ -15,7 +15,11 @@
 #ifndef RINAWIDETEXTEDGE_H
 #define RINAWIDETEXTEDGE_H
 
+#include "visual/rina/rinaPin.h"
+#include "visual/rina/rinaIdRegistry.h"
+#include "visual/rina/rinaQueue.h"
 #include "rina1DRegion.h"
+#include "rinaTextProperty.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -36,33 +40,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		テキストの継承可能プロパティ
-//---------------------------------------------------------------------------
-class tTextInheritableProperties : public tCollectee
-{
-	typedef tCollectee inherited;
-
-	risse_offset Position; //!< 位置
-
-public:
-	//! @brief		コンストラクタ
-	tTextInheritableProperties() { Position = 0; }
-
-	//! @brief		位置を設定する
-	//! @param		pos		位置
-	void SetPosition(risse_offset pos) { Position = pos; }
-
-	//! @brief		位置を得る
-	//! @return		位置
-	risse_offset GetPosition() { return Position; }
-};
-//---------------------------------------------------------------------------
 
 
 

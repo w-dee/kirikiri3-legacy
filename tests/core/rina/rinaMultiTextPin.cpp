@@ -14,8 +14,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaMultiTextPin.h"
-#include "rinaWideTextPin.h"
-#include "rinaNarrowTextPin.h"
+#include "rinaWideTextEdge.h"
+#include "rinaNarrowTextEdge.h"
 
 
 namespace Rina {

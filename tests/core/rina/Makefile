@@ -13,9 +13,9 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES=\
 	rinaWideTextDrawDeviceNode.cpp \
-	rinaWideTextPin.cpp            \
+	rinaWideTextEdge.cpp           \
 	rinaWideTextProviderNode.cpp   \
-	rinaNarrowTextPin.cpp          \
+	rinaNarrowTextEdge.cpp         \
 	rinaNarrowTextProviderNode.cpp \
 	rinaMultiTextPin.cpp           \
 	rinaMultiTextProviderNode.cpp  \

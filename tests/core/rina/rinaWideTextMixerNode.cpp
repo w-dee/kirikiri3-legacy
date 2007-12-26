@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaWideTextMixerNode.h"
-#include "rinaWideTextPin.h"
+#include "rinaWideTextEdge.h"
 #include "rinaWideTextProviderNode.h"
 
 namespace Rina {
@@ -26,8 +26,6 @@ RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
 //---------------------------------------------------------------------------
 tWideTextMixerNode::tWideTextMixerNode() : inherited()
 {
-	Position = 0;
-
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();
 	OutputPin->Attach(this);
@@ -111,7 +109,7 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL, Position);
+	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL, InheritableProperties);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();

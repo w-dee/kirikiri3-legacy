@@ -85,6 +85,18 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+template <typename T> struct tDereference     { typedef T type; };
+template <typename T> struct tDereference<T*> { typedef T type; };
+//! @brief		やや安全なキャスト (Type を元にインターフェースを得る)
+template <typename R, typename T>
+R TypeCast(T * instance)
+{
+	return static_cast<R>(instance->GetInterface(tDereference<R>::type::Type));
+}
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 }

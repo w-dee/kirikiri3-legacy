@@ -39,7 +39,7 @@ public:
 
 	//! @brief		位置を得る
 	//! @return		位置
-	risse_offset GetPosition() { return Position; }
+	risse_offset GetPosition() const { return Position; }
 
 	//! @brief		プロパティの継承を行う
 	//! @param		rhs		子

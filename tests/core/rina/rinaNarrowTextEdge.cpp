@@ -94,7 +94,7 @@ const gc_vector<risse_uint32> & tNarrowTextOutputPin::GetSupportedTypes()
 const tTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableProperties()
 {
 	RISSE_ASSERT(Children.size() == 1);
-	InheritedProperty = reinterpret_cast<tNarrowTextQueueNode*>(Children[0])->GetInheritableProperties() + InheritableProperties;
+	InheritedProperty = TypeCast<tNarrowTextData*>(Children[0])->GetInheritableProperties() + InheritableProperties;
 	return InheritedProperty;
 }
 //---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ const tTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableP
 const char * tNarrowTextInputPinQueueNode::GetText()
 {
 	RISSE_ASSERT(Children.size() == 1);
-	return reinterpret_cast<tNarrowTextQueueNode*>(Children[0])->GetText();
+	return TypeCast<tNarrowTextData*>(Children[0])->GetText();
 }
 //---------------------------------------------------------------------------
 

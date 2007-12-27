@@ -160,7 +160,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tWideTextProviderQueueNode * provider = reinterpret_cast<tWideTextProviderQueueNode *>(*i);
+		tWideTextData * provider = TypeCast<tWideTextData *>(*i);
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();

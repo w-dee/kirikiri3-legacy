@@ -67,6 +67,11 @@ public:
 	//! @param		child		親
 	void AddParent(tQueueNode * parent);
 
+	//! @brief		インターフェースを返す
+	//! @param		type		返すインターフェースに対応するエッジタイプ
+	//! @return		そのインターフェース(NULL=対応していない)
+	virtual void * GetInterface(risse_uint32 type) { return NULL; }
+
 protected:
 	//! @brief		ノードの子を追加する
 	//! @param		child		子

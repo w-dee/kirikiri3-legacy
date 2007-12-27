@@ -170,7 +170,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	// 子ノードを変換する
 	RISSE_ASSERT(Children.size() == 1);
 
-	tNarrowTextProviderQueueNode * child = reinterpret_cast<tNarrowTextProviderQueueNode *>(Children[0]);
+	tNarrowTextData * child = TypeCast<tNarrowTextData*>(Children[0]);
 
 
 	// 結果をPositionとTextに格納

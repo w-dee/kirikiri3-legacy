@@ -165,6 +165,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
 		risse_int32 pos = provider->GetInheritableProperties().GetPosition();
+	wxFprintf(stderr, wxT("child %d at %d: %s\n"), (int)(i-Children.begin()), (int)pos, text.AsWxString().c_str());
 		RISSE_ASSERT(pos >= 0);
 		RISSE_ASSERT(pos + text_size < CanvasSize);
 		for(risse_size i = 0 ; i < text_size; i++)

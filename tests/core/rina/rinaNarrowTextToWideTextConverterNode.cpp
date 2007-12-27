@@ -172,9 +172,11 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 
 	tNarrowTextProviderQueueNode * child = reinterpret_cast<tNarrowTextProviderQueueNode *>(Children[0]);
 
+
 	// 結果をPositionとTextに格納
 	InheritableProperties += child->GetInheritableProperties();
 	Text = tString(child->GetText());
+wxFprintf(stderr, wxT("converter: child: %s\n"), Text.AsWxString().c_str());
 }
 //---------------------------------------------------------------------------
 

@@ -17,7 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
-#include "rinaWideTextEdge.h"
+#include "rinaNarrowTextEdge.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -102,9 +102,9 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tNarrowTextProviderQueueNode : public tQueueNode
+class tNarrowTextProviderQueueNode : public tNarrowTextQueueNode
 {
-	typedef tQueueNode inherited;
+	typedef tNarrowTextQueueNode inherited;
 
 protected:
 	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
@@ -120,7 +120,7 @@ public:
 		InheritableProperties(prop), Text(text) {;}
 
 	//! @brief		継承可能プロパティを得る
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+	virtual const tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		テキストを得る
 	//! @return		テキスト

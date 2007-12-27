@@ -43,6 +43,19 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		ワイドテキストの入力ピン用インターフェース
+//---------------------------------------------------------------------------
+class tWideTextInputPinInterface : public tOutputPin
+{
+public:
+	static const risse_uint32 Type = WideTextEdgeType; //!< このインターフェースの型
+
+public:
+	virtual tTextInheritableProperties & GetInheritableProperties() = 0;
+};
+//---------------------------------------------------------------------------
+
 
 
 
@@ -50,7 +63,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tWideTextInputPin : public tInputPin
+class tWideTextInputPin : public tInputPin, public tWideTextInputPinInterface
 {
 	typedef tInputPin inherited;
 
@@ -66,8 +79,12 @@ public:
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
 
-	//! @brief		継承可能プロパティを得る
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+	//! @brief		インターフェースを返す
+	//! @param		type		返すインターフェースに対応するエッジタイプ
+	//! @return		そのインターフェース(NULL=対応していない)
+	virtual void * GetInterface(risse_uint32 type) { if(type == WideTextEdgeType) return (tWideTextInputPinInterface*)this; else return NULL; }
+
+	virtual tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 };
 //---------------------------------------------------------------------------
 
@@ -101,7 +118,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ワイド文字列用のデータ取得用インターフェース
 //---------------------------------------------------------------------------
-class tWideTextData : public tCollectee
+class tWideTextDataInterface : public tCollectee
 {
 public:
 	static const risse_uint32 Type = WideTextEdgeType; //!< このインターフェースの型
@@ -123,7 +140,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextQueueNode : public tQueueNode, public tWideTextData
+class tWideTextQueueNode : public tQueueNode, public tWideTextDataInterface
 {
 	typedef tQueueNode inherited;
 
@@ -138,7 +155,7 @@ public:
 	//! @brief		インターフェースを返す
 	//! @param		type		返すインターフェースに対応するエッジタイプ
 	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { if(type == WideTextEdgeType) return (tWideTextData*)this; else return NULL; }
+	virtual void * GetInterface(risse_uint32 type) { if(type == WideTextEdgeType) return (tWideTextDataInterface*)this; else return NULL; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 

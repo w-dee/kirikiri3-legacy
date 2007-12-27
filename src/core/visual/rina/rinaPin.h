@@ -61,6 +61,11 @@ public:
 	//! @param		strong_suggest	この提案が強い提案であれば *strong_suggest に真が入る(NULL=イラナイ)
 	//! @return		提案されたタイプ (0=提案なし)
 	virtual risse_uint32 SuggestType(tPin * pin, bool * strong_suggest = NULL);
+
+	//! @brief		インターフェースを返す
+	//! @param		type		返すインターフェースに対応するエッジタイプ
+	//! @return		そのインターフェース(NULL=対応していない)
+	virtual void * GetInterface(risse_uint32 type) { return NULL; }
 };
 //---------------------------------------------------------------------------
 

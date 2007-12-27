@@ -128,7 +128,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 
 	// 入力ピンに情報を設定
 	tQueueNode * new_pin_node =
-			new tNarrowTextInputPinQueueNode(new_parent, ((tNarrowTextInputPin*)(InputPin))->GetInheritableProperties());
+			new tNarrowTextInputPinQueueNode(new_parent, TypeCast<tNarrowTextInputPinInterface*>(InputPin)->GetInheritableProperties());
 	InputPin->SetRenderGeneration(state->GetRenderGeneration());
 	InputPin->SetParentQueueNode(new_pin_node);
 	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
@@ -170,7 +170,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	// 子ノードを変換する
 	RISSE_ASSERT(Children.size() == 1);
 
-	tNarrowTextData * child = TypeCast<tNarrowTextData*>(Children[0]);
+	tNarrowTextDataInterface * child = TypeCast<tNarrowTextDataInterface*>(Children[0]);
 
 
 	// 結果をPositionとTextに格納

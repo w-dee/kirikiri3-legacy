@@ -116,7 +116,7 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		tQueueNode * new_pin_node =
 			new tWideTextInputPinQueueNode(new_parent,
-				((tWideTextInputPin*)(*i))->GetInheritableProperties());
+				TypeCast<tWideTextInputPinInterface*>(*i)->GetInheritableProperties());
 		(*i)->SetParentQueueNode(new_pin_node);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
@@ -160,7 +160,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tWideTextData * provider = TypeCast<tWideTextData *>(*i);
+		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(*i);
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();

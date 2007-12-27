@@ -43,6 +43,19 @@ public:
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		ナローテキストの入力ピン用インターフェース
+//---------------------------------------------------------------------------
+class tNarrowTextInputPinInterface : public tOutputPin
+{
+public:
+	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
+
+public:
+	virtual tTextInheritableProperties & GetInheritableProperties() = 0;
+};
+//---------------------------------------------------------------------------
+
 
 
 
@@ -50,7 +63,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tNarrowTextInputPin : public tInputPin
+class tNarrowTextInputPin : public tInputPin, public tNarrowTextInputPinInterface
 {
 	typedef tInputPin inherited;
 
@@ -66,8 +79,13 @@ public:
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
 
-	//! @brief		継承可能プロパティを得る
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+	//! @brief		インターフェースを返す
+	//! @param		type		返すインターフェースに対応するエッジタイプ
+	//! @return		そのインターフェース(NULL=対応していない)
+	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextInputPinInterface*)this; else return NULL; }
+
+	virtual tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+
 };
 //---------------------------------------------------------------------------
 
@@ -95,7 +113,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ナロー文字列用のデータ取得用インターフェース
 //---------------------------------------------------------------------------
-class tNarrowTextData : public tCollectee
+class tNarrowTextDataInterface : public tCollectee
 {
 public:
 	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
@@ -114,7 +132,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tNarrowTextQueueNode : public tQueueNode, public tNarrowTextData
+class tNarrowTextQueueNode : public tQueueNode, public tNarrowTextDataInterface
 {
 	typedef tQueueNode inherited;
 
@@ -130,7 +148,7 @@ public:
 	//! @brief		インターフェースを返す
 	//! @param		type		返すインターフェースに対応するエッジタイプ
 	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextData*)this; else return NULL; }
+	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextDataInterface*)this; else return NULL; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 

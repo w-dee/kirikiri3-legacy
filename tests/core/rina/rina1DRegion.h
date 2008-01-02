@@ -32,7 +32,7 @@ class t1DArea : public tCollectee
 
 public:
 	//! @brief		コンストラクタ
-	t1DArea();
+	t1DArea() {Start=0;End=0;}
 
 	//! @brief		コンストラクタ
 	//! @param		start		開始位置

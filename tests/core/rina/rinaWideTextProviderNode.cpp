@@ -114,8 +114,12 @@ void tWideTextProviderNode::BuildQueue(tRenderState * state)
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
 
-		// コマンドキューノードを作成
-		new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
+		// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
+		const tWideTextInputPinInterface::tRenderRequests & requests =
+			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
+		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+			requests.begin(); i != requests.end(); i ++)
+			new tWideTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
 	}
 }
 //---------------------------------------------------------------------------

@@ -122,15 +122,26 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
 
-		// 親を設定
-		new_parent->AddParent((*i)->GetParentQueueNode());
+		// すべてのリクエストのすべてのキューノードに同じ子を設定する
+		const tWideTextInputPinInterface::tRenderRequests & requests =
+			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
+		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+				requests.begin(); i != requests.end(); i ++)
+				new_parent->AddParent(i->ParentQueueNode);
 	}
 
 	// 入力ピンに情報を設定
+	// 変換コストが極端に高い場合は
+	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
+	// 必要かもしれないがここではそれは考えない
 	tQueueNode * new_pin_node =
 			new tNarrowTextInputPinQueueNode(new_parent, TypeCast<tNarrowTextInputPinInterface*>(InputPin)->GetInheritableProperties());
 	InputPin->SetRenderGeneration(state->GetRenderGeneration());
-	InputPin->SetParentQueueNode(new_pin_node);
+	InputPin->ClearRenderRequests();
+	tNarrowTextInputPinInterface::tRenderRequest req;
+//	req.Area = 
+	req.ParentQueueNode = new_pin_node;
+	InputPin->AddRenderRequest(req);
 	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
 }
 //---------------------------------------------------------------------------

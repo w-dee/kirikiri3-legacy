@@ -125,8 +125,12 @@ void tNarrowTextProviderNode::BuildQueue(tRenderState * state)
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == NarrowTextEdgeType);
 
-		// コマンドキューノードを作成
-		new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
+		// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
+		const tNarrowTextInputPinInterface::tRenderRequests & requests =
+			TypeCast<tNarrowTextInputPinInterface*>(*i)->GetRenderRequests();
+		for(tNarrowTextInputPinInterface::tRenderRequests::const_iterator i =
+			requests.begin(); i != requests.end(); i ++)
+			new tNarrowTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
 	}
 }
 //---------------------------------------------------------------------------

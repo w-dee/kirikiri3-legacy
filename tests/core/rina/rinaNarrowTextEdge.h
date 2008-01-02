@@ -51,8 +51,31 @@ class tNarrowTextInputPinInterface : public tOutputPin
 public:
 	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
 
+	//! @brief		親ノードから子ノードへ要求するデータの内容
+	struct tRenderRequest
+	{
+		t1DArea		Area; //!< 範囲
+		tQueueNode * ParentQueueNode; //!< 親のキューノード
+	};
+
+	//! @brief		tRequestInfo の配列の typedef
+	typedef gc_vector<tRenderRequest> tRenderRequests;
+
 public:
+	//! @brief		継承可能なプロパティを得る
+	//! @return		継承可能なプロパティ
 	virtual tTextInheritableProperties & GetInheritableProperties() = 0;
+
+	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
+	//! return		親ノードから子ノードへ要求するデータの配列
+	virtual const tRenderRequests & GetRenderRequests() = 0;
+
+	//! @brief		親ノードから子ノードへ要求するデータの配列をクリアする
+	virtual void ClearRenderRequests() = 0;
+
+	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
+	//! @param		req			要求データ
+	virtual void AddRenderRequest(const tRenderRequest & req) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -69,6 +92,8 @@ class tNarrowTextInputPin : public tInputPin, public tNarrowTextInputPinInterfac
 
 	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
+	tRenderRequests RenderRequests; //!< 親ノードから子ノードへ要求するデータの配列
+
 public:
 
 	//! @brief		コンストラクタ
@@ -84,8 +109,20 @@ public:
 	//! @return		そのインターフェース(NULL=対応していない)
 	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextInputPinInterface*)this; else return NULL; }
 
+	//! @brief		継承可能なプロパティを得る
+	//! @return		継承可能なプロパティ
 	virtual tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
+	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
+	//! return		親ノードから子ノードへ要求するデータの配列
+	virtual const tRenderRequests & GetRenderRequests() { return RenderRequests; }
+
+	//! @brief		親ノードから子ノードへ要求するデータの配列をクリアする
+	void ClearRenderRequests() { RenderRequests.clear(); }
+
+	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
+	//! @param		req			要求データ
+	void AddRenderRequest(const tRenderRequest & req) { RenderRequests.push_back(req); }
 };
 //---------------------------------------------------------------------------
 

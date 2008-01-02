@@ -31,7 +31,7 @@ t1DRegion::t1DRegion()
 
 
 //---------------------------------------------------------------------------
-void t1DRegion::Add(const t1DArea & area)
+void t1DRegion::Add(t1DArea area)
 {
 	// うーんと
 	// 真面目にやるとこれ結構厄介なんですが

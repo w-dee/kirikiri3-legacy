@@ -121,9 +121,23 @@ void tMultiTextProviderNode::BuildQueue(tRenderState * state)
 
 		RISSE_ASSERT(target_type == WideTextEdgeType || target_type == NarrowTextEdgeType); // 暫定
 		if(target_type == WideTextEdgeType)
-			new tWideTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption);
+		{
+			// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
+			const tWideTextInputPinInterface::tRenderRequests & requests =
+				TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
+			for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+				requests.begin(); i != requests.end(); i ++)
+				new tWideTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
+		}
 		else if(target_type == NarrowTextEdgeType)
-			new tNarrowTextProviderQueueNode((*i)->GetParentQueueNode(), InheritableProperties, Caption.AsNarrowString());
+		{
+			// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
+			const tNarrowTextInputPinInterface::tRenderRequests & requests =
+				TypeCast<tNarrowTextInputPinInterface*>(*i)->GetRenderRequests();
+			for(tNarrowTextInputPinInterface::tRenderRequests::const_iterator i =
+				requests.begin(); i != requests.end(); i ++)
+				new tNarrowTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption.AsNarrowString());
+		}
 	}
 }
 //---------------------------------------------------------------------------

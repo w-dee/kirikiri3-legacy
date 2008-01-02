@@ -122,7 +122,12 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
 
 		// 親を設定
-		new_parent->AddParent((*i)->GetParentQueueNode());
+		// すべてのリクエストのすべてのキューノードに同じ子を設定する
+		const tWideTextInputPinInterface::tRenderRequests & requests =
+			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
+		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+				requests.begin(); i != requests.end(); i ++)
+				new_parent->AddParent(i->ParentQueueNode);
 	}
 
 	// 入力ピンに情報を設定
@@ -132,6 +137,10 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 		tQueueNode * new_pin_node =
 			new tWideTextInputPinQueueNode(new_parent, TypeCast<tWideTextInputPin*>(*i)->GetInheritableProperties());
 		(*i)->SetParentQueueNode(new_pin_node);
+		tWideTextInputPinInterface::tRenderRequest req;
+	//	req.Area = 
+		req.ParentQueueNode = new_pin_node;
+		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
 }

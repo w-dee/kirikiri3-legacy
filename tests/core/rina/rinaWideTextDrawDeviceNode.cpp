@@ -114,10 +114,14 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
+		TypeCast<tWideTextInputPinInterface*>(*i)->ClearRenderRequests();
 		tQueueNode * new_pin_node =
 			new tWideTextInputPinQueueNode(new_parent,
 				TypeCast<tWideTextInputPinInterface*>(*i)->GetInheritableProperties());
-		(*i)->SetParentQueueNode(new_pin_node);
+		tWideTextInputPinInterface::tRenderRequest req;
+	//	req.Area = 
+		req.ParentQueueNode = new_pin_node;
+		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
 

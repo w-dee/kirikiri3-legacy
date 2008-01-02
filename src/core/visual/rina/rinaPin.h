@@ -103,10 +103,6 @@ public:
 	void SetParentQueueNode(tQueueNode * node)
 		{ ParentQueueNode = node; }
 
-	//! @brief		キュー組み立て時に親となるキューノードを取得する
-	//! @return		親となるキューノード
-	tQueueNode * GetParentQueueNode() const { return ParentQueueNode; }
-
 	//! @brief		最新の情報が設定されたレンダリング世代を設定する
 	//! @param		gen		最新の情報が設定されたレンダリング世代
 	void SetRenderGeneration(tIdRegistry::tRenderGeneration gen) { RenderGeneration = gen; }
@@ -125,7 +121,7 @@ public:
 	//!				実際に接続したりはしない。
 	//! @note		出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
 	//!				入力ピンと出力ピンに対して行う SuggestType() のうち、
-	//! @note		片方が strong_suggest を真にした場合は
+	//!				片方が strong_suggest を真にした場合は
 	//!				そちらの結果が優先される。両方とも strong_suggest を真にした場合や
 	//!				両方とも偽の場合は入力ピンの結果が優先される。
 	//!				どちらかが 0 (提案なし) を返した場合は 0 が帰る。

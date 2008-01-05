@@ -90,7 +90,7 @@ tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
 void tWideTextMixerNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	tWideTextInputPin * newpin = new tWideTextInputPin();
+	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
 	newpin->Attach(this);
 	InputPins.insert(InputPins.begin() + n, newpin);
 }
@@ -109,7 +109,7 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::BuildQueue(tRenderState * state)
 {
-	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL, InheritableProperties);
+	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -127,19 +127,16 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
 		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new_parent->AddParent(i->ParentQueueNode);
+				new_parent->AddParent(*i);
 	}
 
 	// 入力ピンに情報を設定
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
-		tQueueNode * new_pin_node =
-			new tWideTextInputPinQueueNode(new_parent, TypeCast<tWideTextInputPin*>(*i)->GetInheritableProperties());
-		(*i)->SetParentQueueNode(new_pin_node);
-		tWideTextInputPinInterface::tRenderRequest req;
-	//	req.Area = 
-		req.ParentQueueNode = new_pin_node;
+		tWideTextMixerRenderRequest * req =
+			new tWideTextMixerRenderRequest(new_parent, t1DArea(),
+				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
@@ -154,8 +151,8 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 
 
 //---------------------------------------------------------------------------
-tWideTextMixerQueueNode::tWideTextMixerQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop) :
-	inherited(parent, prop, tString())
+tWideTextMixerQueueNode::tWideTextMixerQueueNode(tWideTextRenderRequest * request) :
+	inherited(request, tString())
 {
 	Canvas = NULL;
 }
@@ -179,13 +176,15 @@ void tWideTextMixerQueueNode::BeginProcess()
 void tWideTextMixerQueueNode::EndProcess()
 {
 	// 子ノードを合成する
-	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
+	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
 		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(*i);
+		const tWideTextMixerRenderRequest * req =
+			static_cast<const tWideTextMixerRenderRequest*>((*i)->GetRenderRequest(this));
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
-		risse_int32 pos = provider->GetInheritableProperties().GetPosition();
+		risse_int32 pos = req->GetInheritableProperties().GetPosition();
 		RISSE_ASSERT(pos >= 0);
 		RISSE_ASSERT(pos + text_size < CanvasSize);
 		for(risse_size i = 0 ; i < text_size; i++)

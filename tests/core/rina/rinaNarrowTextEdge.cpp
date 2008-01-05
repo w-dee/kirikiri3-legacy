@@ -90,28 +90,6 @@ const gc_vector<risse_uint32> & tNarrowTextOutputPin::GetSupportedTypes()
 
 
 
-//---------------------------------------------------------------------------
-const tTextInheritableProperties & tNarrowTextInputPinQueueNode::GetInheritableProperties()
-{
-	RISSE_ASSERT(Children.size() == 1);
-	InheritedProperty = TypeCast<tNarrowTextDataInterface*>(Children[0])->GetInheritableProperties() + InheritableProperties;
-	return InheritedProperty;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-const char * tNarrowTextInputPinQueueNode::GetText()
-{
-	RISSE_ASSERT(Children.size() == 1);
-	return TypeCast<tNarrowTextDataInterface*>(Children[0])->GetText();
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
 
 
 //---------------------------------------------------------------------------

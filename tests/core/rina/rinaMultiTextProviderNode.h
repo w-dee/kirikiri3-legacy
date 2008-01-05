@@ -34,16 +34,11 @@ class tMultiTextProviderNode : public tProcessNode
 
 	tMultiTextOutputPin * OutputPin; //!< 出力ピン
 
-	tTextInheritableProperties InheritableProperties; //!< テキストの継承可能なプロパティ
 	tString Caption; //!< 表示するテキスト(キャプション)
 
 public:
 	//! @brief		コンストラクタ
 	tMultiTextProviderNode();
-
-	//! @brief		継承可能プロパティを取得する
-	//! @return		継承可能プロパティ
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション

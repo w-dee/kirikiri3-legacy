@@ -34,15 +34,11 @@ class tWideTextProviderNode : public tProcessNode
 
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
 
-	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 	tString Caption; //!< 表示するテキスト(キャプション)
 
 public:
 	//! @brief		コンストラクタ
 	tWideTextProviderNode();
-
-	//! @brief		継承可能プロパティを得る
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション
@@ -107,20 +103,15 @@ class tWideTextProviderQueueNode : public tWideTextQueueNode
 	typedef tWideTextQueueNode inherited;
 
 protected:
-	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 	tString Text; //!< テキスト
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	//! @param		prop		継承可能なプロパティ
-	//! @param		text	テキスト
-	tWideTextProviderQueueNode(tQueueNode * parent,	const tTextInheritableProperties & prop, const tString & text) :
-		inherited(parent),
-		InheritableProperties(prop), Text(text) {;}
-
-	//! @brief		継承可能プロパティを得る
-	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+	//! @param		request		レンダリング要求
+	//! @param		text		テキスト
+	tWideTextProviderQueueNode(const tWideTextRenderRequest * request, const tString & text) :
+		inherited(request),
+		Text(text) {;}
 
 	//! @brief		テキストを得る
 	//! @return		テキスト

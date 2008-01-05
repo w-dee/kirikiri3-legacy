@@ -130,7 +130,7 @@ void tNarrowTextProviderNode::BuildQueue(tRenderState * state)
 			TypeCast<tNarrowTextInputPinInterface*>(*i)->GetRenderRequests();
 		for(tNarrowTextInputPinInterface::tRenderRequests::const_iterator i =
 			requests.begin(); i != requests.end(); i ++)
-			new tNarrowTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
+			new tNarrowTextProviderQueueNode(*i, Caption);
 	}
 }
 //---------------------------------------------------------------------------

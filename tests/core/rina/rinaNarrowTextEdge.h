@@ -44,6 +44,53 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		親ノードから子ノードへ要求するデータの内容(レンダリング要求)
+//---------------------------------------------------------------------------
+class tNarrowTextRenderRequest : public tRenderRequest
+{
+	typedef tRenderRequest inherited;
+
+	t1DArea		Area; //!< 範囲
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		parent		親キューノード
+	//! @param		area		要求範囲
+	tNarrowTextRenderRequest(tQueueNode * parent, const t1DArea & area) :
+		inherited(parent), Area(area) {;}
+
+	//! @brief		要求範囲を得る
+	const t1DArea & GetArea() const { return Area; }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ミキサ(あるいはdrawdevice)用の親ノードから子ノードへ要求するデータの内容
+//---------------------------------------------------------------------------
+class tNarrowTextMixerRenderRequest : public tNarrowTextRenderRequest
+{
+	typedef tNarrowTextRenderRequest inherited;
+
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		area		要求範囲
+	//! @param		pops		プロパティ
+	tNarrowTextMixerRenderRequest(tQueueNode * parent, const t1DArea & area, const tTextInheritableProperties & props) :
+		inherited(parent, area), InheritableProperties(props) {;}
+
+	//! @brief		継承可能なプロパティを得る
+	//! @return		継承可能なプロパティ
+	const tTextInheritableProperties & GetInheritableProperties() const { return InheritableProperties; }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		ナローテキストの入力ピン用インターフェース
 //---------------------------------------------------------------------------
 class tNarrowTextInputPinInterface : public tOutputPin
@@ -51,21 +98,10 @@ class tNarrowTextInputPinInterface : public tOutputPin
 public:
 	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
 
-	//! @brief		親ノードから子ノードへ要求するデータの内容
-	struct tRenderRequest
-	{
-		t1DArea		Area; //!< 範囲
-		tQueueNode * ParentQueueNode; //!< 親のキューノード
-	};
-
 	//! @brief		tRequestInfo の配列の typedef
-	typedef gc_vector<tRenderRequest> tRenderRequests;
+	typedef gc_vector<const tNarrowTextRenderRequest*> tRenderRequests;
 
 public:
-	//! @brief		継承可能なプロパティを得る
-	//! @return		継承可能なプロパティ
-	virtual tTextInheritableProperties & GetInheritableProperties() = 0;
-
 	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
 	//! return		親ノードから子ノードへ要求するデータの配列
 	virtual const tRenderRequests & GetRenderRequests() = 0;
@@ -75,9 +111,10 @@ public:
 
 	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
 	//! @param		req			要求データ
-	virtual void AddRenderRequest(const tRenderRequest & req) = 0;
+	virtual void AddRenderRequest(const tNarrowTextRenderRequest * req) = 0;
 };
 //---------------------------------------------------------------------------
+
 
 
 
@@ -89,8 +126,6 @@ public:
 class tNarrowTextInputPin : public tInputPin, public tNarrowTextInputPinInterface
 {
 	typedef tInputPin inherited;
-
-	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
 	tRenderRequests RenderRequests; //!< 親ノードから子ノードへ要求するデータの配列
 
@@ -109,10 +144,6 @@ public:
 	//! @return		そのインターフェース(NULL=対応していない)
 	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextInputPinInterface*)this; else return NULL; }
 
-	//! @brief		継承可能なプロパティを得る
-	//! @return		継承可能なプロパティ
-	virtual tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
-
 	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
 	//! return		親ノードから子ノードへ要求するデータの配列
 	virtual const tRenderRequests & GetRenderRequests() { return RenderRequests; }
@@ -122,7 +153,29 @@ public:
 
 	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
 	//! @param		req			要求データ
-	void AddRenderRequest(const tRenderRequest & req) { RenderRequests.push_back(req); }
+	void AddRenderRequest(const tNarrowTextRenderRequest * req) { RenderRequests.push_back(req); }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ミキサ(あるいはdrawdevice)用入力ピン
+//---------------------------------------------------------------------------
+class tNarrowTextMixerInputPin : public tNarrowTextInputPin
+{
+	typedef tNarrowTextInputPin inherited;
+
+	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
+
+public:
+	//! @brief		コンストラクタ
+	tNarrowTextMixerInputPin() : tNarrowTextInputPin() { ; }
+
+	//! @brief		継承可能なプロパティを得る
+	//! @return		継承可能なプロパティ
+	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
 };
 //---------------------------------------------------------------------------
 
@@ -155,10 +208,6 @@ class tNarrowTextDataInterface : public tCollectee
 public:
 	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
 
-	//! @brief		継承可能プロパティを得る
-	//! @return		継承可能プロパティ
-	virtual const tTextInheritableProperties & GetInheritableProperties() = 0;
-
 	//! @brief		テキストを得る
 	//! @return		テキスト
 	virtual const char * GetText() = 0;
@@ -167,20 +216,18 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストコマンドキュー
+//! @brief		ナロー文字列用のテキストコマンドキュー
 //---------------------------------------------------------------------------
 class tNarrowTextQueueNode : public tQueueNode, public tNarrowTextDataInterface
 {
 	typedef tQueueNode inherited;
 
-protected:
-
 public:
 
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	tNarrowTextQueueNode(tQueueNode * parent) :
-		inherited(parent) {;}
+	//! @param		request		レンダリング要求
+	tNarrowTextQueueNode(const tNarrowTextRenderRequest * request) :
+		inherited(request) {;}
 
 	//! @brief		インターフェースを返す
 	//! @param		type		返すインターフェースに対応するエッジタイプ
@@ -196,47 +243,6 @@ protected: //!< サブクラスでオーバーライドして使う物
 	virtual void EndProcess() {;}
 };
 //---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		入力ピン用のテキストコマンドキュー
-//---------------------------------------------------------------------------
-class tNarrowTextInputPinQueueNode : public tNarrowTextQueueNode
-{
-	typedef tNarrowTextQueueNode inherited;
-
-protected:
-	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
-	tTextInheritableProperties		InheritedProperty; //!< 継承されたプロパティ TODO: これ非効率
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	//! @param		prop		継承可能なプロパティ
-	tNarrowTextInputPinQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop) :
-		inherited(parent), InheritableProperties(prop) {;}
-
-	//! @brief		継承可能プロパティを得る
-	//! @return		継承可能プロパティ
-	virtual const tTextInheritableProperties & GetInheritableProperties();
-
-	//! @brief		テキストを得る
-	//! @return		テキスト
-	virtual const char * GetText();
-
-protected: //!< サブクラスでオーバーライドして使う物
-
-	//! @brief		ノードの処理の最初に行う処理
-	virtual void BeginProcess() {;}
-
-	//! @brief		ノードの処理の最後に行う処理
-	virtual void EndProcess() {;}
-};
-//---------------------------------------------------------------------------
-
-
 
 
 

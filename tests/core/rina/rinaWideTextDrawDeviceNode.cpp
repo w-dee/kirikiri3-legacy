@@ -89,7 +89,7 @@ tInputPin * tWideTextDrawDeviceNode::GetInputPinAt(risse_size n)
 void tWideTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	tWideTextInputPin * newpin = new tWideTextInputPin();
+	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
 	newpin->Attach(this);
 	InputPins.insert(InputPins.begin() + n, newpin);
 }
@@ -115,12 +115,9 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		TypeCast<tWideTextInputPinInterface*>(*i)->ClearRenderRequests();
-		tQueueNode * new_pin_node =
-			new tWideTextInputPinQueueNode(new_parent,
-				TypeCast<tWideTextInputPinInterface*>(*i)->GetInheritableProperties());
-		tWideTextInputPinInterface::tRenderRequest req;
-	//	req.Area = 
-		req.ParentQueueNode = new_pin_node;
+		tWideTextMixerRenderRequest * req =
+			new tWideTextMixerRenderRequest(new_parent, t1DArea(),
+				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
 	}
@@ -138,7 +135,8 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 
 
 //---------------------------------------------------------------------------
-tWideTextDrawDeviceQueueNode::tWideTextDrawDeviceQueueNode(tQueueNode * parent) : inherited(parent)
+tWideTextDrawDeviceQueueNode::tWideTextDrawDeviceQueueNode(
+				tWideTextRenderRequest * request) : inherited(request)
 {
 	Canvas = NULL;
 }
@@ -162,13 +160,15 @@ void tWideTextDrawDeviceQueueNode::BeginProcess()
 void tWideTextDrawDeviceQueueNode::EndProcess()
 {
 	// 子ノードを合成する
-	for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
+	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
 		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(*i);
+		const tWideTextMixerRenderRequest * req =
+			static_cast<const tWideTextMixerRenderRequest*>((*i)->GetRenderRequest(this));
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
-		risse_int32 pos = provider->GetInheritableProperties().GetPosition();
+		risse_int32 pos = req->GetInheritableProperties().GetPosition();
 	wxFprintf(stderr, wxT("child %d at %d: %s\n"), (int)(i-Children.begin()), (int)pos, text.AsWxString().c_str());
 		RISSE_ASSERT(pos >= 0);
 		RISSE_ASSERT(pos + text_size < CanvasSize);

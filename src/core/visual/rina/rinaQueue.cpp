@@ -23,15 +23,15 @@ RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);
 
 
 //---------------------------------------------------------------------------
-tQueueNode::tQueueNode(tQueueNode * parent)
+tQueueNode::tQueueNode(const tRenderRequest * request)
 {
 	WaitingChildren = 0;
 	WaitingParents = 0;
 
-	if(parent)
+	if(request)
 	{
-		parent->AddChild(this);
-		Parents.push_back(parent);
+		request->GetParent()->AddChild(this);
+		Parents.push_back(request);
 		WaitingParents ++;
 	}
 }
@@ -48,7 +48,7 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 
 		// Children の WaitingParents をデクリメントする。
 		// それが 0 になった子は(依存関係が解決された子は)キューに push する。
-		for(tNodes::iterator i = Children.begin(); i != Children.end(); i++)
+		for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 		{
 			if(-- (*i)->WaitingParents == 0) // TODO: アトミックなデクリメント
 				queue->Push(*i, true);
@@ -67,10 +67,11 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 
 		// Parents の WaitingChildren をデクリメントする。
 		// それが 0 になった親は(依存関係が解決された親は)キューに push する。
-		for(tNodes::iterator i = Parents.begin(); i != Parents.end(); i++)
+		for(tParents::iterator i = Parents.begin(); i != Parents.end(); i++)
 		{
-			if(-- (*i)->WaitingChildren == 0) // TODO: アトミックなデクリメント
-				queue->Push(*i, false);
+			tQueueNode * parent = (*i)->GetParent();
+			if(-- parent->WaitingChildren == 0) // TODO: アトミックなデクリメント
+				queue->Push(parent, false);
 		}
 	}
 }
@@ -78,10 +79,22 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::AddParent(tQueueNode * parent)
+const tRenderRequest * tQueueNode::GetRenderRequest(const tQueueNode * node) const
 {
-	parent->AddChild(this);
-	Parents.push_back(parent);
+	// TODO: もっと効率の良い実装
+	for(tParents::const_iterator i = Parents.begin(); i != Parents.end(); i++)
+		if((*i)->GetParent() == node) return *i;
+
+	return NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tQueueNode::AddParent(const tRenderRequest * request)
+{
+	request->GetParent()->AddChild(this);
+	Parents.push_back(request);
 	WaitingParents++;
 }
 //---------------------------------------------------------------------------

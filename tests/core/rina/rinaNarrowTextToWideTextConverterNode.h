@@ -96,6 +96,7 @@ class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNod
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		request		レンダリング要求
 	tNarrowTextToWideTextConverterQueueNode();
 
 protected: //!< サブクラスでオーバーライドして使う物

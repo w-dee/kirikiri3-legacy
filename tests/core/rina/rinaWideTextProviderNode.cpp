@@ -119,7 +119,7 @@ void tWideTextProviderNode::BuildQueue(tRenderState * state)
 			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
 		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
 			requests.begin(); i != requests.end(); i ++)
-			new tWideTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
+			new tWideTextProviderQueueNode(*i, Caption);
 	}
 }
 //---------------------------------------------------------------------------

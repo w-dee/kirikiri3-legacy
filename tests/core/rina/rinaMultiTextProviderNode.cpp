@@ -127,7 +127,7 @@ void tMultiTextProviderNode::BuildQueue(tRenderState * state)
 				TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
 			for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tWideTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption);
+				new tWideTextProviderQueueNode(*i, Caption);
 		}
 		else if(target_type == NarrowTextEdgeType)
 		{
@@ -136,7 +136,7 @@ void tMultiTextProviderNode::BuildQueue(tRenderState * state)
 				TypeCast<tNarrowTextInputPinInterface*>(*i)->GetRenderRequests();
 			for(tNarrowTextInputPinInterface::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tNarrowTextProviderQueueNode(i->ParentQueueNode, InheritableProperties, Caption.AsNarrowString());
+				new tNarrowTextProviderQueueNode(*i, Caption.AsNarrowString());
 		}
 	}
 }

@@ -91,27 +91,6 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 
 
 
-//---------------------------------------------------------------------------
-const tTextInheritableProperties & tWideTextInputPinQueueNode::GetInheritableProperties()
-{
-	RISSE_ASSERT(Children.size() == 1);
-	InheritedProperty = TypeCast<tWideTextDataInterface*>(Children[0])->GetInheritableProperties() + InheritableProperties;
-	return InheritedProperty;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-const tString & tWideTextInputPinQueueNode::GetText()
-{
-	RISSE_ASSERT(Children.size() == 1);
-	return TypeCast<tWideTextDataInterface*>(Children[0])->GetText();
-}
-//---------------------------------------------------------------------------
-
-
-
-
 
 
 

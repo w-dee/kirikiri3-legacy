@@ -109,9 +109,8 @@ class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	//! @param		prop		継承可能プロパティ
-	tWideTextMixerQueueNode(tQueueNode * parent, const tTextInheritableProperties & prop);
+	//! @param		request		レンダリング要求
+	tWideTextMixerQueueNode(tWideTextRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

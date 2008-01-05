@@ -17,7 +17,7 @@
 
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
-
+#include "rinaWideTextEdge.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -100,8 +100,8 @@ class tWideTextDrawDeviceQueueNode : public tQueueNode
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	tWideTextDrawDeviceQueueNode(tQueueNode * parent);
+	//! @param		request		レンダリング要求
+	tWideTextDrawDeviceQueueNode(tWideTextRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

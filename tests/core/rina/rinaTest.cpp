@@ -52,52 +52,54 @@ tTester::tTester()
 //---------------------------------------------------------------------------
 void tTester::Test()
 {
+	tWideTextDrawDeviceNode * dd_node = new tWideTextDrawDeviceNode();
+
 	tWideTextProviderNode * provider_node1 = new tWideTextProviderNode();
-	provider_node1->GetInheritableProperties().SetPosition(1);
 	provider_node1->SetCaption(RISSE_WS("aaa"));
+	dd_node->InsertInputPinAt(0);
+	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(0))->
+		GetInheritableProperties().SetPosition(1);
 
 	tWideTextProviderNode * provider_node2 = new tWideTextProviderNode();
-	provider_node2->GetInheritableProperties().SetPosition(5);
 	provider_node2->SetCaption(RISSE_WS("bbb"));
-
-	tWideTextDrawDeviceNode * dd_node = new tWideTextDrawDeviceNode();
-	dd_node->InsertInputPinAt(0);
 	dd_node->InsertInputPinAt(1);
-
-	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(1))->
+		GetInheritableProperties().SetPosition(5);
 
 	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
 
 	tWideTextMixerNode * mixer_node = new tWideTextMixerNode();
-	mixer_node->GetInheritableProperties().SetPosition(9);
 
 	tWideTextProviderNode * provider_node3 = new tWideTextProviderNode();
-	provider_node3->GetInheritableProperties().SetPosition(0);
 	provider_node3->SetCaption(RISSE_WS("ccc"));
+	mixer_node->InsertInputPinAt(0);
+	mixer_node->GetInputPinAt(0)->Connect(provider_node3->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(0))->
+		GetInheritableProperties().SetPosition(0);
 
 	tWideTextProviderNode * provider_node4 = new tWideTextProviderNode();
-	provider_node4->GetInheritableProperties().SetPosition(4);
 	provider_node4->SetCaption(RISSE_WS("ddd"));
+	mixer_node->InsertInputPinAt(1);
+	mixer_node->GetInputPinAt(1)->Connect(provider_node4->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(1))->
+		GetInheritableProperties().SetPosition(4);
 
 	tMultiTextProviderNode * provider_node5 = new tMultiTextProviderNode();
-	provider_node5->GetInheritableProperties().SetPosition(8);
 	provider_node5->SetCaption(RISSE_WS("mmm"));
-
-	mixer_node->InsertInputPinAt(0);
-	mixer_node->InsertInputPinAt(1);
 	mixer_node->InsertInputPinAt(2);
-
-	mixer_node->GetInputPinAt(0)->Connect(provider_node3->GetOutputPinAt(0));
-	mixer_node->GetInputPinAt(1)->Connect(provider_node4->GetOutputPinAt(0));
 	mixer_node->GetInputPinAt(2)->Connect(provider_node5->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(2))->
+		GetInheritableProperties().SetPosition(8);
 
 	dd_node->InsertInputPinAt(2);
 	dd_node->GetInputPinAt(2)->Connect(mixer_node->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(2))->
+		GetInheritableProperties().SetPosition(9);
 
 
 	tNarrowTextProviderNode * narrow_provider_node = new tNarrowTextProviderNode();
-	narrow_provider_node->GetInheritableProperties().SetPosition(21);
 	narrow_provider_node->SetCaption("narrow");
 
 	tNarrowTextToWideTextConverterNode * converter_node1 = new tNarrowTextToWideTextConverterNode();
@@ -105,11 +107,10 @@ void tTester::Test()
 
 	dd_node->InsertInputPinAt(3);
 	dd_node->GetInputPinAt(3)->Connect(converter_node1->GetOutputPinAt(0));
-
-
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(3))->
+		GetInheritableProperties().SetPosition(21);
 
 	tMultiTextProviderNode * multi_provider_node = new tMultiTextProviderNode();
-	multi_provider_node->GetInheritableProperties().SetPosition(30);
 	multi_provider_node->SetCaption(RISSE_WS("multi"));
 
 	tNarrowTextToWideTextConverterNode * converter_node2 = new tNarrowTextToWideTextConverterNode();
@@ -117,14 +118,18 @@ void tTester::Test()
 
 	dd_node->InsertInputPinAt(4);
 	dd_node->GetInputPinAt(4)->Connect(converter_node2->GetOutputPinAt(0));
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(4))->
+		GetInheritableProperties().SetPosition(30);
 
 	dd_node->InsertInputPinAt(5);
 	dd_node->GetInputPinAt(5)->Connect(converter_node1->GetOutputPinAt(0));
-	TypeCast<tWideTextInputPinInterface*>(dd_node->GetInputPinAt(5))->GetInheritableProperties().SetPosition(16);
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(5))->
+		GetInheritableProperties().SetPosition(46);
 
 	dd_node->InsertInputPinAt(6);
 	dd_node->GetInputPinAt(6)->Connect(mixer_node->GetOutputPinAt(0));
-	TypeCast<tWideTextInputPinInterface*>(dd_node->GetInputPinAt(6))->GetInheritableProperties().SetPosition(37);
+	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
+		GetInheritableProperties().SetPosition(37);
 
 
 	// render

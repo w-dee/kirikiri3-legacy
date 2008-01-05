@@ -34,6 +34,26 @@ namespace Rina {
 	末端のEndProcessからルートのEndProcessへの順に実行が行われる。
 */
 
+class tQueueNode;
+//---------------------------------------------------------------------------
+//! @brief		レンダリング要求の基底クラス
+//---------------------------------------------------------------------------
+class tRenderRequest : public tCollectee
+{
+	typedef tCollectee inherited;
+
+	tQueueNode * Parent; //!< 親キューノード
+public:
+	tRenderRequest(tQueueNode * parent) : Parent(parent) {;}
+
+	//! @brief		親キューノードを得る
+	//! @return		親キューノード
+	tQueueNode * GetParent() const { return Parent; }
+};
+//---------------------------------------------------------------------------
+
+
+
 class tCommandQueue;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューノード
@@ -43,17 +63,18 @@ class tQueueNode : public tCollectee
 	typedef tCollectee inherited;
 
 protected:
-	typedef gc_vector<tQueueNode*> tNodes; //!< 子ノードの配列のtypedef
-	tNodes Children; //!< 子ノード
-	tNodes Parents; //!< 親ノード
+	typedef gc_vector<tQueueNode*> tChildren; //!< 子ノードの配列のtypedef
+	typedef gc_vector<const tRenderRequest*> tParents; //!< レンダリング要求(親ノード)の配列のtypedef
+	tChildren Children; //!< 子ノード
+	tParents Parents; //!< 親ノード
 
 	risse_size WaitingChildren; //!< 子ノードを待っているカウント
-	risse_size WaitingParents; //!< 親ノードを待っているカウント TODO: より効率的な実装
+	risse_size WaitingParents; //!< 親キューノードを待っているカウント TODO: より効率的な実装
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		parent		親ノード
-	tQueueNode(tQueueNode * parent);
+	//! @param		request		レンダリング要求
+	tQueueNode(const tRenderRequest * request);
 
 	//! @brief		デストラクタ (おそらく呼ばれない)
 	virtual ~tQueueNode() {;}
@@ -63,9 +84,14 @@ public:
 	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
 	void Process(tCommandQueue * queue, bool is_begin);
 
-	//! @brief		ノードの親を追加する
-	//! @param		child		親
-	void AddParent(tQueueNode * parent);
+	//! @brief		親に対応するレンダリング要求を得る
+	//! @param		node		親ノード
+	//! @return		その親ノードを指し示しているレンダリング要求
+	const tRenderRequest * GetRenderRequest(const tQueueNode * node) const;
+
+	//! @brief		ノードの親とレンダリング要求を追加する
+	//! @param		parent		親
+	void AddParent(const tRenderRequest * request);
 
 	//! @brief		インターフェースを返す
 	//! @param		type		返すインターフェースに対応するエッジタイプ

@@ -127,20 +127,16 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
 		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new_parent->AddParent(i->ParentQueueNode);
+				new_parent->AddParent(*i);
 	}
 
 	// 入力ピンに情報を設定
 	// 変換コストが極端に高い場合は
 	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
 	// 必要かもしれないがここではそれは考えない
-	tQueueNode * new_pin_node =
-			new tNarrowTextInputPinQueueNode(new_parent, TypeCast<tNarrowTextInputPinInterface*>(InputPin)->GetInheritableProperties());
 	InputPin->SetRenderGeneration(state->GetRenderGeneration());
 	InputPin->ClearRenderRequests();
-	tNarrowTextInputPinInterface::tRenderRequest req;
-//	req.Area = 
-	req.ParentQueueNode = new_pin_node;
+	tNarrowTextRenderRequest * req = new tNarrowTextRenderRequest(new_parent, t1DArea());
 	InputPin->AddRenderRequest(req);
 	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
 }
@@ -162,7 +158,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 
 //---------------------------------------------------------------------------
 tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode() :
-	inherited(NULL, tTextInheritableProperties(), tString())
+					inherited(NULL, tString())
 {
 }
 //---------------------------------------------------------------------------
@@ -183,11 +179,8 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 
 	tNarrowTextDataInterface * child = TypeCast<tNarrowTextDataInterface*>(Children[0]);
 
-
 	// 結果をPositionとTextに格納
-	InheritableProperties += child->GetInheritableProperties();
 	Text = tString(child->GetText());
-wxFprintf(stderr, wxT("converter: child: %s\n"), Text.AsWxString().c_str());
 }
 //---------------------------------------------------------------------------
 

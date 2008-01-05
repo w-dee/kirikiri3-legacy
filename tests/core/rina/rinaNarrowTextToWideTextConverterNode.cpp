@@ -136,7 +136,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 	// 必要かもしれないがここではそれは考えない
 	InputPin->SetRenderGeneration(state->GetRenderGeneration());
 	InputPin->ClearRenderRequests();
-	tNarrowTextRenderRequest * req = new tNarrowTextRenderRequest(new_parent, t1DArea());
+	tNarrowTextRenderRequest * req = new tNarrowTextRenderRequest(new_parent, 0, t1DArea());
 	InputPin->AddRenderRequest(req);
 	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
 }
@@ -177,7 +177,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	// 子ノードを変換する
 	RISSE_ASSERT(Children.size() == 1);
 
-	tNarrowTextDataInterface * child = TypeCast<tNarrowTextDataInterface*>(Children[0]);
+	tNarrowTextDataInterface * child = TypeCast<tNarrowTextDataInterface*>(Children[0].GetChild());
 
 	// 結果をPositionとTextに格納
 	Text = tString(child->GetText());

@@ -43,12 +43,56 @@ class tRenderRequest : public tCollectee
 	typedef tCollectee inherited;
 
 	tQueueNode * Parent; //!< 親キューノード
+	risse_size Index; //!< 親キューノード内でのインデックス
+
 public:
-	tRenderRequest(tQueueNode * parent) : Parent(parent) {;}
+	//! @brief		コンストラクタ
+	//! @param		parent		親キューノード
+	//! @param		index		親キューノード内でのインデックス
+	tRenderRequest(tQueueNode * parent, risse_size index) : Parent(parent), Index(index) {;}
 
 	//! @brief		親キューノードを得る
 	//! @return		親キューノード
 	tQueueNode * GetParent() const { return Parent; }
+
+	//! @brief		親キューノード内でのインデックスを得る
+	//! @return		親キューノード内でのインデックス
+	risse_size GetIndex() const { return Index; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		子ノードの情報
+//---------------------------------------------------------------------------
+class tQueueNodeChild : public tCollectee
+{
+	typedef tCollectee inherited;
+
+	tQueueNode * Child; //!< 子キューノード
+	const tRenderRequest * RenderRequest; //!< 子キューノードが保持していたレンダリング要求の情報
+
+public:
+	//! @brief		デフォルトコンストラクタ
+	tQueueNodeChild() : Child(NULL), RenderRequest(NULL) {;}
+
+	//! @brief		コンストラクタ
+	//! @param		child		子キューノード
+	//! @param		request		子キューノードが保持していたレンダリング要求の情報
+	tQueueNodeChild(tQueueNode * child, const tRenderRequest * request = NULL) :
+		Child(child), RenderRequest(request) {;}
+
+	//! @brief		子キューノードを得る
+	//! @return		子キューノード
+	tQueueNode * GetChild() const { return Child; }
+
+	//! @brief		子キューノードが保持していたレンダリング要求の情報を設定する
+	//! @param		request		子キューノードが保持していたレンダリング要求の情報
+	void SetRenderRequest(const tRenderRequest * request) { RenderRequest = request; }
+
+	//! @brief		子キューノードが保持していたレンダリング要求の情報を得る
+	//! @return		子キューノードが保持していたレンダリング要求の情報
+	const tRenderRequest * GetRenderRequest() const { return RenderRequest; }
 };
 //---------------------------------------------------------------------------
 
@@ -63,7 +107,7 @@ class tQueueNode : public tCollectee
 	typedef tCollectee inherited;
 
 protected:
-	typedef gc_vector<tQueueNode*> tChildren; //!< 子ノードの配列のtypedef
+	typedef gc_vector<tQueueNodeChild> tChildren; //!< 子ノードの配列のtypedef
 	typedef gc_vector<const tRenderRequest*> tParents; //!< レンダリング要求(親ノード)の配列のtypedef
 	tChildren Children; //!< 子ノード
 	tParents Parents; //!< 親ノード
@@ -100,8 +144,13 @@ public:
 
 protected:
 	//! @brief		ノードの子を追加する
+	//! @param		index		インデックス
 	//! @param		child		子
-	void AddChild(tQueueNode * child);
+	void AddChild(risse_size index, tQueueNode * child);
+
+	//! @brief		指定インデックスの子ノードのレンダリング要求情報を設定する
+	//! @param		request		レンダリング要求
+	void SetChildRenderRequest(const tRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

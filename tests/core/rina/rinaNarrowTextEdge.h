@@ -55,9 +55,10 @@ class tNarrowTextRenderRequest : public tRenderRequest
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親キューノード
+	//! @param		index		親キューノード内でのインデックス
 	//! @param		area		要求範囲
-	tNarrowTextRenderRequest(tQueueNode * parent, const t1DArea & area) :
-		inherited(parent), Area(area) {;}
+	tNarrowTextRenderRequest(tQueueNode * parent, risse_size index, const t1DArea & area) :
+		inherited(parent, index), Area(area) {;}
 
 	//! @brief		要求範囲を得る
 	const t1DArea & GetArea() const { return Area; }
@@ -77,10 +78,13 @@ class tNarrowTextMixerRenderRequest : public tNarrowTextRenderRequest
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		parent		親キューノード
+	//! @param		index		親キューノード内でのインデックス
 	//! @param		area		要求範囲
 	//! @param		pops		プロパティ
-	tNarrowTextMixerRenderRequest(tQueueNode * parent, const t1DArea & area, const tTextInheritableProperties & props) :
-		inherited(parent, area), InheritableProperties(props) {;}
+	tNarrowTextMixerRenderRequest(tQueueNode * parent, risse_size index, const t1DArea & area,
+		const tTextInheritableProperties & props) :
+		inherited(parent, index, area), InheritableProperties(props) {;}
 
 	//! @brief		継承可能なプロパティを得る
 	//! @return		継承可能なプロパティ

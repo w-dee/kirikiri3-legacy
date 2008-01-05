@@ -116,7 +116,7 @@ void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		TypeCast<tWideTextInputPinInterface*>(*i)->ClearRenderRequests();
 		tWideTextMixerRenderRequest * req =
-			new tWideTextMixerRenderRequest(new_parent, t1DArea(),
+			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
@@ -162,14 +162,13 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(*i);
+		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(i->GetChild());
 		const tWideTextMixerRenderRequest * req =
-			static_cast<const tWideTextMixerRenderRequest*>((*i)->GetRenderRequest(this));
+			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
 		risse_int32 pos = req->GetInheritableProperties().GetPosition();
-	wxFprintf(stderr, wxT("child %d at %d: %s\n"), (int)(i-Children.begin()), (int)pos, text.AsWxString().c_str());
 		RISSE_ASSERT(pos >= 0);
 		RISSE_ASSERT(pos + text_size < CanvasSize);
 		for(risse_size i = 0 ; i < text_size; i++)

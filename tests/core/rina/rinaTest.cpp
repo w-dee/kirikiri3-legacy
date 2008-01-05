@@ -119,7 +119,7 @@ void tTester::Test()
 	dd_node->InsertInputPinAt(4);
 	dd_node->GetInputPinAt(4)->Connect(converter_node2->GetOutputPinAt(0));
 	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(4))->
-		GetInheritableProperties().SetPosition(30);
+		GetInheritableProperties().SetPosition(28);
 
 	dd_node->InsertInputPinAt(5);
 	dd_node->GetInputPinAt(5)->Connect(converter_node1->GetOutputPinAt(0));
@@ -129,7 +129,7 @@ void tTester::Test()
 	dd_node->InsertInputPinAt(6);
 	dd_node->GetInputPinAt(6)->Connect(mixer_node->GetOutputPinAt(0));
 	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
-		GetInheritableProperties().SetPosition(37);
+		GetInheritableProperties().SetPosition(34);
 
 
 	// render

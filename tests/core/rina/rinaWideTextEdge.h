@@ -54,9 +54,10 @@ class tWideTextRenderRequest : public tRenderRequest
 public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親キューノード
+	//! @param		index		親キューノード内でのインデックス
 	//! @param		area		要求範囲
-	tWideTextRenderRequest(tQueueNode * parent, const t1DArea & area) :
-		inherited(parent), Area(area) {;}
+	tWideTextRenderRequest(tQueueNode * parent, risse_size index, const t1DArea & area) :
+		inherited(parent, index), Area(area) {;}
 
 	//! @brief		要求範囲を得る
 	const t1DArea & GetArea() const { return Area; }
@@ -77,9 +78,10 @@ class tWideTextMixerRenderRequest : public tWideTextRenderRequest
 public:
 	//! @brief		コンストラクタ
 	//! @param		area		要求範囲
+	//! @param		index		親キューノード内でのインデックス
 	//! @param		pops		プロパティ
-	tWideTextMixerRenderRequest(tQueueNode * parent, const t1DArea & area, const tTextInheritableProperties & props) :
-		inherited(parent, area), InheritableProperties(props) {;}
+	tWideTextMixerRenderRequest(tQueueNode * parent, risse_size index, const t1DArea & area, const tTextInheritableProperties & props) :
+		inherited(parent, index, area), InheritableProperties(props) {;}
 
 	//! @brief		継承可能なプロパティを得る
 	//! @return		継承可能なプロパティ

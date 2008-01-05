@@ -127,7 +127,7 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
 		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new_parent->AddParent(*i);
+			new_parent->AddParent(*i);
 	}
 
 	// 入力ピンに情報を設定
@@ -135,7 +135,7 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 	{
 		(*i)->SetRenderGeneration(state->GetRenderGeneration());
 		tWideTextMixerRenderRequest * req =
-			new tWideTextMixerRenderRequest(new_parent, t1DArea(),
+			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
 		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
@@ -178,9 +178,9 @@ void tWideTextMixerQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(*i);
+		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(i->GetChild());
 		const tWideTextMixerRenderRequest * req =
-			static_cast<const tWideTextMixerRenderRequest*>((*i)->GetRenderRequest(this));
+			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
 		const tString & text = provider->GetText();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();

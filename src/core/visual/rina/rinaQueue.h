@@ -86,10 +86,6 @@ public:
 	//! @return		子キューノード
 	tQueueNode * GetChild() const { return Child; }
 
-	//! @brief		子キューノードが保持していたレンダリング要求の情報を設定する
-	//! @param		request		子キューノードが保持していたレンダリング要求の情報
-	void SetRenderRequest(const tRenderRequest * request) { RenderRequest = request; }
-
 	//! @brief		子キューノードが保持していたレンダリング要求の情報を得る
 	//! @return		子キューノードが保持していたレンダリング要求の情報
 	const tRenderRequest * GetRenderRequest() const { return RenderRequest; }
@@ -128,11 +124,6 @@ public:
 	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
 	void Process(tCommandQueue * queue, bool is_begin);
 
-	//! @brief		親に対応するレンダリング要求を得る
-	//! @param		node		親ノード
-	//! @return		その親ノードを指し示しているレンダリング要求
-	const tRenderRequest * GetRenderRequest(const tQueueNode * node) const;
-
 	//! @brief		ノードの親とレンダリング要求を追加する
 	//! @param		parent		親
 	void AddParent(const tRenderRequest * request);
@@ -144,13 +135,9 @@ public:
 
 protected:
 	//! @brief		ノードの子を追加する
-	//! @param		index		インデックス
 	//! @param		child		子
-	void AddChild(risse_size index, tQueueNode * child);
-
-	//! @brief		指定インデックスの子ノードのレンダリング要求情報を設定する
 	//! @param		request		レンダリング要求
-	void SetChildRenderRequest(const tRenderRequest * request);
+	void AddChild(tQueueNode * child, const tRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

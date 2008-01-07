@@ -28,10 +28,7 @@ tQueueNode::tQueueNode(const tRenderRequest * request)
 	WaitingChildren = 0;
 	WaitingParents = 0;
 
-	if(request)
-	{
-		AddParent(request);
-	}
+	if(request) AddParent(request);
 }
 //---------------------------------------------------------------------------
 
@@ -64,13 +61,6 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 		// EndProcess を呼び出す
 		EndProcess();
 
-		// parents の該当子ノードに該当するレンダリング要求情報を設定する
-		for(tParents::iterator i = Parents.begin(); i != Parents.end(); i++)
-		{
-			tQueueNode * parent = (*i)->GetParent();
-			parent->SetChildRenderRequest(*i);
-		}
-
 		// Parents の WaitingChildren をデクリメントする。
 		// それが 0 になった親は(依存関係が解決された親は)キューに push する。
 		for(tParents::iterator i = Parents.begin(); i != Parents.end(); i++)
@@ -85,21 +75,9 @@ void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-const tRenderRequest * tQueueNode::GetRenderRequest(const tQueueNode * node) const
-{
-	// TODO: もっと効率の良い実装
-	for(tParents::const_iterator i = Parents.begin(); i != Parents.end(); i++)
-		if((*i)->GetParent() == node) return *i;
-
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 void tQueueNode::AddParent(const tRenderRequest * request)
 {
-	request->GetParent()->AddChild(request->GetIndex(), this);
+	request->GetParent()->AddChild(this, request);
 	Parents.push_back(request);
 	WaitingParents ++;
 }
@@ -107,23 +85,16 @@ void tQueueNode::AddParent(const tRenderRequest * request)
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::AddChild(risse_size index, tQueueNode * child)
+void tQueueNode::AddChild(tQueueNode * child, const tRenderRequest * request)
 {
+	risse_size index = request->GetIndex();
 	if(Children.size() <= index) Children.resize(index + 1);
-	Children[index] = tQueueNodeChild(child);
+	Children[index] = tQueueNodeChild(child, request);
 	WaitingChildren++;
 }
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-void tQueueNode::SetChildRenderRequest(const tRenderRequest * request)
-{
-	RISSE_ASSERT(request->GetIndex() < Children.size());
-	RISSE_ASSERT(request->GetParent() == this);
-	Children[request->GetIndex()].SetRenderRequest(request);
-}
-//---------------------------------------------------------------------------
 
 
 

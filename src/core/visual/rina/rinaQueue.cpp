@@ -34,7 +34,7 @@ tQueueNode::tQueueNode(const tRenderRequest * request)
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::Process(tCommandQueue * queue, bool is_begin)
+void tQueueNode::Process(tQueue * queue, bool is_begin)
 {
 	if(is_begin)
 	{
@@ -106,14 +106,14 @@ void tQueueNode::AddChild(tQueueNode * child, const tRenderRequest * request)
 
 
 //---------------------------------------------------------------------------
-tCommandQueue::tCommandQueue()
+tQueue::tQueue()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tCommandQueue::Process(tQueueNode * rootqueuenode)
+void tQueue::Process(tQueueNode * rootqueuenode)
 {
 	// ルートのキューノードを最初にキューに積む
 	Push(rootqueuenode, true);
@@ -133,7 +133,7 @@ void tCommandQueue::Process(tQueueNode * rootqueuenode)
 
 
 //---------------------------------------------------------------------------
-void tCommandQueue::Push(tQueueNode * node, bool is_begin)
+void tQueue::Push(tQueueNode * node, bool is_begin)
 {
 	tItem item;
 	item.Node = node;

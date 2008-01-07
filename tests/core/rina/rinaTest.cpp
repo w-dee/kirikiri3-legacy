@@ -135,9 +135,9 @@ void tTester::Test()
 	tQueueBuilder builder;
 	builder.Build(dd_node);
 
-	// キューを作成し終わったということでレンダリングを開始する
-	tCommandQueue command_queue;
-	command_queue.Process(builder.GetRootQueueNode());
+	// キューノードを作成し終わったということでレンダリングを開始する
+	tQueue queue;
+	queue.Process(builder.GetRootQueueNode());
 }
 //---------------------------------------------------------------------------
 

@@ -26,7 +26,7 @@ namespace Rina {
 	@note
 	コマンドキューとは言っても線形キューではなくて、依存関係を表せるように
 	DAGによる依存グラフを作成した後、それぞれの BeginProcess と EndProcess を
-	実行単位として 順々に tCommandQueue 内のキューに push していき、
+	実行単位として 順々に tQueue 内のキューに push していき、
 	キューからその実行単位を取り出しながら実行を行っていく。
 	DAGの各ノードは、依存しているノードが実行される前に実行したい内容である
 	BeginProcess と、依存しているノードが実行された後に実行したい内容である
@@ -94,7 +94,7 @@ public:
 
 
 
-class tCommandQueue;
+class tQueue;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューノード
 //---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ public:
 	//! @brief		ノードの処理を行う
 	//! @param		queue		コマンドキューインスタンス
 	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
-	void Process(tCommandQueue * queue, bool is_begin);
+	void Process(tQueue * queue, bool is_begin);
 
 	//! @brief		ノードの親とレンダリング要求を追加する
 	//! @param		parent		親
@@ -156,7 +156,7 @@ protected: //!< サブクラスでオーバーライドして使う物
 //---------------------------------------------------------------------------
 //! @brief		コマンドキュー
 //---------------------------------------------------------------------------
-class tCommandQueue : public tCollectee
+class tQueue : public tCollectee
 {
 	typedef tCollectee inherited;
 
@@ -172,7 +172,7 @@ class tCommandQueue : public tCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tCommandQueue();
+	tQueue();
 
 	//! @brief		処理を実行する
 	//! @param		node		ルートのプロセスノード

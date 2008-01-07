@@ -106,24 +106,24 @@ void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::BuildQueue(tRenderState * state)
+void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 {
 	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(NULL);
 
 	// 入力ピンに再帰
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
-		(*i)->SetRenderGeneration(state->GetRenderGeneration());
+		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		TypeCast<tWideTextInputPinInterface*>(*i)->ClearRenderRequests();
 		tWideTextMixerRenderRequest * req =
 			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
-		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
+		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
 
 	// ルートのキューノードはnew_parentであると主張(ここは後から修正するかも………)
-	state->SetRootQueueNode(new_parent);
+	builder.SetRootQueueNode(new_parent);
 }
 //---------------------------------------------------------------------------
 

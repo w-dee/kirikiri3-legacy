@@ -107,14 +107,14 @@ void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tMultiTextProviderNode::BuildQueue(tRenderState * state)
+void tMultiTextProviderNode::BuildQueue(tQueueBuilder & builder)
 {
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
 		i != OutputPin->GetInputPins().end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
-		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
 
 		// 入力ピンのタイプをチェックし、適切なキューノードを作成
 		risse_uint32 target_type = (*i)->GetAgreedType();

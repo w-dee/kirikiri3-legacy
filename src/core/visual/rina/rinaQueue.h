@@ -190,9 +190,9 @@ public:
 
 class tInputPin;
 //---------------------------------------------------------------------------
-//! @brief		レンダリングのステートを保持するオブジェクト
+//! @brief		コマンドキューを作成するためのオブジェクト
 //---------------------------------------------------------------------------
-class tRenderState : public tCollectee
+class tQueueBuilder : public tCollectee
 {
 	typedef tCollectee inherited;
 
@@ -209,23 +209,26 @@ class tRenderState : public tCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tRenderState();
+	tQueueBuilder();
 
 	//! @brief		レンダリング世代を得る
 	//! @return		レンダリング世代
 	tIdRegistry::tRenderGeneration GetRenderGeneration() const { return RenderGeneration; }
 
-	//! @brief		レンダリングを開始する
+	//! @brief		コマンドキューを作成する
 	//! @param		node		ルートのプロセスノード
-	void Render(tProcessNode * node);
+	void Build(tProcessNode * node);
 
 	//! @brief		キュー組み立てを行うための次のノードをpushする
 	//! @param		node		ノード
-	void PushNextBuildQueueNode(tProcessNode * node);
+	void Push(tProcessNode * node);
 
 	//! @brief		ルートとなるコマンドキューノードを登録する
 	//! @param		node	ルートとなるコマンドキューノード
 	void SetRootQueueNode(tQueueNode * node) { RootQueueNode = node; }
+
+	//! @brief		ルートキューノードを得る
+	tQueueNode * GetRootQueueNode() const { return RootQueueNode; }
 
 };
 //---------------------------------------------------------------------------

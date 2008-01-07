@@ -153,7 +153,7 @@ void tCommandQueue::Push(tQueueNode * node, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-tRenderState::tRenderState()
+tQueueBuilder::tQueueBuilder()
 {
 	RootQueueNode = NULL;
 	RenderGeneration = tIdRegistry::instance()->GetNewRenderGeneration();
@@ -162,7 +162,7 @@ tRenderState::tRenderState()
 
 
 //---------------------------------------------------------------------------
-void tRenderState::Render(tProcessNode * node)
+void tQueueBuilder::Build(tProcessNode * node)
 {
 	// root を Map に挿入
 	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
@@ -174,21 +174,18 @@ void tRenderState::Render(tProcessNode * node)
 	{
 		// 先頭、すなわち最長距離が最も小さいノードから処理を行う
 		tBuildQueueMap::iterator i = BuildQueueMap.begin();
-		i->first->BuildQueue(this);
+		i->first->BuildQueue(*this);
 			// この間に PushNextBuildQueueNode() が呼ばれる可能性があることに注意
 		BuildQueueMap.erase(i); // Map の場合は insert 後もイテレータは有効なのでここでeraseは可
 	}
 
-	// キューを作成し終わったということで
 	RISSE_ASSERT(RootQueueNode != NULL);
-	tCommandQueue command_queue;
-	command_queue.Process(RootQueueNode);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tRenderState::PushNextBuildQueueNode(tProcessNode * node)
+void tQueueBuilder::Push(tProcessNode * node)
 {
 	// insert 時にキーが同じ物、つまり同じノードインスタンスは
 	// 重複することはない。これにより同じノードインスタンスが２回以上

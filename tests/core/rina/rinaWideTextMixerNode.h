@@ -90,8 +90,8 @@ public: // サブクラスで実装すべき物
 	virtual void DeleteInputPinAt(risse_size n);
 
 	//! @brief		コマンドキューの組み立てを行う
-	//! @param		state			レンダリングステート
-	void BuildQueue(tRenderState * state);
+	//! @param		builder			キュービルダーオブジェクト
+	void BuildQueue(tQueueBuilder & builder);
 };
 //---------------------------------------------------------------------------
 

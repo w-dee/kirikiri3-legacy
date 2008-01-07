@@ -24,7 +24,7 @@ namespace Rina {
 class tInputPin;
 class tOutputPin;
 class tQueueNode;
-class tRenderState;
+class tQueueBuilder;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
@@ -103,8 +103,8 @@ public: // サブクラスで実装すべき物
 	virtual void DeleteInputPinAt(risse_size n) = 0;
 
 	//! @brief		コマンドキューの組み立てを行う
-	//! @param		state			レンダリングステート
-	virtual void BuildQueue(tRenderState * state) { return ; }
+	//! @param		builder			キュービルダーオブジェクト
+	virtual void BuildQueue(tQueueBuilder & builder) { return ; }
 
 
 };

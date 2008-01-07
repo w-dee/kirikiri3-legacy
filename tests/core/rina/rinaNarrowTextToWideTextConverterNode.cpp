@@ -108,7 +108,7 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
+void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 {
 	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode();
 
@@ -117,7 +117,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 		i != OutputPin->GetInputPins().end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
-		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
 
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
@@ -134,11 +134,11 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tRenderState * state)
 	// 変換コストが極端に高い場合は
 	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
 	// 必要かもしれないがここではそれは考えない
-	InputPin->SetRenderGeneration(state->GetRenderGeneration());
+	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
 	InputPin->ClearRenderRequests();
 	tNarrowTextRenderRequest * req = new tNarrowTextRenderRequest(new_parent, 0, t1DArea());
 	InputPin->AddRenderRequest(req);
-	state->PushNextBuildQueueNode(InputPin->GetOutputPin()->GetNode());
+	builder.Push(InputPin->GetOutputPin()->GetNode());
 }
 //---------------------------------------------------------------------------
 

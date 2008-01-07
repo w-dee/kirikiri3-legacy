@@ -103,13 +103,13 @@ void tWideTextProviderNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextProviderNode::BuildQueue(tRenderState * state)
+void tWideTextProviderNode::BuildQueue(tQueueBuilder & builder)
 {
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
 		i != OutputPin->GetInputPins().end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
-		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
 
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);

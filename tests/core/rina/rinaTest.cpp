@@ -131,10 +131,13 @@ void tTester::Test()
 	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
 		GetInheritableProperties().SetPosition(34);
 
+	// build queue render
+	tQueueBuilder builder;
+	builder.Build(dd_node);
 
-	// render
-	tRenderState state;
-	state.Render(dd_node);
+	// キューを作成し終わったということでレンダリングを開始する
+	tCommandQueue command_queue;
+	command_queue.Process(builder.GetRootQueueNode());
 }
 //---------------------------------------------------------------------------
 

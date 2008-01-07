@@ -107,7 +107,7 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::BuildQueue(tRenderState * state)
+void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 {
 	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL);
 
@@ -116,7 +116,7 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 		i != OutputPin->GetInputPins().end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
-		if((*i)->GetRenderGeneration() != state->GetRenderGeneration()) continue;
+		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
 
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
@@ -133,12 +133,12 @@ void tWideTextMixerNode::BuildQueue(tRenderState * state)
 	// 入力ピンに情報を設定
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
-		(*i)->SetRenderGeneration(state->GetRenderGeneration());
+		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		tWideTextMixerRenderRequest * req =
 			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
 		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
-		state->PushNextBuildQueueNode((*i)->GetOutputPin()->GetNode());
+		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
 }
 //---------------------------------------------------------------------------

@@ -123,20 +123,18 @@ void tMultiTextProviderNode::BuildQueue(tQueueBuilder & builder)
 		if(target_type == WideTextEdgeType)
 		{
 			// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
-			const tWideTextInputPinInterface::tRenderRequests & requests =
-				TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
-			for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+			const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
+			for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tWideTextProviderQueueNode(*i, Caption);
+				new tWideTextProviderQueueNode((tWideTextRenderRequest*)*i, Caption); // TypeCast ?
 		}
 		else if(target_type == NarrowTextEdgeType)
 		{
 			// 入力ピンのすべてのリクエストに答えるためのキューノードを作成する
-			const tNarrowTextInputPinInterface::tRenderRequests & requests =
-				TypeCast<tNarrowTextInputPinInterface*>(*i)->GetRenderRequests();
-			for(tNarrowTextInputPinInterface::tRenderRequests::const_iterator i =
+			const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
+			for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tNarrowTextProviderQueueNode(*i, Caption.AsNarrowString());
+				new tNarrowTextProviderQueueNode((tNarrowTextRenderRequest*)*i, Caption.AsNarrowString()); // TypeCast ?
 		}
 	}
 }

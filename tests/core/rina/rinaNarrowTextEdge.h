@@ -95,43 +95,11 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ナローテキストの入力ピン用インターフェース
-//---------------------------------------------------------------------------
-class tNarrowTextInputPinInterface : public tOutputPin
-{
-public:
-	static const risse_uint32 Type = NarrowTextEdgeType; //!< このインターフェースの型
-
-	//! @brief		tRequestInfo の配列の typedef
-	typedef gc_vector<const tNarrowTextRenderRequest*> tRenderRequests;
-
-public:
-	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
-	//! return		親ノードから子ノードへ要求するデータの配列
-	virtual const tRenderRequests & GetRenderRequests() = 0;
-
-	//! @brief		親ノードから子ノードへ要求するデータの配列をクリアする
-	virtual void ClearRenderRequests() = 0;
-
-	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
-	//! @param		req			要求データ
-	virtual void AddRenderRequest(const tNarrowTextRenderRequest * req) = 0;
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-//---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tNarrowTextInputPin : public tInputPin, public tNarrowTextInputPinInterface
+class tNarrowTextInputPin : public tInputPin
 {
 	typedef tInputPin inherited;
-
-	tRenderRequests RenderRequests; //!< 親ノードから子ノードへ要求するデータの配列
 
 public:
 
@@ -142,22 +110,6 @@ public:
 	//! @return		このピンがサポートするタイプの一覧
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
-
-	//! @brief		インターフェースを返す
-	//! @param		type		返すインターフェースに対応するエッジタイプ
-	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { if(type == NarrowTextEdgeType) return (tNarrowTextInputPinInterface*)this; else return NULL; }
-
-	//! @brief		親ノードから子ノードへ要求するデータの配列を得る
-	//! return		親ノードから子ノードへ要求するデータの配列
-	virtual const tRenderRequests & GetRenderRequests() { return RenderRequests; }
-
-	//! @brief		親ノードから子ノードへ要求するデータの配列をクリアする
-	void ClearRenderRequests() { RenderRequests.clear(); }
-
-	//! @brief		親ノードから子ノードへ要求するデータの配列にアイテムを追加する
-	//! @param		req			要求データ
-	void AddRenderRequest(const tNarrowTextRenderRequest * req) { RenderRequests.push_back(req); }
 };
 //---------------------------------------------------------------------------
 

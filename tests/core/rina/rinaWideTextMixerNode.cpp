@@ -123,9 +123,8 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 
 		// 親を設定
 		// すべてのリクエストのすべてのキューノードに同じ子を設定する
-		const tWideTextInputPinInterface::tRenderRequests & requests =
-			TypeCast<tWideTextInputPinInterface*>(*i)->GetRenderRequests();
-		for(tWideTextInputPinInterface::tRenderRequests::const_iterator i =
+		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
+		for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
 			new_parent->AddParent(*i);
 	}
@@ -134,10 +133,11 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
+		(*i)->ClearRenderRequests();
 		tWideTextMixerRenderRequest * req =
 			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
-		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
+		(*i)->AddRenderRequest(req);
 		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
 }

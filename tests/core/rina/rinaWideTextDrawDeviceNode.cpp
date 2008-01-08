@@ -114,11 +114,11 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
-		TypeCast<tWideTextInputPinInterface*>(*i)->ClearRenderRequests();
+		(*i)->ClearRenderRequests();
 		tWideTextMixerRenderRequest * req =
 			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
 				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
-		TypeCast<tWideTextInputPinInterface*>(*i)->AddRenderRequest(req);
+		(*i)->AddRenderRequest(req);
 		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
 

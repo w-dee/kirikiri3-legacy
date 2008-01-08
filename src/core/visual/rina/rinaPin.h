@@ -72,6 +72,7 @@ public:
 
 
 class tOutputPin;
+class tRenderRequest;
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //! @note		一つの入力ピンは複数の出力ピンとは接続されない。このため
@@ -85,9 +86,15 @@ class tInputPin : public tPin
 
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
 	risse_uint32 AgreedType; //!< 同意されたタイプ
-	tQueueNode * ParentQueueNode; //!< キュー組み立て時に親となるキューノード
 
 	tIdRegistry::tRenderGeneration RenderGeneration; //!< 最新の情報が設定されたレンダリング世代
+
+public:
+	//! @brief		親ノードから子ノードへのレンダリング要求の配列のtypedef
+	typedef gc_vector<const tRenderRequest*> tRenderRequests;
+
+private:
+	tRenderRequests RenderRequests; //!< 親ノードから子ノードへのレンダリング要求の配列
 
 public:
 	//! @brief		コンストラクタ
@@ -96,12 +103,6 @@ public:
 	//! @brief		接続先の出力ピンを取得する
 	//! @return		接続先の出力ピン
 	tOutputPin * GetOutputPin() const { return OutputPin; }
-
-	//! @brief		キュー組み立て時に親となるキューノードを設定する
-	//! @param		node		親となるキューノード
-	//! @param		gen			このレンダリング世代
-	void SetParentQueueNode(tQueueNode * node)
-		{ ParentQueueNode = node; }
 
 	//! @brief		最新の情報が設定されたレンダリング世代を設定する
 	//! @param		gen		最新の情報が設定されたレンダリング世代
@@ -134,6 +135,17 @@ public:
 	//! @note		ピンは入力ピンがかならず何かの出力ピンを接続するという方式なので
 	//!				出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
 	virtual void Connect(tOutputPin * output_pin);
+
+	//! @brief		親ノードから子ノードへのレンダリング要求の配列を得る
+	//! return		親ノードから子ノードへのレンダリング要求の配列
+	const tRenderRequests & GetRenderRequests() const { return RenderRequests; }
+
+	//! @brief		親ノードから子ノードへのレンダリング要求の配列をクリアする
+	void ClearRenderRequests() { RenderRequests.clear(); }
+
+	//! @brief		親ノードから子ノードへのレンダリング要求の配列にアイテムを追加する
+	//! @param		req			要求データ
+	void AddRenderRequest(const tRenderRequest * req) { RenderRequests.push_back(req); }
 
 protected:
 

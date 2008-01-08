@@ -261,7 +261,7 @@ private:
 
 			コンパイラによる最適化により、new T() の実行が完了する前に
 			object_instance に値が書き込まれる可能性があるが、これは
-			volatile により(おそらく解決)。
+			volatile により(おそらく)解決。
 			new T() によって初期化された内容が他のプロセッサに見える前に
 			object_instance が他のプロセッサに見えてしまう問題
 			(memory ordering 問題) は、クリティカルセクションやミュー

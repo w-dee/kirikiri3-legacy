@@ -28,9 +28,11 @@ class tWideTextOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tWideTextProviderNode : public tProcessNode
+class tWideTextProviderNode : public tProcessNode, public Risa::tSubmorph<tWideTextProviderNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
 
@@ -98,9 +100,11 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextProviderQueueNode : public tWideTextQueueNode
+class tWideTextProviderQueueNode : public tWideTextQueueNode, public Risa::tSubmorph<tWideTextProviderQueueNode>
 {
+public:
 	typedef tWideTextQueueNode inherited;
+private:
 
 protected:
 	tString Text; //!< テキスト

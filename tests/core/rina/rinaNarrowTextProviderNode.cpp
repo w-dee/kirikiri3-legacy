@@ -129,7 +129,7 @@ void tNarrowTextProviderNode::BuildQueue(tQueueBuilder & builder)
 		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 		for(tInputPin::tRenderRequests::const_iterator i =
 			requests.begin(); i != requests.end(); i ++)
-			new tNarrowTextProviderQueueNode((tNarrowTextRenderRequest*)*i, Caption); // TypeCast ?
+			new tNarrowTextProviderQueueNode(Risa::DownCast<const tNarrowTextRenderRequest*>(*i), Caption);
 	}
 }
 //---------------------------------------------------------------------------

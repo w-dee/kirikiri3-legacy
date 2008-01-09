@@ -117,7 +117,7 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 		(*i)->ClearRenderRequests();
 		tWideTextMixerRenderRequest * req =
 			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
-				((tWideTextMixerInputPin*)(*i))->GetInheritableProperties()); // TypeCast ?
+				(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
 		(*i)->AddRenderRequest(req);
 		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
@@ -162,7 +162,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
-		tWideTextDataInterface * provider = TypeCast<tWideTextDataInterface *>(i->GetChild());
+		tWideTextQueueNode * provider = Risa::DownCast<tWideTextQueueNode *>(i->GetChild());
 		const tWideTextMixerRenderRequest * req =
 			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
 		const tString & text = provider->GetText();

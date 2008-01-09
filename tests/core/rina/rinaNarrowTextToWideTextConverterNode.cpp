@@ -176,7 +176,7 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 	// 子ノードを変換する
 	RISSE_ASSERT(Children.size() == 1);
 
-	tNarrowTextDataInterface * child = TypeCast<tNarrowTextDataInterface*>(Children[0].GetChild());
+	tNarrowTextQueueNode * child = Risa::DownCast<tNarrowTextQueueNode*>(Children[0].GetChild());
 
 	// 結果をPositionとTextに格納
 	Text = tString(child->GetText());

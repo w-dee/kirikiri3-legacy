@@ -29,9 +29,11 @@ class tNarrowTextInputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tNarrowTextToWideTextConverterNode : public tProcessNode
+class tNarrowTextToWideTextConverterNode : public tProcessNode, public Risa::tSubmorph<tNarrowTextToWideTextConverterNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
 	tNarrowTextInputPin * InputPin; //!< 入力ピン
@@ -88,11 +90,13 @@ public: // サブクラスで実装すべき物
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストコマンドキュー
+//! @brief		テスト用のテキストコマンドキューノード
 //---------------------------------------------------------------------------
-class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNode
+class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNode, public Risa::tSubmorph<tNarrowTextToWideTextConverterQueueNode>
 {
+public:
 	typedef tWideTextProviderQueueNode inherited;
+private:
 
 public:
 	//! @brief		コンストラクタ

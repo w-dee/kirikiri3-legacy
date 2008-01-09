@@ -16,6 +16,7 @@
 #define RINAIDREGISTRY_H
 
 #include "base/utils/Singleton.h"
+#include "base/utils/TypeCast.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -83,39 +84,6 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
-
-//---------------------------------------------------------------------------
-// 指定された型が抽象クラスかどうかのチェックに用いる
-// boost の is_abstract を参照のこと
-struct tCheckAbstractA { char n[4]; };
-struct tCheckAbstractB { char n[1]; };
-template<typename U>
-static tCheckAbstractA CheckAbstract(U (*)[1]);
-template<typename U>
-static tCheckAbstractB CheckAbstract(...);
-template<int I>
-struct tAbstractAssert {enum { hoge }; };
-template<>
-struct tAbstractAssert<sizeof(tCheckAbstractA)> {};
-//---------------------------------------------------------------------------
-template <typename T> struct tDereference     { typedef T type; };
-template <typename T> struct tDereference<T*> { typedef T type; };
-//---------------------------------------------------------------------------
-//! @brief		やや安全なキャスト (Type を元にインターフェースを得る)
-template <typename R, typename T>
-R TypeCast(T * instance)
-{
-	// R は抽象クラスがいいです
-	enum { check = tAbstractAssert<sizeof(CheckAbstract<typename tDereference<R>::type >(0))>::hoge };
-		// ここで`hoge' is not a member of `Rina::tAbstractAssert<4>'のような
-		// エラーが起こる場合はRが抽象クラスでない場合。
-		// 安全のため、R は抽象クラスへのポインタにしてください。
-
-	// キャストした結果を返す
-	return static_cast<R>(instance->GetInterface(tDereference<R>::type::Type));
-}
-//---------------------------------------------------------------------------
 
 
 

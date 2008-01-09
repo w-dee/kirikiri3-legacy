@@ -29,9 +29,11 @@ namespace Rina {
 //---------------------------------------------------------------------------
 //! @brief		出力ピン
 //---------------------------------------------------------------------------
-class tMultiTextOutputPin : public tOutputPin
+class tMultiTextOutputPin : public tOutputPin, public Risa::tSubmorph<tMultiTextOutputPin>
 {
+public:
 	typedef tOutputPin inherited;
+private:
 
 public:
 	//! @brief		コンストラクタ

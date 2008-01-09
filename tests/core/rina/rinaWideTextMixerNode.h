@@ -30,9 +30,11 @@ class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のミキサノード
 //---------------------------------------------------------------------------
-class tWideTextMixerNode : public tProcessNode
+class tWideTextMixerNode : public tProcessNode, public Risa::tSubmorph<tWideTextMixerNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
@@ -100,9 +102,11 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のミキサコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextMixerQueueNode : public tWideTextProviderQueueNode
+class tWideTextMixerQueueNode : public tWideTextProviderQueueNode, public Risa::tSubmorph<tWideTextMixerQueueNode>
 {
+public:
 	typedef tWideTextProviderQueueNode inherited;
+private:
 
 	static const risse_size CanvasSize = 20; //!< キャンバスのサイズ
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ

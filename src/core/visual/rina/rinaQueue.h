@@ -38,9 +38,11 @@ class tQueueNode;
 //---------------------------------------------------------------------------
 //! @brief		レンダリング要求の基底クラス
 //---------------------------------------------------------------------------
-class tRenderRequest : public tCollectee
+class tRenderRequest : public Risa::tPolymorphic
 {
-	typedef tCollectee inherited;
+public:
+	typedef Risa::tPolymorphic inherited;
+private:
 
 	tQueueNode * Parent; //!< 親キューノード
 	risse_size Index; //!< 親キューノード内でのインデックス
@@ -98,9 +100,11 @@ class tQueue;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューノード
 //---------------------------------------------------------------------------
-class tQueueNode : public tCollectee
+class tQueueNode : public Risa::tPolymorphic
 {
-	typedef tCollectee inherited;
+public:
+	typedef Risa::tPolymorphic inherited;
+private:
 
 protected:
 	typedef gc_vector<tQueueNodeChild> tChildren; //!< 子ノードの配列のtypedef
@@ -127,11 +131,6 @@ public:
 	//! @brief		ノードの親とレンダリング要求を追加する
 	//! @param		parent		親
 	void AddParent(const tRenderRequest * request);
-
-	//! @brief		インターフェースを返す
-	//! @param		type		返すインターフェースに対応するエッジタイプ
-	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { return NULL; }
 
 protected:
 	//! @brief		ノードの子を追加する

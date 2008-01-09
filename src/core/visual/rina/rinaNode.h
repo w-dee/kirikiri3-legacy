@@ -28,9 +28,11 @@ class tQueueBuilder;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
-class tProcessNode : public tCollectee
+class tProcessNode : public Risa::tPolymorphic
 {
-	typedef tCollectee inherited;
+public:
+	typedef Risa::tPolymorphic inherited;
+private:
 
 	risse_size	LongestDistance;
 			//!< ルートノードからの最長距離(ステップ数)。

@@ -29,9 +29,11 @@ class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキスト描画デバイスプロセスノード
 //---------------------------------------------------------------------------
-class tWideTextDrawDeviceNode : public tProcessNode
+class tWideTextDrawDeviceNode : public tProcessNode, public Risa::tSubmorph<tWideTextDrawDeviceNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
 
@@ -91,9 +93,11 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキスト描画デバイスコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextDrawDeviceQueueNode : public tQueueNode
+class tWideTextDrawDeviceQueueNode : public tQueueNode, public Risa::tSubmorph<tWideTextDrawDeviceQueueNode>
 {
+public:
 	typedef tQueueNode inherited;
+private:
 
 	static const risse_size CanvasSize = 78; //!< キャンバスのサイズ
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ

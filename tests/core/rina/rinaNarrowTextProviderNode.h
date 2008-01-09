@@ -28,9 +28,11 @@ class tNarrowTextOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tNarrowTextProviderNode : public tProcessNode
+class tNarrowTextProviderNode : public tProcessNode, public Risa::tSubmorph<tNarrowTextProviderNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	tNarrowTextOutputPin * OutputPin; //!< 出力ピン
 
@@ -96,11 +98,13 @@ public: // サブクラスで実装すべき物
 
 
 //---------------------------------------------------------------------------
-//! @brief		テスト用のテキストコマンドキュー
+//! @brief		テスト用のテキストコマンドキューノード
 //---------------------------------------------------------------------------
-class tNarrowTextProviderQueueNode : public tNarrowTextQueueNode
+class tNarrowTextProviderQueueNode : public tNarrowTextQueueNode, public Risa::tSubmorph<tNarrowTextProviderQueueNode>
 {
+public:
 	typedef tNarrowTextQueueNode inherited;
+private:
 
 protected:
 	const char * Text; //!< テキスト

@@ -25,9 +25,11 @@ class tProcessNode;
 //---------------------------------------------------------------------------
 //! @brief		ピン
 //---------------------------------------------------------------------------
-class tPin : public tCollectee
+class tPin : public Risa::tPolymorphic
 {
-	typedef tCollectee inherited;
+public:
+	typedef Risa::tPolymorphic inherited;
+private:
 
 protected:
 	tProcessNode * Node; //!< このピンを保有しているノード
@@ -61,11 +63,6 @@ public:
 	//! @param		strong_suggest	この提案が強い提案であれば *strong_suggest に真が入る(NULL=イラナイ)
 	//! @return		提案されたタイプ (0=提案なし)
 	virtual risse_uint32 SuggestType(tPin * pin, bool * strong_suggest = NULL);
-
-	//! @brief		インターフェースを返す
-	//! @param		type		返すインターフェースに対応するエッジタイプ
-	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { return NULL; }
 };
 //---------------------------------------------------------------------------
 
@@ -80,9 +77,11 @@ class tRenderRequest;
 //!				入力ピンごとに「エッジを流通するデータのタイプ」としての
 //!				tInputPin::AgreedTypeを持っている。
 //---------------------------------------------------------------------------
-class tInputPin : public tPin
+class tInputPin : public tPin, public Risa::tSubmorph<tInputPin>
 {
+public:
 	typedef tPin inherited;
+private:
 
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
 	risse_uint32 AgreedType; //!< 同意されたタイプ
@@ -165,10 +164,12 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		出力ピン
 //---------------------------------------------------------------------------
-class tOutputPin : public tPin
+class tOutputPin : public tPin, public Risa::tSubmorph<tOutputPin>
 {
-	friend class tInputPin;
+public:
 	typedef tPin inherited;
+private:
+	friend class tInputPin;
 
 public:
 	typedef gc_vector<tInputPin *> tInputPins; //!< 入力ピンの配列

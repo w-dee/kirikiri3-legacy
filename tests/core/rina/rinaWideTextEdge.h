@@ -45,9 +45,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		親ノードから子ノードへ要求するデータの内容(レンダリング要求)
 //---------------------------------------------------------------------------
-class tWideTextRenderRequest : public tRenderRequest
+class tWideTextRenderRequest : public tRenderRequest, public Risa::tSubmorph<tWideTextRenderRequest>
 {
+public:
 	typedef tRenderRequest inherited;
+private:
 
 	t1DArea		Area; //!< 範囲
 
@@ -69,9 +71,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ミキサ(あるいはdrawdevice)用の親ノードから子ノードへ要求するデータの内容
 //---------------------------------------------------------------------------
-class tWideTextMixerRenderRequest : public tWideTextRenderRequest
+class tWideTextMixerRenderRequest : public tWideTextRenderRequest, public Risa::tSubmorph<tWideTextMixerRenderRequest>
 {
+public:
 	typedef tWideTextRenderRequest inherited;
+private:
 
 	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
@@ -94,9 +98,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		入力ピン
 //---------------------------------------------------------------------------
-class tWideTextInputPin : public tInputPin
+class tWideTextInputPin : public tInputPin, public Risa::tSubmorph<tWideTextInputPin>
 {
+public:
 	typedef tInputPin inherited;
+private:
 
 public:
 
@@ -115,9 +121,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		ミキサ(あるいはdrawdevice)用入力ピン
 //---------------------------------------------------------------------------
-class tWideTextMixerInputPin : public tWideTextInputPin
+class tWideTextMixerInputPin : public tWideTextInputPin, public Risa::tSubmorph<tWideTextMixerInputPin>
 {
+public:
 	typedef tWideTextInputPin inherited;
+private:
 
 	tTextInheritableProperties		InheritableProperties; //!< 継承可能なプロパティ
 
@@ -139,9 +147,11 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		出力ピン
 //---------------------------------------------------------------------------
-class tWideTextOutputPin : public tOutputPin
+class tWideTextOutputPin : public tOutputPin, public Risa::tSubmorph<tWideTextOutputPin>
 {
+public:
 	typedef tOutputPin inherited;
+private:
 
 public:
 	//! @brief		コンストラクタ
@@ -159,29 +169,13 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ワイド文字列用のデータ取得用インターフェース
-//---------------------------------------------------------------------------
-class tWideTextDataInterface : public tCollectee
-{
-public:
-	static const risse_uint32 Type = WideTextEdgeType; //!< このインターフェースの型
-
-	//! @brief		テキストを得る
-	//! @return		テキスト
-	virtual const tString & GetText() = 0;
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-//---------------------------------------------------------------------------
 //! @brief		ワイド文字列用のテキストコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextQueueNode : public tQueueNode, public tWideTextDataInterface
+class tWideTextQueueNode : public tQueueNode, public Risa::tSubmorph<tWideTextQueueNode>
 {
+public:
 	typedef tQueueNode inherited;
+private:
 
 public:
 	//! @brief		コンストラクタ
@@ -189,13 +183,12 @@ public:
 	tWideTextQueueNode(const tWideTextRenderRequest * request) :
 		inherited(request) {;}
 
-	//! @brief		インターフェースを返す
-	//! @param		type		返すインターフェースに対応するエッジタイプ
-	//! @return		そのインターフェース(NULL=対応していない)
-	virtual void * GetInterface(risse_uint32 type) { if(type == WideTextEdgeType) return (tWideTextDataInterface*)this; else return NULL; }
+public: //!< サブクラスでオーバーライドして使う物
+	//! @brief		テキストを得る
+	//! @return		テキスト
+	virtual const tString & GetText() = 0;
 
 protected: //!< サブクラスでオーバーライドして使う物
-
 	//! @brief		ノードの処理の最初に行う処理
 	virtual void BeginProcess() {;}
 

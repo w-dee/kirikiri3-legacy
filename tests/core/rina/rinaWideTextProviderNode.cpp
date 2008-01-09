@@ -118,7 +118,7 @@ void tWideTextProviderNode::BuildQueue(tQueueBuilder & builder)
 		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 		for(tInputPin::tRenderRequests::const_iterator i =
 			requests.begin(); i != requests.end(); i ++)
-			new tWideTextProviderQueueNode((tWideTextRenderRequest*)*i, Caption); // TypeCast ?
+			new tWideTextProviderQueueNode(Risa::DownCast<const tWideTextRenderRequest*>(*i), Caption);
 	}
 }
 //---------------------------------------------------------------------------

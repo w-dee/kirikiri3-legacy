@@ -28,9 +28,11 @@ class tMultiTextOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用の複数形式をサポートするテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tMultiTextProviderNode : public tProcessNode
+class tMultiTextProviderNode : public tProcessNode, public Risa::tSubmorph<tMultiTextProviderNode>
 {
+public:
 	typedef tProcessNode inherited;
+private:
 
 	tMultiTextOutputPin * OutputPin; //!< 出力ピン
 

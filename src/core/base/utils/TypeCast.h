@@ -198,7 +198,8 @@ R TryDownCast(T * instance)
 
 	/*
 		ダウンキャストが可能かどうかは、クラスIdの配列のうち、HOLDER::indexで表される
-		インデックス(つまり敬称の階層)が HOLDER::Id (つまりクラスId) であるかどうかをチェックする。
+		インデックス(つまり継承の階層)が HOLDER::Id (つまりクラスId) と同一で
+		あるかどうかでチェックする。
 	*/
 
 	if(base->ClassIds[HOLDER::Index] == HOLDER::Id)

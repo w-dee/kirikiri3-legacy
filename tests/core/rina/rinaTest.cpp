@@ -58,14 +58,14 @@ void tTester::Test()
 	provider_node1->SetCaption(RISSE_WS("aaa"));
 	dd_node->InsertInputPinAt(0);
 	dd_node->GetInputPinAt(0)->Connect(provider_node1->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(0))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(0))->
 		GetInheritableProperties().SetPosition(1);
 
 	tWideTextProviderNode * provider_node2 = new tWideTextProviderNode();
 	provider_node2->SetCaption(RISSE_WS("bbb"));
 	dd_node->InsertInputPinAt(1);
 	dd_node->GetInputPinAt(1)->Connect(provider_node2->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(1))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(1))->
 		GetInheritableProperties().SetPosition(5);
 
 	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
@@ -76,26 +76,26 @@ void tTester::Test()
 	provider_node3->SetCaption(RISSE_WS("ccc"));
 	mixer_node->InsertInputPinAt(0);
 	mixer_node->GetInputPinAt(0)->Connect(provider_node3->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(0))->
+	Risa::DownCast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(0))->
 		GetInheritableProperties().SetPosition(0);
 
 	tWideTextProviderNode * provider_node4 = new tWideTextProviderNode();
 	provider_node4->SetCaption(RISSE_WS("ddd"));
 	mixer_node->InsertInputPinAt(1);
 	mixer_node->GetInputPinAt(1)->Connect(provider_node4->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(1))->
+	Risa::DownCast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(1))->
 		GetInheritableProperties().SetPosition(4);
 
 	tMultiTextProviderNode * provider_node5 = new tMultiTextProviderNode();
 	provider_node5->SetCaption(RISSE_WS("mmm"));
 	mixer_node->InsertInputPinAt(2);
 	mixer_node->GetInputPinAt(2)->Connect(provider_node5->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(2))->
+	Risa::DownCast<tWideTextMixerInputPin*>(mixer_node->GetInputPinAt(2))->
 		GetInheritableProperties().SetPosition(8);
 
 	dd_node->InsertInputPinAt(2);
 	dd_node->GetInputPinAt(2)->Connect(mixer_node->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(2))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(2))->
 		GetInheritableProperties().SetPosition(9);
 
 
@@ -107,7 +107,7 @@ void tTester::Test()
 
 	dd_node->InsertInputPinAt(3);
 	dd_node->GetInputPinAt(3)->Connect(converter_node1->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(3))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(3))->
 		GetInheritableProperties().SetPosition(21);
 
 	tMultiTextProviderNode * multi_provider_node = new tMultiTextProviderNode();
@@ -118,17 +118,17 @@ void tTester::Test()
 
 	dd_node->InsertInputPinAt(4);
 	dd_node->GetInputPinAt(4)->Connect(converter_node2->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(4))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(4))->
 		GetInheritableProperties().SetPosition(28);
 
 	dd_node->InsertInputPinAt(5);
 	dd_node->GetInputPinAt(5)->Connect(converter_node1->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(5))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(5))->
 		GetInheritableProperties().SetPosition(46);
 
 	dd_node->InsertInputPinAt(6);
 	dd_node->GetInputPinAt(6)->Connect(mixer_node->GetOutputPinAt(0));
-	static_cast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
 		GetInheritableProperties().SetPosition(34);
 
 	// build queue render

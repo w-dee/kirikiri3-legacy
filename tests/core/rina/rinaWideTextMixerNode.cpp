@@ -191,16 +191,6 @@ void tWideTextMixerQueueNode::EndProcess()
 		const t1DArea & destarea = req->GetArea();
 		const t1DArea & srcarea = provider->GetArea();
 
-	wxFprintf(stdout, wxT("%s: pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
-			tString(text).AsWxString().c_str(),
-			(int)pos,
-			(int)destarea.GetStart(),
-			(int)destarea.GetEnd(),
-			(int)srcarea.GetStart(),
-			(int)srcarea.GetEnd(),
-			(int)text_offset
-			);
-
 		// position で表された位置 + destarea.Start に、
 		// pbuf で表されたテキスト + text_offset から srcarea.GetLength() 分の
 		// 長さを書き込む。
@@ -215,7 +205,16 @@ void tWideTextMixerQueueNode::EndProcess()
 
 		text_offset += intersect.GetStart() - srcarea.GetStart();
 
-	wxFprintf(stdout, wxT("%s: intersect:(%d,%d), text_offset:%d\n"),
+	wxFprintf(stdout, wxT("\"%s\": pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
+			tString(text).AsWxString().c_str(),
+			(int)pos,
+			(int)destarea.GetStart(),
+			(int)destarea.GetEnd(),
+			(int)srcarea.GetStart(),
+			(int)srcarea.GetEnd(),
+			(int)text_offset
+			);
+	wxFprintf(stdout, wxT("\"%s\": intersect:(%d,%d), text_offset:%d\n"),
 			tString(text).AsWxString().c_str(),
 			(int)intersect.GetStart(),
 			(int)intersect.GetEnd(),

@@ -122,15 +122,13 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 	}
 
 	// 位置ごとに
-	static const risse_size step = tWideTextDrawDeviceQueueNode::CanvasSize;
+	static const risse_size step = 2;
 	risse_size index = 0;
 	for(risse_size pos = 0; pos < tWideTextDrawDeviceQueueNode::CanvasSize; pos += step)
 	{
 		// 入力ピンに再帰
 		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 		{
-			(*i)->SetRenderGeneration(builder.GetRenderGeneration());
-			(*i)->ClearRenderRequests();
 			tWideTextMixerRenderRequest * req =
 				new tWideTextMixerRenderRequest(new_parent, index, t1DArea(pos, pos + step),
 					(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
@@ -190,16 +188,6 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 		const t1DArea & destarea = req->GetArea();
 		const t1DArea & srcarea = provider->GetArea();
 
-	wxFprintf(stdout, wxT("%s: pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
-			tString(text).AsWxString().c_str(),
-			(int)pos,
-			(int)destarea.GetStart(),
-			(int)destarea.GetEnd(),
-			(int)srcarea.GetStart(),
-			(int)srcarea.GetEnd(),
-			(int)text_offset
-			);
-
 		// position で表された位置 + destarea.Start に、
 		// pbuf で表されたテキスト + text_offset から srcarea.GetLength() 分の
 		// 長さを書き込む。
@@ -214,12 +202,22 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 
 		text_offset += intersect.GetStart() - srcarea.GetStart();
 
-	wxFprintf(stdout, wxT("%s: intersect:(%d,%d), text_offset:%d\n"),
+	wxFprintf(stdout, wxT("\"%s\": pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
+			tString(text).AsWxString().c_str(),
+			(int)pos,
+			(int)destarea.GetStart(),
+			(int)destarea.GetEnd(),
+			(int)srcarea.GetStart(),
+			(int)srcarea.GetEnd(),
+			(int)text_offset
+			);
+	wxFprintf(stdout, wxT("\"%s\": intersect:(%d,%d), text_offset:%d\n"),
 			tString(text).AsWxString().c_str(),
 			(int)intersect.GetStart(),
 			(int)intersect.GetEnd(),
 			(int)text_offset
 			);
+
 
 		// 転送先範囲がキャンバスサイズに収まっているかどうか
 		RISSE_ASSERT(intersect.GetStart() + pos >= 0);

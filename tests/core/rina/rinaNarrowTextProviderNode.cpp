@@ -135,7 +135,7 @@ void tNarrowTextProviderNode::BuildQueue(tQueueBuilder & builder)
 				req,
 				Caption,
 				t1DArea(req->GetArea(), t1DArea(0, strlen(Caption))),
-				0);
+				t1DArea(req->GetArea(), t1DArea(0, strlen(Caption))).GetStart());
 		}
 	}
 }

@@ -124,7 +124,7 @@ void tWideTextProviderNode::BuildQueue(tQueueBuilder & builder)
 				req,
 				Caption,
 				t1DArea(req->GetArea(), t1DArea(0, Caption.GetLength())),
-				0);
+				t1DArea(req->GetArea(), t1DArea(0, Caption.GetLength())).GetStart());
 		}
 	}
 }

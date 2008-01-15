@@ -46,6 +46,7 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 		for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 		{
 			tQueueNode * child = i->GetChild();
+			RISSE_ASSERT(child != NULL);
 			if(-- child->WaitingParents == 0) // TODO: アトミックなデクリメント
 				queue->Push(child, true);
 		}
@@ -66,6 +67,7 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 		for(tParents::iterator i = Parents.begin(); i != Parents.end(); i++)
 		{
 			tQueueNode * parent = (*i)->GetParent();
+			RISSE_ASSERT(parent != NULL);
 			if(-- parent->WaitingChildren == 0) // TODO: アトミックなデクリメント
 				queue->Push(parent, false);
 		}

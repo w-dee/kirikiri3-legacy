@@ -85,11 +85,12 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		parent		親キューノード
 	//! @param		index		親キューノード内でのインデックス
-	//! @param		area		要求範囲
-	//! @param		pops		プロパティ
-	tNarrowTextMixerRenderRequest(tQueueNode * parent, risse_size index, const t1DArea & area,
+	//! @param		area		要求範囲(propsにしたがって変形が自動的に行われる)
+	//! @param		props		プロパティ
+	tNarrowTextMixerRenderRequest(tQueueNode * parent, risse_size index,
+		const t1DArea & area,
 		const tTextInheritableProperties & props) :
-		inherited(parent, index, area), InheritableProperties(props) {;}
+		inherited(parent, index, props.ToChild(area)), InheritableProperties(props) {;}
 
 	//! @brief		継承可能なプロパティを得る
 	//! @return		継承可能なプロパティ
@@ -188,6 +189,18 @@ public: //!< サブクラスでオーバーライドして使う物
 	//! @brief		テキストを得る
 	//! @return		テキスト
 	virtual const char * GetText() = 0;
+
+	//! @brief		テキストの範囲を得る
+	//! @return		範囲
+	//! @brief		GetText() で得られたテキストがどこからどこまでの範囲を表しているか
+	virtual const t1DArea & GetArea() = 0;
+
+	//! @brief		テキストのオフセットを得る
+	//! @return		オフセット
+	//! @brief		Text 中のどのオフセットが GetArea().GetBegin() 位置を表しているかを表す。
+	//! @brief		GetText() で得られたテキストのうち、[GetOffset(), GetOffset() + GetArea().GetLength()) の
+	//! 			範囲のみを使用すること。それ以外はたとえアクセス可能であってもアクセスしてはならない。
+	virtual risse_offset GetOffset() = 0;
 
 protected: //!< サブクラスでオーバーライドして使う物
 	//! @brief		ノードの処理の最初に行う処理

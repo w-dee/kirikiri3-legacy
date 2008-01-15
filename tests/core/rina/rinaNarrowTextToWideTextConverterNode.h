@@ -92,7 +92,8 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストコマンドキューノード
 //---------------------------------------------------------------------------
-class tNarrowTextToWideTextConverterQueueNode : public tWideTextProviderQueueNode, public Risa::tSubmorph<tNarrowTextToWideTextConverterQueueNode>
+class tNarrowTextToWideTextConverterQueueNode :
+	public tWideTextProviderQueueNode, public Risa::tSubmorph<tNarrowTextToWideTextConverterQueueNode>
 {
 public:
 	typedef tWideTextProviderQueueNode inherited;
@@ -101,7 +102,7 @@ private:
 public:
 	//! @brief		コンストラクタ
 	//! @param		request		レンダリング要求
-	tNarrowTextToWideTextConverterQueueNode();
+	tNarrowTextToWideTextConverterQueueNode(const tWideTextRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

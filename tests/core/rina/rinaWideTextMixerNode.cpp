@@ -134,8 +134,10 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		(*i)->ClearRenderRequests();
+		// Area はいまのところ全域を要求する
 		tWideTextMixerRenderRequest * req =
-			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(), t1DArea(),
+			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(),
+				t1DArea(0, tWideTextMixerQueueNode::CanvasSize),
 				(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
 		(*i)->AddRenderRequest(req);
 		builder.Push((*i)->GetOutputPin()->GetNode());
@@ -152,7 +154,7 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 
 //---------------------------------------------------------------------------
 tWideTextMixerQueueNode::tWideTextMixerQueueNode(tWideTextRenderRequest * request) :
-	inherited(request, tString())
+	inherited(request, tString(), t1DArea(), 0)
 {
 	Canvas = NULL;
 }
@@ -182,20 +184,69 @@ void tWideTextMixerQueueNode::EndProcess()
 		const tWideTextMixerRenderRequest * req =
 			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
 		const tString & text = provider->GetText();
+		risse_offset text_offset = provider->GetOffset();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
 		risse_int32 pos = req->GetInheritableProperties().GetPosition();
-		RISSE_ASSERT(pos >= 0);
-		RISSE_ASSERT(pos + text_size < CanvasSize);
-		for(risse_size i = 0 ; i < text_size; i++)
+		const t1DArea & destarea = req->GetArea();
+		const t1DArea & srcarea = provider->GetArea();
+
+	wxFprintf(stdout, wxT("%s: pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
+			tString(text).AsWxString().c_str(),
+			(int)pos,
+			(int)destarea.GetStart(),
+			(int)destarea.GetEnd(),
+			(int)srcarea.GetStart(),
+			(int)srcarea.GetEnd(),
+			(int)text_offset
+			);
+
+		// position で表された位置 + destarea.Start に、
+		// pbuf で表されたテキスト + text_offset から srcarea.GetLength() 分の
+		// 長さを書き込む。
+		// dest に範囲外が指定された場合は明らかなエラーだが、src については
+		// 範囲外を含む場合は値が範囲外になっている可能性があるので補正する
+		// ここで destarea は親ノードが子ノードに対して要求した範囲であり、
+		// srcarea はそれに対して子ノードがどう反応したかである
+
+		// destarea と srcarea の重なっている部分しか転送のしようがないので交差を得る
+		t1DArea intersect;
+		if(!destarea.Intersect(srcarea, intersect)) continue; // 交差していない
+
+		text_offset += intersect.GetStart() - srcarea.GetStart();
+
+	wxFprintf(stdout, wxT("%s: intersect:(%d,%d), text_offset:%d\n"),
+			tString(text).AsWxString().c_str(),
+			(int)intersect.GetStart(),
+			(int)intersect.GetEnd(),
+			(int)text_offset
+			);
+
+		// 転送先範囲がキャンバスサイズに収まっているかどうか
+		RISSE_ASSERT(intersect.GetStart() + pos >= 0);
+		RISSE_ASSERT(intersect.GetEnd() + pos <= static_cast<risse_offset>(CanvasSize));
+
+		// 転送元が範囲内に収まっているか
+		RISSE_ASSERT(text_offset >= 0);
+		RISSE_ASSERT(text_offset + intersect.GetLength() <= static_cast<risse_offset>(text_size));
+
+		risse_size length = intersect.GetLength();
+		for(risse_size i = 0 ; i < length; i++)
 		{
-			if(pbuf[i] != RISSE_WC(' '))
-				Canvas[i + pos] = pbuf[i];
+			risse_size src_idx = i + text_offset;
+			risse_size dest_idx = i + pos + intersect.GetStart();
+			if(pbuf[src_idx] != RISSE_WC(' '))
+				Canvas[dest_idx] = pbuf[src_idx];
 		}
+
+	wxFprintf(stdout, wxT("result: \"%s\"\n"), tString(Canvas).AsWxString().c_str());
+
 	}
 
 	// 結果をTextに格納
 	Text = Canvas;
+	Area = t1DArea(0, CanvasSize);
+	Offset = 0;
 
 	wxFprintf(stderr, wxT("mixed output : %s\n"), Text.AsWxString().c_str());
 }

@@ -126,7 +126,14 @@ void tMultiTextProviderNode::BuildQueue(tQueueBuilder & builder)
 			const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 			for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tWideTextProviderQueueNode(Risa::DownCast<const tWideTextRenderRequest*>(*i), Caption);
+			{
+				const tWideTextRenderRequest * req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
+				new tWideTextProviderQueueNode(
+					req,
+					Caption,
+					t1DArea(req->GetArea(), t1DArea(0, Caption.GetLength())),
+					0);
+			}
 		}
 		else if(target_type == NarrowTextEdgeType)
 		{
@@ -134,7 +141,15 @@ void tMultiTextProviderNode::BuildQueue(tQueueBuilder & builder)
 			const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 			for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new tNarrowTextProviderQueueNode(Risa::DownCast<const tNarrowTextRenderRequest*>(*i), Caption.AsNarrowString());
+			{
+				const char * caption = Caption.AsNarrowString();
+				const tNarrowTextRenderRequest * req = Risa::DownCast<const tNarrowTextRenderRequest*>(*i);
+				new tNarrowTextProviderQueueNode(
+					req,
+					caption,
+					t1DArea(req->GetArea(), t1DArea(0, strlen(caption))),
+					0);
+			}
 		}
 	}
 }

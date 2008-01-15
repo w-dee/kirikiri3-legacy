@@ -110,7 +110,9 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 {
-	tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode();
+	// 入力ピンの情報をクリアする
+	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
+	InputPin->ClearRenderRequests();
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -122,22 +124,21 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 		// 入力ピンのタイプをチェック
 		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
 
-		// すべてのリクエストのすべてのキューノードに同じ子を設定する
+		// すべてのリクエストのすべてのキューノードにそれぞれ別の子を作成する
 		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 		for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
-				new_parent->AddParent(*i);
+		{
+			tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(Risa::DownCast<const tWideTextRenderRequest*>(*i));
+			const tWideTextRenderRequest * wide_req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
+			tNarrowTextRenderRequest * narrow_req = new tNarrowTextRenderRequest(new_parent, 0, wide_req->GetArea());
+			InputPin->AddRenderRequest(narrow_req);
+		}
 	}
-
-	// 入力ピンに情報を設定
-	// 変換コストが極端に高い場合は
-	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
-	// 必要かもしれないがここではそれは考えない
-	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
-	InputPin->ClearRenderRequests();
-	tNarrowTextRenderRequest * req = new tNarrowTextRenderRequest(new_parent, 0, t1DArea());
-	InputPin->AddRenderRequest(req);
 	builder.Push(InputPin->GetOutputPin()->GetNode());
+
+	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
+	// 必要かもしれないがここではそれは考えない(すべての要求をそのまま入力ピンにも渡す)
 }
 //---------------------------------------------------------------------------
 
@@ -156,8 +157,8 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 
 
 //---------------------------------------------------------------------------
-tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode() :
-					inherited(NULL, tString())
+tNarrowTextToWideTextConverterQueueNode::tNarrowTextToWideTextConverterQueueNode(const tWideTextRenderRequest * request) :
+					inherited(request, tString(), t1DArea(), 0)
 {
 }
 //---------------------------------------------------------------------------
@@ -178,8 +179,10 @@ void tNarrowTextToWideTextConverterQueueNode::EndProcess()
 
 	tNarrowTextQueueNode * child = Risa::DownCast<tNarrowTextQueueNode*>(Children[0].GetChild());
 
-	// 結果をPositionとTextに格納
+	// 結果をTextとAreaとOffsetに格納
 	Text = tString(child->GetText());
+	Area = child->GetArea();
+	Offset = child->GetOffset();
 }
 //---------------------------------------------------------------------------
 

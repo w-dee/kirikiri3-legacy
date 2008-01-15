@@ -37,7 +37,29 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		start		開始位置
 	//! @param		end			終了位置 ( [start, end) )
-	t1DArea(risse_int start, risse_int end) { RISSE_ASSERT(Start < End); Start = start, End = end; }
+	t1DArea(risse_offset start, risse_offset end) { Start = start, End = end; RISSE_ASSERT(Start < End); }
+
+	//! @brief		コンストラクタ(交差を得る)
+	//! @param		a1		エリア1
+	//! @param		a2		エリア2
+	//! @return		交差がなかった場合は GetLength() が 0 より大きい値を返す
+	t1DArea(const t1DArea & a1, const t1DArea & a2)
+	{
+		a1.Intersect(a2, *this);
+	}
+
+	//! @brief		開始位置を得る
+	//! @return		開始位置
+	risse_offset GetStart() const { return Start; }
+
+	//! @brief		終了位置を得る
+	//! @return		終了位置
+	risse_offset GetEnd() const { return End; }
+
+	//! @brief		エリアの長さを得る
+	//! @return		長さ
+	//! @note		エリアの長さが無効な場合は負の値が帰る
+	risse_offset GetLength() const { return End - Start; }
 
 	//! @brief		範囲が重なっているかどうか
 	//! @param		ref			重なっているかを調べたい相手
@@ -47,6 +69,17 @@ public:
 		if(End <= ref.Start) return false;
 		if(Start >= ref.End) return false;
 		return true;
+	}
+
+	//! @brief		重なっている範囲を得る
+	//! @param		ref			重なっているかを調べたい相手
+	//! @param		intersec	重なっている範囲を格納する先
+	//! @return		範囲が重なっていれば真、そうでなければ偽
+	bool Intersect(const t1DArea & ref, t1DArea & intersec) const
+	{
+		intersec.Start = std::max(Start, ref.Start);
+		intersec.End = std::min(End, ref.End);
+		return intersec.Start < intersec.End;
 	}
 
 	//! @brief		範囲が重なっているか連続している場合は自分を相手に合わせて延長する
@@ -60,6 +93,10 @@ public:
 		if(End < ref.End) End = ref.End;
 		return true;
 	}
+
+	//! @brief		オフセットを加算する
+	//! @param		offset		オフセット
+	void AddOffset(risse_offset offset) { Start += offset, End += offset; }
 };
 //---------------------------------------------------------------------------
 

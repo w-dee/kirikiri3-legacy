@@ -102,13 +102,16 @@ public: // サブクラスで実装すべき物
 //---------------------------------------------------------------------------
 //! @brief		テスト用のミキサコマンドキュー
 //---------------------------------------------------------------------------
-class tWideTextMixerQueueNode : public tWideTextProviderQueueNode, public Risa::tSubmorph<tWideTextMixerQueueNode>
+class tWideTextMixerQueueNode : public tWideTextProviderQueueNode,
+	public Risa::tSubmorph<tWideTextMixerQueueNode>
 {
 public:
 	typedef tWideTextProviderQueueNode inherited;
-private:
 
+public:
 	static const risse_size CanvasSize = 20; //!< キャンバスのサイズ
+
+private:
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:

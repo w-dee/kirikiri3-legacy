@@ -97,9 +97,11 @@ class tWideTextDrawDeviceQueueNode : public tQueueNode, public Risa::tSubmorph<t
 {
 public:
 	typedef tQueueNode inherited;
-private:
 
+public:
 	static const risse_size CanvasSize = 78; //!< キャンバスのサイズ
+
+private:
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ
 
 public:

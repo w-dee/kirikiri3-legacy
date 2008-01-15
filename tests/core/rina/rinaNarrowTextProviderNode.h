@@ -108,18 +108,36 @@ private:
 
 protected:
 	const char * Text; //!< テキスト
+	t1DArea Area; //!< テキストの範囲
+	risse_offset Offset; //!< Area.GetBegin() に対応する Text のインデックス
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		request		レンダリング要求
 	//! @param		text	テキスト
-	tNarrowTextProviderQueueNode(const tNarrowTextRenderRequest * request, const char * text) :
+	//! @param		text_area	テキストの使用範囲
+	tNarrowTextProviderQueueNode(const tNarrowTextRenderRequest * request,
+			const char * text, const t1DArea & area, risse_offset offset) :
 		inherited(request),
-		Text(text) {;}
+		Text(text),
+		Area(area),
+		Offset(offset) {;}
 
 	//! @brief		テキストを得る
 	//! @return		テキスト
 	virtual const char * GetText() { return Text; }
+
+	//! @brief		テキストの範囲を得る
+	//! @return		範囲
+	//! @brief		GetText() で得られたテキストがどこからどこまでの範囲を表しているか
+	virtual const t1DArea & GetArea() { return Area; }
+
+	//! @brief		テキストのオフセットを得る
+	//! @return		オフセット
+	//! @brief		Text 中のどのオフセットが GetArea().GetBegin() 位置を表しているかを表す。
+	//! @brief		GetText() で得られたテキストのうち、[GetOffset(), GetOffset() + GetArea().GetLength()) の
+	//! 			範囲のみを使用すること。それ以外はたとえアクセス可能であってもアクセスしてはならない。
+	virtual risse_offset GetOffset() { return Offset; }
 
 protected: //!< サブクラスでオーバーライドして使う物
 

@@ -15,6 +15,7 @@
 #ifndef RINATEXTPROPERTY_H
 #define RINATEXTPROPERTY_H
 
+#include "rina1DRegion.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -57,6 +58,28 @@ public:
 	{
 		Position += rhs.Position;
 	}
+
+	//! @brief		親->子方向の変換を行う(t1DArea)
+	//! @param		area		エリア
+	//! @return		新しく変換されたエリア
+	t1DArea ToChild(const t1DArea & area) const
+	{
+		t1DArea ret(area);
+		ret.AddOffset(-Position);
+		return ret;
+	}
+
+	//! @brief		子->親方向の変換を行う(t1DArea)
+	//! @param		area		エリア
+	//! @return		新しく変換されたエリア
+	t1DArea ToParent(const t1DArea & area) const
+	{
+		t1DArea ret(area);
+		ret.AddOffset(Position);
+		return ret;
+	}
+
+
 };
 //---------------------------------------------------------------------------
 

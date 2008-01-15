@@ -118,7 +118,14 @@ void tWideTextProviderNode::BuildQueue(tQueueBuilder & builder)
 		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 		for(tInputPin::tRenderRequests::const_iterator i =
 			requests.begin(); i != requests.end(); i ++)
-			new tWideTextProviderQueueNode(Risa::DownCast<const tWideTextRenderRequest*>(*i), Caption);
+		{
+			const tWideTextRenderRequest * req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
+			new tWideTextProviderQueueNode(
+				req,
+				Caption,
+				t1DArea(req->GetArea(), t1DArea(0, Caption.GetLength())),
+				0);
+		}
 	}
 }
 //---------------------------------------------------------------------------

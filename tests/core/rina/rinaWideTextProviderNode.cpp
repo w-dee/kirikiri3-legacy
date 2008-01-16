@@ -34,6 +34,18 @@ tWideTextProviderNode::tWideTextProviderNode()
 
 
 //---------------------------------------------------------------------------
+void tWideTextProviderNode::SetCaption(const tString & caption)
+{
+	// キャプションが変わると前の長さと新しい長さのどちらか長い方分までが更新される
+	risse_size length_was = Caption.GetLength();
+	risse_size length_is  = caption.GetLength();
+	Caption = caption;
+	OutputPin->NotifyUpdate(t1DArea(0, std::max(length_was, length_is)));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_size tWideTextProviderNode::GetOutputPinCount()
 {
 	return 1; // 出力ピンは１個

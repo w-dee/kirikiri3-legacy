@@ -15,6 +15,7 @@
 #include "prec.h"
 #include "rina1DRegion.h"
 #include "rinaWideTextEdge.h"
+#include "rinaWideTextDrawDeviceNode.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(52443,53248,53438,18214,2474,63937,55669,59383);
@@ -63,6 +64,15 @@ const gc_vector<risse_uint32> & tWideTextInputPin::GetSupportedTypes()
 
 
 
+//---------------------------------------------------------------------------
+void tWideTextMixerInputPin::NotifyUpdate(const t1DArea & area)
+{
+	tWideTextDrawDeviceNode * dd_node = Risa::TryDownCast<tWideTextDrawDeviceNode*>(GetNode());
+	if(dd_node) dd_node->NotifyUpdate(InheritableProperties.ToParent(area));
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -86,6 +96,15 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tWideTextOutputPin::NotifyUpdate(const t1DArea & area)
+{
+	for(tInputPins::const_iterator i = GetInputPins().begin(); i != GetInputPins().end(); i++)
+	{
+		Risa::DownCast<tWideTextInputPin *>(*i)->NotifyUpdate(area);
+	}
+}
+//---------------------------------------------------------------------------
 
 
 

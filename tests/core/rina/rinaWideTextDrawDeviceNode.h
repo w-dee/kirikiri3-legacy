@@ -33,9 +33,10 @@ class tWideTextDrawDeviceNode : public tProcessNode, public Risa::tSubmorph<tWid
 {
 public:
 	typedef tProcessNode inherited;
-private:
 
+private:
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
+	t1DRegion DirtyRegion; //!< ダーティーなリージョン
 
 public:
 	//! @brief		コンストラクタ
@@ -85,6 +86,12 @@ public: // サブクラスで実装すべき物
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		builder			キュービルダーオブジェクト
 	void BuildQueue(tQueueBuilder & builder);
+
+
+public:
+	//! @brief		内容の更新があったことを伝える(子ノードから呼ばれる)
+	//! @param		area		範囲
+	void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

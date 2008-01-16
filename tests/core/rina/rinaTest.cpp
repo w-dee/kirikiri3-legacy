@@ -131,13 +131,29 @@ void tTester::Test()
 	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
 		GetInheritableProperties().SetPosition(34);
 
-	// build queue render
-	tQueueBuilder builder;
-	builder.Build(dd_node);
+	{
+		// build queue render
+		tQueueBuilder builder;
+		builder.Build(dd_node);
 
-	// キューノードを作成し終わったということでレンダリングを開始する
-	tQueue queue;
-	queue.Process(builder.GetRootQueueNode());
+		// キューノードを作成し終わったということでレンダリングを開始する
+		tQueue queue;
+		queue.Process(builder.GetRootQueueNode());
+	}
+
+	provider_node1->SetCaption(RISSE_WS("ABC"));
+
+	{
+		// build queue render
+		tQueueBuilder builder;
+		builder.Build(dd_node);
+
+		// キューノードを作成し終わったということでレンダリングを開始する
+		tQueue queue;
+		queue.Process(builder.GetRootQueueNode());
+	}
+
+
 }
 //---------------------------------------------------------------------------
 

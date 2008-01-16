@@ -116,6 +116,11 @@ public:
 	//! @return		このピンがサポートするタイプの一覧
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
+
+	//! @brief		内容の更新があったことを上位のノードに伝える
+	//! @param		area		範囲
+	//! @brief		デフォルトでは何もしない
+	virtual void NotifyUpdate(const t1DArea & area) {;}
 };
 //---------------------------------------------------------------------------
 
@@ -139,6 +144,10 @@ public:
 	//! @brief		継承可能なプロパティを得る
 	//! @return		継承可能なプロパティ
 	tTextInheritableProperties & GetInheritableProperties() { return InheritableProperties; }
+
+	//! @brief		内容の更新があったことを上位のノードに伝える
+	//! @param		area		範囲
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 
@@ -164,6 +173,10 @@ public:
 	//! @return		このピンがサポートするタイプの一覧
 	//! @note		返される配列は、最初の物ほど優先度が高い
 	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
+
+	//! @brief		内容の更新があったことを上位のノードに伝える
+	//! @param		area		範囲
+	void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

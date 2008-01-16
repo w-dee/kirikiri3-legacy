@@ -85,6 +85,16 @@ const gc_vector<risse_uint32> & tNarrowTextOutputPin::GetSupportedTypes()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tNarrowTextOutputPin::NotifyUpdate(const t1DArea & area)
+{
+	for(tInputPins::const_iterator i = GetInputPins().begin(); i != GetInputPins().end(); i++)
+	{
+		Risa::DownCast<tNarrowTextInputPin *>(*i)->NotifyUpdate(area);
+	}
+}
+//---------------------------------------------------------------------------
+
 
 
 

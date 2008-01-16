@@ -126,6 +126,9 @@ public:
 	//! @brief		範囲を追加する
 	//! @param		area		範囲
 	void Add(t1DArea area);
+
+	//! @brief		内容をクリアする
+	void Clear() { Areas.clear(); }
 };
 //---------------------------------------------------------------------------
 

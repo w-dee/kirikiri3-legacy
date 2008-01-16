@@ -48,8 +48,7 @@ public:
 
 	//! @brief		キャプションを設定する
 	//! @return		caption キャプション
-	void SetCaption(const tString & caption) { Caption = caption; }
-
+	void SetCaption(const tString & caption);
 
 public: // サブクラスで実装すべき物
 

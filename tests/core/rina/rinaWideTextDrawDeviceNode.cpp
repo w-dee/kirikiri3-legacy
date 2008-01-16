@@ -28,7 +28,8 @@ RISSE_DEFINE_SOURCE_ID(10207,53962,31748,17392,1438,46335,5173,19226);
 //---------------------------------------------------------------------------
 tWideTextDrawDeviceNode::tWideTextDrawDeviceNode() : inherited()
 {
-
+	// 最初は全領域が dirty
+	DirtyRegion.Add(t1DArea(0, tWideTextDrawDeviceQueueNode::CanvasSize));
 }
 //---------------------------------------------------------------------------
 
@@ -121,26 +122,38 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 		builder.Push((*i)->GetOutputPin()->GetNode());
 	}
 
-	// 位置ごとに
-	static const risse_size step = 2;
+	// Dirty な領域ごとに
+	const t1DRegion::tAreas & dirties = DirtyRegion.GetAreas();
 	risse_size index = 0;
-	for(risse_size pos = 0; pos < tWideTextDrawDeviceQueueNode::CanvasSize; pos += step)
+	for(t1DRegion::tAreas::const_iterator ai = dirties.begin(); ai != dirties.end(); ai++)
 	{
 		// 入力ピンに再帰
 		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 		{
 			tWideTextMixerRenderRequest * req =
-				new tWideTextMixerRenderRequest(new_parent, index, t1DArea(pos, pos + step),
+				new tWideTextMixerRenderRequest(new_parent, index, *ai,
 					(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
 			index ++;
 			(*i)->AddRenderRequest(req);
 		}
 	}
 
+	// Dirty な領域をクリア
+	DirtyRegion.Clear();
+
 	// ルートのキューノードはnew_parentであると主張(ここは後から修正するかも………)
 	builder.SetRootQueueNode(new_parent);
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWideTextDrawDeviceNode::NotifyUpdate(const t1DArea & area)
+{
+	DirtyRegion.Add(area);
+}
+//---------------------------------------------------------------------------
+
 
 
 

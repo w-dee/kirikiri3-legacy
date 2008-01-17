@@ -14,6 +14,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaNarrowTextEdge.h"
+#include "rina1DUpdateReceiver.h"
 
 
 namespace Rina {
@@ -58,8 +59,24 @@ const gc_vector<risse_uint32> & tNarrowTextInputPin::GetSupportedTypes()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tNarrowTextInputPin::NotifyUpdate(const t1DArea & area)
+{
+	t1DUpdateReceiver * node = Risa::TryDownCast<t1DUpdateReceiver*>(GetNode());
+	if(node) node->NotifyUpdate(area);
+}
+//---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+void tNarrowTextMixerInputPin::NotifyUpdate(const t1DArea & area)
+{
+	t1DUpdateReceiver * node = Risa::TryDownCast<t1DUpdateReceiver*>(GetNode());
+	if(node) node->NotifyUpdate(InheritableProperties.ToParent(area));
+}
+//---------------------------------------------------------------------------
 
 
 

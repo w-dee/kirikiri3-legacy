@@ -121,8 +121,7 @@ public:
 
 	//! @brief		内容の更新があったことを上位のノードに伝える
 	//! @param		area		範囲
-	//! @brief		デフォルトでは何もしない
-	virtual void NotifyUpdate(const t1DArea & area) {;}
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 
@@ -150,7 +149,7 @@ public:
 
 	//! @brief		内容の更新があったことを上位のノードに伝える
 	//! @param		area		範囲
-	virtual void NotifyUpdate(const t1DArea & area) {;}
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

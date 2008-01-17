@@ -142,6 +142,8 @@ void tTester::Test()
 	}
 
 	provider_node1->SetCaption(RISSE_WS("ABC"));
+	provider_node2->SetCaption(RISSE_WS("DE"));
+	narrow_provider_node->SetCaption("NARROW");
 
 	{
 		// build queue render

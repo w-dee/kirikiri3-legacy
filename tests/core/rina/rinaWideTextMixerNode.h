@@ -18,6 +18,7 @@
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
 #include "rinaWideTextProviderNode.h"
+#include "rina1DUpdateReceiver.h"
 
 
 namespace Rina {
@@ -30,10 +31,10 @@ class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のミキサノード
 //---------------------------------------------------------------------------
-class tWideTextMixerNode : public tProcessNode, public Risa::tSubmorph<tWideTextMixerNode>
+class tWideTextMixerNode : public t1DUpdateReceiver, public Risa::tSubmorph<tWideTextMixerNode>
 {
 public:
-	typedef tProcessNode inherited;
+	typedef t1DUpdateReceiver inherited;
 private:
 
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列

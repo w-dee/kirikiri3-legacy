@@ -143,6 +143,14 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tNarrowTextToWideTextConverterNode::NotifyUpdate(const t1DArea & area)
+{
+	// そのまま出力ピンに情報を渡す
+fprintf(stderr, "tNarrowTextToWideTextConverterNode::NotifyUpdate : (%d,%d)\n", area.GetStart(), area.GetEnd());
+	OutputPin->NotifyUpdate(area);
+}
+//---------------------------------------------------------------------------
 
 
 

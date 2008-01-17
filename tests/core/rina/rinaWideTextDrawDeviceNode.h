@@ -18,6 +18,7 @@
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
 #include "rinaWideTextEdge.h"
+#include "rina1DUpdateReceiver.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -29,10 +30,10 @@ class tOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキスト描画デバイスプロセスノード
 //---------------------------------------------------------------------------
-class tWideTextDrawDeviceNode : public tProcessNode, public Risa::tSubmorph<tWideTextDrawDeviceNode>
+class tWideTextDrawDeviceNode : public t1DUpdateReceiver, public Risa::tSubmorph<tWideTextDrawDeviceNode>
 {
 public:
-	typedef tProcessNode inherited;
+	typedef t1DUpdateReceiver inherited;
 
 private:
 	gc_vector<tInputPin *> InputPins; //!< 入力ピンの配列
@@ -91,7 +92,7 @@ public: // サブクラスで実装すべき物
 public:
 	//! @brief		内容の更新があったことを伝える(子ノードから呼ばれる)
 	//! @param		area		範囲
-	void NotifyUpdate(const t1DArea & area);
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

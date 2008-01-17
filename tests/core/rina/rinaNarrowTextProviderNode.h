@@ -18,6 +18,7 @@
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaQueue.h"
 #include "rinaNarrowTextEdge.h"
+#include "rina1DUpdateReceiver.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -28,10 +29,10 @@ class tNarrowTextOutputPin;
 //---------------------------------------------------------------------------
 //! @brief		テスト用のテキストプロバイダノード
 //---------------------------------------------------------------------------
-class tNarrowTextProviderNode : public tProcessNode, public Risa::tSubmorph<tNarrowTextProviderNode>
+class tNarrowTextProviderNode : public t1DUpdateReceiver, public Risa::tSubmorph<tNarrowTextProviderNode>
 {
 public:
-	typedef tProcessNode inherited;
+	typedef t1DUpdateReceiver inherited;
 private:
 
 	tNarrowTextOutputPin * OutputPin; //!< 出力ピン

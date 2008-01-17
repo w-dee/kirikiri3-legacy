@@ -26,6 +26,7 @@ RISSE_DEFINE_SOURCE_ID(12623,61035,35256,19759,45714,27702,3711,32168);
 //---------------------------------------------------------------------------
 tNarrowTextProviderNode::tNarrowTextProviderNode()
 {
+	Caption = "";
 	// 出力ピンを作成
 	OutputPin = new tNarrowTextOutputPin();
 	OutputPin->Attach(this);
@@ -36,10 +37,16 @@ tNarrowTextProviderNode::tNarrowTextProviderNode()
 //---------------------------------------------------------------------------
 void tNarrowTextProviderNode::SetCaption(const char * caption)
 {
+	risse_size length_was = strlen(Caption);
+
 	size_t len = strlen(caption);
 	char * newbuf = static_cast<char *>(MallocAtomicCollectee(len + 1));
 	strcpy(newbuf, caption);
 	Caption = newbuf;
+
+	// キャプションが変わると前の長さと新しい長さのどちらか長い方分までが更新される
+	risse_size length_is  = len;
+	OutputPin->NotifyUpdate(t1DArea(0, std::max(length_was, length_is)));
 }
 //---------------------------------------------------------------------------
 

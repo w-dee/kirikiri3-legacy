@@ -110,7 +110,7 @@ public:
 	typedef tWideTextProviderQueueNode inherited;
 
 public:
-	static const risse_size CanvasSize = 20; //!< キャンバスのサイズ
+	static const risse_size CanvasSize = 11; //!< キャンバスのサイズ
 
 private:
 	risse_char * Canvas; //!< 最終的に表示するテキストのバッファ

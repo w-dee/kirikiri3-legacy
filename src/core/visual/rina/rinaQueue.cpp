@@ -46,9 +46,9 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 		for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 		{
 			tQueueNode * child = i->GetChild();
-			RISSE_ASSERT(child != NULL);
-			if(-- child->WaitingParents == 0) // TODO: アトミックなデクリメント
-				queue->Push(child, true);
+			if(child)
+				if(-- child->WaitingParents == 0) // TODO: アトミックなデクリメント
+					queue->Push(child, true);
 		}
 
 		if(Children.size() == 0)
@@ -89,6 +89,8 @@ void tQueueNode::AddParent(const tRenderRequest * request)
 //---------------------------------------------------------------------------
 void tQueueNode::AddChild(tQueueNode * child, const tRenderRequest * request)
 {
+	// 注意: もし child が指定されたインデックスに登録されなかった場合は
+	// そこは NULL になることを期待している実装があることに注意すること
 	risse_size index = request->GetIndex();
 	if(Children.size() <= index) Children.resize(index + 1);
 	Children[index] = tQueueNodeChild(child, request);

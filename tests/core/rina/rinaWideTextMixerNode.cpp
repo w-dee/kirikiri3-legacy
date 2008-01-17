@@ -109,6 +109,37 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 {
+	// 情報収集; 自分に関係する範囲があるかどうか
+	t1DRegion region;
+	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
+		i != OutputPin->GetInputPins().end(); i++)
+	{
+		// レンダリング世代が最新の物かどうかをチェック
+		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
+
+		// 入力ピンのタイプをチェック
+		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
+
+		// 範囲が重なっているか……
+		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
+		for(tInputPin::tRenderRequests::const_iterator i =
+			requests.begin(); i != requests.end(); i ++)
+		{
+			const tWideTextRenderRequest * req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
+			t1DArea intersection;
+			if(req->GetArea().Intersect(t1DArea(0, tWideTextMixerQueueNode::CanvasSize), intersection))
+			{
+				// 重なっていれば region に追加
+				region.Add(intersection);
+			}
+		}
+	}
+
+	// region が何もない場合はそのまま return
+	if(region.IsEmpty())
+		return;
+
+	// ミキサのキューノードを作成する
 	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
@@ -129,18 +160,30 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 			new_parent->AddParent(*i);
 	}
 
-	// 入力ピンに情報を設定
+	// 入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
+	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
+	// ノードを push する
 	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		(*i)->ClearRenderRequests();
-		// Area はいまのところ全域を要求する
-		tWideTextMixerRenderRequest * req =
-			new tWideTextMixerRenderRequest(new_parent, i - InputPins.begin(),
-				t1DArea(0, tWideTextMixerQueueNode::CanvasSize),
-				(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
-		(*i)->AddRenderRequest(req);
 		builder.Push((*i)->GetOutputPin()->GetNode());
+	}
+
+	// Dirty な領域ごとに
+	const t1DRegion::tAreas & dirties = region.GetAreas();
+	risse_size index = 0;
+	for(t1DRegion::tAreas::const_iterator ai = dirties.begin(); ai != dirties.end(); ai++)
+	{
+		// 入力ピンに再帰
+		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
+		{
+			tWideTextMixerRenderRequest * req =
+				new tWideTextMixerRenderRequest(new_parent, index, *ai,
+					(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
+			index ++;
+			(*i)->AddRenderRequest(req);
+		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -180,6 +223,7 @@ void tWideTextMixerQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
+		if(! i->GetChild()) continue;
 		tWideTextQueueNode * provider = Risa::DownCast<tWideTextQueueNode *>(i->GetChild());
 		const tWideTextMixerRenderRequest * req =
 			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());

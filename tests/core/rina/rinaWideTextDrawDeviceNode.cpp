@@ -111,7 +111,6 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 {
 	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(NULL);
 
-	// テスト用に 2 文字ずつレンダリングを行うようにする
 	// まず入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
 	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
 	// ノードを push する
@@ -190,6 +189,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
+		if(! i->GetChild()) continue;
 		tWideTextQueueNode * provider = Risa::DownCast<tWideTextQueueNode *>(i->GetChild());
 		const tWideTextMixerRenderRequest * req =
 			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());

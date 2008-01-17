@@ -129,6 +129,11 @@ public:
 
 	//! @brief		内容をクリアする
 	void Clear() { Areas.clear(); }
+
+	//! @brief		内容が空かどうかを得る
+	//! @return		内容が空かどうか
+	bool IsEmpty() const { return Areas.size() == 0; }
+
 };
 //---------------------------------------------------------------------------
 

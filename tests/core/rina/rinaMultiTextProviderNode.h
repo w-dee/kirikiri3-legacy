@@ -24,7 +24,29 @@ namespace Rina {
 
 
 
-class tMultiTextOutputPin;
+//---------------------------------------------------------------------------
+//! @brief		出力ピン
+//---------------------------------------------------------------------------
+class tMultiTextOutputPin : public tOutputPin, public Risa::tSubmorph<tMultiTextOutputPin>
+{
+public:
+	typedef tOutputPin inherited;
+private:
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		node		ノード
+	tMultiTextOutputPin();
+
+	//! @brief		このピンがサポートするタイプの一覧を得る
+	//! @return		このピンがサポートするタイプの一覧
+	//! @note		返される配列は、最初の物ほど優先度が高い
+	virtual const gc_vector<risse_uint32> & GetSupportedTypes();
+};
+//---------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		テスト用の複数形式をサポートするテキストプロバイダノード
 //---------------------------------------------------------------------------

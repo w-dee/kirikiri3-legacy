@@ -14,7 +14,6 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "rinaMultiTextProviderNode.h"
-#include "rinaMultiTextPin.h"
 #include "rinaWideTextEdge.h"
 #include "rinaWideTextProviderNode.h"
 #include "rinaNarrowTextEdge.h"
@@ -23,6 +22,44 @@
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(47508,49325,57519,19588,18101,2946,50970,8610);
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tMultiTextOutputPin::tMultiTextOutputPin()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+const gc_vector<risse_uint32> & tMultiTextOutputPin::GetSupportedTypes()
+{
+	// 暫定実装、できれば static かシングルトン上の配列への参照を返した方がよい
+	gc_vector<risse_uint32> * arr = new gc_vector<risse_uint32>();
+	arr->push_back(WideTextEdgeType);
+	arr->push_back(NarrowTextEdgeType);
+	return *arr;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

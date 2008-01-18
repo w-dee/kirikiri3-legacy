@@ -18,7 +18,6 @@ CPPFILES=\
 	rinaWideTextProviderNode.cpp   \
 	rinaNarrowTextEdge.cpp         \
 	rinaNarrowTextProviderNode.cpp \
-	rinaMultiTextPin.cpp           \
 	rinaMultiTextProviderNode.cpp  \
 	rinaWideTextMixerNode.cpp      \
 	rinaNarrowTextToWideTextConverterNode.cpp \

@@ -17,7 +17,6 @@
 #include "rinaWideTextProviderNode.h"
 #include "rinaWideTextEdge.h"
 #include "rinaMultiTextProviderNode.h"
-#include "rinaMultiTextPin.h"
 #include "rinaWideTextDrawDeviceNode.h"
 #include "rinaWideTextMixerNode.h"
 #include "rinaNarrowTextToWideTextConverterNode.h"

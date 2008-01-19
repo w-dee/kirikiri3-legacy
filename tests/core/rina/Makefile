@@ -20,6 +20,7 @@ CPPFILES=\
 	rinaNarrowTextProviderNode.cpp \
 	rinaMultiTextProviderNode.cpp  \
 	rinaWideTextMixerNode.cpp      \
+	rinaWideTextReverserNode.cpp   \
 	rinaNarrowTextToWideTextConverterNode.cpp \
 	rinaTest.cpp
 

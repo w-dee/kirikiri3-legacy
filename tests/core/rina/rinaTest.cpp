@@ -19,6 +19,7 @@
 #include "rinaMultiTextProviderNode.h"
 #include "rinaWideTextDrawDeviceNode.h"
 #include "rinaWideTextMixerNode.h"
+#include "rinaWideTextReverserNode.h"
 #include "rinaNarrowTextToWideTextConverterNode.h"
 #include "rinaNarrowTextProviderNode.h"
 
@@ -129,6 +130,13 @@ void tTester::Test()
 	dd_node->GetInputPinAt(6)->Connect(mixer_node->GetOutputPinAt(0));
 	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(6))->
 		GetInheritableProperties().SetPosition(34);
+
+	tWideTextReverserNode * rev_node = new tWideTextReverserNode();
+	rev_node->GetInputPinAt(0)->Connect(mixer_node->GetOutputPinAt(0));
+	dd_node->InsertInputPinAt(7);
+	dd_node->GetInputPinAt(7)->Connect(rev_node->GetOutputPinAt(0));
+	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(7))->
+		GetInheritableProperties().SetPosition(68);
 
 	{
 		// build queue render

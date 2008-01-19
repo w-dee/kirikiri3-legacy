@@ -10,39 +10,47 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief テスト用のテキストミキサノード管理
+//! @brief テキストを反転するノード
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "rinaWideTextMixerNode.h"
 #include "rinaWideTextEdge.h"
-#include "rinaWideTextProviderNode.h"
+#include "rinaWideTextReverserNode.h"
 
 namespace Rina {
-RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
+RISSE_DEFINE_SOURCE_ID(47400,47442,57022,18181,27294,2531,6297,13005);
 //---------------------------------------------------------------------------
 
 
 
+
+
+
+
+
+
 //---------------------------------------------------------------------------
-tWideTextMixerNode::tWideTextMixerNode() : inherited()
+tWideTextReverserNode::tWideTextReverserNode()
 {
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();
 	OutputPin->Attach(this);
+	// 入力ピンを作成
+	InputPin = new tWideTextInputPin();
+	InputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tWideTextMixerNode::GetOutputPinCount()
+risse_size tWideTextReverserNode::GetOutputPinCount()
 {
-	return 1; // 出力ピンは1個
+	return 1; // 出力ピンは１個
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
+tOutputPin * tWideTextReverserNode::GetOutputPinAt(risse_size n)
 {
 	// TODO: 例外
 	if(n == 0) return OutputPin;
@@ -52,7 +60,7 @@ tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
+void tWideTextReverserNode::InsertOutputPinAt(risse_size n)
 {
 	// 出力ピンを追加することはできない
 	// TODO: 例外
@@ -61,7 +69,7 @@ void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
+void tWideTextReverserNode::DeleteOutputPinAt(risse_size n)
 {
 	// 出力ピンを削除することはできない
 	// TODO: 例外
@@ -70,78 +78,52 @@ void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
 
 
 //---------------------------------------------------------------------------
-risse_size tWideTextMixerNode::GetInputPinCount()
+risse_size tWideTextReverserNode::GetInputPinCount()
 {
-	return InputPins.size();
+	return 1;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
+tInputPin * tWideTextReverserNode::GetInputPinAt(risse_size n)
 {
 	// XXX: 範囲外例外
-	return InputPins[n];
+	if(n == 0) return InputPin;
+	return NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::InsertInputPinAt(risse_size n)
+void tWideTextReverserNode::InsertInputPinAt(risse_size n)
 {
-	// XXX: 範囲外例外
-	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
-	newpin->Attach(this);
-	InputPins.insert(InputPins.begin() + n, newpin);
+	// XXX: 入力ピンを追加することはできない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
+void tWideTextReverserNode::DeleteInputPinAt(risse_size n)
 {
-	// XXX: 範囲外例外
-	InputPins.erase(InputPins.begin() + n);
+	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
+void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 {
-wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
-	// 情報収集; 自分に関係する範囲があるかどうか
+wxFprintf(stderr, wxT("tWideTextReverserNode::BuildQueue\n"));
+	/*
+		本来ならば子ノードにバウンディングボックスをといあわせ、それに
+		対応しない位置をはじくようなコードが必要
+		(まだ子ノードからそのような情報を得るインターフェースはない)
+	*/
 	t1DRegion region;
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
-	{
-		// レンダリング世代が最新の物かどうかをチェック
-		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
 
-		// 入力ピンのタイプをチェック
-		RISSE_ASSERT((*i)->GetAgreedType() == WideTextEdgeType);
-
-		// 範囲が重なっているか……
-		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
-		for(tInputPin::tRenderRequests::const_iterator i =
-			requests.begin(); i != requests.end(); i ++)
-		{
-			const tWideTextRenderRequest * req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
-			t1DArea intersection;
-			if(req->GetArea().Intersect(t1DArea(0, tWideTextMixerQueueNode::CanvasSize), intersection))
-			{
-				// 重なっていれば region に追加
-				region.Add(intersection);
-			}
-		}
-	}
-
-	// region が何もない場合はそのまま return
-	if(region.IsEmpty())
-		return;
-
-	// ミキサのキューノードを作成する
-	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL);
+	// リバーサのキューノードを作成する
+	tQueueNode * new_parent = new tWideTextReverserQueueNode(NULL);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -158,18 +140,21 @@ wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
 		const tInputPin::tRenderRequests & requests = (*i)->GetRenderRequests();
 		for(tInputPin::tRenderRequests::const_iterator i =
 				requests.begin(); i != requests.end(); i ++)
+		{
 			new_parent->AddParent(*i);
+			const tWideTextRenderRequest * req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
+
+			// region に追加
+			region.Add(req->GetArea());
+		}
 	}
 
 	// 入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
 	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
 	// ノードを push する
-	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-	{
-		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
-		(*i)->ClearRenderRequests();
-		builder.Push((*i)->GetOutputPin()->GetNode());
-	}
+	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
+	InputPin->ClearRenderRequests();
+	builder.Push(InputPin->GetOutputPin()->GetNode());
 
 	// Dirty な領域ごとに
 	const t1DRegion::tAreas & dirties = region.GetAreas();
@@ -177,14 +162,10 @@ wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
 	for(t1DRegion::tAreas::const_iterator ai = dirties.begin(); ai != dirties.end(); ai++)
 	{
 		// 入力ピンに再帰
-		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
-		{
-			tWideTextMixerRenderRequest * req =
-				new tWideTextMixerRenderRequest(new_parent, index, *ai,
-					(Risa::DownCast<tWideTextMixerInputPin*>(*i))->GetInheritableProperties());
-			index ++;
-			(*i)->AddRenderRequest(req);
-		}
+		tWideTextRenderRequest * req =
+			new tWideTextRenderRequest(new_parent, index, *ai);
+		index ++;
+		InputPin->AddRenderRequest(req);
 	}
 }
 //---------------------------------------------------------------------------
@@ -196,67 +177,98 @@ wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-tWideTextMixerQueueNode::tWideTextMixerQueueNode(tWideTextRenderRequest * request) :
+tWideTextReverserQueueNode::tWideTextReverserQueueNode(tWideTextRenderRequest * request) :
 	inherited(request, tString(), t1DArea(), 0)
 {
-	Canvas = NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerQueueNode::BeginProcess()
+void tWideTextReverserQueueNode::BeginProcess()
 {
-	// キャンバス用にメモリを確保
-	Canvas = (risse_char *)MallocAtomicCollectee(sizeof(risse_char) * (CanvasSize + 1));
-
-	// キャンバスを空白で埋める
-	for(risse_size i = 0; i < CanvasSize; i++) Canvas[i] = RISSE_WC(' ');
-	Canvas[CanvasSize] = 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWideTextMixerQueueNode::EndProcess()
+void tWideTextReverserQueueNode::EndProcess()
 {
+	// 子ノードの範囲を決定する
+	bool first = true;
+	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
+	{
+		if(! i->GetChild()) continue;
+
+		tWideTextQueueNode * provider = Risa::DownCast<tWideTextQueueNode *>(i->GetChild());
+		if(provider->GetArea().GetLength() <= 0) continue; // 範囲が無効
+		const tWideTextMixerRenderRequest * req =
+			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
+		const t1DArea & destarea = req->GetArea();
+		const t1DArea & srcarea = provider->GetArea();
+		t1DArea srcarea_rev(-srcarea.GetEnd(), -srcarea.GetStart());
+		t1DArea intersect;
+		if(!destarea.Intersect(srcarea_rev, intersect)) continue; // 交差していない
+
+		if(first)
+			first = false, Area = intersect;
+		else
+			Area.Unite(intersect);
+	}
+	if(first)
+	{
+		// 子ノードが無い？？
+		Text = tString();
+		Area = t1DArea(0, 0);
+		Offset = 0;
+		return;
+	}
+
+	RISSE_ASSERT(Area.GetLength() > 0);
+	risse_size area_size = Area.GetLength();
+	risse_char * buf = Text.Allocate(area_size);
+	for(risse_size i = 0; i < area_size; i++) buf[i] = RISSE_WC(' '); // 空白で埋める
+	Offset = 0;
+
+wxFprintf(stdout, wxT("Area: (%d,%d)\n"),
+		(int)Area.GetStart(),
+		(int)Area.GetEnd() );
+
 	// 子ノードを合成する
 	for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 	{
 		if(! i->GetChild()) continue;
 		tWideTextQueueNode * provider = Risa::DownCast<tWideTextQueueNode *>(i->GetChild());
+		if(provider->GetArea().GetLength() <= 0) continue; // 範囲が無効
 		const tWideTextMixerRenderRequest * req =
 			static_cast<const tWideTextMixerRenderRequest*>(i->GetRenderRequest());
 		const tString & text = provider->GetText();
 		risse_offset text_offset = provider->GetOffset();
 		const risse_char *pbuf = text.c_str();
 		risse_size text_size = text.GetLength();
-		risse_int32 pos = req->GetInheritableProperties().GetPosition();
 		const t1DArea & destarea = req->GetArea();
 		const t1DArea & srcarea = provider->GetArea();
+		t1DArea srcarea_rev(-srcarea.GetEnd(), -srcarea.GetStart());
 
-		// position で表された位置 + destarea.Start に、
-		// pbuf で表されたテキスト + text_offset から srcarea.GetLength() 分の
-		// 長さを書き込む。
-		// dest に範囲外が指定された場合は明らかなエラーだが、src については
-		// 範囲外を含む場合は値が範囲外になっている可能性があるので補正する
-		// ここで destarea は親ノードが子ノードに対して要求した範囲であり、
-		// srcarea はそれに対して子ノードがどう反応したかである
-
-		// destarea と srcarea の重なっている部分しか転送のしようがないので交差を得る
+		// destarea と srcarea_rev の重なっている部分しか転送のしようがないので交差を得る
 		t1DArea intersect;
-		if(!destarea.Intersect(srcarea, intersect)) continue; // 交差していない
+		if(!destarea.Intersect(srcarea_rev, intersect)) continue; // 交差していない
 
-		text_offset += intersect.GetStart() - srcarea.GetStart();
+		text_offset += intersect.GetEnd() - srcarea_rev.GetEnd();
 
-	wxFprintf(stdout, wxT("\"%s\": pos:%d, destarea:(%d,%d), srcarea:(%d,%d), text_offset:%d\n"),
+	wxFprintf(stdout, wxT("\"%s\": destarea:(%d,%d), srcarea:(%d,%d), srcarea_rev:(%d,%d), text_offset:%d\n"),
 			tString(text).AsWxString().c_str(),
-			(int)pos,
 			(int)destarea.GetStart(),
 			(int)destarea.GetEnd(),
 			(int)srcarea.GetStart(),
 			(int)srcarea.GetEnd(),
+			(int)srcarea_rev.GetStart(),
+			(int)srcarea_rev.GetEnd(),
 			(int)text_offset
 			);
 	wxFprintf(stdout, wxT("\"%s\": intersect:(%d,%d), text_offset:%d\n"),
@@ -266,10 +278,6 @@ void tWideTextMixerQueueNode::EndProcess()
 			(int)text_offset
 			);
 
-		// 転送先範囲がキャンバスサイズに収まっているかどうか
-		RISSE_ASSERT(intersect.GetStart() + pos >= 0);
-		RISSE_ASSERT(intersect.GetEnd() + pos <= static_cast<risse_offset>(CanvasSize));
-
 		// 転送元が範囲内に収まっているか
 		RISSE_ASSERT(text_offset >= 0);
 		RISSE_ASSERT(text_offset + intersect.GetLength() <= static_cast<risse_offset>(text_size));
@@ -277,23 +285,19 @@ void tWideTextMixerQueueNode::EndProcess()
 		risse_size length = intersect.GetLength();
 		for(risse_size i = 0 ; i < length; i++)
 		{
-			risse_size src_idx = i + text_offset;
-			risse_size dest_idx = i + pos + intersect.GetStart();
+			risse_size src_idx  = i + text_offset;
+			risse_size dest_idx = (intersect.GetStart() - Area.GetStart()) + length - i - 1;
 			if(pbuf[src_idx] != RISSE_WC(' '))
-				Canvas[dest_idx] = pbuf[src_idx];
+				buf[dest_idx] = pbuf[src_idx];
 		}
-
-	wxFprintf(stdout, wxT("result: \"%s\"\n"), tString(Canvas).AsWxString().c_str());
 
 	}
 
-	// 結果をTextに格納
-	Text = Canvas;
-	Area = t1DArea(0, CanvasSize);
-	Offset = 0;
-
-	wxFprintf(stderr, wxT("mixed output : %s\n"), Text.AsWxString().c_str());
+	wxFprintf(stderr, wxT("reversed output : %s\n"), Text.AsWxString().c_str());
 }
 //---------------------------------------------------------------------------
 
+
+
+//---------------------------------------------------------------------------
 }

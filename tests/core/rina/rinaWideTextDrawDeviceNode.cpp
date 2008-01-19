@@ -254,7 +254,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 	}
 
 	// 結果を出力する
-	wxFprintf(stdout, wxT("%s\n"), tString(Canvas).AsWxString().c_str());
+	wxFprintf(stdout, wxT("DrawDevice output: %s\n"), tString(Canvas).AsWxString().c_str());
 }
 //---------------------------------------------------------------------------
 

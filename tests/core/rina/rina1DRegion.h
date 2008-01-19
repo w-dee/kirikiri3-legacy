@@ -37,7 +37,7 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		start		開始位置
 	//! @param		end			終了位置 ( [start, end) )
-	t1DArea(risse_offset start, risse_offset end) { Start = start, End = end; RISSE_ASSERT(Start < End); }
+	t1DArea(risse_offset start, risse_offset end) { Start = start, End = end; RISSE_ASSERT(Start <= End); }
 
 	//! @brief		コンストラクタ(交差を得る)
 	//! @param		a1		エリア1
@@ -92,6 +92,16 @@ public:
 		if(Start > ref.Start) Start = ref.Start;
 		if(End < ref.End) End = ref.End;
 		return true;
+	}
+
+	//! @brief		二つの範囲を統合する
+	//! @param		ref			統合する相手
+	void Unite(const t1DArea & ref)
+	{
+		risse_offset start = std::min(Start, ref.Start);
+		risse_offset end   = std::min(End  , ref.End  );
+		Start = start;
+		End = end;
 	}
 
 	//! @brief		オフセットを加算する

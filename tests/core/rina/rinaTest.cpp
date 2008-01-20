@@ -68,7 +68,7 @@ void tTester::Test()
 	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(1))->
 		GetInheritableProperties().SetPosition(5);
 
-	wxPrintf(wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
+	wxFprintf(stderr, wxT("%08x\n"), dd_node->GetInputPinAt(0)->GetAgreedType());
 
 	tWideTextMixerNode * mixer_node = new tWideTextMixerNode();
 
@@ -136,7 +136,7 @@ void tTester::Test()
 	dd_node->InsertInputPinAt(7);
 	dd_node->GetInputPinAt(7)->Connect(rev_node->GetOutputPinAt(0));
 	Risa::DownCast<tWideTextMixerInputPin*>(dd_node->GetInputPinAt(7))->
-		GetInheritableProperties().SetPosition(68);
+		GetInheritableProperties().SetPosition(64);
 
 	{
 		// build queue render

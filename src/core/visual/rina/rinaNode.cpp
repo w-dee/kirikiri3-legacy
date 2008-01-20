@@ -42,7 +42,7 @@ void tProcessNode::CalcLongestDistance()
 		risse_size dist = GetOutputPinAt(i)->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist) longest = dist;
 	}
-	LongestDistance = longest;
+	LongestDistance = longest + 1;
 
 	// 子に再帰
 	risse_size input_pincount = GetInputPinCount();

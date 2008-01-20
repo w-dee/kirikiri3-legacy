@@ -47,9 +47,10 @@ public:
 	{
 		bool operator ()(tProcessNode * a, tProcessNode * b)
 		{
-			if(a->GetLongestDistance() < b->GetLongestDistance()) return true;
-			if(a < b) return true;
-			return false;
+			risse_offset dis = a->GetLongestDistance() - b->GetLongestDistance();
+			if(dis < 0) return true;
+			if(dis > 0) return false;
+			return a < b;
 		}
 	};
 

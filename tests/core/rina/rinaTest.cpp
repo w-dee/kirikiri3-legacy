@@ -150,6 +150,7 @@ void tTester::Test()
 
 	provider_node1->SetCaption(RISSE_WS("ABC"));
 	provider_node2->SetCaption(RISSE_WS("DE"));
+	provider_node4->SetCaption(RISSE_WS("JKL"));
 	narrow_provider_node->SetCaption("NARROW");
 
 	{

@@ -176,8 +176,8 @@ void tWideTextDrawDeviceQueueNode::BeginProcess()
 	// キャンバス用にメモリを確保
 	Canvas = (risse_char *)MallocAtomicCollectee(sizeof(risse_char) * (CanvasSize + 1));
 
-	// キャンバスを空白で埋める
-	for(risse_size i = 0; i < CanvasSize; i++) Canvas[i] = RISSE_WC(' ');
+	// キャンバスをドットで埋める
+	for(risse_size i = 0; i < CanvasSize; i++) Canvas[i] = RISSE_WC('.');
 	Canvas[CanvasSize] = 0;
 }
 //---------------------------------------------------------------------------
@@ -245,8 +245,7 @@ void tWideTextDrawDeviceQueueNode::EndProcess()
 		{
 			risse_size src_idx = i + text_offset;
 			risse_size dest_idx = i + pos + intersect.GetStart();
-			if(pbuf[src_idx] != RISSE_WC(' '))
-				Canvas[dest_idx] = pbuf[src_idx];
+			Canvas[dest_idx] = pbuf[src_idx];
 		}
 
 	wxFprintf(stdout, wxT("result: \"%s\"\n"), tString(Canvas).AsWxString().c_str());

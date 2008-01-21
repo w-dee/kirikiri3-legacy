@@ -109,7 +109,6 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 {
-wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
 	// 情報収集; 自分に関係する範囲があるかどうか
 	t1DRegion region;
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -190,6 +189,14 @@ wxFprintf(stderr, wxT("tWideTextMixerNode::BuildQueue\n"));
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tWideTextMixerNode::NotifyUpdate(const t1DArea & area)
+{
+	// そのまま出力ピンに情報を渡す
+	OutputPin->NotifyUpdate(area);
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -212,7 +219,7 @@ void tWideTextMixerQueueNode::BeginProcess()
 	Canvas = (risse_char *)MallocAtomicCollectee(sizeof(risse_char) * (CanvasSize + 1));
 
 	// キャンバスを空白で埋める
-	for(risse_size i = 0; i < CanvasSize; i++) Canvas[i] = RISSE_WC(' ');
+	for(risse_size i = 0; i < CanvasSize; i++) Canvas[i] = RISSE_WC('.');
 	Canvas[CanvasSize] = 0;
 }
 //---------------------------------------------------------------------------
@@ -279,8 +286,7 @@ void tWideTextMixerQueueNode::EndProcess()
 		{
 			risse_size src_idx = i + text_offset;
 			risse_size dest_idx = i + pos + intersect.GetStart();
-			if(pbuf[src_idx] != RISSE_WC(' '))
-				Canvas[dest_idx] = pbuf[src_idx];
+			Canvas[dest_idx] = pbuf[src_idx];
 		}
 
 	wxFprintf(stdout, wxT("result: \"%s\"\n"), tString(Canvas).AsWxString().c_str());

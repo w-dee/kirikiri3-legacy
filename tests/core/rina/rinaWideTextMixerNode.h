@@ -95,6 +95,11 @@ public: // サブクラスで実装すべき物
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		builder			キュービルダーオブジェクト
 	void BuildQueue(tQueueBuilder & builder);
+
+public:
+	//! @brief		内容の更新があったことを伝える(子ノードから呼ばれる)
+	//! @param		area		範囲
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

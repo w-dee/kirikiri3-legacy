@@ -114,7 +114,6 @@ void tWideTextReverserNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 {
-wxFprintf(stderr, wxT("tWideTextReverserNode::BuildQueue\n"));
 	/*
 		本来ならば子ノードにバウンディングボックスをといあわせ、それに
 		対応しない位置をはじくようなコードが必要
@@ -171,6 +170,14 @@ wxFprintf(stderr, wxT("tWideTextReverserNode::BuildQueue\n"));
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tWideTextReverserNode::NotifyUpdate(const t1DArea & area)
+{
+	// 反転した位置を出力ノードに対して与える
+	t1DArea area_rev(-area.GetEnd(), -area.GetStart());
+	OutputPin->NotifyUpdate(area_rev);
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -259,7 +266,7 @@ wxFprintf(stdout, wxT("Area: (%d,%d)\n"),
 		t1DArea intersect;
 		if(!destarea.Intersect(srcarea_rev, intersect)) continue; // 交差していない
 
-		text_offset += intersect.GetEnd() - srcarea_rev.GetEnd();
+		text_offset += -(intersect.GetEnd() - srcarea_rev.GetEnd());
 
 	wxFprintf(stdout, wxT("\"%s\": destarea:(%d,%d), srcarea:(%d,%d), srcarea_rev:(%d,%d), text_offset:%d\n"),
 			tString(text).AsWxString().c_str(),

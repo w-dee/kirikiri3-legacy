@@ -19,6 +19,7 @@
 #include "visual/rina/rinaQueue.h"
 #include "rinaWideTextProviderNode.h"
 #include "rinaWideTextEdge.h"
+#include "rina1DUpdateReceiver.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -28,10 +29,10 @@ namespace Rina {
 //---------------------------------------------------------------------------
 //! @brief		テキストの反転を行うノード
 //---------------------------------------------------------------------------
-class tWideTextReverserNode : public tProcessNode, public Risa::tSubmorph<tWideTextReverserNode>
+class tWideTextReverserNode : public t1DUpdateReceiver, public Risa::tSubmorph<tWideTextReverserNode>
 {
 public:
-	typedef tProcessNode inherited;
+	typedef t1DUpdateReceiver inherited;
 private:
 
 	tWideTextOutputPin * OutputPin; //!< 出力ピン
@@ -82,6 +83,11 @@ public: // サブクラスで実装すべき物
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		builder			キュービルダーオブジェクト
 	void BuildQueue(tQueueBuilder & builder);
+
+public:
+	//! @brief		内容の更新があったことを伝える(子ノードから呼ばれる)
+	//! @param		area		範囲
+	virtual void NotifyUpdate(const t1DArea & area);
 };
 //---------------------------------------------------------------------------
 

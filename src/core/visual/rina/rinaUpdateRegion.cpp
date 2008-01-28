@@ -73,10 +73,10 @@ exit_first_find_loop:
 	// この時点では、cx が ccx に達したか、あるいは連続してないか、あるいは
 	//  topとbottomが違うセルが見つかったかのどれかである
 	// rect のメンバを設定する
-	rect.Left   = (cx_start << CellSizeShift) + X0(row[cx_start]);
-	rect.Top    = (cy       << CellSizeShift) + Y0(row[cx_start]);
-	rect.Right  = (cx       << CellSizeShift) + X1(row[cx      ]) + 1;
-	rect.Bottom = (cy       << CellSizeShift) + Y1(row[cx      ]) + 1;
+	rect.Left   = (cx_start << CellSizeShift) + (X0(row[cx_start])      << 2);
+	rect.Top    = (cy       << CellSizeShift) +  Y0(row[cx_start]);
+	rect.Right  = (cx       << CellSizeShift) + (X1(row[cx      ]) + 1) << 2;
+	rect.Bottom = (cy       << CellSizeShift) +  Y1(row[cx      ]) + 1;
 
 	// メンバに変数を書き戻す
 	cx ++;
@@ -152,8 +152,8 @@ void tUpdateRegion::Fill(const tRect & rect)
 	if(!rect.HasArea()) return; // 面積を持ってない
 
 	// 開始セル位置と終了セル位置を計算
-	risse_size start_x = rect.Left       >> CellSizeShift;
-	risse_size end_x   = rect.Right      >> CellSizeShift;
+	risse_size start_x =  rect.Left      >> CellSizeShift;
+	risse_size end_x   =  rect.Right     >> CellSizeShift;
 	risse_size start_y = (rect.Top-1)    >> CellSizeShift;
 	risse_size end_y   = (rect.Bottom-1) >> CellSizeShift;
 
@@ -171,7 +171,7 @@ void tUpdateRegion::Fill(const tRect & rect)
 			cell.SetOffsets(0, 0);
 
 			// 各セルの既存の更新矩形との Union を作成する
-			row[x] = UniteCell(row[x], cell.Left, cell.Top, cell.Right-1, cell.Bottom-1);
+			row[x] = UniteCell(row[x], (cell.Left >> 2), cell.Top, ((cell.Right-1) >> 2), cell.Bottom-1);
 		}
 	}
 }

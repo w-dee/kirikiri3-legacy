@@ -78,6 +78,11 @@ exit_first_find_loop:
 	rect.Right  = (cx       << CellSizeShift) + (X1(row[cx      ]) + 1) << 2;
 	rect.Bottom = (cy       << CellSizeShift) +  Y1(row[cx      ]) + 1;
 
+	// 横方向は4ピクセル単位の精度しかない。
+	// したがって場合によっては右端がWidthを越えるので補正する
+	if(rect.Right > UpdateRegion.Width) rect.Right = UpdateRegion.Width;
+	RISSE_ASSERT(rect.HasArea());
+
 	// メンバに変数を書き戻す
 	cx ++;
 	CurrentX = cx;
@@ -137,9 +142,36 @@ void tUpdateRegion::Clear()
 //---------------------------------------------------------------------------
 void tUpdateRegion::Fill()
 {
-	risse_size total_cells = TotalCells;
 	risse_uint16 * cells = Cells;
-	for(risse_size i = 0; i < total_cells; i++) cells[i] = FullCellValue;
+
+	risse_size full_w = Width  >> CellSizeShift;
+	risse_size full_h = Height >> CellSizeShift;
+
+	int right_fraction  = (Width  & (CellSize-1));
+	int bottom_fraction = (Height & (CellSize-1));
+
+	for(risse_size y = 0; y < full_h; y++)
+	{
+		risse_uint16 *row = cells + y * CellCountX;
+		for(risse_size x = 0; x < full_w; x++) row[i] = FullCellValue;
+
+		// 右端の処理
+		if(right_fraction)
+			row[full_w] = Pack(0, 0, (right_fraction - 1)>>2, 31);
+	}
+
+	// 下端の処理
+	if(bottom_fraction)
+	{
+		risse_uint16 *row = cells + full_h * CellCountX;
+		for(risse_size x = 0; x < full_w; x++)
+			row[x] = Pack(0, 0, 7, bottom_fraction - 1);
+
+		// 右下の処理
+		if(right_fraction)
+			row[full_w] =
+				Pack(0, 0, (right_fraction - 1)>>2, bottom_fraction - 1);
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -148,26 +180,28 @@ void tUpdateRegion::Fill()
 void tUpdateRegion::Fill(const tRect & rect)
 {
 	// TODO: 高速化
-
-	if(!rect.HasArea()) return; // 面積を持ってない
+	tRect target(0, 0, Width, Height);
+	target.Intersect(rect); // UpdateRegionの外枠でクリップ
+	if(!target.HasArea()) return; // 面積を持ってない
 
 	// 開始セル位置と終了セル位置を計算
-	risse_size start_x =  rect.Left      >> CellSizeShift;
-	risse_size end_x   =  rect.Right     >> CellSizeShift;
-	risse_size start_y = (rect.Top-1)    >> CellSizeShift;
-	risse_size end_y   = (rect.Bottom-1) >> CellSizeShift;
+	risse_size start_x =  target.Left      >> CellSizeShift;
+	risse_size end_x   =  target.Right     >> CellSizeShift;
+	risse_size start_y = (target.Top-1)    >> CellSizeShift;
+	risse_size end_y   = (target.Bottom-1) >> CellSizeShift;
 
 	// ループ
+	risse_uint16 * cells = Cells;
 	for(risse_size y = start_y; y <= end_y; y++)
 	{
-		risse_uint16 *row = Cells + y * CellCountX;
+		risse_uint16 *row = cells + y * CellCountX;
 		for(risse_size x = start_x; x <= end_x; x++)
 		{
 			// 各セルとの交差を得る
 			tRect cell(x<<CellSizeShift, y<<CellSizeShift,
 					(x<<CellSizeShift)+CellSize, (y<<CellSizeShift)+CellSize);
 
-			cell.Intersect(rect);
+			cell.Intersect(target);
 			cell.SetOffsets(0, 0);
 
 			// 各セルの既存の更新矩形との Union を作成する

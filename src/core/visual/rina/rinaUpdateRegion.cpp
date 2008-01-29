@@ -80,7 +80,8 @@ exit_first_find_loop:
 
 	// 横方向は4ピクセル単位の精度しかない。
 	// したがって場合によっては右端がWidthを越えるので補正する
-	if(rect.Right > UpdateRegion.Width) rect.Right = UpdateRegion.Width;
+	if(rect.Right > static_cast<coord>(UpdateRegion.Width))
+		rect.Right = UpdateRegion.Width;
 	RISSE_ASSERT(rect.HasArea());
 
 	// メンバに変数を書き戻す
@@ -153,7 +154,7 @@ void tUpdateRegion::Fill()
 	for(risse_size y = 0; y < full_h; y++)
 	{
 		risse_uint16 *row = cells + y * CellCountX;
-		for(risse_size x = 0; x < full_w; x++) row[i] = FullCellValue;
+		for(risse_size x = 0; x < full_w; x++) row[x] = FullCellValue;
 
 		// 右端の処理
 		if(right_fraction)

@@ -65,7 +65,7 @@ const gc_vector<risse_uint32> & tMultiTextOutputPin::GetSupportedTypes()
 
 
 //---------------------------------------------------------------------------
-tMultiTextProviderNode::tMultiTextProviderNode()
+tMultiTextProviderNode::tMultiTextProviderNode(tGraph * graph) : inherited(graph)
 {
 	// 出力ピンを作成
 	OutputPin = new tMultiTextOutputPin();

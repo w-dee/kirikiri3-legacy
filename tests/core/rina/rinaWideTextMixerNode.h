@@ -45,7 +45,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tWideTextMixerNode();
+	//! @param		graph		グラフインスタンス
+	tWideTextMixerNode(tGraph * graph);
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tWideTextMixerNode() {;}

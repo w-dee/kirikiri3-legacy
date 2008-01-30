@@ -26,7 +26,7 @@ RISSE_DEFINE_SOURCE_ID(46687,10373,53420,18577,17050,14358,44584,58654);
 
 
 //---------------------------------------------------------------------------
-tNarrowTextToWideTextConverterNode::tNarrowTextToWideTextConverterNode()
+tNarrowTextToWideTextConverterNode::tNarrowTextToWideTextConverterNode(tGraph * graph) : inherited(graph)
 {
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();

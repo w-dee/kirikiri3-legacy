@@ -10,37 +10,30 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief 更新を受け付けることができるクラスの基底クラス
+//! @brief RINA 接続グラフ管理
 //---------------------------------------------------------------------------
-#ifndef RINA1DUPDATERECEIVER_H
-#define RINA1DUPDATERECEIVER_H
+#ifndef RINAGRAPH_H
+#define RINAGRAPH_H
 
-#include "rina1DRegion.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		テキストの継承可能プロパティ
+//! @brief		接続グラフ管理
 //---------------------------------------------------------------------------
-class t1DUpdateReceiver : public tProcessNode, public Risa::tSubmorph<t1DUpdateReceiver>
+class tGraph : public tCollectee
 {
 public:
-	typedef tProcessNode inherited;
+	typedef tCollectee inherited;
 
 public:
+
 	//! @brief		コンストラクタ
-	t1DUpdateReceiver(tGraph * graph) : inherited(graph) {;}
-
-	//! @brief		内容の更新があったことを伝える(子ノードから呼ばれる)
-	//! @param		area		範囲
-	virtual void NotifyUpdate(const t1DArea & area) {;}
-
-
+	tGraph() {;}
 };
 //---------------------------------------------------------------------------
-
 
 
 //---------------------------------------------------------------------------

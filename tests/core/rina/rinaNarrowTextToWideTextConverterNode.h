@@ -41,7 +41,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tNarrowTextToWideTextConverterNode();
+	//! @param		graph		グラフインスタンス
+	tNarrowTextToWideTextConverterNode(tGraph * graph);
 
 
 public: // サブクラスで実装すべき物

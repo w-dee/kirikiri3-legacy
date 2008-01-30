@@ -24,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(12623,61035,35256,19759,45714,27702,3711,32168);
 
 
 //---------------------------------------------------------------------------
-tNarrowTextProviderNode::tNarrowTextProviderNode()
+tNarrowTextProviderNode::tNarrowTextProviderNode(tGraph * graph) : inherited(graph)
 {
 	Caption = "";
 	// 出力ピンを作成

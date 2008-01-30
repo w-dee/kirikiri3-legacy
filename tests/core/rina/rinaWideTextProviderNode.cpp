@@ -24,7 +24,7 @@ RISSE_DEFINE_SOURCE_ID(55116,34738,34674,19554,62891,6474,53398,51508);
 
 
 //---------------------------------------------------------------------------
-tWideTextProviderNode::tWideTextProviderNode()
+tWideTextProviderNode::tWideTextProviderNode(tGraph * graph) : inherited(graph)
 {
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();

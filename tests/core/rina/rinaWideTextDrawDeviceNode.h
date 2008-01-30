@@ -41,7 +41,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tWideTextDrawDeviceNode();
+	//! @param		graph		グラフインスタンス
+	tWideTextDrawDeviceNode(tGraph * graph);
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tWideTextDrawDeviceNode() {;}

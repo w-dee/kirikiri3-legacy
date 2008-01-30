@@ -29,7 +29,7 @@ RISSE_DEFINE_SOURCE_ID(47400,47442,57022,18181,27294,2531,6297,13005);
 
 
 //---------------------------------------------------------------------------
-tWideTextReverserNode::tWideTextReverserNode()
+tWideTextReverserNode::tWideTextReverserNode(tGraph * graph) : inherited(graph)
 {
 	// 出力ピンを作成
 	OutputPin = new tWideTextOutputPin();

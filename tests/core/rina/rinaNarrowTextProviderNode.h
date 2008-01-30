@@ -41,7 +41,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tNarrowTextProviderNode();
+	//! @param		graph		グラフインスタンス
+	tNarrowTextProviderNode(tGraph * graph);
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション

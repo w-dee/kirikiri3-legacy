@@ -62,7 +62,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tMultiTextProviderNode();
+	//! @param		graph		グラフインスタンス
+	tMultiTextProviderNode(tGraph * graph);
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション

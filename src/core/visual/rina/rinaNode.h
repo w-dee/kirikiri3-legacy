@@ -25,6 +25,7 @@ class tInputPin;
 class tOutputPin;
 class tQueueNode;
 class tQueueBuilder;
+class tGraph;
 //---------------------------------------------------------------------------
 //! @brief		プロセスノード
 //---------------------------------------------------------------------------
@@ -33,6 +34,7 @@ class tProcessNode : public Risa::tPolymorphic
 public:
 	typedef Risa::tPolymorphic inherited;
 private:
+	tGraph * Graph; //!< グラフインスタンス
 
 	risse_size	LongestDistance;
 			//!< ルートノードからの最長距離(ステップ数)。
@@ -57,9 +59,13 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	tProcessNode();
+	//! @param		graph		グラフインスタンス
+	tProcessNode(tGraph * graph);
 
 public:
+	//! @brief		グラフインスタンスを得る
+	tGraph * GetGraph() const { return Graph; }
+
 	//! @brief		ルートノードからの最長距離を得る
 	//! @return		ルートノードからの最長距離 (ルートノード = 0)
 	//! @note		どの出力ピンも接続されていない状態では返される値の内容は不定

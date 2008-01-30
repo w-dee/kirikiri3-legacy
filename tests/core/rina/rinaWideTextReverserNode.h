@@ -40,7 +40,8 @@ private:
 
 public:
 	//! @brief		コンストラクタ
-	tWideTextReverserNode();
+	//! @param		graph		グラフインスタンス
+	tWideTextReverserNode(tGraph * graph);
 
 public: // サブクラスで実装すべき物
 

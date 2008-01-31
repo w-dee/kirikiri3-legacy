@@ -112,8 +112,19 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	class tCriticalSection : public tDestructee
 	{
 		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
+#ifdef RISSE_ASSERT_ENABLED
+		DWORD LockingThreadId; //!< ロックを行っているスレッドID
+		DWORD LockingNestCount; //!< ロックのネストカウント
+#endif
 	public:
-		tCriticalSection() { InitializeCriticalSection(&CS); } //!< コンストラクタ
+		//! @brief		コンストラクタ
+		tCriticalSection(){
+#ifdef RISSE_ASSERT_ENABLED
+			LockingThreadId = 0;
+			LockingNestCount = 0;
+#endif
+			InitializeCriticalSection(&CS);
+		}
 		~tCriticalSection() { DeleteCriticalSection(&CS); } //!< デストラクタ
 
 	private:
@@ -122,6 +133,11 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	private:
 		void Enter() { EnterCriticalSection(&CS); } //!< クリティカルセクションに入る
 		void Leave() { LeaveCriticalSection(&CS); } //!< クリティカルセクションから出る
+
+#ifdef RISSE_ASSERT_ENABLED
+	public:
+		DWORD GetLockingThreadId() const { return LockingThreadId; }
+#endif
 
 	public:
 		//! @brief  クリティカルセクション用ロッカー
@@ -132,14 +148,29 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			tLocker(tCriticalSection & cs) : CS(cs)
 			{
 				CS.Enter();
+#ifdef RISSE_ASSERT_ENABLED
+				if(CS.LockingNestCount == 0)
+					CS.LockingThreadId = GetCurrentThreadId();
+				CS.LockingNestCount ++;
+#endif
 			}
 			~tLocker()
 			{
+#ifdef RISSE_ASSERT_ENABLED
+				CS.LockingNestCount --;
+				if(CS.LockingNestCount == 0)
+					CS.LockingThreadId = 0;
+#endif
 				CS.Leave();
 			}
 		private:
 			tLocker(const tLocker &); // non-copyable
 		};
+
+#ifdef RISSE_ASSERT_ENABLED
+	#define RISSE_ASSERT_CS_LOCKED(x) \
+		RISSE_ASSERT((x).GetLockingThreadId() == GetCurrentThreadId())
+#endif
 
 		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
 		class tConditionalLocker : public tCollectee
@@ -321,6 +352,11 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		*/
 	#endif
 	//---------------------------------------------------------------------------
+
+	// デフォルトの RISSE_ASSERT_CS_LOCKED
+	#ifndef RISSE_ASSERT_CS_LOCKED
+		#define RISSE_ASSERT_CS_LOCKED(x)
+	#endif
 
 
 	} // namespace Risse

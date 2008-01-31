@@ -44,6 +44,8 @@ tWideTextReverserNode::tWideTextReverserNode(tGraph * graph) : inherited(graph)
 //---------------------------------------------------------------------------
 risse_size tWideTextReverserNode::GetOutputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return 1; // 出力ピンは１個
 }
 //---------------------------------------------------------------------------
@@ -52,6 +54,8 @@ risse_size tWideTextReverserNode::GetOutputPinCount()
 //---------------------------------------------------------------------------
 tOutputPin * tWideTextReverserNode::GetOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// TODO: 例外
 	if(n == 0) return OutputPin;
 	return NULL; // 出力ピンはない
@@ -62,6 +66,8 @@ tOutputPin * tWideTextReverserNode::GetOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::InsertOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
@@ -71,6 +77,8 @@ void tWideTextReverserNode::InsertOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::DeleteOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
@@ -80,6 +88,8 @@ void tWideTextReverserNode::DeleteOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 risse_size tWideTextReverserNode::GetInputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return 1;
 }
 //---------------------------------------------------------------------------
@@ -88,6 +98,8 @@ risse_size tWideTextReverserNode::GetInputPinCount()
 //---------------------------------------------------------------------------
 tInputPin * tWideTextReverserNode::GetInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 範囲外例外
 	if(n == 0) return InputPin;
 	return NULL;
@@ -98,6 +110,8 @@ tInputPin * tWideTextReverserNode::GetInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::InsertInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 入力ピンを追加することはできない
 }
 //---------------------------------------------------------------------------
@@ -106,6 +120,8 @@ void tWideTextReverserNode::InsertInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::DeleteInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
@@ -114,6 +130,8 @@ void tWideTextReverserNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	/*
 		本来ならば子ノードにバウンディングボックスをといあわせ、それに
 		対応しない位置をはじくようなコードが必要
@@ -173,6 +191,8 @@ void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 //---------------------------------------------------------------------------
 void tWideTextReverserNode::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 反転した位置を出力ノードに対して与える
 	t1DArea area_rev(-area.GetEnd(), -area.GetStart());
 	OutputPin->NotifyUpdate(area_rev);

@@ -63,6 +63,8 @@ const gc_vector<risse_uint32> & tWideTextInputPin::GetSupportedTypes()
 //---------------------------------------------------------------------------
 void tWideTextInputPin::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+
 	t1DUpdateReceiver * node = Risa::TryDownCast<t1DUpdateReceiver*>(GetNode());
 	if(node) node->NotifyUpdate(area);
 }
@@ -75,6 +77,8 @@ void tWideTextInputPin::NotifyUpdate(const t1DArea & area)
 //---------------------------------------------------------------------------
 void tWideTextMixerInputPin::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+
 	t1DUpdateReceiver * node = Risa::TryDownCast<t1DUpdateReceiver*>(GetNode());
 	if(node) node->NotifyUpdate(InheritableProperties.ToParent(area));
 }
@@ -106,6 +110,8 @@ const gc_vector<risse_uint32> & tWideTextOutputPin::GetSupportedTypes()
 //---------------------------------------------------------------------------
 void tWideTextOutputPin::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+
 	for(tInputPins::const_iterator i = GetInputPins().begin(); i != GetInputPins().end(); i++)
 	{
 		Risa::DownCast<tWideTextInputPin *>(*i)->NotifyUpdate(area);

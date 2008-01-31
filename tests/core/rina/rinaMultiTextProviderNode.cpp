@@ -77,6 +77,7 @@ tMultiTextProviderNode::tMultiTextProviderNode(tGraph * graph) : inherited(graph
 //---------------------------------------------------------------------------
 risse_size tMultiTextProviderNode::GetOutputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	return 1; // 出力ピンは１個
 }
 //---------------------------------------------------------------------------
@@ -85,6 +86,7 @@ risse_size tMultiTextProviderNode::GetOutputPinCount()
 //---------------------------------------------------------------------------
 tOutputPin * tMultiTextProviderNode::GetOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// TODO: 例外
 	if(n == 0) return OutputPin;
 	return NULL; // 出力ピンはない
@@ -95,6 +97,7 @@ tOutputPin * tMultiTextProviderNode::GetOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tMultiTextProviderNode::InsertOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
@@ -104,6 +107,7 @@ void tMultiTextProviderNode::InsertOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tMultiTextProviderNode::DeleteOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
@@ -113,6 +117,7 @@ void tMultiTextProviderNode::DeleteOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 risse_size tMultiTextProviderNode::GetInputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -121,6 +126,7 @@ risse_size tMultiTextProviderNode::GetInputPinCount()
 //---------------------------------------------------------------------------
 tInputPin * tMultiTextProviderNode::GetInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 範囲外例外
 	return NULL;
 }
@@ -130,6 +136,7 @@ tInputPin * tMultiTextProviderNode::GetInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tMultiTextProviderNode::InsertInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 入力ピンを追加することはできない
 }
 //---------------------------------------------------------------------------
@@ -138,6 +145,7 @@ void tMultiTextProviderNode::InsertInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
@@ -146,6 +154,8 @@ void tMultiTextProviderNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tMultiTextProviderNode::BuildQueue(tQueueBuilder & builder)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
 		i != OutputPin->GetInputPins().end(); i++)

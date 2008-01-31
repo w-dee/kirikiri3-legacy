@@ -37,6 +37,7 @@ tWideTextDrawDeviceNode::tWideTextDrawDeviceNode(tGraph * graph) : inherited(gra
 //---------------------------------------------------------------------------
 risse_size tWideTextDrawDeviceNode::GetOutputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	return 0; // 出力ピンはない
 }
 //---------------------------------------------------------------------------
@@ -45,6 +46,7 @@ risse_size tWideTextDrawDeviceNode::GetOutputPinCount()
 //---------------------------------------------------------------------------
 tOutputPin * tWideTextDrawDeviceNode::GetOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// TODO: 例外
 	return NULL; // 出力ピンはない
 }
@@ -54,6 +56,7 @@ tOutputPin * tWideTextDrawDeviceNode::GetOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
@@ -63,6 +66,7 @@ void tWideTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
@@ -72,6 +76,7 @@ void tWideTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 risse_size tWideTextDrawDeviceNode::GetInputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	return InputPins.size();
 }
 //---------------------------------------------------------------------------
@@ -80,6 +85,7 @@ risse_size tWideTextDrawDeviceNode::GetInputPinCount()
 //---------------------------------------------------------------------------
 tInputPin * tWideTextDrawDeviceNode::GetInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 範囲外例外
 	return InputPins[n];
 }
@@ -89,6 +95,7 @@ tInputPin * tWideTextDrawDeviceNode::GetInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 範囲外例外
 	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
 	newpin->Attach(this);
@@ -100,6 +107,7 @@ void tWideTextDrawDeviceNode::InsertInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 	// XXX: 範囲外例外
 	InputPins.erase(InputPins.begin() + n);
 }
@@ -109,6 +117,8 @@ void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	tQueueNode * new_parent = new tWideTextDrawDeviceQueueNode(NULL);
 
 	// まず入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
@@ -149,6 +159,8 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 //---------------------------------------------------------------------------
 void tWideTextDrawDeviceNode::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	DirtyRegion.Add(area);
 }
 //---------------------------------------------------------------------------

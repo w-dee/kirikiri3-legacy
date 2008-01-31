@@ -36,6 +36,8 @@ tWideTextMixerNode::tWideTextMixerNode(tGraph * graph) : inherited(graph)
 //---------------------------------------------------------------------------
 risse_size tWideTextMixerNode::GetOutputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return 1; // 出力ピンは1個
 }
 //---------------------------------------------------------------------------
@@ -44,6 +46,8 @@ risse_size tWideTextMixerNode::GetOutputPinCount()
 //---------------------------------------------------------------------------
 tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// TODO: 例外
 	if(n == 0) return OutputPin;
 	return NULL; // 出力ピンはない
@@ -54,6 +58,8 @@ tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
@@ -63,6 +69,8 @@ void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
@@ -72,6 +80,8 @@ void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 risse_size tWideTextMixerNode::GetInputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return InputPins.size();
 }
 //---------------------------------------------------------------------------
@@ -80,6 +90,8 @@ risse_size tWideTextMixerNode::GetInputPinCount()
 //---------------------------------------------------------------------------
 tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 範囲外例外
 	return InputPins[n];
 }
@@ -89,6 +101,8 @@ tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::InsertInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 範囲外例外
 	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
 	newpin->Attach(this);
@@ -100,6 +114,8 @@ void tWideTextMixerNode::InsertInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 範囲外例外
 	InputPins.erase(InputPins.begin() + n);
 }
@@ -109,6 +125,8 @@ void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 情報収集; 自分に関係する範囲があるかどうか
 	t1DRegion region;
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
@@ -192,6 +210,8 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 //---------------------------------------------------------------------------
 void tWideTextMixerNode::NotifyUpdate(const t1DArea & area)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// そのまま出力ピンに情報を渡す
 	OutputPin->NotifyUpdate(area);
 }

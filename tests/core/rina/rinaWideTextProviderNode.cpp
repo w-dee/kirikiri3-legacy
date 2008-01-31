@@ -50,6 +50,8 @@ void tWideTextProviderNode::SetCaption(const tString & caption)
 //---------------------------------------------------------------------------
 risse_size tWideTextProviderNode::GetOutputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return 1; // 出力ピンは１個
 }
 //---------------------------------------------------------------------------
@@ -58,6 +60,8 @@ risse_size tWideTextProviderNode::GetOutputPinCount()
 //---------------------------------------------------------------------------
 tOutputPin * tWideTextProviderNode::GetOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// TODO: 例外
 	if(n == 0) return OutputPin;
 	return NULL; // 出力ピンはない
@@ -68,6 +72,8 @@ tOutputPin * tWideTextProviderNode::GetOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::InsertOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを追加することはできない
 	// TODO: 例外
 }
@@ -77,6 +83,8 @@ void tWideTextProviderNode::InsertOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::DeleteOutputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// 出力ピンを削除することはできない
 	// TODO: 例外
 }
@@ -86,6 +94,8 @@ void tWideTextProviderNode::DeleteOutputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 risse_size tWideTextProviderNode::GetInputPinCount()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	return 0;
 }
 //---------------------------------------------------------------------------
@@ -94,6 +104,8 @@ risse_size tWideTextProviderNode::GetInputPinCount()
 //---------------------------------------------------------------------------
 tInputPin * tWideTextProviderNode::GetInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 範囲外例外
 	return NULL;
 }
@@ -103,6 +115,8 @@ tInputPin * tWideTextProviderNode::GetInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::InsertInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 入力ピンを追加することはできない
 }
 //---------------------------------------------------------------------------
@@ -111,6 +125,8 @@ void tWideTextProviderNode::InsertInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::DeleteInputPinAt(risse_size n)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
@@ -119,6 +135,8 @@ void tWideTextProviderNode::DeleteInputPinAt(risse_size n)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::BuildQueue(tQueueBuilder & builder)
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
 		i != OutputPin->GetInputPins().end(); i++)
 	{

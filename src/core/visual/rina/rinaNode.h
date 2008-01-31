@@ -44,7 +44,7 @@ private:
 
 	risse_size	BuildQueueWaitingOutputPin; //!< BuildQueue にて待つべき出力/入力ピンの数
 
-protected:
+public:
 	//! @brief		グラフをロックするためのクラス
 	class tGraphLocker : public Risa::tCriticalSection::tLocker
 	{

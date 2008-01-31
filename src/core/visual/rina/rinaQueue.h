@@ -188,12 +188,15 @@ public:
 
 
 class tInputPin;
+class tGraph;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューを作成するためのオブジェクト
 //---------------------------------------------------------------------------
 class tQueueBuilder : public tCollectee
 {
 	typedef tCollectee inherited;
+
+	tGraph * Graph; //!< グラフインスタンス
 
 	tIdRegistry::tRenderGeneration	 RenderGeneration; //!< レンダリングした世代
 
@@ -208,7 +211,8 @@ class tQueueBuilder : public tCollectee
 
 public:
 	//! @brief		コンストラクタ
-	tQueueBuilder();
+	//! @param		graph		グラフインスタンス
+	tQueueBuilder(tGraph * graph);
 
 	//! @brief		レンダリング世代を得る
 	//! @return		レンダリング世代

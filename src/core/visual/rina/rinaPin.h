@@ -16,6 +16,7 @@
 #define RINAPIN_H
 
 #include "visual/rina/rinaNode.h"
+#include "visual/rina/rinaGraph.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -29,7 +30,15 @@ class tPin : public Risa::tPolymorphic
 {
 public:
 	typedef Risa::tPolymorphic inherited;
-private:
+
+protected:
+	//! @brief		グラフをロックするためのクラス
+	class tGraphLocker : public Risa::tCriticalSection::tLocker
+	{
+	public:
+		tGraphLocker(const tPin & _this) :
+			tCriticalSection::tLocker(_this.GetNode()->GetGraph()->GetCS()) {;}
+	};
 
 protected:
 	tProcessNode * Node; //!< このピンを保有しているノード
@@ -81,8 +90,8 @@ class tInputPin : public tPin, public Risa::tSubmorph<tInputPin>
 {
 public:
 	typedef tPin inherited;
-private:
 
+private:
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
 	risse_uint32 AgreedType; //!< 同意されたタイプ
 
@@ -99,6 +108,7 @@ public:
 	//! @brief		コンストラクタ
 	tInputPin();
 
+public:
 	//! @brief		接続先の出力ピンを取得する
 	//! @return		接続先の出力ピン
 	tOutputPin * GetOutputPin() const { return OutputPin; }
@@ -117,7 +127,7 @@ public:
 	//! @brief		ネゴシエーションを行う
 	//! @param		output_pin		接続先の出力ピン
 	//! @return		同意のとれたタイプ (0=同意無し)
-	//! @note		出力ピントの間でネゴシエーションを行い、同意のとれたタイプを返す。
+	//! @note		出力ピンとの間でネゴシエーションを行い、同意のとれたタイプを返す。
 	//!				実際に接続したりはしない。
 	//! @note		出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
 	//!				入力ピンと出力ピンに対して行う SuggestType() のうち、
@@ -133,7 +143,7 @@ public:
 	//! @note		ネゴシエーションに失敗した場合は例外が発生する。
 	//! @note		ピンは入力ピンがかならず何かの出力ピンを接続するという方式なので
 	//!				出力ピン側のこのメソッドはprotectedになっていて外部からアクセスできない。
-	virtual void Connect(tOutputPin * output_pin);
+	virtual void InternalConnect(tOutputPin * output_pin);
 
 	//! @brief		親ノードから子ノードへのレンダリング要求の配列を得る
 	//! return		親ノードから子ノードへのレンダリング要求の配列
@@ -147,15 +157,18 @@ public:
 	void AddRenderRequest(const tRenderRequest * req) { RenderRequests.push_back(req); }
 
 protected:
-
 	//! @brief		同意されたタイプを設定する
 	//! @param		type	同意されたタイプ
 	void SetAgreedType(risse_uint32 type) { AgreedType = type; }
 
-public:
+public: // 公開インターフェース
+	//! @brief		出力ピンを接続する
+	//! @param		output_pin		出力ピン(NULL=接続解除)
+	void Connect(tOutputPin * output_pin);
+
 	//! @brief		同意されたタイプを得る
 	//! @return		同意されたタイプ
-	risse_uint32 GetAgreedType() const { return AgreedType; }
+	risse_uint32 GetAgreedType() const;
 };
 //---------------------------------------------------------------------------
 
@@ -185,11 +198,11 @@ public:
 	//! @return		接続先の入力ピンの配列
 	const tInputPins & GetInputPins() const { return InputPins; }
 
+public:
 	//! @brief		このピンの先に繋がってる入力ピンに繋がってるノードのルートからの最長距離を求める
 	//! @return		ルートからの最長距離
 	risse_size GetLongestDistance() const;
 
-protected:
 	//! @brief		入力ピンを接続する(tInputPin::Connectから呼ばれる)
 	//! @param		input_pin	入力ピン
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。

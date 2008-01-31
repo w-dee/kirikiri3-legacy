@@ -45,7 +45,7 @@ public:
 
 	//! @brief		キャプションを取得する
 	//! @return		キャプション
-	const tString & GetCaption() const { return Caption; }
+	const tString & GetCaption() const { volatile tGraphLocker lock(*this); return Caption; }
 
 	//! @brief		キャプションを設定する
 	//! @return		caption キャプション

@@ -65,13 +65,14 @@ public:
 	//! @param		graph		グラフインスタンス
 	tMultiTextProviderNode(tGraph * graph);
 
+public: // 公開インターフェース
 	//! @brief		キャプションを取得する
 	//! @return		キャプション
-	const tString & GetCaption() const { return Caption; }
+	const tString & GetCaption() const { volatile tGraphLocker lock(*this); return Caption; }
 
 	//! @brief		キャプションを設定する
 	//! @return		caption キャプション
-	void SetCaption(const tString & caption) { Caption = caption; }
+	void SetCaption(const tString & caption) { volatile tGraphLocker lock(*this); Caption = caption; }
 
 
 public: // サブクラスで実装すべき物

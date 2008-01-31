@@ -66,7 +66,7 @@ private:
 
 	tEdgeDataMap EdgeDataMap; //!< エッジを流れるデータの型のマップ
 
-	risse_uint32 RenderGeneration; //!< レンダリングの世代(普通1ずつふえ、前のレンダリングと次のレンダリングを区別する)
+	risse_uint32 RenderGeneration; //!< レンダリングの世代(普通1ずつふえ、前のレンダリングと次のレンダリングを区別する) @note グラフごとではなくてシステムワイドな値
 
 public:
 	//! @brief		コンストラクタ

@@ -37,6 +37,8 @@ tNarrowTextProviderNode::tNarrowTextProviderNode(tGraph * graph) : inherited(gra
 //---------------------------------------------------------------------------
 void tNarrowTextProviderNode::SetCaption(const char * caption)
 {
+	volatile tGraphLocker lock(*this); 
+
 	risse_size length_was = strlen(Caption);
 
 	size_t len = strlen(caption);

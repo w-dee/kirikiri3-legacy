@@ -15,7 +15,7 @@
 #include "prec.h"
 #include "visual/rina/rinaQueue.h"
 #include "visual/rina/rinaPin.h"
-
+#include "visual/rina/rinaGraph.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);
@@ -157,8 +157,9 @@ void tQueue::Push(tQueueNode * node, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-tQueueBuilder::tQueueBuilder()
+tQueueBuilder::tQueueBuilder(tGraph * graph)
 {
+	Graph = graph;
 	RootQueueNode = NULL;
 	RenderGeneration = tIdRegistry::instance()->GetNewRenderGeneration();
 }
@@ -168,6 +169,9 @@ tQueueBuilder::tQueueBuilder()
 //---------------------------------------------------------------------------
 void tQueueBuilder::Build(tProcessNode * node)
 {
+	// キューの構築中はグラフ全体をロック
+	volatile tCriticalSection::tLocker holder(Graph->GetCS());
+
 	// root を Map に挿入
 	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
 

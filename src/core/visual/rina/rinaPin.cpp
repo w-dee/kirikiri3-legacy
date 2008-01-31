@@ -94,7 +94,7 @@ risse_uint32 tInputPin::Negotiate(tOutputPin * output_pin)
 
 
 //---------------------------------------------------------------------------
-void tInputPin::Connect(tOutputPin * output_pin)
+void tInputPin::InternalConnect(tOutputPin * output_pin)
 {
 	AgreedType = Negotiate(output_pin);
 //	if(AgreedType == 0) { /* TODO: 例外 */ }
@@ -109,6 +109,27 @@ void tInputPin::Connect(tOutputPin * output_pin)
 	OutputPin->GetNode()->CalcLongestDistance();
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInputPin::Connect(tOutputPin * output_pin)
+{
+	volatile tGraphLocker holder(*this);
+	InternalConnect(output_pin);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tInputPin::GetAgreedType() const
+{
+	volatile tGraphLocker holder(*this);
+	return AgreedType;
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 

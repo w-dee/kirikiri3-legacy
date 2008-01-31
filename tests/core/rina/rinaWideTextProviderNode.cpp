@@ -36,6 +36,8 @@ tWideTextProviderNode::tWideTextProviderNode(tGraph * graph) : inherited(graph)
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::SetCaption(const tString & caption)
 {
+	volatile tGraphLocker lock(*this); 
+
 	// キャプションが変わると前の長さと新しい長さのどちらか長い方分までが更新される
 	risse_size length_was = Caption.GetLength();
 	risse_size length_is  = caption.GetLength();

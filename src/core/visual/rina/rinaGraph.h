@@ -15,6 +15,8 @@
 #ifndef RINAGRAPH_H
 #define RINAGRAPH_H
 
+#include "base/utils/RisaThread.h"
+
 
 namespace Rina {
 //---------------------------------------------------------------------------
@@ -25,13 +27,19 @@ namespace Rina {
 //---------------------------------------------------------------------------
 class tGraph : public tCollectee
 {
+	Risa::tCriticalSection * CS; //!< このグラフを保護するためのクリティカルセクション
+
 public:
 	typedef tCollectee inherited;
 
 public:
 
 	//! @brief		コンストラクタ
-	tGraph() {;}
+	tGraph();
+
+	//! @brief		このグラフを保護するためのクリティカルセクションを得る
+	//! @return		このグラフを保護するためのクリティカルセクション
+	tCriticalSection & GetCS() const { return *CS; }
 };
 //---------------------------------------------------------------------------
 

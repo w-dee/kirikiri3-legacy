@@ -143,7 +143,7 @@ void tTester::Test()
 
 	{
 		// build queue render
-		tQueueBuilder builder;
+		tQueueBuilder builder(graph);
 		builder.Build(dd_node);
 
 		// キューノードを作成し終わったということでレンダリングを開始する
@@ -158,7 +158,7 @@ void tTester::Test()
 
 	{
 		// build queue render
-		tQueueBuilder builder;
+		tQueueBuilder builder(graph);
 		builder.Build(dd_node);
 
 		// キューノードを作成し終わったということでレンダリングを開始する

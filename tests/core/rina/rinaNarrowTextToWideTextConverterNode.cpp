@@ -26,83 +26,19 @@ RISSE_DEFINE_SOURCE_ID(46687,10373,53420,18577,17050,14358,44584,58654);
 
 
 //---------------------------------------------------------------------------
-tNarrowTextToWideTextConverterNode::tNarrowTextToWideTextConverterNode(tGraph * graph) : inherited(graph)
+tPinDescriptor tNarrowTextToWideTextConverterNode::InputPinDescriptor(
+	RISSE_WS("input"), RISSE_WS_TR("Input Pin") );
+tPinDescriptor tNarrowTextToWideTextConverterNode::OutputPinDescriptor(
+	RISSE_WS("output"), RISSE_WS_TR("Output Pin") );
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tNarrowTextToWideTextConverterNode::tNarrowTextToWideTextConverterNode(tGraph * graph) : inherited(graph),
+	InputPins(this, InputPinDescriptor, new tNarrowTextInputPin()),
+	OutputPins(this, OutputPinDescriptor, new tWideTextOutputPin())
 {
-	// 出力ピンを作成
-	OutputPin = new tWideTextOutputPin();
-	OutputPin->Attach(this);
-	InputPin = new tNarrowTextInputPin();
-	InputPin->Attach(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tNarrowTextToWideTextConverterNode::GetOutputPinCount()
-{
-	return 1; // 出力ピンは１個
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tOutputPin * tNarrowTextToWideTextConverterNode::GetOutputPinAt(risse_size n)
-{
-	// TODO: 例外
-	if(n == 0) return OutputPin;
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::InsertOutputPinAt(risse_size n)
-{
-	// 出力ピンを追加することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::DeleteOutputPinAt(risse_size n)
-{
-	// 出力ピンを削除することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tNarrowTextToWideTextConverterNode::GetInputPinCount()
-{
-	return 1; // 入力ピンは一個
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tNarrowTextToWideTextConverterNode::GetInputPinAt(risse_size n)
-{
-	// TODO: 例外
-	if(n == 0) return InputPin;
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::InsertInputPinAt(risse_size n)
-{
-	// XXX: 入力ピンを追加することはできない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
-{
-	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
 
@@ -111,12 +47,13 @@ void tNarrowTextToWideTextConverterNode::DeleteInputPinAt(risse_size n)
 void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 {
 	// 入力ピンの情報をクリアする
-	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
-	InputPin->ClearRenderRequests();
+	InputPins.At(0)->SetRenderGeneration(builder.GetRenderGeneration());
+	InputPins.At(0)->ClearRenderRequests();
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
+	const tOutputPin::tInputPins & input_pins = OutputPins.At(0)->GetInputPins();
+	for(tOutputPin::tInputPins::const_iterator i = input_pins.begin();
+		i != input_pins.end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
 		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
@@ -132,10 +69,10 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 			tQueueNode * new_parent = new tNarrowTextToWideTextConverterQueueNode(Risa::DownCast<const tWideTextRenderRequest*>(*i));
 			const tWideTextRenderRequest * wide_req = Risa::DownCast<const tWideTextRenderRequest*>(*i);
 			tNarrowTextRenderRequest * narrow_req = new tNarrowTextRenderRequest(new_parent, 0, wide_req->GetArea());
-			InputPin->AddRenderRequest(narrow_req);
+			InputPins.At(0)->AddRenderRequest(narrow_req);
 		}
 	}
-	builder.Push(InputPin->GetOutputPin()->GetNode());
+	builder.Push(InputPins.At(0)->GetOutputPin()->GetNode());
 
 	// 出力ピンの先の入力ピンが要求している領域のみに対して変換を行うようにするなどの処置が
 	// 必要かもしれないがここではそれは考えない(すべての要求をそのまま入力ピンにも渡す)
@@ -147,7 +84,7 @@ void tNarrowTextToWideTextConverterNode::BuildQueue(tQueueBuilder & builder)
 void tNarrowTextToWideTextConverterNode::NotifyUpdate(const t1DArea & area)
 {
 	// そのまま出力ピンに情報を渡す
-	OutputPin->NotifyUpdate(area);
+	OutputPins.At(0)->NotifyUpdate(area);
 }
 //---------------------------------------------------------------------------
 

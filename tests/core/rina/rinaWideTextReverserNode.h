@@ -35,8 +35,10 @@ public:
 	typedef t1DUpdateReceiver inherited;
 private:
 
-	tWideTextOutputPin * OutputPin; //!< 出力ピン
-	tWideTextInputPin * InputPin; //!< 入力ピン
+	static tPinDescriptor InputPinDescriptor; //!< 入力ピンのデスクリプタ
+	static tPinDescriptor OutputPinDescriptor; //!< 出力ピンのデスクリプタ
+	tOnePins<tWideTextInputPin> InputPins; //!< 入力ピンの配列
+	tOnePins<tWideTextOutputPin> OutputPins; //!< 出力ピンの配列
 
 public:
 	//! @brief		コンストラクタ
@@ -45,49 +47,13 @@ public:
 
 public: // サブクラスで実装すべき物
 
-	//! @brief		出力ピンの個数を得る
-	//! @return		出力ピンの個数
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual risse_size GetOutputPinCount();
+	//! @brief		入力ピンの配列を得る
+	//! @return		入力ピンの配列
+	virtual tInputPins & GetInputPins() { return InputPins; }
 
-	//! @brief		指定位置の出力ピンを得る
-	//! @param		n		指定位置
-	//! @return		指定位置の出力ピン
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual tOutputPin * GetOutputPinAt(risse_size n);
-
-	//! @brief		指定位置に新規出力ピンを挿入する
-	//! @param		n		指定位置
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual void InsertOutputPinAt(risse_size n);
-
-	//! @brief		指定位置から出力ピンを削除する
-	//! @param		n		指定位置
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual void DeleteOutputPinAt(risse_size n);
-
-
-
-	//! @brief		入力ピンの個数を得る
-	//! @return		入力ピンの個数
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual risse_size GetInputPinCount();
-
-	//! @brief		指定位置の入力ピンを得る
-	//! @param		n		指定位置
-	//! @return		指定位置の入力ピン
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual tInputPin * GetInputPinAt(risse_size n);
-
-	//! @brief		指定位置に入力ピンを挿入する
-	//! @param		n		指定位置
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual void InsertInputPinAt(risse_size n);
-
-	//! @brief		指定位置から入力ピンを削除する
-	//! @param		n		指定位置
-	//! @note		ピンの操作を行う前にグラフをロックすること
-	virtual void DeleteInputPinAt(risse_size n);
+	//! @brief		出力ピンの配列を得る
+	//! @return		出力ピンの配列
+	virtual tOutputPins & GetOutputPins() { return OutputPins; }
 
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		builder			キュービルダーオブジェクト

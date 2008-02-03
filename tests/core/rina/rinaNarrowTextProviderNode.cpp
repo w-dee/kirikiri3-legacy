@@ -24,12 +24,19 @@ RISSE_DEFINE_SOURCE_ID(12623,61035,35256,19759,45714,27702,3711,32168);
 
 
 //---------------------------------------------------------------------------
-tNarrowTextProviderNode::tNarrowTextProviderNode(tGraph * graph) : inherited(graph)
+tPinDescriptor tNarrowTextProviderNode::Descriptor(
+	RISSE_WS("output"), RISSE_WS_TR("Output Pin") );
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tNarrowTextProviderNode::tNarrowTextProviderNode(tGraph * graph) :
+	inherited(graph),
+	InputPins(this),
+	OutputPins(this, Descriptor, new tNarrowTextOutputPin())
 {
 	Caption = "";
-	// 出力ピンを作成
-	OutputPin = new tNarrowTextOutputPin();
-	OutputPin->Attach(this);
 }
 //---------------------------------------------------------------------------
 
@@ -48,84 +55,7 @@ void tNarrowTextProviderNode::SetCaption(const char * caption)
 
 	// キャプションが変わると前の長さと新しい長さのどちらか長い方分までが更新される
 	risse_size length_is  = len;
-	OutputPin->NotifyUpdate(t1DArea(0, std::max(length_was, length_is)));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tNarrowTextProviderNode::GetOutputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	return 1; // 出力ピンは１個
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tOutputPin * tNarrowTextProviderNode::GetOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// TODO: 例外
-	if(n == 0) return OutputPin;
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextProviderNode::InsertOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// 出力ピンを追加することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextProviderNode::DeleteOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// 出力ピンを削除することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tNarrowTextProviderNode::GetInputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	return 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tNarrowTextProviderNode::GetInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 範囲外例外
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextProviderNode::InsertInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 入力ピンを追加することはできない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNarrowTextProviderNode::DeleteInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 入力ピンを削除することはできない
+	OutputPins.At(0)->NotifyUpdate(t1DArea(0, std::max(length_was, length_is)));
 }
 //---------------------------------------------------------------------------
 
@@ -135,8 +65,9 @@ void tNarrowTextProviderNode::BuildQueue(tQueueBuilder & builder)
 {
 	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
+	const tOutputPin::tInputPins & input_pins = OutputPins.At(0)->GetInputPins();
+	for(tOutputPin::tInputPins::const_iterator i = input_pins.begin();
+		i != input_pins.end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
 		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;

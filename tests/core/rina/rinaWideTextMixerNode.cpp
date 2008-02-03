@@ -24,100 +24,18 @@ RISSE_DEFINE_SOURCE_ID(8982,48844,33706,17807,17033,58515,58827,7512);
 
 
 //---------------------------------------------------------------------------
-tWideTextMixerNode::tWideTextMixerNode(tGraph * graph) : inherited(graph)
+tPinDescriptor tWideTextMixerNode::InputPinDescriptor(
+	RISSE_WS("input %1"), RISSE_WS_TR("Input Pin %1") );
+tPinDescriptor tWideTextMixerNode::OutputPinDescriptor(
+	RISSE_WS("output"), RISSE_WS_TR("Output Pin") );
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tWideTextMixerNode::tWideTextMixerNode(tGraph * graph) : inherited(graph),
+	InputPins(this, InputPinDescriptor),
+	OutputPins(this, OutputPinDescriptor, new tWideTextOutputPin())
 {
-	// 出力ピンを作成
-	OutputPin = new tWideTextOutputPin();
-	OutputPin->Attach(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextMixerNode::GetOutputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	return 1; // 出力ピンは1個
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tOutputPin * tWideTextMixerNode::GetOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// TODO: 例外
-	if(n == 0) return OutputPin;
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextMixerNode::InsertOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// 出力ピンを追加することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextMixerNode::DeleteOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// 出力ピンを削除することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextMixerNode::GetInputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	return InputPins.size();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tWideTextMixerNode::GetInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 範囲外例外
-	return InputPins[n];
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextMixerNode::InsertInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 範囲外例外
-	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
-	newpin->Attach(this);
-	InputPins.insert(InputPins.begin() + n, newpin);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextMixerNode::DeleteInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 範囲外例外
-	InputPins.erase(InputPins.begin() + n);
 }
 //---------------------------------------------------------------------------
 
@@ -129,8 +47,9 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 
 	// 情報収集; 自分に関係する範囲があるかどうか
 	t1DRegion region;
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
+	const tOutputPin::tInputPins & output_input_pins = OutputPins.At(0)->GetInputPins();
+	for(tOutputPin::tInputPins::const_iterator i = output_input_pins.begin();
+		i != output_input_pins.end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
 		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
@@ -161,8 +80,8 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 	tQueueNode * new_parent = new tWideTextMixerQueueNode(NULL);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
+	for(tOutputPin::tInputPins::const_iterator i = output_input_pins.begin();
+		i != output_input_pins.end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
 		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
@@ -181,7 +100,10 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 	// 入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
 	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
 	// ノードを push する
-	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
+	typedef tArrayPins<tWideTextMixerInputPin>::tArray inputarray_t;
+	inputarray_t & inputarray = InputPins.GetPins();
+	for(inputarray_t::iterator i = inputarray.begin();
+		i != inputarray.end(); i++)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		(*i)->ClearRenderRequests();
@@ -194,7 +116,8 @@ void tWideTextMixerNode::BuildQueue(tQueueBuilder & builder)
 	for(t1DRegion::tAreas::const_iterator ai = dirties.begin(); ai != dirties.end(); ai++)
 	{
 		// 入力ピンに再帰
-		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
+		for(inputarray_t::iterator i = inputarray.begin();
+			i != inputarray.end(); i++)
 		{
 			tWideTextMixerRenderRequest * req =
 				new tWideTextMixerRenderRequest(new_parent, index, *ai,
@@ -213,7 +136,7 @@ void tWideTextMixerNode::NotifyUpdate(const t1DArea & area)
 	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
 
 	// そのまま出力ピンに情報を渡す
-	OutputPin->NotifyUpdate(area);
+	OutputPins.At(0)->NotifyUpdate(area);
 }
 //---------------------------------------------------------------------------
 

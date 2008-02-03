@@ -29,100 +29,19 @@ RISSE_DEFINE_SOURCE_ID(47400,47442,57022,18181,27294,2531,6297,13005);
 
 
 //---------------------------------------------------------------------------
-tWideTextReverserNode::tWideTextReverserNode(tGraph * graph) : inherited(graph)
+tPinDescriptor tWideTextReverserNode::InputPinDescriptor(
+	RISSE_WS("input"), RISSE_WS_TR("Input Pin") );
+tPinDescriptor tWideTextReverserNode::OutputPinDescriptor(
+	RISSE_WS("output"), RISSE_WS_TR("Output Pin") );
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+tWideTextReverserNode::tWideTextReverserNode(tGraph * graph) : inherited(graph),
+	InputPins(this, InputPinDescriptor, new tWideTextInputPin()),
+	OutputPins(this, OutputPinDescriptor, new tWideTextOutputPin())
 {
-	// 出力ピンを作成
-	OutputPin = new tWideTextOutputPin();
-	OutputPin->Attach(this);
-	// 入力ピンを作成
-	InputPin = new tWideTextInputPin();
-	InputPin->Attach(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextReverserNode::GetOutputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	return 1; // 出力ピンは１個
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tOutputPin * tWideTextReverserNode::GetOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// TODO: 例外
-	if(n == 0) return OutputPin;
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextReverserNode::InsertOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// 出力ピンを追加することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextReverserNode::DeleteOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// 出力ピンを削除することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextReverserNode::GetInputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	return 1;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tWideTextReverserNode::GetInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 範囲外例外
-	if(n == 0) return InputPin;
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextReverserNode::InsertInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 入力ピンを追加することはできない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextReverserNode::DeleteInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-
-	// XXX: 入力ピンを削除することはできない
 }
 //---------------------------------------------------------------------------
 
@@ -143,8 +62,9 @@ void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 	tQueueNode * new_parent = new tWideTextReverserQueueNode(NULL);
 
 	// 出力ピンの先に繋がってる入力ピンそれぞれについて
-	for(tOutputPin::tInputPins::const_iterator i = OutputPin->GetInputPins().begin();
-		i != OutputPin->GetInputPins().end(); i++)
+	const tOutputPin::tInputPins & input_pins = OutputPins.At(0)->GetInputPins();
+	for(tOutputPin::tInputPins::const_iterator i = input_pins.begin();
+		i != input_pins.end(); i++)
 	{
 		// レンダリング世代が最新の物かどうかをチェック
 		if((*i)->GetRenderGeneration() != builder.GetRenderGeneration()) continue;
@@ -169,9 +89,9 @@ void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 	// 入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
 	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
 	// ノードを push する
-	InputPin->SetRenderGeneration(builder.GetRenderGeneration());
-	InputPin->ClearRenderRequests();
-	builder.Push(InputPin->GetOutputPin()->GetNode());
+	InputPins.At(0)->SetRenderGeneration(builder.GetRenderGeneration());
+	InputPins.At(0)->ClearRenderRequests();
+	builder.Push(InputPins.At(0)->GetOutputPin()->GetNode());
 
 	// Dirty な領域ごとに
 	const t1DRegion::tAreas & dirties = region.GetAreas();
@@ -182,7 +102,7 @@ void tWideTextReverserNode::BuildQueue(tQueueBuilder & builder)
 		tWideTextRenderRequest * req =
 			new tWideTextRenderRequest(new_parent, index, *ai);
 		index ++;
-		InputPin->AddRenderRequest(req);
+		InputPins.At(0)->AddRenderRequest(req);
 	}
 }
 //---------------------------------------------------------------------------
@@ -195,7 +115,7 @@ void tWideTextReverserNode::NotifyUpdate(const t1DArea & area)
 
 	// 反転した位置を出力ノードに対して与える
 	t1DArea area_rev(-area.GetEnd(), -area.GetStart());
-	OutputPin->NotifyUpdate(area_rev);
+	OutputPins.At(0)->NotifyUpdate(area_rev);
 }
 //---------------------------------------------------------------------------
 

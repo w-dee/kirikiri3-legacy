@@ -36,20 +36,22 @@ tProcessNode::tProcessNode(tGraph * graph)
 //---------------------------------------------------------------------------
 void tProcessNode::CalcLongestDistance()
 {
+	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+
 	risse_size longest = risse_size_max;
-	risse_size output_pincount = GetOutputPinCount();
+	risse_size output_pincount = GetOutputPins().GetCount();
 	for(risse_size i = 0; i < output_pincount; i++)
 	{
-		risse_size dist = GetOutputPinAt(i)->GetLongestDistance();
+		risse_size dist = GetOutputPins().At(i)->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist) longest = dist;
 	}
 	LongestDistance = longest + 1;
 
 	// 子に再帰
-	risse_size input_pincount = GetInputPinCount();
+	risse_size input_pincount = GetInputPins().GetCount();
 	for(risse_size i = 0; i < input_pincount; i++)
 	{
-		GetInputPinAt(i)->GetOutputPin()->GetNode()->CalcLongestDistance();
+		GetInputPins().At(i)->GetOutputPin()->GetNode()->CalcLongestDistance();
 	}
 }
 //---------------------------------------------------------------------------

@@ -24,92 +24,20 @@ RISSE_DEFINE_SOURCE_ID(10207,53962,31748,17392,1438,46335,5173,19226);
 
 
 
+//---------------------------------------------------------------------------
+tPinDescriptor tWideTextDrawDeviceNode::Descriptor(
+	RISSE_WS("input %1"), RISSE_WS_TR("Input Pin %1") );
+//---------------------------------------------------------------------------
+
 
 //---------------------------------------------------------------------------
-tWideTextDrawDeviceNode::tWideTextDrawDeviceNode(tGraph * graph) : inherited(graph)
+tWideTextDrawDeviceNode::tWideTextDrawDeviceNode(tGraph * graph) :
+	inherited(graph),
+	InputPins(this, Descriptor),
+	OutputPins(this)
 {
 	// 最初は全領域が dirty
 	DirtyRegion.Add(t1DArea(0, tWideTextDrawDeviceQueueNode::CanvasSize));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextDrawDeviceNode::GetOutputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	return 0; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tOutputPin * tWideTextDrawDeviceNode::GetOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// TODO: 例外
-	return NULL; // 出力ピンはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::InsertOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// 出力ピンを追加することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::DeleteOutputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// 出力ピンを削除することはできない
-	// TODO: 例外
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-risse_size tWideTextDrawDeviceNode::GetInputPinCount()
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	return InputPins.size();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tInputPin * tWideTextDrawDeviceNode::GetInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 範囲外例外
-	return InputPins[n];
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::InsertInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 範囲外例外
-	tWideTextInputPin * newpin = new tWideTextMixerInputPin();
-	newpin->Attach(this);
-	InputPins.insert(InputPins.begin() + n, newpin);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWideTextDrawDeviceNode::DeleteInputPinAt(risse_size n)
-{
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
-	// XXX: 範囲外例外
-	InputPins.erase(InputPins.begin() + n);
 }
 //---------------------------------------------------------------------------
 
@@ -124,7 +52,10 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 	// まず入力ピンにレンダリング世代を設定し、レンダリング要求をクリアする
 	// また、次に処理すべきノードとして、入力ピンの先の出力ピンのそのまた先の
 	// ノードを push する
-	for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
+	typedef tArrayPins<tWideTextMixerInputPin>::tArray inputarray_t;
+	inputarray_t & inputarray = InputPins.GetPins();
+	for(inputarray_t::iterator i = inputarray.begin();
+		i != inputarray.end(); i++)
 	{
 		(*i)->SetRenderGeneration(builder.GetRenderGeneration());
 		(*i)->ClearRenderRequests();
@@ -137,7 +68,8 @@ void tWideTextDrawDeviceNode::BuildQueue(tQueueBuilder & builder)
 	for(t1DRegion::tAreas::const_iterator ai = dirties.begin(); ai != dirties.end(); ai++)
 	{
 		// 入力ピンに再帰
-		for(gc_vector<tInputPin *>::iterator i = InputPins.begin(); i != InputPins.end(); i++)
+		for(inputarray_t::iterator i = inputarray.begin();
+			i != inputarray.end(); i++)
 		{
 			tWideTextMixerRenderRequest * req =
 				new tWideTextMixerRenderRequest(new_parent, index, *ai,

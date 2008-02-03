@@ -91,6 +91,8 @@ class tInputPin : public tPin, public Risa::tSubmorph<tInputPin>
 public:
 	typedef tPin inherited;
 
+	typedef tInputPin tPinDirectionType; //!< テンプレート中で派生クラスが tInputPin の派生なのか tOutputPin の派生なのかを調べるために使われる
+
 private:
 	tOutputPin * OutputPin; //!< この入力ピンにつながっている出力ピン
 	risse_uint32 AgreedType; //!< 同意されたタイプ
@@ -181,6 +183,9 @@ class tOutputPin : public tPin, public Risa::tSubmorph<tOutputPin>
 {
 public:
 	typedef tPin inherited;
+
+	typedef tOutputPin tPinDirectionType; //!< テンプレート中で派生クラスが tInputPin の派生なのか tOutputPin の派生なのかを調べるために使われる
+
 private:
 	friend class tInputPin;
 
@@ -212,6 +217,397 @@ public:
 	//! @param		input_pin	入力ピン
 	//! @note		サブクラスでオーバーライドしたときは最後に親クラスのこれを呼ぶこと。
 	virtual void Disconnect(tInputPin * input_pin);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ピンの説明
+//---------------------------------------------------------------------------
+struct tPinDescriptor
+{
+public:
+	tString			ShortName; //!< 短い名前 (i18nしないこと)
+	tString			LongDescription; //!< 長い説明 (i18n可)
+
+	//! @brief		デフォルトコンストラクタ
+	tPinDescriptor() {;}
+
+	//! @brief		コンストラクタ
+	//! @param		shortname		短い名前 (i18nしないこと)
+	//! @param		longdesc		長い説明 (i18n可)
+	tPinDescriptor(const tString shortname, const tString longdesc)
+		: ShortName(shortname), LongDescription(longdesc) {;}
+
+	//! @brief		ref の 各文字列メンバの %1 を数値に置き換えて設定する
+	//! @param		ref		元になるピンの説明
+	//! @param		n		各文字列メンバの '%1' に置き換わる文字列
+	void MakeNumbered(const tPinDescriptor & ref, risse_size n)
+	{
+		tString num(tString::AsString(static_cast<risse_int64>(n)));
+		ShortName			= tString(ref.ShortName			, num);
+		LongDescription		= tString(ref.LongDescription	, num);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+class tProcessNode;
+//---------------------------------------------------------------------------
+//! @brief		ピン配列
+//! @note		ピン操作の各メソッドはグラフをロックしない。
+//!				ピンを操作する前にはグラフをロックすること。また、グラフがロック
+//!				されていることを確実にするために、各メソッドにはグラフがロックされている
+//!				かどうかの ASSERT を挿入することを強く推奨する。
+//---------------------------------------------------------------------------
+template <typename PINTYPE>
+class tPins : public Risa::tPolymorphic
+{
+public:
+	typedef Risa::tPolymorphic inherited;
+
+private:
+	tProcessNode * Node; //!< このピン配列を保持しているノードインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		node		このピン配列を保持するノードインスタンス
+	tPins(tProcessNode * node) { Node = node; }
+
+	//! @brief		このピン配列を保持しているノードインスタンスを得る
+	//! @return		このピン配列を保持しているノードインスタンス
+	tProcessNode * GetNode() const { return Node; }
+
+	//! @brief		ピンの数を得る
+	//! @return		ピンの総数
+	virtual risse_size GetCount()
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		return 0;
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	virtual tPin * Get(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+		return NULL;
+	}
+
+	//! @brief		指定インデックスのピンを削除する
+	//! @param		index		インデックス
+	virtual void Delete(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスにピンを挿入する
+	//! @param		index		インデックス
+	virtual void Insert(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスのピンの情報を得る
+	//! @param		index		インデックス
+	//! @return		ピンの情報
+	virtual tPinDescriptor GetDescriptor(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+		return tPinDescriptor();
+	}
+
+	//! @brief		指定の名前のピンのインデックスを探して返す
+	//! @param		name		ピン名 (tPinDescriptor::ShortName のもの)
+	//! @return		見つかったピンのインデックス (見つからなかった場合は risse_size_max)
+	virtual risse_size FindPinByShortName(const tString & name)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS()); 
+		risse_size count = GetCount();
+		for(risse_size i = 0; i < count; i++)
+			if(GetDescriptor(i).ShortName == name) return i;
+		return risse_size_max;
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		入力ピンのピン配列
+//! @note		このクラスではすべてのメソッドが実装されているが、
+//!				すべてあたかもピンが無いかのように振る舞う。
+//!				そのため、入力ピンを持たないノードの入力ピン配列に使うことができる。
+//---------------------------------------------------------------------------
+class tInputPins : public tPins<tInputPin>, public Risa::tSubmorph<tInputPins>
+{
+public:
+	typedef tPins<tInputPin> inherited;
+
+public:
+	typedef tInputPin tPinType;
+
+	//! @brief		コンストラクタ
+	//! @param		node		このピン配列を保持するノードインスタンス
+	tInputPins(tProcessNode * node) : inherited(node) {;}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	//! @note		Get() と異なり、戻りの型は tInputPin * になる (単にGet()の戻りをキャストしてるだけ)
+	tInputPin * At(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		return static_cast<tInputPin*>(Get(index));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		出力ピンのピン配列
+//! @note		このクラスではすべてのメソッドが実装されているが、
+//!				すべてあたかもピンが無いかのように振る舞う。
+//!				そのため、出力ピンを持たないノードの出力ピン配列に使うことができる。
+//---------------------------------------------------------------------------
+class tOutputPins : public tPins<tOutputPin>, public Risa::tSubmorph<tOutputPins>
+{
+public:
+	typedef tPins<tOutputPin> inherited;
+
+public:
+	typedef tOutputPin tPinType;
+
+	//! @brief		コンストラクタ
+	//! @param		node		このピン配列を保持するノードインスタンス
+	tOutputPins(tProcessNode * node) : inherited(node) {;}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	//! @note		Get() と異なり、戻りの型は tOutputPin * になる (単にGet()の戻りをキャストしてるだけ)
+	tOutputPin * At(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(GetNode()->GetGraph()->GetCS());
+		return static_cast<tOutputPin*>(Get(index));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		与えられた型がtInputPinかtOutputPinかでtypeの型を変えるテンプレート型
+//---------------------------------------------------------------------------
+template <typename QUESTION>
+struct tInputPinsOrOutputPinsSelector
+{
+};
+template <>
+struct tInputPinsOrOutputPinsSelector<tInputPin>
+{
+	typedef tInputPins type;
+};
+template <>
+struct tInputPinsOrOutputPinsSelector<tOutputPin>
+{
+	typedef tOutputPins type;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		一つだけのピンを持つピン配列
+//---------------------------------------------------------------------------
+template <typename PINTYPE>
+class tOnePins : public tInputPinsOrOutputPinsSelector<typename PINTYPE::tPinDirectionType>::type,
+									public Risa::tSubmorph<tOnePins<PINTYPE> >
+{
+public:
+	typedef typename tInputPinsOrOutputPinsSelector<typename PINTYPE::tPinDirectionType>::type inherited;
+
+private:
+	tPinDescriptor Descriptor; //!< そのピンのデスクリプタ
+	PINTYPE * Pin; //!< 唯一のピン
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		node		このピン配列を保持するノードインスタンス
+	//! @param		desc		ピンのデスクリプタ
+	//! @param		pin			ピンインスタンス
+	tOnePins(tProcessNode * node, const tPinDescriptor & desc, PINTYPE * pin) :
+		inherited(node), Descriptor(desc), Pin(pin)
+	{ Pin->Attach(node); }
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	//! @note		Get() と異なり、戻りの型は PINTYPE * になる (単にGet()の戻りをキャストしてるだけ)
+	PINTYPE * At(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		return static_cast<PINTYPE*>(Get(index));
+	}
+
+	//! @brief		ピンの数を得る
+	//! @return		ピンの総数
+	virtual risse_size GetCount()
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		return 1;
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	virtual tPin * Get(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		if(index == 0) return Pin;
+		/* TODO: 例外 */
+		return NULL;
+	}
+
+	//! @brief		指定インデックスのピンを削除する
+	//! @param		index		インデックス
+	virtual void Delete(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+		return;
+	}
+
+	//! @brief		指定インデックスにピンを挿入する
+	//! @param		index		インデックス
+	virtual void Insert(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスのピンの情報を得る
+	//! @param		index		インデックス
+	//! @return		ピンの情報
+	virtual tPinDescriptor GetDescriptor(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		if(index==0) return Descriptor;
+		/* TODO: 例外 */
+		return tPinDescriptor();
+	}
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		一つの型のピン配列
+//---------------------------------------------------------------------------
+template <typename PINTYPE>
+class tArrayPins : public tInputPinsOrOutputPinsSelector<typename PINTYPE::tPinDirectionType>::type,
+									public Risa::tSubmorph<tArrayPins<PINTYPE> >
+{
+public:
+	typedef typename tInputPinsOrOutputPinsSelector<typename PINTYPE::tPinDirectionType>::type inherited;
+
+public:
+	typedef gc_vector<PINTYPE *> tArray;
+
+private:
+	tArray Pins; //!< ピンの配列
+	tPinDescriptor Descriptor; //!< そのピンのデスクリプタ(文字列中の '%1' の部分はピン番号に置き換わる)
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		node		このピン配列を保持するノードインスタンス
+	//! @param		desc		ピンのデスクリプタ
+	tArrayPins(tProcessNode * node, const tPinDescriptor & desc) :
+		inherited(node), Descriptor(desc)
+	{ ; }
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tArrayPins() {;}
+
+	//! @brief		ピンの配列(内部配列)を得る
+	tArray & GetPins()
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		return Pins;
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	//! @note		Get() と異なり、戻りの型は PINTYPE * になる (単にGet()の戻りをキャストしてるだけ)
+	PINTYPE * At(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		return static_cast<PINTYPE*>(Get(index));
+	}
+
+	//! @brief		ピンの数を得る
+	//! @return		ピンの総数
+	virtual risse_size GetCount()
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		return Pins.size();
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	virtual tPin * Get(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		if(index < Pins.size()) return Pins[index];
+		/* TODO: 例外 */
+		return NULL;
+	}
+
+	//! @brief		指定インデックスのピンを削除する
+	//! @param		index		インデックス
+	virtual void Delete(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		if(index < Pins.size()) Pins.erase(Pins.begin() + index);
+		/* TODO: 例外 */
+		return;
+	}
+
+	//! @brief		指定インデックスにピンを挿入する
+	//! @param		index		インデックス
+	//! @return		挿入されたピン
+	virtual void Insert(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		PINTYPE * newpin = new PINTYPE();
+		if(index <= Pins.size())
+		{
+			newpin->Attach(inherited::GetNode());
+			Pins.insert(Pins.begin() + index, newpin);
+		}
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスのピンの情報を得る
+	//! @param		index		インデックス
+	//! @return		ピンの情報
+	virtual tPinDescriptor GetDescriptor(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(inherited::GetNode()->GetGraph()->GetCS());
+		if(index < Pins.size())
+		{
+			tPinDescriptor ret;
+			ret.MakeNumbered(Descriptor, index);
+			return ret;
+		}
+		/* TODO: 例外 */
+		return tPinDescriptor();
+	}
 };
 //---------------------------------------------------------------------------
 

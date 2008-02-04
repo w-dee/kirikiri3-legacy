@@ -45,8 +45,8 @@ public:
 
 protected:
 	typedef tHashTable<tString, tMemberData>
-		tHashTable; //!< ハッシュ表の型
-	tHashTable HashTable; //!< ハッシュ表
+		tMemberHashTable; //!< ハッシュ表の型
+	tMemberHashTable HashTable; //!< ハッシュ表
 	const tString & PrototypeName;
 		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクトの名前
 	const tString & MembersName;

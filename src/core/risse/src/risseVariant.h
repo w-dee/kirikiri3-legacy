@@ -1838,6 +1838,37 @@ public:
 			{ return rhs.GetType() == vtObject && rhs.AsObject().StrictEqual(AsObject()); }
 
 	//-----------------------------------------------------------------------
+	//! @brief		同定演算子		Identify
+	//! @param		rhs			右辺
+	//! @return		同定の結果、同一ならば真、そうでなければ偽。
+	//!				Dictionary のキーの比較に用いられる。
+	//-----------------------------------------------------------------------
+	bool Identify(const tVariantBlock & rhs) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return Identify_Void     (rhs);
+		case vtInteger:	return Identify_Integer  (rhs);
+		case vtReal:	return Identify_Real     (rhs);
+		case vtNull:	return Identify_Null     (rhs);
+		case vtString:	return Identify_String   (rhs);
+		case vtOctet:	return Identify_Octet    (rhs);
+		case vtBoolean:	return Identify_Boolean  (rhs);
+		case vtObject:	return Identify_Object   (rhs);
+		}
+		return false;
+	}
+
+	bool Identify_Void     (const tVariantBlock & rhs) const { return StrictEqual_Void     (rhs); }
+	bool Identify_Integer  (const tVariantBlock & rhs) const { return StrictEqual_Integer  (rhs); }
+	bool Identify_Real     (const tVariantBlock & rhs) const { return StrictEqual_Real     (rhs); }
+	bool Identify_Null     (const tVariantBlock & rhs) const { return StrictEqual_Null     (rhs); }
+	bool Identify_String   (const tVariantBlock & rhs) const { return StrictEqual_String   (rhs); }
+	bool Identify_Octet    (const tVariantBlock & rhs) const { return StrictEqual_Octet    (rhs); }
+	bool Identify_Boolean  (const tVariantBlock & rhs) const { return StrictEqual_Boolean  (rhs); }
+	bool Identify_Object   (const tVariantBlock & rhs) const;
+
+	//-----------------------------------------------------------------------
 	//! @brief		< 演算子		Lesser
 	//! @param		rhs			右辺
 	//! @return		*this < rhs ならば真
@@ -3005,6 +3036,102 @@ public: // スレッド同期
 		~tSynchronizer();
 	};
 
+public: // ハッシュ/ヒント
+
+	//-----------------------------------------------------------------------
+	//! @brief		ヒントを得る
+	//! @return		ヒント(0=ヒント無効)
+	//-----------------------------------------------------------------------
+	risse_uint32 GetHint() const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return GetHint_Void     ();
+		case vtInteger:	return GetHint_Integer  ();
+		case vtReal:	return GetHint_Real     ();
+		case vtNull:	return GetHint_Null     ();
+		case vtString:	return GetHint_String   ();
+		case vtOctet:	return GetHint_Octet    ();
+		case vtBoolean:	return GetHint_Boolean  ();
+		case vtObject:	return GetHint_Object   ();
+		}
+		return 0;
+	}
+
+	risse_uint32 GetHint_Void     () const { return GetHash_Void(); }
+	risse_uint32 GetHint_Integer  () const { return GetHash_Integer(); }
+	risse_uint32 GetHint_Real     () const { return GetHash_Real(); }
+	risse_uint32 GetHint_Null     () const { return GetHash_Null(); }
+	risse_uint32 GetHint_String   () const { return AsString().GetHint(); }
+	risse_uint32 GetHint_Octet    () const { return AsOctet().GetHint(); }
+	risse_uint32 GetHint_Boolean  () const { return GetHash_Boolean(); }
+	risse_uint32 GetHint_Object   () const;
+
+	//-----------------------------------------------------------------------
+	//! @brief		ヒントを設定する
+	//! @param		hint		ヒント
+	//-----------------------------------------------------------------------
+	void SetHint(risse_uint32 hint) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	SetHint_Void     (hint);
+		case vtInteger:	SetHint_Integer  (hint);
+		case vtReal:	SetHint_Real     (hint);
+		case vtNull:	SetHint_Null     (hint);
+		case vtString:	SetHint_String   (hint);
+		case vtOctet:	SetHint_Octet    (hint);
+		case vtBoolean:	SetHint_Boolean  (hint);
+		case vtObject:	SetHint_Object   (hint);
+		}
+	}
+
+	void SetHint_Void     (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Integer  (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Real     (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Null     (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_String   (risse_uint32 hint) const { AsString().SetHint(hint); }
+	void SetHint_Octet    (risse_uint32 hint) const { AsOctet().SetHint(hint); }
+	void SetHint_Boolean  (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Object   (risse_uint32 hint) const;
+
+	//-----------------------------------------------------------------------
+	//! @brief		ハッシュを得る
+	//! @return		ハッシュ値
+	//-----------------------------------------------------------------------
+	risse_uint32 GetHash() const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return GetHash_Void     ();
+		case vtInteger:	return GetHash_Integer  ();
+		case vtReal:	return GetHash_Real     ();
+		case vtNull:	return GetHash_Null     ();
+		case vtString:	return GetHash_String   ();
+		case vtOctet:	return GetHash_Octet    ();
+		case vtBoolean:	return GetHash_Boolean  ();
+		case vtObject:	return GetHash_Object   ();
+		}
+		return ~static_cast<risse_uint32>(0);
+	}
+
+	/* ここで返されている 0x8f84b331のような マジックナンバーに得に意味はない。
+	   たんに、他と重ならなさそうな値が適当に選ばれているだけである。 */
+
+	risse_uint32 GetHash_Void     () const { return 0x8f84b331; /* 唯一のインスタンス */ }
+	risse_uint32 GetHash_Integer  () const
+					{ return static_cast<risse_uint32>(0xf2345678 ^ AsInteger() ^ (AsInteger() >> 4));
+					  /* 適当にハッシュして返す */ }
+	risse_uint32 GetHash_Real     () const;
+	risse_uint32 GetHash_Null     () const { return 0x9b371c72; /* 唯一のインスタンス */ }
+	risse_uint32 GetHash_String   () const
+					{ return AsString().GetHash(); }
+	risse_uint32 GetHash_Octet    () const
+					{ return AsOctet().GetHash(); }
+	risse_uint32 GetHash_Boolean  () const
+					{ return CastToBoolean_Boolean()?0xab2ed843:0xbd8b88c4; }
+	risse_uint32 GetHash_Object   () const;
+
 public: // ユーティリティ
 	//-----------------------------------------------------------------------
 	//! @brief		人間が可読な形式に変換
@@ -3044,6 +3171,7 @@ public: // ユーティリティ
 					{ return CastToString_Boolean(); }
 	tString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tString(); /* incomplete */ }
+
 
 	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
 	//! @param		cls		クラスオブジェクトインスタンス

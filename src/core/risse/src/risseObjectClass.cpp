@@ -51,6 +51,9 @@ void tObjectClass::RegisterMembers()
 	BindFunction(this, ss_construct, &tObjectClass::construct);
 	BindFunction(this, ss_initialize, &tObjectClass::initialize);
 	BindFunction(this, mnDiscEqual, &tObjectClass::DiscEqual);
+	BindFunction(this, ss_identify, &tObjectClass::identify);
+	BindProperty(this, ss_hint, &tObjectClass::get_hint, &tObjectClass::set_hint);
+	BindProperty(this, ss_hash, &tObjectClass::get_hash);
 	BindFunction(this, ss_isA, &tObjectClass::isA, 
 		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_eval, &tObjectClass::eval);
@@ -89,10 +92,85 @@ bool tObjectClass::DiscEqual(const tNativeCallInfo & info, const tVariant &rhs)
 		return info.This.GetObjectInterface() == rhs.GetObjectInterface();
 	}
 	// プリミティブ型
+	// TODO: 各サブクラスでオーバーライドされているかのように実装すべき？
 	return info.This.DiscEqual(rhs);
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+bool tObjectClass::identify(const tNativeCallInfo & info, const tVariant &rhs)
+{
+	return info.This.StrictEqual(rhs); // デフォルトは StrictEqual と一緒
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tObjectClass::get_hint(const tNativePropGetInfo & info)
+{
+	if(info.This.GetType() == tVariant::vtObject)
+	{
+		if(info.result)
+		{
+			risse_uint32 ptr = ~reinterpret_cast<risse_int32>(info.This.GetObjectInterface());
+			*info.result = static_cast<risse_int64>(ptr ^ (ptr >> 4));
+		}
+		return;
+
+		// tObjectClass::get_hash() も参照のこと
+	}
+
+	// プリミティブ型
+	// TODO: 各サブクラスでオーバーライドされているかのように実装すべき？
+	if(info.result)
+		*info.result = static_cast<risse_int64>(info.This.GetHint());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tObjectClass::set_hint(const tNativePropSetInfo & info)
+{
+	if(info.This.GetType() == tVariant::vtObject)
+	{
+		return; // 何もできず
+	}
+
+	// プリミティブ型
+	// TODO: 各サブクラスでオーバーライドされているかのように実装すべき？
+	info.This.SetHint(static_cast<risse_uint32>(info.value.operator risse_int64()));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tObjectClass::get_hash(const tNativePropGetInfo & info)
+{
+	if(info.This.GetType() == tVariant::vtObject)
+	{
+		// 適当にハッシュを作って返す。
+		// 値はアドレスを整数にキャストしたものを元にするが、
+		// 値がポインタに似てると(GCがその先にあるオブジェクトをマークしてしまうので)
+		// やっかいなので bit not をとる。
+		// またオブジェクトは 8byte とか 16byte にアラインメントされた位置に確保されるが
+		// その影響を少なくするために 4 回右シフトした結果を xor する。
+
+		// tObjectClass::get_hint() も参照のこと
+		if(info.result)
+		{
+			risse_uint32 ptr = ~reinterpret_cast<risse_int32>(info.This.GetObjectInterface());
+			*info.result = static_cast<risse_int64>(ptr ^ (ptr >> 4));
+		}
+		return;
+	}
+
+	// プリミティブ型
+	// TODO: 各サブクラスでオーバーライドされているかのように実装すべき？
+	if(info.result)
+		*info.result = static_cast<risse_int64>(info.This.GetHash());
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

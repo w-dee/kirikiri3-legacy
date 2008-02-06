@@ -162,4 +162,6 @@ ss_getTimezoneOffset				getTimezoneOffset				#!< "getTimezoneOffset" メソッ�
 ss_timezoneOffset					timezoneOffset					#!< "timezoneOffset" プロパティ名
 ss_toGMTString						toGMTString						#!< "toGMTString" メソッド名
 ss_toLocaleString					toLocaleString					#!< "toLocaleString" メソッド名
-
+ss_hash								hash							#!< "hash" プロパティ名
+ss_hint								hint							#!< "hint" プロパティ名
+ss_identify							identify						#!< "identify" メソッド名

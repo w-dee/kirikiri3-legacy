@@ -36,6 +36,10 @@ public: // Risse用メソッドなど
 	static void construct();
 	static void initialize();
 	static bool DiscEqual(const tNativeCallInfo & info, const tVariant &rhs); // === 演算子
+	static bool identify(const tNativeCallInfo & info, const tVariant &rhs); // Dictionary で hash とともに同定に用いる
+	static void get_hint(const tNativePropGetInfo & info); // hint プロパティ
+	static void set_hint(const tNativePropSetInfo & info); // hint プロパティ
+	static void get_hash(const tNativePropGetInfo & info); // hash プロパティ
 	static bool isA(const tVariant & Class,
 				const tNativeCallInfo & info);
 	static void eval(const tString & script,

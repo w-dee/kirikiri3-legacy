@@ -287,7 +287,40 @@ private:
 	//! @return		内部バッファ
 	risse_uint8 * InternalIndepend() const;
 
+public: // hint/hash
+
+	//! @brief ヒントを得る
+	//! @return ヒント (0 = ヒントが無効)
+	risse_uint32 GetHint() const
+	{
+		// TODO: こいつの設計と実装
+		return 0;
+	}
+
+	//! @brief 現在のオクテット列のハッシュに従ってヒントを設定する
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint() const
+	{
+		// TODO: こいつの設計と実装
+	}
+
+	//! @brief ヒントを設定する
+	//! @brief hint  ハッシュ値
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint(risse_uint32 hint) const
+	{
+		// TODO: こいつの設計と実装
+	}
+
+	//! @brief オクテット列のハッシュを計算して返す
+	//! @return ハッシュ値
+	//! @note	戻り値は必ず0以外の値になる
+	risse_uint32 GetHash() const;
+
 public: // utilities
+
 	//! @brief		値を再パース可能な文字列に変換する
 	//! @return		再パース可能な文字列
 	tString AsTokenString() const
@@ -526,6 +559,32 @@ public: // pointer
 	{
 		GetBlock()->Fit();
 	}
+
+public: // hint/hash
+
+	//! @brief ヒントを得る
+	//! @return ヒント (0 = ヒントが無効)
+	risse_uint32 GetHint() const
+	{ return GetBlock()->GetHint(); }
+
+	//! @brief 現在のオクテット列のハッシュに従ってヒントを設定する
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint() const
+	{ GetBlock()->SetHint(); }
+
+	//! @brief ヒントを設定する
+	//! @brief hint  ハッシュ値
+	//! @note このメソッドはバッファの内容を変更するにもかかわらず const
+	//! メソッドである。
+	void SetHint(risse_uint32 hint) const
+	{ GetBlock()->SetHint(hint); }
+
+	//! @brief オクテット列のハッシュを計算して返す
+	//! @return ハッシュ値
+	//! @note	戻り値は必ず0以外の値になる
+	risse_uint32 GetHash() const
+	{ return GetBlock()->GetHash(); }
 
 public: // utilities
 	//! @brief		値を再パース可能な文字列に変換する

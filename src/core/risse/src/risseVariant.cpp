@@ -1494,6 +1494,11 @@ bool tVariantBlock::Equal_Boolean  (const tVariantBlock & rhs) const
 //---------------------------------------------------------------------------
 bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
 {
+	// Real::identify メソッドの実装はこれがつかわれるので、
+	// hash プロパティと齟齬が生じないようにすること。
+	// このソースファイルの
+	// tVariantBlock::GetHash_Real() も参照のこと。
+
 	// Real の符合、クラスも厳密に同じかどうかを見る
 	if(rhs.GetType() != vtReal) return false;
 
@@ -1508,6 +1513,14 @@ bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
 
 	// クラスと値が同じであるかどうかを返す
 	return l_cls == r_cls && lv == rv;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tVariantBlock::Identify_Object   (const tVariantBlock & rhs) const
+{
+	return Invoke_Object(ss_identify, rhs).CastToBoolean();
 }
 //---------------------------------------------------------------------------
 
@@ -4880,6 +4893,63 @@ tVariantBlock::tSynchronizer::~tSynchronizer()
 {
 	// ロックオブジェクトを消滅させる
 	(reinterpret_cast<tObjectInterface::tSynchronizer*>(Synchronizer))->~tSynchronizer();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHint_Object   () const
+{
+	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hint).CastToInteger());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tVariantBlock::SetHint_Object   (risse_uint32 hint) const
+{
+	SetPropertyDirect_Object(ss_hint, 0, (risse_int64)hint);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHash_Real     () const
+{
+	// tVariantBlock::StrictEqual_Real() も参照すること。
+
+	risse_real v =     AsReal();
+	risse_uint32 cls = GetFPClass(v);
+
+	switch(cls & RISSE_FC_CLASS_MASK)
+	{
+	case RISSE_FC_CLASS_NORMAL:
+		// 普通の数値
+		{
+			risse_uint64 iv = *reinterpret_cast<risse_uint64*>(&v);
+			risse_uint32 hash = static_cast<risse_uint32>(iv) ^
+				static_cast<risse_uint32>(iv >> 32) ^
+				static_cast<risse_uint32>(iv >> 48);
+			return hash; // 適当に hash を計算して返す
+		}
+
+	case RISSE_FC_CLASS_NAN:
+		// NaN の場合は符号は無視する
+		return RISSE_FC_CLASS_NAN;
+
+	case RISSE_FC_CLASS_INF:
+		return RISSE_FC_IS_NEGATIVE(cls) ? 3 : 2;
+	}
+
+	return ~static_cast<risse_uint32>(0);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHash_Object   () const
+{
+	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hash).CastToInteger());
 }
 //---------------------------------------------------------------------------
 

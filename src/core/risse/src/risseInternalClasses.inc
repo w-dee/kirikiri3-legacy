@@ -21,6 +21,7 @@
 #include "risseNumberClass.h"
 #include "risseIntegerClass.h"
 #include "risseRealClass.h"
+#include "risseDictionaryClass.h"
 #include "risseCoroutineClass.h"
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
@@ -52,6 +53,7 @@ RISSE_INTERNALCLASSES_CLASS(String                          )
 RISSE_INTERNALCLASSES_CLASS(Number                          )
 RISSE_INTERNALCLASSES_CLASS(Integer                         )
 RISSE_INTERNALCLASSES_CLASS(Real                            )
+RISSE_INTERNALCLASSES_CLASS(Dictionary                      )
 RISSE_INTERNALCLASSES_CLASS(Date                            )
 RISSE_INTERNALCLASSES_CLASS(Thread                          )
 RISSE_INTERNALCLASSES_CLASS(Coroutine                       )

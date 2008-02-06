@@ -35,6 +35,7 @@ RISSE_DEFINE_SOURCE_ID(65360,34010,1527,19914,27817,35057,17111,22724);
 void tArrayInstance::construct()
 {
 	// default メンバを追加 (デフォルトではvoid)
+	// TODO: default ではなくて missing メソッドみたいなのを実装しようよ
 	RegisterNormalMember(ss_default, tVariant::GetVoidObject());
 
 	// filler メンバを追加 (デフォルトではvoid)

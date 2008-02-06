@@ -111,14 +111,12 @@ void tObjectClass::get_hint(const tNativePropGetInfo & info)
 {
 	if(info.This.GetType() == tVariant::vtObject)
 	{
+		// デフォルトでは hash プロパティを読み出す
 		if(info.result)
-		{
-			risse_uint32 ptr = ~reinterpret_cast<risse_int32>(info.This.GetObjectInterface());
-			*info.result = static_cast<risse_int64>(ptr ^ (ptr >> 4));
-		}
+			*info.result = info.This.GetPropertyDirect_Object(ss_hash);
+		else
+			info.This.GetPropertyDirect_Object(ss_hash); // dummy read
 		return;
-
-		// tObjectClass::get_hash() も参照のこと
 	}
 
 	// プリミティブ型

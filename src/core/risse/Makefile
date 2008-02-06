@@ -70,6 +70,7 @@ CPPFILES =  \
 			src/risseCoroutineClass.cpp              \
 			src/risseDateClass.cpp                   \
 			src/risseDateParser.cpp                  \
+			src/risseDictionaryClass.cpp             \
 			src/risseExceptionClass.cpp              \
 			src/risseFunctionClass.cpp               \
 			src/risseGC.cpp                          \

@@ -89,6 +89,9 @@ public:
 	//! @brief		ハッシュを作成する
 	//! @param		val		値
 	//! @return		ハッシュ値
+	//! @note		デフォルトのハッシュ値計算メソッドは T の全域のビット列を
+	//!				対象にハッシュを計算する。つまりパディングなどが詰まっていると
+	//!				そこのゴミを拾うことを意味するので注意。
 	static risse_uint32 Make(const T &val)
 	{
 		const char *p = (const char*)&val;
@@ -133,6 +136,12 @@ public:
 
 
 	enum { HasHint = 0 }; //!< ハッシュのヒントを得る事ができるかどうか
+
+	//! @brief		キー同士の比較
+	//! @param		key1		キーその1
+	//! @param		key2		キーその2
+	//! @return		キーが同一かどうか
+	static bool Compare(const T & key1, const T & key2) { return key1 == key2; }
 };
 //---------------------------------------------------------------------------
 
@@ -179,6 +188,71 @@ public:
 	}
 
 	enum { HasHint = 1 }; //!< ハッシュのヒントを得る事ができるかどうか
+
+	//! @brief		キー同士の比較
+	//! @param		key1		キーその1
+	//! @param		key2		キーその2
+	//! @return		キーが同一かどうか
+	static bool Compare(const T & key1, const T & key2) { return key1 == key2; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		ハッシュ関数の特性クラス(tVariant用)
+//---------------------------------------------------------------------------
+template <>
+class tHashTraits<tVariant>
+{
+	typedef tVariant T;
+public:
+	//! @brief		ハッシュを作成する
+	//! @param		val		値
+	//! @return		ハッシュ値
+	static risse_uint32 Make(const T &val)
+	{
+		risse_uint32 hash = val.GetHash();
+		if(!hash) hash = (risse_uint32)(risse_int32)-1;
+			// val.GetHash() は 0 を返すことがあるので修正
+		return hash;
+	}
+
+	//! @brief		ハッシュのヒントを返す
+	//! @param		val		値
+	//! @return		ハッシュ値(0=ハッシュが無効)
+	static risse_uint32 GetHint(const T &val)
+	{
+		return val.GetHint();
+	}
+
+	//! @brief		ハッシュのヒントを設定する
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	static void SetHint(T & val, risse_uint32 hash)
+	{
+		val.SetHint(hash);
+	}
+
+	//! @brief		ハッシュのヒントを設定する(const版)
+	//! @param		val		値
+	//! @param		hash	ハッシュ値
+	//! @note		valのSetHintがmutableとして宣言されている向き
+	static void SetHint(const T & val, risse_uint32 hash)
+	{
+		val.SetHint(hash);
+	}
+
+	enum { HasHint = 1 }; //!< ハッシュのヒントを得る事ができるかどうか
+
+	//! @brief		キー同士の比較
+	//! @param		key1		キーその1
+	//! @param		key2		キーその2
+	//! @return		キーが同一かどうか
+	static bool Compare(const T & key1, const T & key2)
+	{
+		// tVariant::Identify を用いる
+		return key1.Identify(key2);
+	}
 };
 //---------------------------------------------------------------------------
 
@@ -386,7 +460,7 @@ protected:
 			if(hash == elm->Hash)
 			{
 				// same ?
-				if(key == *(KeyT*)elm->Key)
+				if(HashTraitsT::Compare(key, *(KeyT*)elm->Key))
 				{
 					// do copying instead of inserting if these are same
 					*(ValueT*)elm->Value = value;
@@ -412,7 +486,7 @@ protected:
 		if(hash == lv1->Hash)
 		{
 			// same?
-			if(key == *(KeyT*)lv1->Key)
+			if(HashTraitsT::Compare(key, *(KeyT*)lv1->Key))
 			{
 				// do copying instead of inserting if these are same
 				*(ValueT*)lv1->Value = value;
@@ -447,7 +521,7 @@ protected:
 		const tElement *lv1 = Elms + (hash & HashMask);
 		if(hash == lv1->Hash && lv1->Flags & UsingFlag)
 		{
-			if(key == *(KeyT*)lv1->Key) return lv1;
+			if(HashTraitsT::Compare(key, *(KeyT*)lv1->Key)) return lv1;
 		}
 
 		// lv2を検索
@@ -456,7 +530,7 @@ protected:
 		{
 			if(hash == elm->Hash)
 			{
-				if(key == *(KeyT*)elm->Key) return elm;
+				if(HashTraitsT::Compare(key, *(KeyT*)elm->Key)) return elm;
 			}
 			elm = static_cast<const tElement * > (elm->Next);
 		}
@@ -476,7 +550,7 @@ protected:
 		tElement *lv1 = Elms + (hash & HashMask);
 		if(lv1->Flags & UsingFlag && hash == lv1->Hash)
 		{
-			if(key == *(KeyT*)lv1->Key)
+			if(HashTraitsT::Compare(key, *(KeyT*)lv1->Key))
 			{
 				// delete lv1
 				Destruct(*lv1);
@@ -491,7 +565,7 @@ protected:
 		{
 			if(hash == elm->Hash)
 			{
-				if(key == *(KeyT*)elm->Key)
+				if(HashTraitsT::Compare(key, *(KeyT*)elm->Key))
 				{
 					Count --;
 					prev->Next = elm->Next; // sever from the chain

@@ -3075,14 +3075,14 @@ public: // ハッシュ/ヒント
 	{
 		switch(GetType())
 		{
-		case vtVoid:	SetHint_Void     (hint);
-		case vtInteger:	SetHint_Integer  (hint);
-		case vtReal:	SetHint_Real     (hint);
-		case vtNull:	SetHint_Null     (hint);
-		case vtString:	SetHint_String   (hint);
-		case vtOctet:	SetHint_Octet    (hint);
-		case vtBoolean:	SetHint_Boolean  (hint);
-		case vtObject:	SetHint_Object   (hint);
+		case vtVoid:	SetHint_Void     (hint); return;
+		case vtInteger:	SetHint_Integer  (hint); return;
+		case vtReal:	SetHint_Real     (hint); return;
+		case vtNull:	SetHint_Null     (hint); return;
+		case vtString:	SetHint_String   (hint); return;
+		case vtOctet:	SetHint_Octet    (hint); return;
+		case vtBoolean:	SetHint_Boolean  (hint); return;
+		case vtObject:	SetHint_Object   (hint); return;
 		}
 	}
 

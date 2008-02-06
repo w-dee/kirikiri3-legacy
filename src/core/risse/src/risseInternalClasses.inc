@@ -15,6 +15,7 @@
 #include "rissePropertyClass.h"
 #include "risseArrayClass.h"
 #include "risseStringClass.h"
+#include "risseOctetClass.h"
 #include "rissePrimitiveClass.h"
 #include "risseNullClass.h"
 #include "risseVoidClass.h"
@@ -52,6 +53,7 @@ RISSE_INTERNALCLASSES_CLASS(Null                            )
 RISSE_INTERNALCLASSES_CLASS(Void                            )
 RISSE_INTERNALCLASSES_CLASS(Boolean                         )
 RISSE_INTERNALCLASSES_CLASS(String                          )
+RISSE_INTERNALCLASSES_CLASS(Octet                           )
 RISSE_INTERNALCLASSES_CLASS(Number                          )
 RISSE_INTERNALCLASSES_CLASS(Integer                         )
 RISSE_INTERNALCLASSES_CLASS(Real                            )

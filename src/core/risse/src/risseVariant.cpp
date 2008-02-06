@@ -21,6 +21,7 @@
 #include "risseBooleanClass.h"
 #include "risseVoidClass.h"
 #include "risseNullClass.h"
+#include "risseOctetClass.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptBlockClass.h"
@@ -195,7 +196,7 @@ inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * en
 	case vtNull:	Class = engine->NullClass; break;
 	case vtBoolean:	Class = engine->BooleanClass; break;
 	case vtString:	Class = engine->StringClass; break;
-	case vtOctet:	break;
+	case vtOctet:	Class = engine->OctetClass; break;
 	default:		break;
 	}
 	RISSE_ASSERT(Class != NULL);

@@ -87,6 +87,7 @@ CPPFILES =  \
 			src/risseObjectBase.cpp                  \
 			src/risseObjectClass.cpp                 \
 			src/risseOctet.cpp                       \
+			src/risseOctetClass.cpp                  \
 			src/risseOpCodes.cpp                     \
 			src/risseOperateFlags.cpp                \
 			src/risseOperateRetValue.cpp             \

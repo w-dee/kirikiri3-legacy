@@ -39,8 +39,10 @@ assert(NaN.hash == 1 && NaN.hash == NaN.hint);
 assert((-NaN).hash == 1 && (-NaN).hash == (-NaN).hint);
 assert(Infinity.hash == 2 && Infinity.hash == Infinity.hint);
 assert((-Infinity).hash == 3 && (-Infinity).hash == (-Infinity).hash);
-// assert(null.hash == 0x9b371c72);
-// assert ( octet hash, Octet class not implemented yet )
+assert(null.hash == 0x9b371c72 && null.hint == null.hash);
+assert(<% %>.hash == 0xffffffff/* && <% %>.hint == <% %>.hash*/);
+assert(<% 31 %>.hash == 0x806b80c9/* && <% 31 %>.hint == <% 31 %>.hash*/);
+	// currently Octet::hint always returns 0 (that is, the hinting is not available)
 assert(true.hash == 0xab2ed843 && true.hash == true.hint);
 assert(false.hash == 0xbd8b88c4 && false.hash == false.hint);
 

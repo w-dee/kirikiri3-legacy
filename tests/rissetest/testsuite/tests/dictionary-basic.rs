@@ -36,18 +36,16 @@ dic[+Infinity] = "real +inf";
 dic[-Infinity] = "real -inf";
 dic[+NaN] = "real NaN";
 dic[void] = "void";
-/*
-comment out until we implement Null, Octet classes
 dic[null] = "null";
 dic[<% %>] = "octet empty";
 dic[<% 01 %>] = "octet 1";
 dic[<% 02 %>] = "octet 2";
-*/
 dic[true] = "true";
 dic[false] = "false";
 dic[Test.new(1, 2, 3)] = "Test 1,2,3";
 dic[Test.new(0, 0, 0)] = "Test 0,0,0";
-dic[Test.new(1, 1, 1)] = "Test 1,1,1";
+dic[Test.new(1, 1, 1)] = "--";
+dic[Test.new(1, 1, 1)] = "Test 1,1,1"; // overwrite
 
 assert(dic["a"] == "string a");
 assert(dic["b"] == "string b");
@@ -63,13 +61,10 @@ assert(dic[-Infinity] == "real -inf");
 assert(dic[+NaN] == "real NaN");
 assert(dic[-NaN] == "real NaN"); // Real::identify does not identify signess of NaN
 assert(dic[void] == "void");
-/*
-comment out until we implement Null, Octet classes
 assert(dic[null] == "null");
 assert(dic[<% %>] == "octet empty");
 assert(dic[<% 01 %>] == "octet 1");
 assert(dic[<% 02 %>] == "octet 2");
-*/
 assert(dic[true] == "true");
 assert(dic[false] == "false");
 assert(dic[Test.new(1, 2, 3)] == "Test 1,2,3");

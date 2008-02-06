@@ -20,6 +20,7 @@
 #include "risseCompiler.h"
 #include "../risseExceptionClass.h"
 #include "../risseScriptBlockClass.h"
+#include "../risseScriptEngine.h"
 
 namespace Risse
 {
@@ -55,6 +56,12 @@ tSSAStatement::tSSAStatement(tSSAForm * form,
 		break;
 	case tVMInsnInfo::vieNonEffective:
 		Effective = false;
+		break;
+	case tVMInsnInfo::vieAssertion:
+		// アサーションが有効の時のみ副作用がある
+		Effective = Form->GetFunction()->GetFunctionGroup()->
+						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine()->
+						GetAssertionEnabled();
 		break;
 	}
 }

@@ -15,6 +15,7 @@
 -Eff	N		tVMInsnInfo::vieNonEffective
 -Eff	E		tVMInsnInfo::vieEffective
 -Eff	V		tVMInsnInfo::vieVarying
+-Eff	A		tVMInsnInfo::vieAssertion
 
 
 //	ニーモニックに関するメモ:
@@ -143,8 +144,10 @@ ISet					iset		R,R,R,-,-,-		[]=			E	#!< set [ ]
 // 書き込みの場合は DSet がメンバ名なしで呼ばれる。
 
 // assertion
-Assert					assert		R,C,-,-,-,-		----		N	#!< assertion check
-AssertType				assertt		R,O,-,-,-,-		----		N	#!< assertion of variant type
+// 注: これらは tScriptEngine::GetAssertionEnabled() が真の場合は Effective になるが
+// そうでなければ Non-effective である
+Assert					assert		R,C,-,-,-,-		----		A	#!< assertion check
+AssertType				assertt		R,O,-,-,-,-		----		A	#!< assertion of variant type
 
 // 代入演算子の類
 BitAndAssign			ERR			-,-,-,-,-,-		&=			V	#!< &=

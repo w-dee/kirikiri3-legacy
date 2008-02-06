@@ -64,7 +64,8 @@ struct tVMInsnInfo
 	{
 		vieNonEffective, 	//!< N このオペコードは副作用を持たない
 		vieEffective,		//!< E このオペコードは副作用を持つ
-		vieVarying			//!< V このオペコードはオペランドによっては副作用を持つ
+		vieVarying,			//!< V このオペコードはオペランドによっては副作用を持つ
+		vieAssertion		//!< A このオペコードはアサーションが有効な時のみに副作用を持つ
 	};
 
 	const char * Name;							//!< 命令名

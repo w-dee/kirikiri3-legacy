@@ -67,6 +67,7 @@ void singleton_manager::register_disconnector(handler_t func)
 {
 	// ここはマルチスレッドからの保護が必要だが、これを呼ぶ
 	// singleton_base<T>::make_instance 内ですでに保護されている
+	RISSE_ASSERT_CS_LOCKED(singleton_manager::GetCS());
 	if(disconnectors == NULL)
 		disconnectors = new gc_vector<handler_t>();
 	disconnectors->push_back(func);

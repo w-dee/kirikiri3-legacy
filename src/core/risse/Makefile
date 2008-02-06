@@ -81,6 +81,7 @@ CPPFILES =  \
 			src/risseModule.cpp                      \
 			src/risseModuleClass.cpp                 \
 			src/risseNativeBinder.cpp                \
+			src/risseNullClass.cpp                   \
 			src/risseNumberClass.cpp                 \
 			src/risseObject.cpp                      \
 			src/risseObjectBase.cpp                  \

@@ -31,6 +31,10 @@ dic[1] = "integer 1";
 dic[2] = "integer 2";
 dic[-0.0] = "real -0.0";
 dic[+0.0] = "real +0.0";
+dic[1.5] = "real +1.5";
+dic[+Infinity] = "real +inf";
+dic[-Infinity] = "real -inf";
+dic[+NaN] = "real NaN";
 dic[void] = "void";
 /*
 comment out until we implement Null, Octet classes
@@ -53,6 +57,11 @@ assert(dic[1] == "integer 1");
 assert(dic[2] == "integer 2");
 assert(dic[-0.0] == "real -0.0");
 assert(dic[+0.0] == "real +0.0");
+assert(dic[1.5] == "real +1.5");
+assert(dic[+Infinity] == "real +inf");
+assert(dic[-Infinity] == "real -inf");
+assert(dic[+NaN] == "real NaN");
+assert(dic[-NaN] == "real NaN"); // Real::identify does not identify signess of NaN
 assert(dic[void] == "void");
 /*
 comment out until we implement Null, Octet classes

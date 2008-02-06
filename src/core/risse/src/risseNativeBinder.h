@@ -448,13 +448,20 @@ inline tVariant ToVariant(T s)
 
 //---------------------------------------------------------------------------
 // 数値系
+/*
 template <>
 inline tVariant ToVariant<risse_size>(risse_size s)
 {
 	return tVariant((risse_int64)s);
 }
+*/
 template <>
 inline tVariant ToVariant<risse_uint64>(risse_uint64 s)
+{
+	return tVariant((risse_int64)s);
+}
+template <>
+inline tVariant ToVariant<risse_uint32>(risse_uint32 s)
 {
 	return tVariant((risse_int64)s);
 }
@@ -486,15 +493,22 @@ inline typename tRemoveReference<T>::type FromVariant(const tVariant & v)
 
 //---------------------------------------------------------------------------
 // 数値系
+/*
 template <>
 inline risse_size FromVariant<risse_size>(const tVariant & v)
 {
 	return (risse_size)(risse_int64)v;
 }
+*/
 template <>
 inline risse_uint64 FromVariant<risse_uint64>(const tVariant & v)
 {
 	return (risse_uint64)(risse_int64)v;
+}
+template <>
+inline risse_uint32 FromVariant<risse_uint32>(const tVariant & v)
+{
+	return (risse_uint32)(risse_int64)v;
 }
 template <>
 inline risse_offset FromVariant<risse_offset>(const tVariant & v)
@@ -621,6 +635,18 @@ public:
 		((tFunc)f)(info);
 	}
 };
+// static setter with calling info
+template <typename CC>
+class tBinderPropertySetter_InfoS
+{
+	typedef void (*tFunc)(const tNativePropSetInfo & info);
+public:
+	static void Call(void (*f)(),
+		const tNativePropSetInfo & info)
+	{
+		((tFunc)f)(info);
+	}
+};
 // non-static getter with calling info
 template <typename CC, typename IC>
 class tBinderPropertyGetter_Info
@@ -737,6 +763,27 @@ void BindProperty(CC * _class, const tString & name,
 				setter ? &tBinderPropertySetterS<CC, ST >::Call : NULL
 				), context), attribute, is_members);
 }
+
+
+// static with calling info getter, calling info setter
+template <typename CC>
+void BindProperty(CC * _class, const tString & name,
+	void (*getter)(const tNativePropGetInfo &), void (*setter)(const tNativePropSetInfo &),
+	tMemberAttribute attribute = tMemberAttribute(),
+	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+{
+	attribute.Set(tMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tVariantBlock(
+			tNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tClassBase *)_class,
+				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
+				getter ? &tBinderPropertyGetter_InfoS<CC>::Call : NULL,
+				setter ? reinterpret_cast<void (*)()>(setter) : NULL,
+				setter ? &tBinderPropertySetter_InfoS<CC>::Call : NULL
+				), context), attribute, is_members);
+}
+
 // static with calling info getter, read-only
 template <typename CC/*, typename ST*/>
 void BindProperty(CC * _class, const tString & name,

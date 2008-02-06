@@ -41,9 +41,7 @@ public:
 
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
-	static void charAt(const tNativeCallInfo & info, risse_offset index);
 	static void get_length(const tNativePropGetInfo & info);
-	static void substr(risse_offset start, const tNativeCallInfo & info);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -1,8 +1,37 @@
+function make_hash(iv)
+{
+	iv = (integer)iv;
+	var hash = iv;
+	hash += (hash << 10);
+	hash &= 0xffffffff;
+	hash ^= (hash >> 6);
+	hash &= 0xffffffff;
+	hash += (iv >> 11);
+	hash &= 0xffffffff;
+	hash += (hash << 10);
+	hash &= 0xffffffff;
+	hash ^= (hash >> 6);
+	hash &= 0xffffffff;
+	hash += (iv >> 32);
+	hash &= 0xffffffff;
+	hash += (hash << 10);
+	hash &= 0xffffffff;
+	hash ^= (hash >> 6);
+	hash &= 0xffffffff;
+	hash += (hash << 3);
+	hash &= 0xffffffff;
+	hash ^= (hash >> 10);
+	hash &= 0xffffffff;
+	hash += (hash << 15);
+	return hash & 0xffffffff;
+}
+
 assert(void.hash == 0x8f84b331 && void.hint == void.hash);
-assert(0 .hash == 0xf2345678 && 0 .hash == 0 .hint);
-assert(17 .hash == 0xf2345668 && 17 .hash == 17 .hint);
-assert(0b10.01 . hash ==
-	( (0x4002000000000000 ^ (0x4002000000000000 >> 32) ^ (0x4002000000000000 >> 48))&0xffffffff));
+assert(0 .hash == make_hash(0) && 0 .hash == 0 .hint);
+assert(17 .hash == make_hash(17) && 17 .hash == 17 .hint);
+
+
+assert(0b10.01 . hash == make_hash(0x4002000000000000));
 	// 0b10.01 = 2.25, IEEE double:  0x4002000000000000
 assert(0b10.01 . hash == 0b10.01 . hint);
 

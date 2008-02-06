@@ -3119,9 +3119,7 @@ public: // ハッシュ/ヒント
 	   たんに、他と重ならなさそうな値が適当に選ばれているだけである。 */
 
 	risse_uint32 GetHash_Void     () const { return 0x8f84b331; /* 唯一のインスタンス */ }
-	risse_uint32 GetHash_Integer  () const
-					{ return static_cast<risse_uint32>(0xf2345678 ^ AsInteger() ^ (AsInteger() >> 4));
-					  /* 適当にハッシュして返す */ }
+	risse_uint32 GetHash_Integer  () const;
 	risse_uint32 GetHash_Real     () const;
 	risse_uint32 GetHash_Null     () const { return 0x9b371c72; /* 唯一のインスタンス */ }
 	risse_uint32 GetHash_String   () const

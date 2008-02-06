@@ -4914,6 +4914,28 @@ void tVariantBlock::SetHint_Object   (risse_uint32 hint) const
 
 
 //---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHash_Integer  () const
+{
+	// ビット列を適当にハッシュして返す
+	risse_uint64 iv = static_cast<risse_uint64>(AsInteger());
+	risse_uint32 hash = static_cast<risse_uint32>(iv);
+	hash += (hash << 10);
+	hash ^= (hash >> 6);
+	hash += static_cast<risse_uint32>(iv >> 11);
+	hash += (hash << 10);
+	hash ^= (hash >> 6);
+	hash += static_cast<risse_uint32>(iv >> 32);
+	hash += (hash << 10);
+	hash ^= (hash >> 6);
+	hash += (hash << 3);
+	hash ^= (hash >> 10);
+	hash += (hash << 15);
+	return hash;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint32 tVariantBlock::GetHash_Real     () const
 {
 	// tVariantBlock::StrictEqual_Real() も参照すること。
@@ -4926,11 +4948,21 @@ risse_uint32 tVariantBlock::GetHash_Real     () const
 	case RISSE_FC_CLASS_NORMAL:
 		// 普通の数値
 		{
+			// ビット列を適当にハッシュして返す
 			risse_uint64 iv = *reinterpret_cast<risse_uint64*>(&v);
-			risse_uint32 hash = static_cast<risse_uint32>(iv) ^
-				static_cast<risse_uint32>(iv >> 32) ^
-				static_cast<risse_uint32>(iv >> 48);
-			return hash; // 適当に hash を計算して返す
+			risse_uint32 hash = static_cast<risse_uint32>(iv);
+			hash += (hash << 10);
+			hash ^= (hash >> 6);
+			hash += static_cast<risse_uint32>(iv >> 11);
+			hash += (hash << 10);
+			hash ^= (hash >> 6);
+			hash += static_cast<risse_uint32>(iv >> 32);
+			hash += (hash << 10);
+			hash ^= (hash >> 6);
+			hash += (hash << 3);
+			hash ^= (hash >> 10);
+			hash += (hash << 15);
+			return hash;
 		}
 
 	case RISSE_FC_CLASS_NAN:

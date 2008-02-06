@@ -10,7 +10,9 @@ custom_build()
 {
 	# とりあえず、src/include を include にコピーする
 	cd $prefix
+	[ -d include ] || mkdir include
 	cp -pR src_temp/include include
+	mv include/include include/risagl
 	# svn ディレクトリは一応削除しておく………
 	rm -rf `find include -name .svn`
 }

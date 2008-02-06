@@ -24,6 +24,7 @@ files.each do |file|
 		else
 			pattern = match[1]
 			print "testing #{File.basename file} ... "
+			STDOUT.flush
 			system("\"#{File.expand_path(EXECUTABLE)}\" " +
 						" #{file} 1>#{TEMP_DIR}/stdout.log 2>#{TEMP_DIR}/stderr.log");
 			result = IO.read("#{TEMP_DIR}/stdout.log")

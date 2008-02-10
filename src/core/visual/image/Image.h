@@ -8,52 +8,43 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief イメージバッファクラス
+//! @brief イメージクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#ifndef ImageH
+#define ImageH
+
+#include "base/gc/RisaGC.h"
 #include "visual/image/ImageBuffer.h"
 
-
 namespace Risa {
-RISSE_DEFINE_SOURCE_ID(12015,30980,25352,17139,45454,47885,46776,11050);
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
 //---------------------------------------------------------------------------
-tARGB32MemoryImageBuffer::tARGB32MemoryImageBuffer(risse_size w, risse_size h)
+//! @brief		イメージクラス
+//---------------------------------------------------------------------------
+class tImage : public tCollectee
 {
-	PixelStore = new pixe_store_t(w, h);
-	Descriptor.PixelFormat = pfARGB32;
-	Descriptor.Buffer = &*PixelStore->begin();
-	Descriptor.Pitch = PixelStore->get_fragment_length();
-	Descriptor.Width = w;
-	Descriptor.Height = h;
-}
+public:
+	tGCReferencePtr<tImageBuffer> * ImageBuffer; //!< イメージバッファインスタンス
+
+public:
+	tImage(); //!< コンストラクタ
+
+public:
+	//! @brief		明示的にイメージを破棄する
+	//! @note		破棄というか参照カウンタを減じて参照を消すだけ。
+	//!				他でイメージバッファを参照している場合は破棄されないと思う
+	void Dispose();
+
+	//! @brief		メモリ上にイメージバッファを新規作成する
+	//! @param		format		ピクセル形式
+	//! @param		w			横幅
+	//! @param		h			縦幅
+	void New(tImageBuffer::tPixelFormat format, risse_size w, risse_size h);
+
+};
 //---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-tGray8MemoryImageBuffer::tGray8MemoryImageBuffer(risse_size w, risse_size h)
-{
-	PixelStore = new pixe_store_t(w, h);
-	Descriptor.PixelFormat = pfGray8;
-	Descriptor.Buffer = &*PixelStore->begin();
-	Descriptor.Pitch = PixelStore->get_fragment_length();
-	Descriptor.Width = w;
-	Descriptor.Height = h;
-}
-//---------------------------------------------------------------------------
-
-
-
 
 
 
@@ -62,3 +53,4 @@ tGray8MemoryImageBuffer::tGray8MemoryImageBuffer(risse_size w, risse_size h)
 } // namespace Risa
 
 
+#endif

@@ -179,6 +179,71 @@ public:
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		参照カウンタ付きオブジェクトを対象にしたポインタ
+//! @note		AddRef() および Release() をメソッドに持つクラスが対象。
+//---------------------------------------------------------------------------
+template <typename T>
+class tGCReferencePtr : public tDestructee
+{
+	T* Pointer; //!< ポインタ
+
+
+
+public:
+	//! @brief コンストラクタ
+	tGCReferencePtr()
+	{
+		Pointer = NULL;
+	}
+
+	//! @brief コンストラクタ
+	//! @param	ptr	ポインタ
+	tGCReferencePtr(T * ptr)
+	{
+		Pointer = ptr;
+		if(Pointer) Pointer->AddRef();
+	}
+
+	//! @brief		デストラクタ
+	~tGCReferencePtr()
+	{
+		if(Pointer) Pointer->Release();
+	}
+
+	//! @brief		ポインタを破棄する(NULLに設定する)
+	void dispose() { set(NULL); }
+
+	//! @brief		ポインタを設定する
+	//! @param		ptr		ポインタ
+	void set(T * ptr) {
+		if(Pointer != ptr) {
+			if(Pointer) Pointer->Release();
+			Pointer = ptr;
+			if(Pointer) Pointer->AddRef();
+		}
+	}
+
+	//! @brief		ポインタを設定する
+	void operator = (T * ptr) { set(ptr); }
+
+	//! @brief ポインタへの変換
+	//! @note	注意! AddRef() されます
+	T* get() const { if(Pointer) Pointer->AddRef(); return Pointer; }
+
+	//! @brief ポインタへの変換
+	//! @note	注意! AddRef() されません
+	T* get_noaddref() const { return Pointer; }
+
+	//! @brief ポインタへの変換
+	operator T* () const { return Pointer; }
+
+	//! @brief ポインタへの変換
+	T* operator -> () const { return Pointer; }
+};
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

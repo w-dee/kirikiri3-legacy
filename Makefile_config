@@ -241,15 +241,11 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	@rm -f $(TOP_DIR)/config_success
 	@#-----------------------------------------------------------------------------
 	@echo "RisaGL ..."
-	@# risagl/include と risagl/include/risagl が両方インクルード・パスに指定されているが
-	@# risagl/include/risagl 内に他と重複するファイル名のファイルがあると混乱が起きるかもしれない。
-	@# なので risagl/include/risagl の方にはあまりインクルード・パスを通したくないが、
-	@# それだと動かないので、とりあえずの処置。
 	@(set -e ;\
 		echo "####  RisaGL config  ####" ;\
-		echo "RISAGL_CFLAGS   := -I$(RISAGL_DIR)/include -I$(RISAGL_DIR)/include/risagl" ;\
-		echo "RISAGL_CXXFLAGS := -I$(RISAGL_DIR)/include -I$(RISAGL_DIR)/include/risagl" ;\
-		echo "RISAGL_CPPFLAGS := -I$(RISAGL_DIR)/include -I$(RISAGL_DIR)/include/risagl" ;\
+		echo "RISAGL_CFLAGS   := -I$(RISAGL_DIR)/include" ;\
+		echo "RISAGL_CXXFLAGS := -I$(RISAGL_DIR)/include" ;\
+		echo "RISAGL_CPPFLAGS := -I$(RISAGL_DIR)/include" ;\
 		echo "RISAGL_LIBS     := " ;\
 		touch $(TOP_DIR)/config_success ;\
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)

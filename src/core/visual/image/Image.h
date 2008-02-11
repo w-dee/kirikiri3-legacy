@@ -41,7 +41,28 @@ public:
 	//! @param		format		ピクセル形式
 	//! @param		w			横幅
 	//! @param		h			縦幅
-	void New(tImageBuffer::tPixelFormat format, risse_size w, risse_size h);
+	void New(tPixel::tFormat format, risse_size w, risse_size h);
+
+	//! @brief		イメージバッファを持っているかどうかを返す
+	//! @return		イメージバッファを持っているかどうか
+	bool HasBuffer() const { /* TODO: RESSE_ASSERT_CS_LOCKED */ return * ImageBuffer != NULL; }
+
+	//! @brief		イメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
+	//! @return		イメージバッファのデスクリプタ
+	const tImageBuffer::tDescriptor & GetDescriptor() const {
+		return (*ImageBuffer)->GetDescriptor(); }
+
+	//! @brief		書き込み用のイメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
+	//! @return		イメージバッファのデスクリプタ
+	const tImageBuffer::tDescriptor & GetDescriptorForWrite() {
+		Independ();
+		return (*ImageBuffer)->GetDescriptor(); }
+
+	//! @brief		イメージバッファを独立する
+	//! @param		clone		独立する際、内容をコピーするかどうか
+	//!							(偽を指定すると内容は不定になる)
+	//! @note		イメージバッファが他と共有されている場合は内容をクローンして独立させる
+	void Independ(bool clone = true);
 
 };
 //---------------------------------------------------------------------------

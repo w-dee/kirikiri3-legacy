@@ -46,17 +46,17 @@ void tImage::Dispose()
 
 
 //---------------------------------------------------------------------------
-void tImage::New(tImageBuffer::tPixelFormat format, risse_size w, risse_size h)
+void tImage::New(tPixel::tFormat format, risse_size w, risse_size h)
 {
 	// TODO: スレッド保護
 	tImageBuffer * buf = NULL;
 
 	switch(format)
 	{
-	case tImageBuffer::pfGray8:
+	case tPixel::pfGray8:
 		buf = new tGray8MemoryImageBuffer(w, h);
 		break;
-	case tImageBuffer::pfARGB32:
+	case tPixel::pfARGB32:
 		buf = new tARGB32MemoryImageBuffer(w, h);
 		break;
 	}
@@ -68,6 +68,12 @@ void tImage::New(tImageBuffer::tPixelFormat format, risse_size w, risse_size h)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tImage::Independ(bool clone)
+{
+	
+}
+//---------------------------------------------------------------------------
 
 
 

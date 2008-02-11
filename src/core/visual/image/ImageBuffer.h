@@ -15,7 +15,7 @@
 
 #include <risa_gl/pixel_store.hpp>
 #include <risa_gl/pixel.hpp>
-
+#include "visual/image/PixelType.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -63,17 +63,10 @@ class tImageBuffer : public tCollectee
 	tAtomicCounter RefCount; //!< リファレンスカウンタ
 
 public:
-	//! @brief		ピクセル形式
-	enum tPixelFormat
-	{
-		pfGray8, //!< 8bpp グレースケール
-		pfARGB32, //!< 32bpp Alpha, R, G, B (もっとも一般的)
-	};
-
 	//! @brief		イメージバッファ記述子
 	struct tDescriptor
 	{
-		tPixelFormat PixelFormat; //!< ピクセル形式
+		tPixel::tFormat PixelFormat; //!< ピクセル形式
 		void * Buffer; //!< バッファへの先頭
 		risse_offset Pitch; //!< ピッチ(バイト単位)
 		risse_size Width; //!< 横幅
@@ -110,6 +103,11 @@ public:
 	//! @brief		記述子を得る
 	//! @return		記述子
 	virtual const tDescriptor & GetDescriptor() = 0;
+
+	//! @brief		内容をクローンする
+	//! @param		copy_image		内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)
+	//! @return		クローンされたイメージバッファ
+	virtual tImageBuffer * Clone(bool copy_image = true) = 0;
 };
 //---------------------------------------------------------------------------
 
@@ -123,59 +121,51 @@ public:
 
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		メモリイメージバッファ
+//---------------------------------------------------------------------------
+template <typename pixel_t, int alignment, int pixel_format>
+class tMemoryImageBuffer : public tImageBuffer
+{
+	typedef tMemoryImageBuffer<pixel_t, alignment, pixel_format> self_type;
+
+	typedef gc_pixel_store<pixel_t,
+		risa_gl::aligned_allocator<pixel_t, alignment, pixel_store_allocate_implements> >
+			pixe_store_t; //!< pfARGB32 用のピクセルストア
+
+	pixe_store_t * PixelStore; //!< ピクセルストアへのポインタ
+	tDescriptor Descriptor; //!< 記述子
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		w		画像の横幅
+	//! @param		h		画像の縦幅
+	tMemoryImageBuffer(risse_size w, risse_size h);
+
+public:
+	//! @brief		記述子を得る
+	//! @return		記述子
+	virtual const tDescriptor & GetDescriptor() { return Descriptor; }
+
+	//! @brief		内容をクローンする
+	//! @param		copy_image		内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)
+	//! @return		クローンされたイメージバッファ
+	virtual tImageBuffer * Clone(bool copy_image = true);
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		ARGB32メモリイメージバッファ
 //---------------------------------------------------------------------------
-class tARGB32MemoryImageBuffer : public tImageBuffer
-{
-	typedef risa_gl::pixel pixel_t;
-	typedef gc_pixel_store<pixel_t,
-		risa_gl::aligned_allocator<pixel_t, 16, pixel_store_allocate_implements> >
-			pixe_store_t; //!< pfARGB32 用のピクセルストア
-
-	pixe_store_t * PixelStore; //!< ピクセルストアへのポインタ
-	tDescriptor Descriptor; //!< 記述子
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		w		画像の横幅
-	//! @param		h		画像の縦幅
-	tARGB32MemoryImageBuffer(risse_size w, risse_size h);
-
-public:
-	//! @brief		記述子を得る
-	//! @return		記述子
-	virtual const tDescriptor & GetDescriptor() { return Descriptor; }
-};
-//---------------------------------------------------------------------------
-
+typedef tMemoryImageBuffer<risa_gl::pixel, 16, tPixel::pfARGB32> tARGB32MemoryImageBuffer;
 
 //---------------------------------------------------------------------------
 //! @brief		Gray8メモリイメージバッファ
 //---------------------------------------------------------------------------
-class tGray8MemoryImageBuffer : public tImageBuffer
-{
-	typedef risse_uint8 pixel_t;
-	typedef gc_pixel_store<pixel_t,
-		risa_gl::aligned_allocator<pixel_t, 4, pixel_store_allocate_implements> >
-			pixe_store_t; //!< pfARGB32 用のピクセルストア
-
-	pixe_store_t * PixelStore; //!< ピクセルストアへのポインタ
-	tDescriptor Descriptor; //!< 記述子
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		w		画像の横幅
-	//! @param		h		画像の縦幅
-	tGray8MemoryImageBuffer(risse_size w, risse_size h);
-
-public:
-	//! @brief		記述子を得る
-	//! @return		記述子
-	virtual const tDescriptor & GetDescriptor() { return Descriptor; }
-};
+typedef tMemoryImageBuffer<risse_uint8, 4, tPixel::pfGray8> tGray8MemoryImageBuffer;
 //---------------------------------------------------------------------------
 
 

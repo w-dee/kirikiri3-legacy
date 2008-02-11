@@ -99,6 +99,23 @@ public:
 		}
 	}
 
+	//! @brief		内容を独立させる
+	//! @param		copy_image		独立させる際に内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)
+	//! @return		独立が行われた場合、独立されたイメージバッファ。そうでなければ this
+	//! @note		返されるイメージバッファの参照カウンタはAddRef()されていると考えるべき
+	tImageBuffer * Independ(bool copy_image)
+	{
+		// いったんリファレンスカウンタを増やす。
+		if(AddRef() >= 3)
+		{
+			// 参照を増やした結果 3 以上になったと言うことは
+			// 増やす前は 2 以上(つまり独立してない) だったということ
+			Release();
+			return Clone(copy_image);
+		}
+		return this;
+	}
+
 public:
 	//! @brief		記述子を得る
 	//! @return		記述子

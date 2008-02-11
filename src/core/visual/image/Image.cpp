@@ -71,7 +71,12 @@ void tImage::New(tPixel::tFormat format, risse_size w, risse_size h)
 //---------------------------------------------------------------------------
 void tImage::Independ(bool clone)
 {
-	
+	// TODO: スレッド保護
+	RISSE_ASSERT(*ImageBuffer);
+
+	tImageBuffer * buf = (*ImageBuffer)->Independ(clone);
+	ImageBuffer->set(buf);
+	buf->Release(); // ImageBuffer が後は参照カウンタを管理するのでここでは持っている必要なし
 }
 //---------------------------------------------------------------------------
 

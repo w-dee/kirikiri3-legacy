@@ -50,8 +50,11 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImage * image,
 		return;
 	}
 
+	// dict の内容は一応クリア
+	if(dict)
+		dict->Invoke(tSS<'c','l','e','a','r'>());
+
 	// デコーダの本体処理を呼び出す
-	// TODO: ここで dict の内容のクリア
 	DesiredPixelFormat = pixel_format;
 	if(callback) callback->CallOnProgress(1, 0); // 0%
 	Process(stream, image, pixel_format, callback, dict);

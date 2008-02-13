@@ -621,6 +621,77 @@ static void Convert32BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT 
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+static void Convert32BitTo32Bit(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRICT const risse_uint32 *buf, risse_size len)
+{
+	{
+		risse_size ___index = 0;
+		if(len > (4-1))
+		{
+			len -= (4-1);
+
+			while(___index < len)
+			{
+				{
+				#if TJS_HOST_IS_BIG_ENDIAN
+					risse_uint32 d = buf[(___index+0)];
+					dest[(___index+0)] = ((d&0xff)<<24) + ((d&0xff00)<<8) +  ((d&0xff0000)>>8) + ((d&0xff000000)>>24);
+				#else
+					risse_uint32 d = buf[(___index+0)];
+					dest[(___index+0)] = d;
+				#endif
+				}
+				{
+				#if TJS_HOST_IS_BIG_ENDIAN
+					risse_uint32 d = buf[(___index+1)];
+					dest[(___index+1)] = ((d&0xff)<<24) + ((d&0xff00)<<8) +  ((d&0xff0000)>>8) + ((d&0xff000000)>>24);
+				#else
+					risse_uint32 d = buf[(___index+1)];
+					dest[(___index+1)] = d;
+				#endif
+				}
+				{
+				#if TJS_HOST_IS_BIG_ENDIAN
+					risse_uint32 d = buf[(___index+2)];
+					dest[(___index+2)] = ((d&0xff)<<24) + ((d&0xff00)<<8) +  ((d&0xff0000)>>8) + ((d&0xff000000)>>24);
+				#else
+					risse_uint32 d = buf[(___index+2)];
+					dest[(___index+2)] = d;
+				#endif
+				}
+				{
+				#if TJS_HOST_IS_BIG_ENDIAN
+					risse_uint32 d = buf[(___index+3)];
+					dest[(___index+3)] = ((d&0xff)<<24) + ((d&0xff00)<<8) +  ((d&0xff0000)>>8) + ((d&0xff000000)>>24);
+				#else
+					risse_uint32 d = buf[(___index+3)];
+					dest[(___index+3)] = d;
+				#endif
+				}
+				___index += 4;
+			}
+
+			len += (4-1);
+		}
+
+		while(___index < len)
+		{
+			{
+			#if TJS_HOST_IS_BIG_ENDIAN
+				risse_uint32 d = buf[___index];
+				dest[___index] = ((d&0xff)<<24) + ((d&0xff00)<<8) +  ((d&0xff0000)>>8) + ((d&0xff000000)>>24);
+			#else
+				risse_uint32 d = buf[___index];
+				dest[___index] = d;
+			#endif
+			}
+			___index ++;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
 
 
 //---------------------------------------------------------------------------
@@ -865,8 +936,10 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImage * image,
 			else
 			{
 				// always copy from the buffer
-				memcpy((risse_uint32*)scanline,
-					(risse_uint32*)buf, bi.biWidth * sizeof(risse_uint32));
+				// ... but endianness should be considered
+				Convert32BitTo32Bit(
+					(risse_uint32*)scanline,
+					(risse_uint32*)buf, bi.biWidth);
 			}
 			break;
 		}
@@ -953,6 +1026,114 @@ void tBMPImageDecoder::Process(tStreamInstance * stream, tImage * image,
 	InternalLoadBMP(src, image, pixel_format, callback, dict, bi, palette);
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tBMPImageEncoder::Process(tStreamInstance * stream, tImage * image,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict)
+{
+	// 今のところ dict の '_type' は 'bmp24' と 'bmp32' を受け付ける
+	// (デフォルトは bmp32)
+	int pixel_bytes = 4;
+	if(dict)
+	{
+		tVariant val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','t','y','p','e'>()));
+		if(!val.IsVoid())
+		{
+			tString str = val.operator tString();
+			if(str == RISSE_WS("bmp24"))
+				pixel_bytes = 3;
+			else if(str == RISSE_WS("bmp32"))
+				pixel_bytes = 4;
+			else
+				tIllegalArgumentExceptionClass::Throw(
+					RISSE_WS_TR("unknown bitmap sub-type in '_type' parameter"));
+		}
+	}
+
+	tStreamAdapter dest(stream);
+	const tImageBuffer::tDescriptor & image_desc = image->GetDescriptor();
+
+	// prepare header
+	risse_size bmppitch = image_desc.Width * pixel_bytes;
+	bmppitch = (((bmppitch - 1) >> 2) + 1) << 2;
+
+	dest.WriteI16LE(0x4d42);  /* bfType */
+	dest.WriteI32LE(
+			14 + // BITMAPFILEHEADER
+			40 + // BITMAPINFOHEADER
+			bmppitch * image_desc.Height); /* bfSize */
+	dest.WriteI16LE(0); /* bfReserved1 */
+	dest.WriteI16LE(0); /* bfReserved2 */
+	dest.WriteI32LE(
+			14 + // BITMAPFILEHEADER
+			40 + // BITMAPINFOHEADER
+			0); /* bfOffBits */
+
+	dest.WriteI32LE(40); /* biSize = sizeof(BITMAPINFOHEADER) */
+	dest.WriteI32LE(image_desc.Width); /* biWidth */
+	dest.WriteI32LE(image_desc.Height); /* biHeight */
+	dest.WriteI16LE(1); /* biPlanes */
+	dest.WriteI16LE(pixel_bytes * 8); /* biBitCount */
+	dest.WriteI32LE(BI_RGB); /* biCompression */
+	dest.WriteI32LE(0); /* biSizeImage */
+	dest.WriteI32LE(0); /* biXPelsPerMeter */
+	dest.WriteI32LE(0); /* biYPelsPerMeter */
+	dest.WriteI32LE(0); /* biClrUsed */
+	dest.WriteI32LE(0); /* biClrImportant */
+
+	// write bitmap body
+	void * buf = NULL;
+	for(risse_offset y = image_desc.Height - 1; y >= 0; y --)
+	{
+		if(callback) callback->CallOnProgress(image_desc.Height, image_desc.Height - y);
+		if(pixel_bytes == 4)
+		{
+			risse_offset pitch = 0;
+			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * image_desc.Width);
+			void * inbuf = GetLines(NULL, y, 1, pitch, tPixel::pfARGB32);
+			Convert32BitTo32Bit(
+				static_cast<risse_uint32*>(buf),
+				static_cast<risse_uint32*>(inbuf),
+				image_desc.Width); // これはendiannessの変換も行う
+		}
+		else if(pixel_bytes == 3)
+		{
+			risse_offset pitch = 0;
+			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * image_desc.Width);
+			const risse_uint8 *inbuf = static_cast<const risse_uint8 *>(
+				GetLines(NULL, y, 1, pitch, tPixel::pfARGB32));
+			risse_uint8 *destbuf = static_cast<risse_uint8*>(buf);
+			// 32bpp を 24bpp に詰め直す(alphaは無視)
+			for(risse_size x = 0; x < image_desc.Width; x++)
+			{
+				destbuf[0] = inbuf[0];
+				destbuf[1] = inbuf[1];
+				destbuf[2] = inbuf[2];
+				destbuf += 3;
+				inbuf += 4;
+			}
+		}
+		dest.WriteBuffer(buf, bmppitch);
+	}
+
+
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

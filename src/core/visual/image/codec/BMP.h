@@ -51,6 +51,25 @@ private:
 
 
 //---------------------------------------------------------------------------
+//! @brief		BMPイメージエンコーダ
+//---------------------------------------------------------------------------
+class tBMPImageEncoder : public tImageEncoder
+{
+public:
+	//! @brief		エンコードを行う
+	//! @param		stream		入力ストリーム
+	//! @param		image		イメージ
+	//! @param		pixel_format	要求するピクセル形式
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	virtual void Process(tStreamInstance * stream, tImage * image,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict);
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 } // namespace Risa
 
 

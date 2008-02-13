@@ -762,7 +762,7 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImage * image,
 	{
 		if(bufremain == 0)
 		{
-			callback->CallOnProgress(height, src_y);
+			if(callback) callback->CallOnProgress(height, src_y);
 
 			risse_int remain = height - src_y;
 			risse_int read_lines = remain > RISSE_BMP_READ_LINE_MAX ?

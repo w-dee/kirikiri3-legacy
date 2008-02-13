@@ -36,7 +36,7 @@ tImageDecoder::tImageDecoder()
 
 //---------------------------------------------------------------------------
 void tImageDecoder::Decode(tStreamInstance * stream, tImage * image,
-	tPixel::tFormat pixel_format, tDictionaryInstance * dict)
+	tPixel::tFormat pixel_format, tProgressCallback * callback, tDictionaryInstance * dict)
 {
 	// TODO: image のロック
 	// TODO: this のロック
@@ -51,8 +51,11 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImage * image,
 	}
 
 	// デコーダの本体処理を呼び出す
+	// TODO: ここで dict の内容のクリア
 	DesiredPixelFormat = pixel_format;
-	Process(stream, image, pixel_format, dict);
+	if(callback) callback->CallOnProgress(1, 0); // 0%
+	Process(stream, image, pixel_format, callback, dict);
+	if(callback) callback->CallOnProgress(1, 1); // 100%
 }
 //---------------------------------------------------------------------------
 
@@ -114,7 +117,7 @@ void * tImageDecoder::StartLines(risse_size y, risse_size h, risse_offset & pitc
 	if(LastConvertBufferSize < buffer_size)
 	{
 		// 足りないので割り当て直す
-		LastConvertBuffer = AlignedMallocCollectee(buffer_size, 4);
+		LastConvertBuffer = AlignedMallocAtomicCollectee(buffer_size, 4);
 		LastConvertBufferSize = buffer_size;
 	}
 

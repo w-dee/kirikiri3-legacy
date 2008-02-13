@@ -16,6 +16,7 @@
 #include "visual/image/Image.h"
 #include "risse/include/risseDictionaryClass.h"
 #include "risse/include/risseStreamClass.h"
+#include "base/utils/ProgressCallback.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -44,8 +45,9 @@ public:
 	//! @brief		stream から image に対してデコードを行う
 	//! @param		stream		入力ストリーム
 	//! @param		image		イメージ
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
 	//! @param		pixel_format	要求するピクセル形式
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
 	//! @note		例外が発生した場合は stream の位置は元に戻される。
 	//!				image にすでにイメージバッファが割り当たっていた場合は
 	//!				そのサイズが画像サイズと異なる場合、またはピクセル形式が
@@ -54,16 +56,19 @@ public:
 	//!				割り当てられる。
 	//!				いったんデコードを行ったらデコーダインスタンスの再利用は行わずに破棄すること。
 	void Decode(tStreamInstance * stream, tImage * image,
-					tPixel::tFormat pixel_format, tDictionaryInstance * dict);
+					tPixel::tFormat pixel_format, tProgressCallback * callback,
+					tDictionaryInstance * dict);
 
 protected:
 	//! @brief		デコードを行う(サブクラスで実装すること)
 	//! @param		stream		入力ストリーム
 	//! @param		image		イメージ
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
 	//! @param		pixel_format	要求するピクセル形式
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
 	virtual void Process(tStreamInstance * stream, tImage * image,
-					tPixel::tFormat pixel_format, tDictionaryInstance * dict) = 0;
+					tPixel::tFormat pixel_format, tProgressCallback * callback,
+					tDictionaryInstance * dict) = 0;
 
 	//! @brief		サイズなどを設定する(サブクラスから呼ばれる)
 	//! @param		w			横幅

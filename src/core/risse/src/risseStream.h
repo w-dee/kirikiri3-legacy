@@ -178,6 +178,30 @@ public: // ユーティリティ
 	//! @note		読み込みに失敗した場合は例外が発生する
 	risse_uint8 ReadI8() { return ReadI8LE(); }
 
+	//! @brief		ストリームに64bit little endian 整数を書き込む
+	//! @param		v		書き込む値
+	//! @note		書き込みに失敗した場合は例外が発生する
+	void Write64LE(risse_uint64 v);
+
+	//! @brief		ストリームに32bit little endian 整数を書き込む
+	//! @param		v		書き込む値
+	//! @note		書き込みに失敗した場合は例外が発生する
+	void WriteI32LE(risse_uint32 v);
+
+	//! @brief		ストリームに16bit little endian 整数を書き込む
+	//! @param		v		書き込む値
+	//! @note		書き込みに失敗した場合は例外が発生する
+	void WriteI16LE(risse_uint16 v);
+
+	//! @brief		ストリームに8bit 整数を書き込む
+	//! @param		v		書き込む値
+	//! @note		書き込みに失敗した場合は例外が発生する
+	void WriteI8LE(risse_uint8 v);
+	//! @brief		ストリームに8bit 整数を書き込む
+	//! @param		v		書き込む値
+	//! @note		書き込みに失敗した場合は例外が発生する
+	void WriteI8(risse_uint8 v) { WriteI8LE(v); }
+
 };
 //---------------------------------------------------------------------------
 

@@ -163,7 +163,7 @@ void tStreamAdapter::WriteBuffer(const void *buffer, risse_size write_size)
 risse_uint64 tStreamAdapter::ReadI64LE()
 {
 	risse_uint64 buf;
-	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
+	ReadBuffer(static_cast<void*>(&buf), sizeof(buf));
 #if RISSE_HOST_IS_LITTLE_ENDIAN
 	return buf;
 #endif
@@ -182,7 +182,7 @@ risse_uint64 tStreamAdapter::ReadI64LE()
 risse_uint32 tStreamAdapter::ReadI32LE()
 {
 	risse_uint32 buf;
-	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
+	ReadBuffer(static_cast<void*>(&buf), sizeof(buf));
 #if RISSE_HOST_IS_LITTLE_ENDIAN
 	return buf;
 #endif
@@ -200,7 +200,7 @@ risse_uint32 tStreamAdapter::ReadI32LE()
 risse_uint16 tStreamAdapter::ReadI16LE()
 {
 	risse_uint16 buf;
-	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
+	ReadBuffer(static_cast<void*>(&buf), sizeof(buf));
 #if RISSE_HOST_IS_LITTLE_ENDIAN
 	return buf;
 #endif
@@ -217,13 +217,57 @@ risse_uint16 tStreamAdapter::ReadI16LE()
 risse_uint8 tStreamAdapter::ReadI8LE()
 {
 	risse_uint8 buf;
-	ReadBuffer(reinterpret_cast<void*>(&buf), sizeof(buf));
+	ReadBuffer(static_cast<void*>(&buf), sizeof(buf));
 	return buf;
 }
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tStreamAdapter::Write64LE(risse_uint64 v)
+{
+	risse_uint64 tmp = v;
+#if RISSE_HOST_IS_BIG_ENDIAN
+	tmp = ((tmp & RISSE_UI64_VAL(0xff00ff00ff00ff00)) >>  8) + ((tmp & RISSE_UI64_VAL(0x00ff00ff00ff00ff)) <<  8);
+	tmp = ((tmp & RISSE_UI64_VAL(0xffff0000ffff0000)) >> 16) + ((tmp & RISSE_UI64_VAL(0x0000ffff0000ffff)) << 16);
+	tmp = ((tmp & RISSE_UI64_VAL(0xffffffff00000000)) >> 32) + ((tmp & RISSE_UI64_VAL(0x00000000ffffffff)) << 32);
+#endif
+	WriteBuffer(static_cast<void*>(&tmp), sizeof(tmp));
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tStreamAdapter::WriteI32LE(risse_uint32 v)
+{
+	risse_uint32 tmp = v;
+#if RISSE_HOST_IS_BIG_ENDIAN
+	tmp = ((tmp & 0xff00ff00L) >>  8) + ((tmp & 0x00ff00ffL) <<  8);
+	tmp = ((tmp & 0xffff0000L) >> 16) + ((tmp & 0x0000ffffL) << 16);
+#endif
+	WriteBuffer(static_cast<void*>(&tmp), sizeof(tmp));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStreamAdapter::WriteI16LE(risse_uint16 v)
+{
+	risse_uint16 tmp = v;
+#if RISSE_HOST_IS_BIG_ENDIAN
+	tmp = ((tmp & 0xff00) >>  8) + ((tmp & 0x00ff) <<  8);
+#endif
+	WriteBuffer(static_cast<void*>(&tmp), sizeof(tmp));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStreamAdapter::WriteI8LE(risse_uint8 v)
+{
+	WriteBuffer(static_cast<void*>(&v), sizeof(v));
+}
+//---------------------------------------------------------------------------
 
 
 

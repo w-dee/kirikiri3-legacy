@@ -150,8 +150,91 @@ void tImageDecoder::DoneLines()
 //---------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tImageEncoder::tImageEncoder()
+{
+	Encoded = false;
+	Image = NULL;
+	LastConvertBuffer = NULL;
+	LastConvertBufferSize = 0;
+}
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+void tImageEncoder::Encode(tStreamInstance * stream, tImage * image,
+				tProgressCallback * callback,
+				tDictionaryInstance * dict)
+{
+	// TODO: image のロック
+	// TODO: this のロック
+	if(Encoded) { RISSE_ASSERT(!Encoded); /* TODO: 例外 */ }
+	Encoded = true;
+	Image = image;
+
+	// デコーダの本体処理を呼び出す
+	if(callback) callback->CallOnProgress(1, 0); // 0%
+	Process(stream, image, callback, dict);
+	if(callback) callback->CallOnProgress(1, 1); // 100%
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void * tImageEncoder::GetLines(void * buf, risse_size y, risse_size h,
+	risse_offset & pitch, tPixel::tFormat pixel_format)
+{
+	const tImageBuffer::tDescriptor & image_desc = Image->GetDescriptor();
+
+	if(buf || Image->GetDescriptor().PixelFormat != pixel_format)
+	{
+		// バッファが与えられている、あるいは変換が必要な場合
+		if(!buf)
+		{
+			// バッファが与えられていない場合
+			// ピッチを計算する
+			const tPixel::tDescriptor & pixel_desc =
+				tPixel::GetDescriptorFromFormat(pixel_format);
+			risse_size width_bytes = pixel_desc.Size * image_desc.Width;
+			pitch = (width_bytes + 15) & ~ 15;
+			risse_size buffer_size = pitch * h;
+			// バッファを割り当てる
+			if(LastConvertBufferSize < buffer_size)
+			{
+				// 足りないので割り当て直す
+				LastConvertBuffer = buf = AlignedMallocAtomicCollectee(buffer_size, 4);
+				LastConvertBufferSize = buffer_size;
+			}
+		}
+		// ピクセル形式の変換を行う
+		for(risse_size yy = 0; yy < h; yy++)
+		{
+			tPixel::Convert(
+				static_cast<risse_uint8*>(buf) + pitch * yy,
+				pixel_format,
+				static_cast<risse_uint8*>(image_desc.Buffer) + image_desc.Pitch * (yy + y),
+				image_desc.PixelFormat,
+				image_desc.Width);
+		}
+		return buf;
+	}
+
+	// バッファが与えられず、かつ、変換が必要ない場合
+	// そのまま画像バッファを返す
+	pitch = image_desc.Pitch;
+	return static_cast<risse_uint8*>(image_desc.Buffer) + image_desc.Pitch * y;
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

@@ -91,9 +91,63 @@ protected:
 	//!				大きくとも16ピクセル縦幅などの大きさで StartLines() -> DoneLines() を繰り返した方が効率的。
 	void * StartLines(risse_size y, risse_size h, risse_offset & pitch);
 
-	//! @brief		バッファにデータを書き込んだ事を通知する
+	//! @brief		バッファにデータを書き込んだ事を通知する(サブクラスから呼ばれる)
 	//! @note		StartLines() で取得したバッファへの書き込みが完了したことを通知するためにサブクラスから呼ばれる
 	void DoneLines();
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		イメージエンコーダクラスの基底クラス
+//---------------------------------------------------------------------------
+class tImageEncoder : public tCollectee
+{
+	bool Encoded; //!< エンコードが終了したかどうか
+	tImage * Image; //!< エンコードしたいイメージ
+	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
+	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
+
+public:
+	tImageEncoder(); //!< コンストラクタ
+
+public:
+	//! @brief		image から stream に対してエンコードを行う
+	//! @param		stream		出力ストリーム
+	//! @param		image		イメージ
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	//! @note		例外が発生した場合の stream の状態は不定。
+	//!				もしコーデックごとにオプションが必要な場合はdictの中に
+	//!				パラメータを指定して渡すこと(その場合は基本的にはキー名の先頭には
+	//!				'_' (アンダースコア) をつけること:例 '_subtype' )
+	//!				dict の内容はエンコーダ内では変更してはならない。
+	void Encode(tStreamInstance * stream, tImage * image,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict);
+
+protected:
+	//! @brief		エンコードを行う(サブクラスで実装すること)
+	//! @param		stream		入力ストリーム
+	//! @param		image		イメージ
+	//! @param		pixel_format	要求するピクセル形式
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	virtual void Process(tStreamInstance * stream, tImage * image,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict) = 0;
+
+	//! @brief		nライン分のバッファを取得する(サブクラスから呼ばれる)
+	//! @param		buf		格納先バッファ(NULLの場合はこのメソッド内で割り当てられる)
+	//! @param		y		縦座標値(ピクセル単位)
+	//! @param		h		縦幅(ピクセル単位)
+	//! @param		pitch	buf の ピッチ(次のラインへのバイト数)
+	//!						bufにNULLを渡した場合は戻りのバッファに対応するpitchが書き込まれる
+	//! @param		pixel_format	取得したいピクセル形式
+	//! @return		バッファ
+	void * GetLines(void * buf, risse_size y, risse_size h, risse_offset & pitch,
+		tPixel::tFormat pixel_format);
+
 };
 //---------------------------------------------------------------------------
 

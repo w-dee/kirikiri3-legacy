@@ -71,5 +71,9 @@ assert(dic[Test.new(1, 2, 3)] == "Test 1,2,3");
 assert(dic[Test.new(0, 0, 0)] == "Test 0,0,0");
 assert(dic[Test.new(1, 1, 1)] == "Test 1,1,1");
 
+assert(dic.count == 22);
+dic.clear();
+assert(dic.count == 0);
+
 "ok" //=> "ok"
 

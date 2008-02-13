@@ -81,6 +81,24 @@ void tDictionaryInstance::iset(const tVariant & value, const tVariant & key)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tDictionaryInstance::clear()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	HashTable.Clear();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tDictionaryInstance::get_count()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	return HashTable.GetCount();
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -113,6 +131,8 @@ void tDictionaryClass::RegisterMembers()
 	BindFunction(this, ss_initialize, &tDictionaryInstance::initialize);
 	BindFunction(this, mnIGet, &tDictionaryInstance::iget);
 	BindFunction(this, mnISet, &tDictionaryInstance::iset);
+	BindFunction(this, ss_clear, &tDictionaryInstance::clear);
+	BindProperty(this, ss_count, &tDictionaryInstance::get_count);
 }
 //---------------------------------------------------------------------------
 

@@ -1136,6 +1136,23 @@ void tBMPImageEncoder::Process(tStreamInstance * stream, tImage * image,
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		BMPイメージコーデックファクトリ
+//---------------------------------------------------------------------------
+class tBMPImageCodecFactory : public tImageCodecFactory, public singleton_base<tBMPImageCodecFactory>
+{
+	virtual tImageDecoder * CreateDecoder() { return new tBMPImageDecoder; }
+	virtual tImageEncoder * CreateEncoder() { return new tBMPImageEncoder; }
+public:
+	//! @brief		コンストラクタ
+	tBMPImageCodecFactory()
+	{
+		tImageCodecFactoryManager::instance()->Register(tSS<'.','b','m','p'>(), this);
+		tImageCodecFactoryManager::instance()->Register(tSS<'.','d','i','b'>(), this);
+	}
+};
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

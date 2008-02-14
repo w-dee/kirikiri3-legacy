@@ -154,6 +154,63 @@ protected:
 
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief	 	イメージコーデックファクトリ
+//! @note		Risa は 拡張子で画像形式を判断する。ファクトリの登録は
+//!				tImageCodecFactoryManager を通して行うこと。
+//---------------------------------------------------------------------------
+class tImageCodecFactory : public tCollectee
+{
+public:
+	virtual tImageDecoder * CreateDecoder() = 0; //!< デコーダを作成する
+	virtual tImageEncoder * CreateEncoder() = 0; //!< エンコーダを作成する
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		イメージコーデックファクトリマネージャ
+//---------------------------------------------------------------------------
+class tImageCodecFactoryManager : public singleton_base<tImageCodecFactoryManager>
+{
+	typedef gc_map<tString, tImageCodecFactory *>  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
+	tMap Map; //!< 拡張子→ファクトリのマップ
+
+public:
+	//! @brief	 	コンストラクタ
+	tImageCodecFactoryManager();
+
+	//! @brief	 	デストラクタ
+	~tImageCodecFactoryManager();
+
+	//! @brief	 	ファクトリを登録する
+	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
+	//! @param		factory		ファクトリ
+	void Register(const tString & extension, tImageCodecFactory * factory);
+
+	//! @brief	 	ファクトリの登録を解除する
+	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
+	void Unregister(const tString & extension);
+
+	//! @brief	 	デコーダを作成する
+	//! @param		filename ファイル名
+	//! @return		作成されたデコーダ
+	tImageDecoder * CreateDecoder(const tString & filename);
+
+	//! @brief	 	エンコーダを作成する
+	//! @param		filename ファイル名
+	//! @return		作成されたエンコーダ
+	tImageEncoder * CreateEncoder(const tString & filename);
+};
+//---------------------------------------------------------------------------
+
+
+
+
 //---------------------------------------------------------------------------
 } // namespace Risa
 

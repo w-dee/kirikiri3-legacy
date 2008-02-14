@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/image/ImageCodec.h"
+#include "base/fs/common/FSManager.h"
 
 
 namespace Risa {
@@ -235,6 +236,106 @@ void * tImageEncoder::GetLines(void * buf, risse_size y, risse_size h,
 	return static_cast<risse_uint8*>(image_desc.Buffer) + image_desc.Pitch * y;
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tImageCodecFactoryManager::tImageCodecFactoryManager()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tImageCodecFactoryManager::~tImageCodecFactoryManager()
+{
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageCodecFactoryManager::Register(const tString & extension, tImageCodecFactory * factory)
+{
+	Map.insert(tMap::value_type(extension, factory));
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageCodecFactoryManager::Unregister(const tString & extension)
+{
+	Map.erase(extension);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tImageDecoder * tImageCodecFactoryManager::CreateDecoder(const tString & filename)
+{
+	// 拡張子を取り出す
+	tString ext = tFileSystemManager::ExtractExtension(filename);
+	ext.ToLowerCaseNC();
+
+	// ファクトリを探す
+	tMap::iterator factory = Map.find(ext);
+	if(factory != Map.end())
+	{
+		// ファクトリが見つかった
+		tImageDecoder * decoder;
+		decoder = factory->second->CreateDecoder();
+		return decoder;
+	}
+	else
+	{
+		// ファクトリは見つからなかった
+		// TODO: これちゃんとした例外クラスにすること
+		tIOExceptionClass::Throw(tString(
+			RISSE_WS_TR("'%1' has non-supported file extension"), filename));
+		return NULL; // これは実行されない
+	}
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tImageEncoder * tImageCodecFactoryManager::CreateEncoder(const tString & filename)
+{
+	// 拡張子を取り出す
+	tString ext = tFileSystemManager::ExtractExtension(filename);
+	ext.ToLowerCaseNC();
+
+	// ファクトリを探す
+	tMap::iterator factory = Map.find(ext);
+	if(factory != Map.end())
+	{
+		// ファクトリが見つかった
+		tImageEncoder * encoder;
+		encoder = factory->second->CreateEncoder();
+		return encoder;
+	}
+	else
+	{
+		// ファクトリは見つからなかった
+		// TODO: これちゃんとした例外クラスにすること
+		tIOExceptionClass::Throw(tString(
+			RISSE_WS_TR("'%1' has non-supported file extension"), filename));
+		return NULL; // これは実行されない
+	}
+
+}
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

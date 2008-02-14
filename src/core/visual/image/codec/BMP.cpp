@@ -1109,17 +1109,18 @@ void tBMPImageEncoder::Process(tStreamInstance * stream, tImage * image,
 		{
 			risse_offset pitch = 0;
 			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * image_desc.Width);
-			const risse_uint8 *inbuf = static_cast<const risse_uint8 *>(
+			const risse_uint32 *inbuf = static_cast<const risse_uint32 *>(
 				GetLines(NULL, y, 1, pitch, tPixel::pfARGB32));
 			risse_uint8 *destbuf = static_cast<risse_uint8*>(buf);
 			// 32bpp を 24bpp に詰め直す(alphaは無視)
 			for(risse_size x = 0; x < image_desc.Width; x++)
 			{
-				destbuf[0] = inbuf[0];
-				destbuf[1] = inbuf[1];
-				destbuf[2] = inbuf[2];
+				risse_uint32 px = *inbuf;
+				destbuf[0] =  px        & 0xff;
+				destbuf[1] = (px >>  8) & 0xff;
+				destbuf[2] = (px >> 16) & 0xff;
 				destbuf += 3;
-				inbuf += 4;
+				inbuf ++;
 			}
 		}
 		dest.WriteBuffer(buf, bmppitch);

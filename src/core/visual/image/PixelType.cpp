@@ -127,6 +127,40 @@ void tPixel::Convert(RISSE_RESTRICT void * dest, tPixel::tFormat dest_format,
 
 
 
+
+
+
+
+//---------------------------------------------------------------------------
+tPixelConstsModule::tPixelConstsModule(tScriptEngine * engine) :
+	tModuleBase(tSS<'P','i','x','e','l','C','o','n','s','t','s'>(), engine)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPixelConstsModule::RegisterMembers()
+{
+	GetInstance()->RegisterFinalConstMember(
+			tSS<'p','f','G','r','a','y','8'>(),
+			tVariant((risse_int64)tPixel::pfGray8), true);
+	GetInstance()->RegisterFinalConstMember(
+			tSS<'p','f','A','R','G','B','3','2'>(),
+			tVariant((risse_int64)tPixel::pfARGB32), true);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		PixelConsts モジュールレジストラ
+template class tRisseModuleRegisterer<tPixelConstsModule>;
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 } // namespace Risa
 

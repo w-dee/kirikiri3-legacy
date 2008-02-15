@@ -31,7 +31,7 @@ public:
 	bool Decoded; //!< デコードが終了したかどうか
 	tPixel::tFormat DesiredPixelFormat; //!< 要求されたフォーマット
 	tPixel::tFormat DecoderPixelFormat; //!< デコーダから返されるフォーマット
-	tImage * Image; //!< 格納先のイメージ
+	tImageInstance * Image; //!< 格納先のイメージ
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 	risse_offset LastCnvertBufferPitch; //!< 最後に作成した変換用バッファのピッチ
@@ -55,7 +55,7 @@ public:
 	//!				割り当てられていない場合は、サイズにしたがったメモリ上のバッファが
 	//!				割り当てられる。
 	//!				いったんデコードを行ったらデコーダインスタンスの再利用は行わずに破棄すること。
-	void Decode(tStreamInstance * stream, tImage * image,
+	void Decode(tStreamInstance * stream, tImageInstance * image,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict);
 
@@ -66,7 +66,7 @@ protected:
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImage * image,
+	virtual void Process(tStreamInstance * stream, tImageInstance * image,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict) = 0;
 
@@ -104,7 +104,7 @@ protected:
 class tImageEncoder : public tCollectee
 {
 	bool Encoded; //!< エンコードが終了したかどうか
-	tImage * Image; //!< エンコードしたいイメージ
+	tImageInstance * Image; //!< エンコードしたいイメージ
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 
@@ -122,7 +122,7 @@ public:
 	//!				パラメータを指定して渡すこと(その場合は基本的にはキー名の先頭には
 	//!				'_' (アンダースコア) をつけること:例 '_subtype' )
 	//!				dict の内容はエンコーダ内では変更してはならない。
-	void Encode(tStreamInstance * stream, tImage * image,
+	void Encode(tStreamInstance * stream, tImageInstance * image,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict);
 
@@ -133,7 +133,7 @@ protected:
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImage * image,
+	virtual void Process(tStreamInstance * stream, tImageInstance * image,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict) = 0;
 

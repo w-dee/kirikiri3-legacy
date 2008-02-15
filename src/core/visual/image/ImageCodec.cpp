@@ -36,7 +36,7 @@ tImageDecoder::tImageDecoder()
 
 
 //---------------------------------------------------------------------------
-void tImageDecoder::Decode(tStreamInstance * stream, tImage * image,
+void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 	tPixel::tFormat pixel_format, tProgressCallback * callback, tDictionaryInstance * dict)
 {
 	// TODO: image のロック
@@ -83,7 +83,7 @@ void tImageDecoder::SetDimensions(risse_size w, risse_size h,
 	Image->Independ(false);
 
 	// メモリ上のバッファを image に割り当てる
-	Image->New(DesiredPixelFormat, w, h);
+	Image->Allocate(DesiredPixelFormat, w, h);
 
 	// デコーダが望むピクセル形式を保存
 	DecoderPixelFormat = pixel_format;
@@ -173,7 +173,7 @@ tImageEncoder::tImageEncoder()
 
 
 //---------------------------------------------------------------------------
-void tImageEncoder::Encode(tStreamInstance * stream, tImage * image,
+void tImageEncoder::Encode(tStreamInstance * stream, tImageInstance * image,
 				tProgressCallback * callback,
 				tDictionaryInstance * dict)
 {

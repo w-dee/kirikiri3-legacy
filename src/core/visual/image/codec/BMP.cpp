@@ -736,7 +736,7 @@ struct RISSE_WIN_BITMAPINFOHEADER
 
 //---------------------------------------------------------------------------
 #define RISSE_BMP_READ_LINE_MAX 8
-void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImage * image,
+void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImageInstance * image,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi, risse_uint8 * palsrc)
 {
@@ -952,7 +952,7 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImage * image,
 	}
 }
 //---------------------------------------------------------------------------
-void tBMPImageDecoder::Process(tStreamInstance * stream, tImage * image,
+void tBMPImageDecoder::Process(tStreamInstance * stream, tImageInstance * image,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
@@ -1036,7 +1036,7 @@ void tBMPImageDecoder::Process(tStreamInstance * stream, tImage * image,
 
 
 //---------------------------------------------------------------------------
-void tBMPImageEncoder::Process(tStreamInstance * stream, tImage * image,
+void tBMPImageEncoder::Process(tStreamInstance * stream, tImageInstance * image,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {

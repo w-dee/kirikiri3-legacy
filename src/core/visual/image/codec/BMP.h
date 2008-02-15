@@ -35,13 +35,13 @@ public:
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImage * image,
+	virtual void Process(tStreamInstance * stream, tImageInstance * image,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
 
 private:
 	//! @brief		内部関数
-	void InternalLoadBMP(tStreamAdapter src, tImage * image,
+	void InternalLoadBMP(tStreamAdapter src, tImageInstance * image,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi, risse_uint8 * palsrc);
 
@@ -62,7 +62,7 @@ public:
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImage * image,
+	virtual void Process(tStreamInstance * stream, tImageInstance * image,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict);
 };

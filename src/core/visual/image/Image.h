@@ -15,21 +15,24 @@
 
 #include "base/gc/RisaGC.h"
 #include "visual/image/ImageBuffer.h"
+#include "base/script/RisseEngine.h"
+#include "risse/include/risseDictionaryClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
 
 
+
 //---------------------------------------------------------------------------
-//! @brief		イメージクラス
+//! @brief		イメージインスタンス
 //---------------------------------------------------------------------------
-class tImage : public tCollectee
+class tImageInstance : public tObjectBase
 {
 public:
 	tGCReferencePtr<tImageBuffer> * ImageBuffer; //!< イメージバッファインスタンス
 
 public:
-	tImage(); //!< コンストラクタ
+	tImageInstance(); //!< コンストラクタ
 
 public:
 	//! @brief		明示的にイメージを破棄する
@@ -41,7 +44,7 @@ public:
 	//! @param		format		ピクセル形式
 	//! @param		w			横幅
 	//! @param		h			縦幅
-	void New(tPixel::tFormat format, risse_size w, risse_size h);
+	void Allocate(tPixel::tFormat format, risse_size w, risse_size h);
 
 	//! @brief		イメージバッファを持っているかどうかを返す
 	//! @return		イメージバッファを持っているかどうか
@@ -64,10 +67,41 @@ public:
 	//! @note		イメージバッファが他と共有されている場合は内容をクローンして独立させる
 	void Independ(bool clone = true);
 
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+
+	void dispose() { Dispose(); }
+	void allocate(risse_size w, risse_size h, const tMethodArgument &args);
+	void deallocate() { Dispose(); }
+	void independ(const tMethodArgument &args);
 };
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Image" クラス
+//---------------------------------------------------------------------------
+class tImageClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tImageClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

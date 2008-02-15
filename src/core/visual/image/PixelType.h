@@ -15,6 +15,8 @@
 
 #include <risa_gl/pixel_store.hpp>
 #include <risa_gl/pixel.hpp>
+#include "base/script/RisseEngine.h"
+#include "risse/include/risseModule.h"
 
 
 namespace Risa {
@@ -63,6 +65,23 @@ public:
 	//! @param		length			変換する長さ(ピクセル単位)
 	static void Convert(RISSE_RESTRICT void * dest, tFormat dest_format,
 		RISSE_RESTRICT const void * src, tFormat src_format, risse_size length);
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ピクセル関連定数用モジュール
+//---------------------------------------------------------------------------
+class tPixelConstsModule : public tModuleBase
+{
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tPixelConstsModule(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
 };
 //---------------------------------------------------------------------------
 

@@ -13,6 +13,8 @@
 #ifndef PROGRESSCALLBACK_H
 #define PROGRESSCALLBACK_H
 
+#include "risse/include/risseVariant.h"
+
 namespace Risa
 {
 //---------------------------------------------------------------------------
@@ -41,6 +43,36 @@ protected:
 	//! @param		percent		進捗率(%)
 	//! @note		処理を中断したい場合は例外を送出すること。
 	virtual void OnProgress(int percent) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief  risse メソッドを呼び出すようにした tProgressCallback の実装
+//---------------------------------------------------------------------------
+class tRisseProgressCallback : public tProgressCallback
+{
+	tScriptEngine * ScriptEngine; //!< Risseスクリプトエンジンインスタンス
+	tVariant Method; //!< 呼び出すメソッド
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		Risseスクリプトエンジンインスタンス
+	//! @param		method		呼び出すメソッド
+	tRisseProgressCallback(tScriptEngine * engine,
+		const tVariant & method) :
+			ScriptEngine(engine), Method(method)
+	{}
+
+protected:
+	//! @brief		進捗コールバックを行う
+	//! @param		percent		進捗率(%)
+	//! @note		処理を中断したい場合は例外を送出すること。
+	virtual void OnProgress(int percent)
+	{
+		Method.FuncCall(ScriptEngine, NULL, 0, tMethodArgument::New((risse_int64)percent));
+	}
 };
 //---------------------------------------------------------------------------
 }

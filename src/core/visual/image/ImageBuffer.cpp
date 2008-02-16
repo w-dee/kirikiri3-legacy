@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/image/ImageBuffer.h"
+#include "base/log/Log.h"
 
 
 namespace Risa {
@@ -30,7 +31,27 @@ RISSE_DEFINE_SOURCE_ID(12015,30980,25352,17139,45454,47885,46776,11050);
 template <typename pixel_t, int alignment, int pixel_format>
 tMemoryImageBuffer<pixel_t, alignment, pixel_format>::tMemoryImageBuffer(risse_size w, risse_size h)
 {
-	PixelStore = new pixe_store_t(w, h);
+	int retry_count = 3; // 3 回までリトライ
+retry:
+	try
+	{
+		PixelStore = new pixe_store_t(w, h);
+	}
+	catch(std::bad_alloc)
+	{
+		if(retry_count--)
+		{
+			tLogger::Log(tString(
+				RISSE_WS_TR("allocation of memory image buffer (%1x%2, %3) failed. retrying after GC ..."),
+					tString::AsString((risse_int64)w), tString::AsString((risse_int64)h),
+					tPixel::GetDescriptorFromFormat(static_cast<tPixel::tFormat>(pixel_format)).LongDesc),
+				tLogger::llNotice);
+			CollectGarbage();
+			goto retry;
+		}
+		throw;
+	}
+
 	Descriptor.PixelFormat = static_cast<tPixel::tFormat>(pixel_format);
 	Descriptor.Buffer = &*PixelStore->begin();
 	Descriptor.Pitch = PixelStore->get_fragment_length();

@@ -29,6 +29,7 @@ tImageDecoder::tImageDecoder()
 {
 	Decoded = false;
 	Image = NULL;
+	ImageBuffer = NULL;
 	LastConvertBuffer = NULL;
 	LastConvertBufferSize = 0;
 }
@@ -39,27 +40,55 @@ tImageDecoder::tImageDecoder()
 void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 	tPixel::tFormat pixel_format, tProgressCallback * callback, tDictionaryInstance * dict)
 {
-	// TODO: image のロック
-	// TODO: this のロック
 	if(Decoded) { RISSE_ASSERT(!Decoded); /* TODO: 例外 */ }
 	Decoded = true;
 	Image = image;
 
-	if(Image->HasBuffer() && Image->GetDescriptor().PixelFormat != pixel_format)
 	{
-		// TODO: PixelFormat が違うとの例外
-		return;
+		// Image をロック
+		volatile tObjectInterface::tSynchronizer sync(Image); // sync
+
+		if(Image->HasBuffer() && Image->GetDescriptor().PixelFormat != pixel_format)
+		{
+			// TODO: PixelFormat が違うとの例外
+			return;
+		}
+
+		DesiredPixelFormat = pixel_format;
+		ImageBuffer = Image->GetBuffer();
 	}
 
-	// dict の内容は一応クリア
-	if(dict)
-		dict->Invoke(tSS<'c','l','e','a','r'>());
 
 	// デコーダの本体処理を呼び出す
-	DesiredPixelFormat = pixel_format;
-	if(callback) callback->CallOnProgress(1, 0); // 0%
-	Process(stream, image, pixel_format, callback, dict);
-	if(callback) callback->CallOnProgress(1, 1); // 100%
+	try
+	{
+		if(callback) callback->CallOnProgress(1, 0); // 0%
+
+
+#ifdef RISSE_ASSERT_ENABLED
+	// デコーダがちゃんと dict の中身をクリアする実装になってるかをチェックするためにダミーの要素を追加する
+	if(dict) dict->Invoke(tSS<'[',']','='>(), tVariant(tSS<'d','u','m','m','y'>()), tVariant(tSS<'_','d','u','m','m','y'>()));
+#endif
+
+
+		Process(stream, pixel_format, callback, dict);
+
+
+#ifdef RISSE_ASSERT_ENABLED
+	// デコーダがちゃんと dict の中身をクリアする実装になってるかをチェックする
+	if(dict) RISSE_ASSERT(dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','d','u','m','m','y'>()).IsVoid()));
+#endif
+
+
+		if(callback) callback->CallOnProgress(1, 1); // 100%
+	}
+	catch(...)
+	{
+		ImageBuffer->Release(), ImageBuffer = NULL;
+		throw;
+	}
+	ImageBuffer->Release(), ImageBuffer = NULL;
+
 }
 //---------------------------------------------------------------------------
 
@@ -68,8 +97,11 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 void tImageDecoder::SetDimensions(risse_size w, risse_size h,
 									tPixel::tFormat pixel_format)
 {
+	// Image をロック
+	volatile tObjectInterface::tSynchronizer sync(Image); // sync
+
 	// Image にすでにバッファが割り当てられている場合はそのサイズをチェック
-	if(Image->HasBuffer())
+	if(ImageBuffer)
 	{
 		const tImageBuffer::tDescriptor & desc = Image->GetDescriptor();
 		if(desc.Width != w || desc.Height != h)
@@ -78,12 +110,17 @@ void tImageDecoder::SetDimensions(risse_size w, risse_size h,
 			RISSE_ASSERT(desc.Width == w && desc.Height == h);
 		}
 	}
+	else
+	{
+		// そうでなければイメージバッファを独立させる
+		Image->Independ(false);
 
-	// そうでなければイメージバッファを独立させる
-	Image->Independ(false);
+		// メモリ上のバッファを image に割り当てる
+		Image->Allocate(DesiredPixelFormat, w, h);
 
-	// メモリ上のバッファを image に割り当てる
-	Image->Allocate(DesiredPixelFormat, w, h);
+		// イメージバッファを取得する
+		ImageBuffer = Image->GetBuffer();
+	}
 
 	// デコーダが望むピクセル形式を保存
 	DecoderPixelFormat = pixel_format;
@@ -97,18 +134,18 @@ void * tImageDecoder::StartLines(risse_size y, risse_size h, risse_offset & pitc
 	LastLineY = y;
 	LastLineH = h;
 
+	const tImageBuffer::tDescriptor & image_desc = ImageBuffer->GetDescriptor();
+
 	// デコーダが望むピクセル形式の場合はそのままイメージバッファのメモリ領域を返す
 	if(DecoderPixelFormat == DesiredPixelFormat)
 	{
 		// デコーダが望むピクセル形式とイメージバッファのピクセル形式が同じ
-		const tImageBuffer::tDescriptor & desc = Image->GetDescriptorForWrite();
-		pitch = desc.Pitch;
-		return static_cast<risse_uint8*>(desc.Buffer) + pitch * y;
+		pitch = image_desc.Pitch;
+		return static_cast<risse_uint8*>(image_desc.Buffer) + pitch * y;
 	}
 
 	// そうでない場合は変換用バッファを作成してそれを返す
 	// 変換用バッファのサイズは………
-	const tImageBuffer::tDescriptor & image_desc = Image->GetDescriptorForWrite();
 	const tPixel::tDescriptor & pixel_desc = tPixel::GetDescriptorFromFormat(image_desc.PixelFormat);
 
 	// んー
@@ -137,15 +174,15 @@ void tImageDecoder::DoneLines()
 	if(DecoderPixelFormat == DesiredPixelFormat) return;
 
 	// そうでない場合は変換が必要です
-	const tImageBuffer::tDescriptor & desc = Image->GetDescriptorForWrite();
+	const tImageBuffer::tDescriptor & image_desc = ImageBuffer->GetDescriptor();
 	for(risse_size y = 0; y < LastLineH; y++)
 	{
 		tPixel::Convert(
-			static_cast<risse_uint8*>(desc.Buffer) + desc.Pitch * (y + LastLineY),
+			static_cast<risse_uint8*>(image_desc.Buffer) + image_desc.Pitch * (y + LastLineY),
 			DesiredPixelFormat,
 			static_cast<risse_uint8*>(LastConvertBuffer) + LastCnvertBufferPitch * y,
 			DecoderPixelFormat,
-			desc.Width);
+			image_desc.Width);
 	}
 }
 //---------------------------------------------------------------------------
@@ -165,7 +202,7 @@ void tImageDecoder::DoneLines()
 tImageEncoder::tImageEncoder()
 {
 	Encoded = false;
-	Image = NULL;
+	ImageBuffer = NULL;
 	LastConvertBuffer = NULL;
 	LastConvertBufferSize = 0;
 }
@@ -181,12 +218,31 @@ void tImageEncoder::Encode(tStreamInstance * stream, tImageInstance * image,
 	// TODO: this のロック
 	if(Encoded) { RISSE_ASSERT(!Encoded); /* TODO: 例外 */ }
 	Encoded = true;
-	Image = image;
+	ImageBuffer = image->GetBuffer();
+	try
+	{
+		// デコーダの本体処理を呼び出す
+		if(callback) callback->CallOnProgress(1, 0); // 0%
+		Process(stream, callback, dict);
+		if(callback) callback->CallOnProgress(1, 1); // 100%
+	}
+	catch(...)
+	{
+		ImageBuffer->Release(), ImageBuffer = NULL;
+		throw;
+	}
+	ImageBuffer->Release(), ImageBuffer = NULL;
+}
+//---------------------------------------------------------------------------
 
-	// デコーダの本体処理を呼び出す
-	if(callback) callback->CallOnProgress(1, 0); // 0%
-	Process(stream, image, callback, dict);
-	if(callback) callback->CallOnProgress(1, 1); // 100%
+
+//---------------------------------------------------------------------------
+void tImageEncoder::GetDimensions(risse_size *w, risse_size *h, tPixel::tFormat *pixel_format)
+{
+	const tImageBuffer::tDescriptor & image_desc = ImageBuffer->GetDescriptor();
+	if(w) *w = image_desc.Width;
+	if(h) *h = image_desc.Height;
+	if(pixel_format) *pixel_format = image_desc.PixelFormat;
 }
 //---------------------------------------------------------------------------
 
@@ -195,9 +251,9 @@ void tImageEncoder::Encode(tStreamInstance * stream, tImageInstance * image,
 void * tImageEncoder::GetLines(void * buf, risse_size y, risse_size h,
 	risse_offset & pitch, tPixel::tFormat pixel_format)
 {
-	const tImageBuffer::tDescriptor & image_desc = Image->GetDescriptor();
+	const tImageBuffer::tDescriptor & image_desc = ImageBuffer->GetDescriptor();
 
-	if(buf || Image->GetDescriptor().PixelFormat != pixel_format)
+	if(buf || image_desc.PixelFormat != pixel_format)
 	{
 		// バッファが与えられている、あるいは変換が必要な場合
 		if(!buf)

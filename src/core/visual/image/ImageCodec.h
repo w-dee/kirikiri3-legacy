@@ -32,6 +32,7 @@ public:
 	tPixel::tFormat DesiredPixelFormat; //!< 要求されたフォーマット
 	tPixel::tFormat DecoderPixelFormat; //!< デコーダから返されるフォーマット
 	tImageInstance * Image; //!< 格納先のイメージ
+	tImageBuffer * ImageBuffer; //!< 格納先のイメージバッファ
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 	risse_offset LastCnvertBufferPitch; //!< 最後に作成した変換用バッファのピッチ
@@ -55,6 +56,10 @@ public:
 	//!				割り当てられていない場合は、サイズにしたがったメモリ上のバッファが
 	//!				割り当てられる。
 	//!				いったんデコードを行ったらデコーダインスタンスの再利用は行わずに破棄すること。
+	//! @note		dict には、もしデコーダに指定したいオプションがある場合はこの中にいれて渡す。
+	//!				(その場合は基本的にはキー名の先頭には
+	//!				'_' (アンダースコア) をつけること:例 '_subtype' )
+	//!				デコーダはこの dict の内容をクリアして新しくメタデータを入れ直さなければならない。
 	void Decode(tStreamInstance * stream, tImageInstance * image,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict);
@@ -62,11 +67,14 @@ public:
 protected:
 	//! @brief		デコードを行う(サブクラスで実装すること)
 	//! @param		stream		入力ストリーム
-	//! @param		image		イメージ
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImageInstance * image,
+	//! @note		dict には、もしデコーダに指定したいオプションがある場合はこの中にいれて渡す。
+	//!				(その場合は基本的にはキー名の先頭には
+	//!				'_' (アンダースコア) をつけること:例 '_subtype' )
+	//!				デコーダはこの dict の内容をクリアして新しくメタデータを入れ直さなければならない。
+	virtual void Process(tStreamInstance * stream,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict) = 0;
 
@@ -77,7 +85,7 @@ protected:
 	//! @note		image にすでにイメージバッファが割り当たっていた場合、
 	//!				サイズが異なる場合は例外が発生する。pixel_format は
 	//!				Process() に渡されたピクセルタイプと異なる物を指定してもよいが
-	//!				異なる物が渡された場合はこのクラスでの変換がおこなわれる。]
+	//!				異なる物が渡された場合はこのクラスでの変換がおこなわれる。
 	void SetDimensions(risse_size w, risse_size h, tPixel::tFormat pixel_format);
 
 	//! @brief		nライン分のバッファを取得する(サブクラスから呼ばれる)
@@ -104,7 +112,7 @@ protected:
 class tImageEncoder : public tCollectee
 {
 	bool Encoded; //!< エンコードが終了したかどうか
-	tImageInstance * Image; //!< エンコードしたいイメージ
+	tImageBuffer * ImageBuffer; //!< エンコードしたいイメージのイメージバッファ
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 
@@ -129,13 +137,18 @@ public:
 protected:
 	//! @brief		エンコードを行う(サブクラスで実装すること)
 	//! @param		stream		入力ストリーム
-	//! @param		image		イメージ
 	//! @param		pixel_format	要求するピクセル形式
 	//! @param		callback	進捗コールバック(NULL=イラナイ)
 	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream, tImageInstance * image,
+	virtual void Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict) = 0;
+
+	//! @brief		サイズなどを取得する(サブクラスから呼ばれる)
+	//! @param		w			横幅を格納する変数へのポインタ
+	//! @param		h			縦幅を格納する変数へのポインタ
+	//! @param		pixel_format	(イメージバッファの元々の)ピクセル形式を格納する変数へのポインタ
+	void GetDimensions(risse_size *w, risse_size *h, tPixel::tFormat *pixel_format = NULL);
 
 	//! @brief		nライン分のバッファを取得する(サブクラスから呼ばれる)
 	//! @param		buf		格納先バッファ(NULLの場合はこのメソッド内で割り当てられる)

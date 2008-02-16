@@ -50,6 +50,10 @@ public:
 	//! @return		イメージバッファを持っているかどうか
 	bool HasBuffer() const { /* TODO: RESSE_ASSERT_CS_LOCKED */ return * ImageBuffer != NULL; }
 
+	//! @brief		イメージバッファを返す
+	//! @note		注意！返されるイメージバッファの参照カウンタはここでインクリメントされる。
+	tImageBuffer * GetBuffer() const { return ImageBuffer->get(); }
+
 	//! @brief		イメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
 	//! @return		イメージバッファのデスクリプタ
 	const tImageBuffer::tDescriptor & GetDescriptor() const {
@@ -57,9 +61,7 @@ public:
 
 	//! @brief		書き込み用のイメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
 	//! @return		イメージバッファのデスクリプタ
-	const tImageBuffer::tDescriptor & GetDescriptorForWrite() {
-		Independ();
-		return (*ImageBuffer)->GetDescriptor(); }
+	const tImageBuffer::tDescriptor & GetDescriptorForWrite();
 
 	//! @brief		イメージバッファを独立する
 	//! @param		clone		独立する際、内容をコピーするかどうか
@@ -75,6 +77,8 @@ public: // Risse用メソッドなど
 	void allocate(risse_size w, risse_size h, const tMethodArgument &args);
 	void deallocate() { Dispose(); }
 	void independ(const tMethodArgument &args);
+	void load(const tString & filename, const tMethodArgument & args);
+	void save(const tString & filename, const tMethodArgument & args);
 };
 //---------------------------------------------------------------------------
 

@@ -736,7 +736,7 @@ struct RISSE_WIN_BITMAPINFOHEADER
 
 //---------------------------------------------------------------------------
 #define RISSE_BMP_READ_LINE_MAX 8
-void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImageInstance * image,
+void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi, risse_uint8 * palsrc)
 {
@@ -952,7 +952,7 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src, tImageInstance * imag
 	}
 }
 //---------------------------------------------------------------------------
-void tBMPImageDecoder::Process(tStreamInstance * stream, tImageInstance * image,
+void tBMPImageDecoder::Process(tStreamInstance * stream,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
@@ -960,6 +960,10 @@ void tBMPImageDecoder::Process(tStreamInstance * stream, tImageInstance * image,
 	// mostly taken ( but totally re-written ) from SDL,
 	// http://www.libsdl.org/
 	tStreamAdapter src(stream);
+
+	// dict から読み取るべき内容は無し。dict をクリアする
+	if(dict)
+		dict->Invoke(tSS<'c','l','e','a','r'>());
 
 	// TODO: only checked in Win32 platform
 	risse_uint64 firstpos = src.GetPosition();
@@ -1023,7 +1027,7 @@ void tBMPImageDecoder::Process(tStreamInstance * stream, tImageInstance * image,
 	src.ReadBuffer(palette, palsize);
 	src.SetPosition(firstpos + bf.bfOffBits);
 
-	InternalLoadBMP(src, image, pixel_format, callback, dict, bi, palette);
+	InternalLoadBMP(src, pixel_format, callback, dict, bi, palette);
 }
 //---------------------------------------------------------------------------
 
@@ -1036,7 +1040,7 @@ void tBMPImageDecoder::Process(tStreamInstance * stream, tImageInstance * image,
 
 
 //---------------------------------------------------------------------------
-void tBMPImageEncoder::Process(tStreamInstance * stream, tImageInstance * image,
+void tBMPImageEncoder::Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
@@ -1060,17 +1064,19 @@ void tBMPImageEncoder::Process(tStreamInstance * stream, tImageInstance * image,
 	}
 
 	tStreamAdapter dest(stream);
-	const tImageBuffer::tDescriptor & image_desc = image->GetDescriptor();
+	risse_size width = 0;
+	risse_size height = 0;
+	GetDimensions(&width, &height);
 
 	// prepare header
-	risse_size bmppitch = image_desc.Width * pixel_bytes;
+	risse_size bmppitch = width * pixel_bytes;
 	bmppitch = (((bmppitch - 1) >> 2) + 1) << 2;
 
 	dest.WriteI16LE(0x4d42);  /* bfType */
 	dest.WriteI32LE(
 			14 + // BITMAPFILEHEADER
 			40 + // BITMAPINFOHEADER
-			bmppitch * image_desc.Height); /* bfSize */
+			bmppitch * height); /* bfSize */
 	dest.WriteI16LE(0); /* bfReserved1 */
 	dest.WriteI16LE(0); /* bfReserved2 */
 	dest.WriteI32LE(
@@ -1079,8 +1085,8 @@ void tBMPImageEncoder::Process(tStreamInstance * stream, tImageInstance * image,
 			0); /* bfOffBits */
 
 	dest.WriteI32LE(40); /* biSize = sizeof(BITMAPINFOHEADER) */
-	dest.WriteI32LE(image_desc.Width); /* biWidth */
-	dest.WriteI32LE(image_desc.Height); /* biHeight */
+	dest.WriteI32LE(width); /* biWidth */
+	dest.WriteI32LE(height); /* biHeight */
 	dest.WriteI16LE(1); /* biPlanes */
 	dest.WriteI16LE(pixel_bytes * 8); /* biBitCount */
 	dest.WriteI32LE(BI_RGB); /* biCompression */
@@ -1092,28 +1098,28 @@ void tBMPImageEncoder::Process(tStreamInstance * stream, tImageInstance * image,
 
 	// write bitmap body
 	void * buf = NULL;
-	for(risse_offset y = image_desc.Height - 1; y >= 0; y --)
+	for(risse_offset y = height - 1; y >= 0; y --)
 	{
-		if(callback) callback->CallOnProgress(image_desc.Height, image_desc.Height - y);
+		if(callback) callback->CallOnProgress(height, height - y);
 		if(pixel_bytes == 4)
 		{
 			risse_offset pitch = 0;
-			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * image_desc.Width);
+			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * width);
 			void * inbuf = GetLines(NULL, y, 1, pitch, tPixel::pfARGB32);
 			Convert32BitTo32Bit(
 				static_cast<risse_uint32*>(buf),
 				static_cast<risse_uint32*>(inbuf),
-				image_desc.Width); // これはendiannessの変換も行う
+				width); // これはendiannessの変換も行う
 		}
 		else if(pixel_bytes == 3)
 		{
 			risse_offset pitch = 0;
-			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * image_desc.Width);
+			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * width);
 			const risse_uint32 *inbuf = static_cast<const risse_uint32 *>(
 				GetLines(NULL, y, 1, pitch, tPixel::pfARGB32));
 			risse_uint8 *destbuf = static_cast<risse_uint8*>(buf);
 			// 32bpp を 24bpp に詰め直す(alphaは無視)
-			for(risse_size x = 0; x < image_desc.Width; x++)
+			for(risse_size x = 0; x < width; x++)
 			{
 				risse_uint32 px = *inbuf;
 				destbuf[0] =  px        & 0xff;

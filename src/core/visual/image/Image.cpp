@@ -12,9 +12,11 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "visual/image/Image.h"
+#include "visual/image/ImageCodec.h"
 #include "risse/include/risseNativeBinder.h"
 #include "risse/include/risseScriptEngine.h"
 #include "risse/include/risseStaticStrings.h"
+#include "base/fs/common/FSManager.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(59719,27864,5820,19638,31923,42718,35156,64208);
@@ -74,6 +76,17 @@ void tImageInstance::Allocate(tPixel::tFormat format, risse_size w, risse_size h
 
 
 //---------------------------------------------------------------------------
+const tImageBuffer::tDescriptor & tImageInstance::GetDescriptorForWrite()
+{
+	volatile tSynchronizer sync(this); // sync
+
+	Independ();
+	return (*ImageBuffer)->GetDescriptor();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tImageInstance::Independ(bool clone)
 {
 	volatile tSynchronizer sync(this); // sync
@@ -123,6 +136,102 @@ void tImageInstance::independ(const tMethodArgument &args)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tImageInstance::load(const tString & filename, const tMethodArgument & args)
+{
+	// ファイル名(の拡張子)に対応したデコーダを得る
+	tImageDecoder * decoder = tImageCodecFactoryManager::instance()->CreateDecoder(filename);
+
+	// 辞書配列インスタンスを第２引数から取得
+	tPixel::tFormat format = tPixel::pfARGB32; // デフォルトフォーマット
+	tDictionaryInstance * dict = NULL;
+	if(args.HasArgument(1))
+	{
+		dict = args[1].
+			ExpectAndGetObjectInterafce<tDictionaryInstance>(
+					GetRTTI()->GetScriptEngine()->DictionaryClass);
+		// ピクセルフォーマット ('_pixel_format' を得る)
+		tVariant val =
+			dict->Invoke(
+				tSS<'[',']'>(),
+				tVariant(tSS<'_','p','i','x','e','l','_','f','o','r','m','a','t'>()));
+		if(!val.IsVoid())
+			format = (tPixel::tFormat)(risse_int64)val;
+	}
+
+	// ストリームを作成
+	tStreamInstance * stream =
+		tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead);
+
+	try
+	{
+		// コールバックは？
+		if(args.HasBlockArgument(0))
+		{
+			tRisseProgressCallback cb(GetRTTI()->GetScriptEngine(), args.GetBlockArgument(0));
+			decoder->Decode(stream, this, format, &cb, dict);
+		}
+		else
+		{
+			// コールバック無し
+			decoder->Decode(stream, this, format, NULL, dict);
+		}
+	}
+	catch(...)
+	{
+		tStreamAdapter(stream).Dispose();
+		throw;
+	}
+
+	tStreamAdapter(stream).Dispose();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageInstance::save(const tString & filename, const tMethodArgument & args)
+{
+	// ファイル名(の拡張子)に対応したエンコーダを得る
+	tImageEncoder * encoder = tImageCodecFactoryManager::instance()->CreateEncoder(filename);
+
+	// 辞書配列インスタンスを第２引数から取得
+	tDictionaryInstance * dict = NULL;
+	if(args.HasArgument(1))
+	{
+		dict = args[1].
+			ExpectAndGetObjectInterafce<tDictionaryInstance>(
+					GetRTTI()->GetScriptEngine()->DictionaryClass);
+	}
+
+	// ストリームを作成
+	tStreamInstance * stream =
+		tFileSystemManager::instance()->Open(filename, tFileOpenModes::omWrite);
+
+	try
+	{
+		// コールバックは？
+		if(args.HasBlockArgument(0))
+		{
+			tRisseProgressCallback cb(GetRTTI()->GetScriptEngine(), args.GetBlockArgument(0));
+			encoder->Encode(stream, this, &cb, dict);
+		}
+		else
+		{
+			// コールバック無し
+			encoder->Encode(stream, this, NULL, dict);
+		}
+	}
+	catch(...)
+	{
+		tStreamAdapter(stream).Dispose();
+		throw;
+	}
+
+	tStreamAdapter(stream).Dispose();
+
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -166,6 +275,8 @@ void tImageClass::RegisterMembers()
 	BindFunction(this, tSS<'a','l','l','o','c','a','t','e'>(), &tImageInstance::allocate);
 	BindFunction(this, tSS<'d','e','a','l','l','o','c','a','t','e'>(), &tImageInstance::deallocate);
 	BindFunction(this, tSS<'i','n','d','e','p','e','n','d'>(), &tImageInstance::independ);
+	BindFunction(this, tSS<'l','o','a','d'>(), &tImageInstance::load);
+	BindFunction(this, tSS<'s','a','v','e'>(), &tImageInstance::save);
 }
 //---------------------------------------------------------------------------
 

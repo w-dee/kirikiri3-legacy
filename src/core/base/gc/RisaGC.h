@@ -205,6 +205,14 @@ public:
 		if(Pointer) Pointer->AddRef();
 	}
 
+	//! @brief コピーコンストラクタ
+	//! @param	ref	ポインタ
+	tGCReferencePtr(const tGCReferencePtr & ref)
+	{
+		Pointer = ref.Pointer;
+		if(Pointer) Pointer->AddRef();
+	}
+
 	//! @brief		デストラクタ
 	~tGCReferencePtr()
 	{

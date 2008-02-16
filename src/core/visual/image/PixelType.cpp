@@ -25,10 +25,14 @@ RISSE_DEFINE_SOURCE_ID(46171,32073,43095,17838,16560,33312,37643,36234);
 //---------------------------------------------------------------------------
 tPixel::tDescriptor tPixel::Descriptors[tPixel::NumFormats] = {
 	{
-		1 // size
+		1, // size
+		"pfGray8", // name
+		"8bit grayscale" // long desc
 	},
 	{
-		4 // size
+		4, // size
+		"pfARGB32", // name
+		"32bit A8R8G8B8" // long desc
 	},
 };
 //---------------------------------------------------------------------------

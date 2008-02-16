@@ -43,7 +43,9 @@ public:
 	//! @brief		ピクセル形式デスクリプタ
 	struct tDescriptor
 	{
-		int		Size; //!< 1ピクセルを格納するのに必要なサイズ
+		int				Size; //!< 1ピクセルを格納するのに必要なサイズ
+		const char *	Name; //!< 名前
+		const char *	LongDesc; //!< 長い説明
 	};
 
 	//! @brief		ピクセル形式デスクリプタの配列(tFormatに対応)

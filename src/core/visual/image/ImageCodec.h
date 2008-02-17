@@ -33,6 +33,8 @@ public:
 	tPixel::tFormat DecoderPixelFormat; //!< デコーダから返されるフォーマット
 	tImageInstance * Image; //!< 格納先のイメージ
 	tImageBuffer * ImageBuffer; //!< 格納先のイメージバッファ
+	const tImageBuffer::tBufferPointer * BufferPointer; //!< 格納先のイメージバッファのバッファポインター
+	const tImageBuffer::tDescriptor * Descriptor; //!< 格納先イメージバッファの記述子
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 	risse_offset LastCnvertBufferPitch; //!< 最後に作成した変換用バッファのピッチ
@@ -113,6 +115,8 @@ class tImageEncoder : public tCollectee
 {
 	bool Encoded; //!< エンコードが終了したかどうか
 	tImageBuffer * ImageBuffer; //!< エンコードしたいイメージのイメージバッファ
+	const tImageBuffer::tBufferPointer * BufferPointer; //!< エンコードしたいイメージバッファのバッファポインター
+	const tImageBuffer::tDescriptor * Descriptor; //!< エンコードしたいイメージバッファの記述子
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
 

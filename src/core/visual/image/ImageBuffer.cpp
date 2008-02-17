@@ -24,6 +24,28 @@ RISSE_DEFINE_SOURCE_ID(12015,30980,25352,17139,45454,47885,46776,11050);
 
 
 
+//---------------------------------------------------------------------------
+void tImageBuffer::IncBufferLockCount()
+{
+	volatile tCriticalSection::tLocker lock(*CS);
+	if(++BufferLockCount == 1) LockBuffer();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageBuffer::DecBufferLockCount()
+{
+	volatile tCriticalSection::tLocker lock(*CS);
+	if(--BufferLockCount == 0) UnlockBuffer();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 
@@ -53,10 +75,11 @@ retry:
 	}
 
 	Descriptor.PixelFormat = static_cast<tPixel::tFormat>(pixel_format);
-	Descriptor.Buffer = &*PixelStore->begin();
-	Descriptor.Pitch = PixelStore->get_fragment_length();
 	Descriptor.Width = w;
 	Descriptor.Height = h;
+
+	BufferPointer.Buffer = &*PixelStore->begin();
+	BufferPointer.Pitch = PixelStore->get_fragment_length();
 }
 //---------------------------------------------------------------------------
 
@@ -74,14 +97,15 @@ tImageBuffer * tMemoryImageBuffer<pixel_t, alignment, pixel_format>::Clone(bool 
 		for(risse_size y = 0; y < Descriptor.Height; y++)
 		{
 			memcpy(
-				static_cast<risse_uint8*>(new_ib->Descriptor.Buffer) + new_ib->Descriptor.Pitch * y,
-				static_cast<const risse_uint8*>(Descriptor.Buffer) + Descriptor.Pitch * y,
+				static_cast<risse_uint8*>(new_ib->BufferPointer.Buffer) + new_ib->BufferPointer.Pitch * y,
+				static_cast<const risse_uint8*>(BufferPointer.Buffer) + BufferPointer.Pitch * y,
 				pixel_desc.Size * Descriptor.Width);
 		}
 	}
 	return new_ib;
 }
 //---------------------------------------------------------------------------
+
 
 
 

@@ -59,9 +59,14 @@ public:
 	const tImageBuffer::tDescriptor & GetDescriptor() const {
 		return (*ImageBuffer)->GetDescriptor(); }
 
-	//! @brief		書き込み用のイメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
-	//! @return		イメージバッファのデスクリプタ
-	const tImageBuffer::tDescriptor & GetDescriptorForWrite();
+	//! @brief		イメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
+	//! @return		イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	const tImageBuffer::tBufferPointer & GetBufferPointer() const {
+		return (*ImageBuffer)->GetBufferPointer(); }
+
+	//! @brief		書き込み用のイメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
+	//! @return		イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	const tImageBuffer::tBufferPointer & GetBufferPointerForWrite();
 
 	//! @brief		イメージバッファを独立する
 	//! @param		clone		独立する際、内容をコピーするかどうか

@@ -16,6 +16,7 @@
 #include <risa_gl/pixel_store.hpp>
 #include <risa_gl/pixel.hpp>
 #include "visual/image/PixelType.h"
+#include "base/utils/RisaThread.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -61,24 +62,54 @@ public:
 class tImageBuffer : public tCollectee
 {
 	tAtomicCounter RefCount; //!< リファレンスカウンタ
+	unsigned long BufferLockCount; //!< バッファのロックカウンタ
+	tCriticalSection * CS; //!< このイメージバッファを保護するためのクリティカルセクション
+
 
 public:
 	//! @brief		イメージバッファ記述子
 	struct tDescriptor
 	{
 		tPixel::tFormat PixelFormat; //!< ピクセル形式
-		void * Buffer; //!< バッファへの先頭
-		risse_offset Pitch; //!< ピッチ(バイト単位)
 		risse_size Width; //!< 横幅
 		risse_size Height; //!< 縦幅
 	};
 
+
+	//! @brief		バッファポインタ構造体
+	struct tBufferPointer
+	{
+		tImageBuffer * ImageBuffer; //!< イメージバッファへの参照
+		void * Buffer; //!< バッファへの先頭
+		risse_offset Pitch; //!< ピッチ(バイト単位)
+
+		//! @brief		この情報をリリースする。
+		//!				使い終わったら必ず呼ぶこと。
+		void Release() const { ImageBuffer->DecBufferLockCount();ImageBuffer->Release(); }
+	};
+
+protected:
+	tDescriptor Descriptor; //!< イメージバッファ記述子
+	tBufferPointer BufferPointer;
+
 public:
 	//! @brief		コンストラクタ
-	tImageBuffer() : RefCount(1L) {;}
+	tImageBuffer() : RefCount(1L), BufferLockCount(0L)
+		{CS=new tCriticalSection(); BufferPointer.ImageBuffer = this;}
 
 	//! @brief		デストラクタ (他の多くのtCollectee派生クラスと違い、呼ばれることがある)
-	virtual ~tImageBuffer() {;}
+	virtual ~tImageBuffer()
+	{
+		// バッファはすべて開放されていなければならない
+		RISSE_ASSERT( (long) BufferLockCount == 0 );
+	}
+
+protected:
+	//! @brief		バッファのロックカウントを増やす
+	void IncBufferLockCount();
+
+	//! @brief		バッファのロックカウントを減らす
+	void DecBufferLockCount();
 
 public:
 	//! @brief		参照カウンタをインクリメントする
@@ -116,15 +147,45 @@ public:
 		return this;
 	}
 
-public:
-	//! @brief		記述子を得る
-	//! @return		記述子
-	virtual const tDescriptor & GetDescriptor() = 0;
+	//! @brief		イメージバッファ記述子を得る
+	//! @return		イメージバッファ記述子
+	//! @note		イメージバッファ記述子は、いったんイメージバッファが構築されると以降内容が変わることはない。
+	const tDescriptor & GetDescriptor()
+	{
+		IncBufferLockCount();
+		AddRef();
+		return Descriptor;
+	}
 
+	//! @brief		バッファポインタ構造体を得る
+	//! @return		バッファポインタ構造体(使い終わったらtBufferPointer::Release() を呼ぶこと)
+	const tBufferPointer & GetBufferPointer()
+	{
+		IncBufferLockCount();
+		AddRef();
+		return BufferPointer;
+	}
+
+public: // サブクラスで実装する
 	//! @brief		内容をクローンする
 	//! @param		copy_image		内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)
 	//! @return		クローンされたイメージバッファ
 	virtual tImageBuffer * Clone(bool copy_image = true) = 0;
+
+protected: // サブクラスで実装する
+
+	//! @brief		バッファをロックする
+	//! @note		バッファをロックするとともにこのクラスのBufferPointerに必要情報を書き込むこと。
+	//!				(別にLockBufferで特にやることが無ければあらかじめコンストラクタなどでBufferPointerに
+	//!				書き込んでおいてよい; tMemoryImageBuffer を参照)
+	//!				GetBufferPointer() と tBufferPointer::Release() の呼び出し回数は釣り合ってなければならない。
+	//!				ネストされた GetBufferPointer() の呼び出しではこのメソッドは呼ばれない
+	//!				(すべての BufferPointer が Releaseされている状態で GetBufferPointer() が呼ばれた際に呼ばれる)
+	virtual void LockBuffer() = 0;
+
+	//! @brief		バッファのロックを解除する
+	virtual void UnlockBuffer() = 0;
+
 };
 //---------------------------------------------------------------------------
 
@@ -153,7 +214,6 @@ class tMemoryImageBuffer : public tImageBuffer
 			pixe_store_t; //!< pfARGB32 用のピクセルストア
 
 	pixe_store_t * PixelStore; //!< ピクセルストアへのポインタ
-	tDescriptor Descriptor; //!< 記述子
 
 public:
 	//! @brief		コンストラクタ
@@ -162,14 +222,17 @@ public:
 	tMemoryImageBuffer(risse_size w, risse_size h);
 
 public:
-	//! @brief		記述子を得る
-	//! @return		記述子
-	virtual const tDescriptor & GetDescriptor() { return Descriptor; }
-
 	//! @brief		内容をクローンする
 	//! @param		copy_image		内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)
 	//! @return		クローンされたイメージバッファ
 	virtual tImageBuffer * Clone(bool copy_image = true);
+
+	//! @brief		バッファをロックする
+	virtual void LockBuffer() {;}
+
+	//! @brief		バッファのロックを解除する
+	virtual void UnlockBuffer() {;}
+
 };
 //---------------------------------------------------------------------------
 

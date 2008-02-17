@@ -76,12 +76,12 @@ void tImageInstance::Allocate(tPixel::tFormat format, risse_size w, risse_size h
 
 
 //---------------------------------------------------------------------------
-const tImageBuffer::tDescriptor & tImageInstance::GetDescriptorForWrite()
+const tImageBuffer::tBufferPointer & tImageInstance::GetBufferPointerForWrite()
 {
 	volatile tSynchronizer sync(this); // sync
 
 	Independ();
-	return (*ImageBuffer)->GetDescriptor();
+	return (*ImageBuffer)->GetBufferPointer();
 }
 //---------------------------------------------------------------------------
 

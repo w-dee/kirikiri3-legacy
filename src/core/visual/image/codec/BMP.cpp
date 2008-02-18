@@ -19,70 +19,98 @@ namespace Risa {
 RISSE_DEFINE_SOURCE_ID(33256,33111,47197,17413,6573,47168,12670,30341);
 //---------------------------------------------------------------------------
 
+
+
+
+
 //---------------------------------------------------------------------------
-static void Expand1BitTo8BitPal(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len, const risse_uint32 *pal)
+#ifndef BI_RGB // avoid re-define error on Win32
+	#define BI_RGB			0
+	#define BI_RLE8			1
+	#define BI_RLE4			2
+	#define BI_BITFIELDS	3
+#endif
+
+
+struct tBitField
 {
-	risse_uint8 p[2];
-	risse_uint8 *d=dest, *dlim;
-	risse_uint8 b;
+	risse_uint32	Mask; // mask value for
+	int				Shift; // shift value
+	int				Bits; // bit count
+	risse_uint32	Scale; // scale
 
-	p[0] = pal[0]&0xff, p[1] = pal[1]&0xff;
-	dlim = dest + len-7;
-	while(d < dlim)
-	{
-		b = *(buf++);
-		d[0] = p[(risse_uint)(b&(risse_uint)0x80)>>7];
-		d[1] = p[(risse_uint)(b&(risse_uint)0x40)>>6];
-		d[2] = p[(risse_uint)(b&(risse_uint)0x20)>>5];
-		d[3] = p[(risse_uint)(b&(risse_uint)0x10)>>4];
-		d[4] = p[(risse_uint)(b&(risse_uint)0x08)>>3];
-		d[5] = p[(risse_uint)(b&(risse_uint)0x04)>>2];
-		d[6] = p[(risse_uint)(b&(risse_uint)0x02)>>1];
-		d[7] = p[(risse_uint)(b&(risse_uint)0x01)   ];
-		d += 8;
+	tBitField() {
+		Mask = 0;
+		Shift = 0;
+		Bits = 0;
+		Scale = 1;
 	}
-	dlim = dest + len;
-	b = *buf;
-	while(d<dlim)
-	{
-		*(d++) = (b&0x80) ? p[1] : p[0];
-		b<<=1;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-/*
-//---------------------------------------------------------------------------
-static void Expand1BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len)
+	void MaskToShiftBits();
+};
+void tBitField::MaskToShiftBits()
 {
-	risse_uint8 *d=dest, *dlim;
-	risse_uint8 b;
-
-	dlim = dest + len-7;
-	while(d < dlim)
+	// Mask から Shift, Bits などへと変換する
+	Shift = -1;
+	Bits = 0;
+	for(int i =0; i < 32; i++)
 	{
-		b = *(buf++);
-		d[0] = (risse_uint8)((b&(risse_uint)0x80)>>7);
-		d[1] = (risse_uint8)((b&(risse_uint)0x40)>>6);
-		d[2] = (risse_uint8)((b&(risse_uint)0x20)>>5);
-		d[3] = (risse_uint8)((b&(risse_uint)0x10)>>4);
-		d[4] = (risse_uint8)((b&(risse_uint)0x08)>>3);
-		d[5] = (risse_uint8)((b&(risse_uint)0x04)>>2);
-		d[6] = (risse_uint8)((b&(risse_uint)0x02)>>1);
-		d[7] = (risse_uint8)((b&(risse_uint)0x01)   );
-		d += 8;
+		if((1L<<i)&Mask)
+		{
+			if(Shift == -1) Shift = i;
+			Bits ++;
+		}
 	}
-	dlim = dest + len;
-	b = *buf;
-	while(d<dlim)
+	if(Bits > 8)
 	{
-		*(d++) = (b&0x80) ? 1 : 0;
-		b<<=1;
+		// Bits が 8 より大きい場合は余分な分を捨てるようにする
+		Shift += (8 - Bits);
+		Bits = 8;
 	}
+	// scale を計算
+	Scale = 0xffff / ((1<<Bits) - 1);
 }
+
+
+struct tBitFields
+{
+	tBitField R;
+	tBitField G;
+	tBitField B;
+	tBitField A;
+
+	void MaskToShiftBits() {
+		R.MaskToShiftBits();
+		G.MaskToShiftBits();
+		B.MaskToShiftBits();
+		A.MaskToShiftBits();
+	}
+};
+
+struct RISSE_WIN_BITMAPFILEHEADER
+{
+	risse_uint16	bfType;
+	risse_uint32	bfSize;
+	risse_uint16	bfReserved1;
+	risse_uint16	bfReserved2;
+	risse_uint32	bfOffBits;
+};
+struct RISSE_WIN_BITMAPINFOHEADER
+{
+	risse_uint32	biSize;
+	risse_int32		biWidth;
+	risse_int32		biHeight;
+	risse_uint16	biPlanes;
+	risse_uint16	biBitCount;
+	risse_uint32	biCompression;
+	risse_uint32	biSizeImage;
+	risse_uint32	biXPelsPerMeter;
+	risse_uint32	biYPelsPerMeter;
+	risse_uint32	biClrUsed;
+	risse_uint32	biClrImportant;
+
+	tBitFields		BitFields;
+};
 //---------------------------------------------------------------------------
-*/
 
 
 //---------------------------------------------------------------------------
@@ -119,54 +147,6 @@ static void Expand1BitTo32BitPal(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRI
 
 
 //---------------------------------------------------------------------------
-static void Expand4BitTo8BitPal(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len, const risse_uint32 *pal)
-{
-	risse_uint8 *d=dest, *dlim;
-	risse_uint8 b;
-
-	dlim = dest + (len & ~1);
-	while(d < dlim)
-	{
-		b = *(buf++);
-		d[0] = (risse_uint8)pal[(b&0xf0)>>4];
-		d[1] = (risse_uint8)pal[b&0x0f];
-		d += 2;
-	}
-	if(len & 1)
-	{
-		b = *buf;
-		if(d<dlim) *d = (risse_uint8)pal[(b&0xf0)>>4];
-	}
-}
-//---------------------------------------------------------------------------
-
-
-/*
-//---------------------------------------------------------------------------
-static void Expand4BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len)
-{
-	risse_uint8 *d=dest, *dlim;
-	risse_uint8 b;
-
-	dlim = dest + (len & ~1);
-	while(d < dlim)
-	{
-		b = *(buf++);
-		d[0] = (risse_uint8)((b&0xf0)>>4);
-		d[1] = (risse_uint8)(b&0x0f);
-		d += 2;
-	}
-	if(len & 1)
-	{
-		b = *buf;
-		if(d<dlim) *d = (risse_uint8)((b&0xf0)>>4);
-	}
-}
-//---------------------------------------------------------------------------
-*/
-
-
-//---------------------------------------------------------------------------
 static void Expand4BitTo32BitPal(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len, const risse_uint32 *pal)
 {
 	risse_uint32 *d=dest, *dlim;
@@ -184,37 +164,6 @@ static void Expand4BitTo32BitPal(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRI
 	{
 		b = *buf;
 		*d = pal[(b&0xf0)>>4];
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-static void Expand8BitTo8BitPal(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len, const risse_uint32 *pal)
-{
-	{
-		risse_size ___index = 0;
-		if(len > (4-1))
-		{
-			len -= (4-1);
-
-			while(___index < len)
-			{
-				dest[(___index+0)] = pal[buf[(___index+0)]]&0xff;
-				dest[(___index+1)] = pal[buf[(___index+1)]]&0xff;
-				dest[(___index+2)] = pal[buf[(___index+2)]]&0xff;
-				dest[(___index+3)] = pal[buf[(___index+3)]]&0xff;
-				___index += 4;
-			}
-
-			len += (4-1);
-		}
-
-		while(___index < len)
-		{
-			dest[___index] = pal[buf[___index]]&0xff;
-			___index ++;
-		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -250,248 +199,6 @@ static void Expand8BitTo32BitPal(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRI
 			dest[___index] = pal[buf[___index]];
 			___index ++;
 		}
-	}
-}
-//---------------------------------------------------------------------------
-
-
-/*
-//---------------------------------------------------------------------------
-static void TVPExpand8BitTo32BitGray(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len)
-{
-	risse_uint8 a, b;
-	{
-		risse_size ___index = 0;
-		if(len > (8-1))
-		{
-			len -= (8-1);
-
-			while(___index < len)
-			{
-				a = buf[(___index+(0*2))];
-				b = buf[(___index+(0*2+1))];
-				dest[(___index+(0*2))] = 0xff000000 + (a * 0x10101);
-				dest[(___index+(0*2+1))] = 0xff000000 + (b * 0x10101);
-				a = buf[(___index+(1*2))];
-				b = buf[(___index+(1*2+1))];
-				dest[(___index+(1*2))] = 0xff000000 + (a * 0x10101);
-				dest[(___index+(1*2+1))] = 0xff000000 + (b * 0x10101);
-				a = buf[(___index+(2*2))];
-				b = buf[(___index+(2*2+1))];
-				dest[(___index+(2*2))] = 0xff000000 + (a * 0x10101);
-				dest[(___index+(2*2+1))] = 0xff000000 + (b * 0x10101);
-				a = buf[(___index+(3*2))];
-				b = buf[(___index+(3*2+1))];
-				dest[(___index+(3*2))] = 0xff000000 + (a * 0x10101);
-				dest[(___index+(3*2+1))] = 0xff000000 + (b * 0x10101);
-				___index += 8;
-			}
-
-			len += (8-1);
-		}
-
-		while(___index < len)
-		{
-			a = buf[___index];;
-			dest[___index] = 0xff000000 + (a * 0x10101);;
-			___index ++;
-		}
-	}
-}
-//---------------------------------------------------------------------------
-*/
-
-
-//---------------------------------------------------------------------------
-static void Convert15BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint16 *buf, risse_size len)
-{
-	{
-		risse_size ___index = 0;
-		if(len > (4-1))
-		{
-			len -= (4-1);
-
-			while(___index < len)
-			{
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+0)) << 8 + *((risse_uint8*)(buf+(___index+0))+1);
-				#else
-					risse_uint16 s = buf[(___index+0)];
-				#endif
-					dest[(___index+0)] =
-						((s&0x7c00)*56+ (s&0x03e0)*(187<<5)+ (s&0x001f)*(21<<10)) >> 15;
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+1)) << 8 + *((risse_uint8*)(buf+(___index+1))+1);
-				#else
-					risse_uint16 s = buf[(___index+1)];
-				#endif
-					dest[(___index+1)] =
-						((s&0x7c00)*56+ (s&0x03e0)*(187<<5)+ (s&0x001f)*(21<<10)) >> 15;
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+2)) << 8 + *((risse_uint8*)(buf+(___index+2))+1);
-				#else
-					risse_uint16 s = buf[(___index+2)];
-				#endif
-					dest[(___index+2)] =
-						((s&0x7c00)*56+ (s&0x03e0)*(187<<5)+ (s&0x001f)*(21<<10)) >> 15;
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+3)) << 8 + *((risse_uint8*)(buf+(___index+3))+1);
-				#else
-					risse_uint16 s = buf[(___index+3)];
-				#endif
-					dest[(___index+3)] =
-						((s&0x7c00)*56+ (s&0x03e0)*(187<<5)+ (s&0x001f)*(21<<10)) >> 15;
-				}
-				___index += 4;
-			}
-
-			len += (4-1);
-		}
-
-		while(___index < len)
-		{
-		#if RISSE_HOST_IS_BIG_ENDIAN
-			risse_uint16 s = *(risse_uint8*)(buf+___index) << 8 + *((risse_uint8*)(buf+___index)+1);
-		#else
-			risse_uint16 s = buf[___index];
-		#endif
-			dest[___index] =
-				((s&0x7c00)*56+ (s&0x03e0)*(187<<5)+ (s&0x001f)*(21<<10)) >> 15;
-			___index ++;
-		}
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-static void Convert15BitTo32Bit(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRICT const risse_uint16 *buf, risse_size len)
-{
-	{
-		risse_size ___index = 0;
-		if(len > (4-1))
-		{
-			len -= (4-1);
-
-			while(___index < len)
-			{
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+0)) << 8 + *((risse_uint8*)(buf+(___index+0))+1);
-				#else
-					risse_uint16 s = buf[(___index+0)];
-				#endif
-					risse_int r = s&0x7c00;
-					risse_int g = s&0x03e0;
-					risse_int b = s&0x001f;
-					dest[(___index+0)] = 0xff000000 +
-						(r <<  9) + ((r&0x7000)<<4) +
-						(g <<  6) + ((g&0x0380)<<1) +
-						(b <<  3) + (b>>2);
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+1)) << 8 + *((risse_uint8*)(buf+(___index+1))+1);
-				#else
-					risse_uint16 s = buf[(___index+1)];
-				#endif
-					risse_int r = s&0x7c00;
-					risse_int g = s&0x03e0;
-					risse_int b = s&0x001f;
-					dest[(___index+1)] = 0xff000000 +
-						(r <<  9) + ((r&0x7000)<<4) +
-						(g <<  6) + ((g&0x0380)<<1) +
-						(b <<  3) + (b>>2);
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+2)) << 8 + *((risse_uint8*)(buf+(___index+2))+1);
-				#else
-					risse_uint16 s = buf[(___index+2)];
-				#endif
-					risse_int r = s&0x7c00;
-					risse_int g = s&0x03e0;
-					risse_int b = s&0x001f;
-					dest[(___index+2)] = 0xff000000 +
-						(r <<  9) + ((r&0x7000)<<4) +
-						(g <<  6) + ((g&0x0380)<<1) +
-						(b <<  3) + (b>>2);
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint16 s = *(risse_uint8*)(buf+(___index+3)) << 8 + *((risse_uint8*)(buf+(___index+3))+1);
-				#else
-					risse_uint16 s = buf[(___index+3)];
-				#endif
-					risse_int r = s&0x7c00;
-					risse_int g = s&0x03e0;
-					risse_int b = s&0x001f;
-					dest[(___index+3)] = 0xff000000 +
-						(r <<  9) + ((r&0x7000)<<4) +
-						(g <<  6) + ((g&0x0380)<<1) +
-						(b <<  3) + (b>>2);
-				}
-				___index += 4;
-			}
-
-			len += (4-1);
-		}
-
-		while(___index < len)
-		{
-			{
-			#if RISSE_HOST_IS_BIG_ENDIAN
-				risse_uint16 s = *(risse_uint8*)(buf+___index) << 8 + *((risse_uint8*)(buf+___index)+1);
-			#else
-				risse_uint16 s = buf[___index];
-			#endif
-				risse_int r = s&0x7c00;
-				risse_int g = s&0x03e0;
-				risse_int b = s&0x001f;
-				dest[___index] = 0xff000000 +
-					(r <<  9) + ((r&0x7000)<<4) +
-					(g <<  6) + ((g&0x0380)<<1) +
-					(b <<  3) + (b>>2);
-			}
-			___index ++;
-		}
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-static inline unsigned char compose_grayscale(risse_int r, risse_int g, risse_int b)
-{ return ((unsigned char)((((risse_int)(b)*19 + (risse_int)(g)*183 + (risse_int)(r)*54)>>8))); }
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-static void Convert24BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint8 *buf, risse_size len)
-{
-	risse_uint8 *slimglim = dest + len;
-	risse_uint8 *slimglims = slimglim - 3;
-	while(dest < slimglims)
-	{
-		dest[0] = compose_grayscale(buf[2], buf[1], buf[0]);
-		dest[1] = compose_grayscale(buf[5], buf[4], buf[3]);
-		dest[2] = compose_grayscale(buf[8], buf[7], buf[6]);
-		dest[3] = compose_grayscale(buf[11], buf[10], buf[9]);
-		dest += 4;
-		buf += 12;
-	}
-	while(dest < slimglim)
-	{
-		dest[0] = compose_grayscale(buf[2], buf[1], buf[0]);
-		dest ++;
-		buf += 3;
 	}
 }
 //---------------------------------------------------------------------------
@@ -544,78 +251,6 @@ static void Convert24BitTo32Bit(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRIC
 		*(dest++) = 0xff000000 + buf[0] + (buf[1]<<8) + (buf[2]<<16);
 #endif
 		buf += 3;
-	}
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-static void Convert32BitTo8Bit(RISSE_RESTRICT risse_uint8 *dest, RISSE_RESTRICT const risse_uint32 *buf, risse_size len)
-{
-	{
-		risse_size ___index = 0;
-		if(len > (4-1))
-		{
-
-			len -= (4-1);
-
-			while(___index < len)
-			{
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint32 d = buf[(___index+0)];
-					dest[(___index+0)] = compose_grayscale(d&0xff, (d&0xff00)>>8, (d&0xff0000)>>16);
-				#else
-					risse_uint32 d = buf[(___index+0)];
-					dest[(___index+0)] = compose_grayscale((d&0xff0000)>>16, (d&0xff00)>>8, d&0xff);
-				#endif
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint32 d = buf[(___index+1)];
-					dest[(___index+1)] = compose_grayscale(d&0xff, (d&0xff00)>>8, (d&0xff0000)>>16);
-				#else
-					risse_uint32 d = buf[(___index+1)];
-					dest[(___index+1)] = compose_grayscale((d&0xff0000)>>16, (d&0xff00)>>8, d&0xff);
-				#endif
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint32 d = buf[(___index+2)];
-					dest[(___index+2)] = compose_grayscale(d&0xff, (d&0xff00)>>8, (d&0xff0000)>>16);
-				#else
-					risse_uint32 d = buf[(___index+2)];
-					dest[(___index+2)] = compose_grayscale((d&0xff0000)>>16, (d&0xff00)>>8, d&0xff);
-				#endif
-				}
-				{
-				#if RISSE_HOST_IS_BIG_ENDIAN
-					risse_uint32 d = buf[(___index+3)];
-					dest[(___index+3)] = compose_grayscale(d&0xff, (d&0xff00)>>8, (d&0xff0000)>>16);
-				#else
-					risse_uint32 d = buf[(___index+3)];
-					dest[(___index+3)] = compose_grayscale((d&0xff0000)>>16, (d&0xff00)>>8, d&0xff);
-				#endif
-				}
-				___index += 4;
-			}
-
-			len += (4-1);
-		}
-
-		while(___index < len)
-		{
-			{
-			#if RISSE_HOST_IS_BIG_ENDIAN
-				risse_uint32 d = buf[___index];
-				dest[___index] = compose_grayscale(d&0xff, (d&0xff00)>>8, (d&0xff0000)>>16);
-			#else
-				risse_uint32 d = buf[___index];
-				dest[___index] = compose_grayscale((d&0xff0000)>>16, (d&0xff00)>>8, d&0xff);
-			#endif
-			}
-			___index ++;
-		}
 	}
 }
 //---------------------------------------------------------------------------
@@ -692,45 +327,86 @@ static void Convert32BitTo32Bit(RISSE_RESTRICT risse_uint32 *dest, RISSE_RESTRIC
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+static void Convert16BitFieldsTo32Bit(
+				const tBitFields & fields,
+				RISSE_RESTRICT risse_uint32* scanline,
+				RISSE_RESTRICT const risse_uint16* buf, risse_size length)
+{
+	risse_uint16	r_mask	= static_cast<risse_uint16>(fields.R.Mask);
+	int				r_shift	= fields.R.Shift;
+	risse_uint32	r_scale	= fields.R.Scale;
+	risse_uint16	g_mask	= static_cast<risse_uint16>(fields.G.Mask);
+	int				g_shift	= fields.G.Shift;
+	risse_uint32	g_scale	= fields.G.Scale;
+	risse_uint16	b_mask	= static_cast<risse_uint16>(fields.B.Mask);
+	int				b_shift	= fields.B.Shift;
+	risse_uint32	b_scale	= fields.B.Scale;
+	risse_uint16	a_mask	= static_cast<risse_uint16>(fields.A.Mask);
+	int				a_shift	= fields.A.Shift;
+	risse_uint32	a_scale	= fields.A.Scale;
+
+	risse_uint32	a_opaque = a_mask ? 0 : 0xff000000L;
+		// alpha を持たない場合は常に 0xff000000
+
+	for(risse_size i = 0; i < length ; i++)
+	{
+		risse_uint16 v = buf[i];
+#if TJS_HOST_IS_BIG_ENDIAN
+		v = (v >> 8) + (v << 8);
+#endif
+		scanline[i] =
+			((((v & r_mask) >> r_shift) * r_scale >> 8) << 16) +
+			((((v & g_mask) >> g_shift) * g_scale >> 8) <<  8) +
+			((((v & b_mask) >> b_shift) * b_scale >> 8)      ) +
+			((((v & a_mask) >> a_shift) * a_scale >> 8) << 24) +
+			a_opaque ;
+	}
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-#ifndef BI_RGB // avoid re-define error on Win32
-	#define BI_RGB			0
-	#define BI_RLE8			1
-	#define BI_RLE4			2
-	#define BI_BITFIELDS	3
-#endif
+static void Convert32BitFieldsTo32Bit(
+				const tBitFields & fields,
+				RISSE_RESTRICT risse_uint32* scanline,
+				RISSE_RESTRICT const risse_uint32* buf, risse_size length)
+{
+	risse_uint32	r_mask	= fields.R.Mask;
+	int				r_shift	= fields.R.Shift;
+	risse_uint32	r_scale	= fields.R.Scale;
+	risse_uint32	g_mask	= fields.G.Mask;
+	int				g_shift	= fields.G.Shift;
+	risse_uint32	g_scale	= fields.G.Scale;
+	risse_uint32	b_mask	= fields.B.Mask;
+	int				b_shift	= fields.B.Shift;
+	risse_uint32	b_scale	= fields.B.Scale;
+	risse_uint32	a_mask	= fields.A.Mask;
+	int				a_shift	= fields.A.Shift;
+	risse_uint32	a_scale	= fields.A.Scale;
 
-#ifdef __WIN32__
-#pragma pack(push, 1)
+	risse_uint32	a_opaque = a_mask ? 0 : 0xff000000L;
+		// alpha を持たない場合は常に 0xff000000
+
+	for(risse_size i = 0; i < length ; i++)
+	{
+		risse_uint32 v = buf[i];
+#if TJS_HOST_IS_BIG_ENDIAN
+		v = ((v&0xff)<<24) + ((v&0xff00)<<8) +  ((v&0xff0000)>>8) + ((v&0xff000000)>>24);
 #endif
-struct RISSE_WIN_BITMAPFILEHEADER
-{
-	risse_uint16	bfType;
-	risse_uint32	bfSize;
-	risse_uint16	bfReserved1;
-	risse_uint16	bfReserved2;
-	risse_uint32	bfOffBits;
-};
-struct RISSE_WIN_BITMAPINFOHEADER
-{
-	risse_uint32	biSize;
-	risse_int32		biWidth;
-	risse_int32		biHeight;
-	risse_uint16	biPlanes;
-	risse_uint16	biBitCount;
-	risse_uint32	biCompression;
-	risse_uint32	biSizeImage;
-	risse_uint32	biXPelsPerMeter;
-	risse_uint32	biYPelsPerMeter;
-	risse_uint32	biClrUsed;
-	risse_uint32	biClrImportant;
-};
-#ifdef __WIN32__
-#pragma pack(pop)
-#endif
+		scanline[i] =
+			((((v & r_mask) >> r_shift) * r_scale >> 8) << 16) +
+			((((v & g_mask) >> g_shift) * g_scale >> 8) <<  8) +
+			((((v & b_mask) >> b_shift) * b_scale >> 8)      ) +
+			((((v & a_mask) >> a_shift) * a_scale >> 8) << 24) +
+			a_opaque ;
+	}
+}
 //---------------------------------------------------------------------------
+
+
+
+
 
 
 
@@ -738,12 +414,13 @@ struct RISSE_WIN_BITMAPINFOHEADER
 #define RISSE_BMP_READ_LINE_MAX 8
 void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
-					tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi, risse_uint8 * palsrc)
+					tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi,
+					risse_uint8 * palsrc)
 {
 	// mostly taken from kirikiri2
 
 	// TODO: only checked on Win32 platform
-	bool grayscale = pixel_format == tPixel::pfGray8; // grayscale ?
+	int bitcount = static_cast<int>(bi.biBitCount);
 
 	if(bi.biSize == 12)
 	{
@@ -752,20 +429,11 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 		bi.biClrUsed = 1 << bi.biBitCount;
 	}
 
-	risse_uint16 orgbitcount = bi.biBitCount;
-	if(bi.biBitCount == 1 || bi.biBitCount == 4)
-	{
-		bi.biBitCount = 8;
-	}
-
 	switch(bi.biCompression)
 	{
 	case BI_RGB:
-		// if there are no masks, use the defaults
-		break; // use default
-
 	case BI_BITFIELDS:
-		tIOExceptionClass::Throw(RISSE_WS_TR("BITFIELDS not supported in BMP loading"));
+		break; // use default
 
 	default:
 		tIOExceptionClass::Throw(RISSE_WS_TR("compressed BMP not supported"));
@@ -773,9 +441,9 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 
 	// load palette
 	risse_uint32 palette[256];   // (msb) argb (lsb)
-	if(orgbitcount <= 8)
+	if(bitcount <= 8)
 	{
-		if(bi.biClrUsed == 0) bi.biClrUsed = 1 << orgbitcount ;
+		if(bi.biClrUsed == 0) bi.biClrUsed = 1 << bitcount ;
 		if(bi.biSize == 12)
 		{
 			// read OS/2 palette
@@ -798,26 +466,16 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 				palsrc += 4;
 			}
 		}
-
-		if(grayscale)
-		{
-			// make grayscale palette
-			for(int i = 0; i < 256; i++)
-			{
-				palette[i] =
-					compose_grayscale((palette[i]>>16)&0xff, (palette[i]>>8)&0xff, palette[i]&0xff);
-			}
-		}
 	}
 
 	risse_int height;
 	height = bi.biHeight<0?-bi.biHeight:bi.biHeight;
 		// positive value of bi.biHeight indicates top-down DIB
 
-	SetDimensions(bi.biWidth, height, grayscale ? tPixel::pfGray8 : tPixel::pfARGB32);
+	SetDimensions(bi.biWidth, height, tPixel::pfARGB32);
 
 	risse_int pitch;
-	pitch = (((bi.biWidth * orgbitcount) + 31) & ~31) /8;
+	pitch = (((bi.biWidth * bitcount) + 31) & ~31) /8;
 	risse_uint8 *readbuf =
 		static_cast<risse_uint8 *>(
 			AlignedMallocAtomicCollectee(pitch * RISSE_BMP_READ_LINE_MAX, 4));
@@ -846,101 +504,46 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 		risse_offset pitch = 0;
 		void *scanline = StartLines(dest_y, 1, pitch);
 
-		switch(orgbitcount)
+		switch(bitcount)
 		{
 			// convert pixel format
 		case 1:
-			if(grayscale)
-			{
-				Expand1BitTo8BitPal(
-					(risse_uint8*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
-			else
-			{
-				Expand1BitTo32BitPal(
-					(risse_uint32*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
+			Expand1BitTo32BitPal(
+				(risse_uint32*)scanline,
+				(risse_uint8*)buf, bi.biWidth, palette);
 			break;
 
 		case 4:
-			if(grayscale)
-			{
-				Expand4BitTo8BitPal(
-					(risse_uint8*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
-			else
-			{
-				Expand4BitTo32BitPal(
-					(risse_uint32*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
+			Expand4BitTo32BitPal(
+				(risse_uint32*)scanline,
+				(risse_uint8*)buf, bi.biWidth, palette);
 			break;
 
 		case 8:
-			if(grayscale)
-			{
-				// convert to grayscale
-				Expand8BitTo8BitPal(
-					(risse_uint8*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
-			else
-			{
-				Expand8BitTo32BitPal(
-					(risse_uint32*)scanline,
-					(risse_uint8*)buf, bi.biWidth, palette);
-			}
+			Expand8BitTo32BitPal(
+				(risse_uint32*)scanline,
+				(risse_uint8*)buf, bi.biWidth, palette);
 			break;
 
 		case 15:
 		case 16:
-			if(grayscale)
-			{
-				Convert15BitTo8Bit(
-					(risse_uint8*)scanline,
-					(risse_uint16*)buf, bi.biWidth);
-			}
-			else
-			{
-				Convert15BitTo32Bit(
-					(risse_uint32*)scanline,
-					(risse_uint16*)buf, bi.biWidth);
-			}
+			Convert16BitFieldsTo32Bit(
+				bi.BitFields,
+				(risse_uint32*)scanline,
+				(risse_uint16*)buf, bi.biWidth);
 			break;
 
 		case 24:
-			if(grayscale)
-			{
-				Convert24BitTo8Bit(
-					(risse_uint8*)scanline,
-					(risse_uint8*)buf, bi.biWidth);
-			}
-			else
-			{
-				Convert24BitTo32Bit(
-					(risse_uint32*)scanline,
-					(risse_uint8*)buf, bi.biWidth);
-			}
+			Convert24BitTo32Bit(
+				(risse_uint32*)scanline,
+				(risse_uint8*)buf, bi.biWidth);
 			break;
 
 		case 32:
-			if(grayscale)
-			{
-				Convert32BitTo8Bit(
-					(risse_uint8*)scanline,
-					(risse_uint32*)buf, bi.biWidth);
-			}
-			else
-			{
-				// always copy from the buffer
-				// ... but endianness should be considered
-				Convert32BitTo32Bit(
-					(risse_uint32*)scanline,
-					(risse_uint32*)buf, bi.biWidth);
-			}
+			Convert32BitFieldsTo32Bit(
+				bi.BitFields,
+				(risse_uint32*)scanline,
+				(risse_uint32*)buf, bi.biWidth);
 			break;
 		}
 
@@ -986,6 +589,7 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 	// read the BITMAPINFOHEADER
 	RISSE_WIN_BITMAPINFOHEADER bi;
 	bi.biSize = src.ReadI32LE();
+	bool bitfields_read = false;
 	if(bi.biSize == 12)
 	{
 		// OS/2 Bitmap
@@ -994,9 +598,10 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 		bi.biHeight = (risse_uint32)src.ReadI16LE();
 		bi.biPlanes = src.ReadI16LE();
 		bi.biBitCount = src.ReadI16LE();
+		bi.biCompression = BI_RGB;
 		bi.biClrUsed = 1 << bi.biBitCount;
 	}
-	else if(bi.biSize == 40)
+	else if(bi.biSize >= 40)
 	{
 		// Windows Bitmap
 		bi.biWidth = src.ReadI32LE();
@@ -1009,12 +614,51 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 		bi.biYPelsPerMeter = src.ReadI32LE();
 		bi.biClrUsed = src.ReadI32LE();
 		bi.biClrImportant = src.ReadI32LE();
+
+		if(bi.biSize == 40 && bi.biCompression == BI_BITFIELDS)
+		{
+			bi.BitFields.R.Mask = src.ReadI32LE();
+			bi.BitFields.G.Mask = src.ReadI32LE();
+			bi.BitFields.B.Mask = src.ReadI32LE();
+			bitfields_read = true;
+		}
+
+		if(bi.biSize >= 56 && bi.biSize <= 64)
+		{
+			// bit fields
+			bi.BitFields.R.Mask = src.ReadI32LE();
+			bi.BitFields.G.Mask = src.ReadI32LE();
+			bi.BitFields.B.Mask = src.ReadI32LE();
+			bi.BitFields.A.Mask = src.ReadI32LE();
+			bitfields_read = true;
+		}
 	}
 	else
 	{
 		tIOExceptionClass::Throw(RISSE_WS_TR("non-supported version in BMP header"));
 	}
 
+	if(!bitfields_read)
+	{
+		switch(bi.biBitCount)
+		{
+		case 32:
+			bi.BitFields.R.Mask = 0x00ff0000;
+			bi.BitFields.G.Mask = 0x0000ff00;
+			bi.BitFields.B.Mask = 0x000000ff;
+			bi.BitFields.A.Mask = 0x00000000;
+			break;
+		case 16:
+			bi.BitFields.R.Mask = 0x7c00;
+			bi.BitFields.G.Mask = 0x03e0;
+			bi.BitFields.B.Mask = 0x001f;
+			bi.BitFields.A.Mask = 0x00000000;
+			break;
+		default:;
+		}
+	}
+
+	bi.BitFields.MaskToShiftBits();
 
 	// load palette
 	risse_int palsize = (bi.biBitCount <= 8) ?
@@ -1025,8 +669,11 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 	if(palsize) palette = static_cast<risse_uint8*>(MallocAtomicCollectee(palsize));
 
 	src.ReadBuffer(palette, palsize);
+
+	// seek to the first bitmap bits
 	src.SetPosition(firstpos + bf.bfOffBits);
 
+	// load rest
 	InternalLoadBMP(src, pixel_format, callback, dict, bi, palette);
 }
 //---------------------------------------------------------------------------
@@ -1044,8 +691,9 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
-	// 今のところ dict の '_type' は 'bmp24' と 'bmp32' を受け付ける
-	// (デフォルトは bmp32)
+	// 今のところ dict の '_type' は '24' (別名'R8G8B8') と '32'
+	// (別名 'A8R8G8B8') を受け付ける
+	// (デフォルトは 24)
 	int pixel_bytes = 4;
 	if(dict)
 	{
@@ -1053,9 +701,11 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 		if(!val.IsVoid())
 		{
 			tString str = val.operator tString();
-			if(str == RISSE_WS("bmp24"))
+			if(str == RISSE_WS("24") ||
+				str == RISSE_WS("R8G8B8"))
 				pixel_bytes = 3;
-			else if(str == RISSE_WS("bmp32"))
+			else if(str == RISSE_WS("32") ||
+				str == RISSE_WS("A8R8G8B8"))
 				pixel_bytes = 4;
 			else
 				tIllegalArgumentExceptionClass::Throw(
@@ -1069,32 +719,40 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 	GetDimensions(&width, &height);
 
 	// prepare header
+	int bitfields_size = pixel_bytes == 3 ? 0: 16; // BITFIELDS のサイズ
 	risse_size bmppitch = width * pixel_bytes;
 	bmppitch = (((bmppitch - 1) >> 2) + 1) << 2;
 
 	dest.WriteI16LE(0x4d42);  /* bfType */
 	dest.WriteI32LE(
 			14 + // BITMAPFILEHEADER
-			40 + // BITMAPINFOHEADER
+			40 + bitfields_size +// BITMAPINFOHEADER
 			bmppitch * height); /* bfSize */
 	dest.WriteI16LE(0); /* bfReserved1 */
 	dest.WriteI16LE(0); /* bfReserved2 */
 	dest.WriteI32LE(
 			14 + // BITMAPFILEHEADER
-			40 + // BITMAPINFOHEADER
+			40 + bitfields_size + // BITMAPINFOHEADER
 			0); /* bfOffBits */
 
-	dest.WriteI32LE(40); /* biSize = sizeof(BITMAPINFOHEADER) */
+	dest.WriteI32LE(40 + bitfields_size); /* biSize = sizeof(BITMAPINFOHEADER) */
 	dest.WriteI32LE(width); /* biWidth */
 	dest.WriteI32LE(height); /* biHeight */
 	dest.WriteI16LE(1); /* biPlanes */
 	dest.WriteI16LE(pixel_bytes * 8); /* biBitCount */
-	dest.WriteI32LE(BI_RGB); /* biCompression */
+	dest.WriteI32LE(bitfields_size ? BI_BITFIELDS : BI_RGB); /* biCompression */
 	dest.WriteI32LE(0); /* biSizeImage */
 	dest.WriteI32LE(0); /* biXPelsPerMeter */
 	dest.WriteI32LE(0); /* biYPelsPerMeter */
 	dest.WriteI32LE(0); /* biClrUsed */
 	dest.WriteI32LE(0); /* biClrImportant */
+	if(bitfields_size == 16)
+	{
+		dest.WriteI32LE(0xff000000); // A Mask
+		dest.WriteI32LE(0x00ff0000); // R Mask
+		dest.WriteI32LE(0x0000ff00); // G Mask
+		dest.WriteI32LE(0x000000ff); // B Mask
+	}
 
 	// write bitmap body
 	void * buf = NULL;

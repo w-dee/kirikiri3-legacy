@@ -42,7 +42,8 @@ private:
 	//! @brief		内部関数
 	void InternalLoadBMP(tStreamAdapter src,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi, risse_uint8 * palsrc);
+						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi,
+						risse_uint8 * palsrc);
 
 
 };

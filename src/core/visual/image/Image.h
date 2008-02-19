@@ -79,6 +79,7 @@ public: // Risse用メソッドなど
 	void initialize(const tNativeCallInfo &info);
 
 	void dispose() { Dispose(); }
+	bool get_hasBuffer();
 	void allocate(risse_size w, risse_size h, const tMethodArgument &args);
 	void deallocate() { Dispose(); }
 	void independ(const tMethodArgument &args);

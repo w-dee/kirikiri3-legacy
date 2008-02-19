@@ -52,7 +52,8 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 
 		// TODO: Image-> の C++ メソッド呼び出しを Risse メソッド呼び出しに置き換えるように
 
-		if(Image->HasBuffer() && Image->GetDescriptor().PixelFormat != pixel_format)
+		if(Image->GetPropertyDirect(tSS<'h','a','s','B','u','f','f','e','r'>()).operator bool() &&
+			Image->GetDescriptor().PixelFormat != pixel_format)
 		{
 			// TODO: PixelFormat が違うとの例外
 			return;
@@ -117,12 +118,15 @@ void tImageDecoder::SetDimensions(risse_size w, risse_size h,
 		}
 
 		// イメージバッファを独立させる
-		Image->Independ(false);
+		Image->Invoke(tSS<'i','n','d','e','p','e','n','t'>(), tVariant(false));
 	}
 	else
 	{
 		// メモリ上のバッファを image に割り当てる
-		Image->Allocate(DesiredPixelFormat, w, h);
+		Image->Invoke(tSS<'a','l','l','o','c','a','t','e'>(), 
+			tVariant(static_cast<risse_int64>(w)),
+			tVariant(static_cast<risse_int64>(h)),
+			tVariant(static_cast<risse_int64>(DesiredPixelFormat)));
 
 		// イメージバッファとそのバッファポインタ、記述子を取得する
 		ImageBuffer = Image->GetBuffer();

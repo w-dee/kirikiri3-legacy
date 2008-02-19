@@ -601,7 +601,7 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 		bi.biCompression = BI_RGB;
 		bi.biClrUsed = 1 << bi.biBitCount;
 	}
-	else if(bi.biSize >= 40)
+	else if(bi.biSize == 40 || (bi.biSize >= 56 && bi.biSize <= 64))
 	{
 		// Windows Bitmap
 		bi.biWidth = src.ReadI32LE();
@@ -748,10 +748,10 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 	dest.WriteI32LE(0); /* biClrImportant */
 	if(bitfields_size == 16)
 	{
-		dest.WriteI32LE(0xff000000); // A Mask
 		dest.WriteI32LE(0x00ff0000); // R Mask
 		dest.WriteI32LE(0x0000ff00); // G Mask
 		dest.WriteI32LE(0x000000ff); // B Mask
+		dest.WriteI32LE(0xff000000); // A Mask
 	}
 
 	// write bitmap body

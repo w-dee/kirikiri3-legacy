@@ -736,5 +736,19 @@ tVariant tObjectBase::Invoke(
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tVariant tObjectBase::Invoke(
+	const tString & membername,
+	const tVariant & arg1,
+	const tVariant & arg2,
+	const tVariant & arg3)
+{
+	tVariant value;
+	Do(ocFuncCall, &value, membername, 0, tMethodArgument::New(arg1, arg2, arg3));
+	return value;
+}
+//---------------------------------------------------------------------------
+
 } /* namespace Risse */
 

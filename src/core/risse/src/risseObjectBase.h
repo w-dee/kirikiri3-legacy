@@ -229,6 +229,19 @@ public:
 		const tVariant & arg2
 		);
 
+	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	//! @param		membername	メンバ名
+	//! @param		arg1		引数
+	//! @param		arg2		引数
+	//! @param		arg3		引数
+	//! @return		戻り値
+	tVariantBlock Invoke(
+		const tString & membername,
+		const tVariant & arg1,
+		const tVariant & arg2,
+		const tVariant & arg3
+		);
+
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

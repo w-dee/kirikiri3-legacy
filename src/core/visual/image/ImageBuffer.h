@@ -123,7 +123,7 @@ public:
 	//! @note		参照カウンタがゼロになれば delete this するようになっている
 	void Release()
 	{
-		if(-- RefCount)
+		if(-- RefCount == 0)
 		{
 			// 参照カウンタがゼロになったので delete this する
 			delete this;

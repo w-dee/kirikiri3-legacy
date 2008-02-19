@@ -50,6 +50,8 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 		// Image をロック
 		volatile tObjectInterface::tSynchronizer sync(Image); // sync
 
+		// TODO: Image-> の C++ メソッド呼び出しを Risse メソッド呼び出しに置き換えるように
+
 		if(Image->HasBuffer() && Image->GetDescriptor().PixelFormat != pixel_format)
 		{
 			// TODO: PixelFormat が違うとの例外
@@ -58,8 +60,8 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 
 		DesiredPixelFormat = pixel_format;
 		ImageBuffer = Image->GetBuffer();
-		if(ImageBuffer) BufferPointer = & Image->GetBufferPointer();
-		if(ImageBuffer) Descriptor = & Image->GetDescriptor();
+		if(ImageBuffer) BufferPointer = & ImageBuffer->GetBufferPointer();
+		if(ImageBuffer) Descriptor = & ImageBuffer->GetDescriptor();
 	}
 
 	// デコーダの本体処理を呼び出す
@@ -113,19 +115,19 @@ void tImageDecoder::SetDimensions(risse_size w, risse_size h,
 			// TODO: サイズが違うとの例外
 			RISSE_ASSERT(Descriptor->Width == w && Descriptor->Height == h);
 		}
+
+		// イメージバッファを独立させる
+		Image->Independ(false);
 	}
 	else
 	{
-		// そうでなければイメージバッファを独立させる
-		Image->Independ(false);
-
 		// メモリ上のバッファを image に割り当てる
 		Image->Allocate(DesiredPixelFormat, w, h);
 
 		// イメージバッファとそのバッファポインタ、記述子を取得する
 		ImageBuffer = Image->GetBuffer();
-		BufferPointer = & Image->GetBufferPointer();
-		Descriptor = & Image->GetDescriptor();
+		BufferPointer = & ImageBuffer->GetBufferPointer();
+		Descriptor = & ImageBuffer->GetDescriptor();
 	}
 
 	// デコーダが望むピクセル形式を保存

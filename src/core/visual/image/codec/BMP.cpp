@@ -67,7 +67,10 @@ void tBitField::MaskToShiftBits()
 		Bits = 8;
 	}
 	// scale を計算
-	Scale = 0xffff / ((1<<Bits) - 1);
+	if(Bits != 0)
+		Scale = 0xffff / ((1<<Bits) - 1);
+	else
+		Scale = 0;
 }
 
 
@@ -666,9 +669,11 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 		((bi.biSize == 12) ? 3:4)) : 0;  // bi.biSize == 12 ( OS/2 palette )
 	risse_uint8 *palette = NULL;
 
-	if(palsize) palette = static_cast<risse_uint8*>(MallocAtomicCollectee(palsize));
-
-	src.ReadBuffer(palette, palsize);
+	if(palsize)
+	{
+		palette = static_cast<risse_uint8*>(MallocAtomicCollectee(palsize));
+		src.ReadBuffer(palette, palsize);
+	}
 
 	// seek to the first bitmap bits
 	src.SetPosition(firstpos + bf.bfOffBits);

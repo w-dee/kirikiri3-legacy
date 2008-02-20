@@ -111,6 +111,7 @@ void tImageInstance::construct()
 //---------------------------------------------------------------------------
 risse_uint32 tImageInstance::GetARGB32(risse_size x, risse_size y)
 {
+	// TODO: 範囲チェック
 	volatile tSynchronizer sync(this); // sync
 
 	RISSE_ASSERT(*ImageBuffer);
@@ -123,6 +124,7 @@ risse_uint32 tImageInstance::GetARGB32(risse_size x, risse_size y)
 //---------------------------------------------------------------------------
 void tImageInstance::SetARGB32(risse_size x, risse_size y, risse_uint32 v)
 {
+	// TODO: 範囲チェック
 	volatile tSynchronizer sync(this); // sync
 
 	RISSE_ASSERT(*ImageBuffer);

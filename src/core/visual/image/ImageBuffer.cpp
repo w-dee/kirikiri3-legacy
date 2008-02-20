@@ -45,6 +45,7 @@ void tImageBuffer::DecBufferLockCount()
 //---------------------------------------------------------------------------
 risse_uint32 tImageBuffer::GetARGB32(risse_size x, risse_size y)
 {
+	// TODO: 範囲チェック
 	const tBufferPointer & ptr = GetBufferPointer();
 	risse_uint32 ret;
 	try
@@ -69,6 +70,7 @@ risse_uint32 tImageBuffer::GetARGB32(risse_size x, risse_size y)
 //---------------------------------------------------------------------------
 void tImageBuffer::SetARGB32(risse_size x, risse_size y, risse_uint32 v)
 {
+	// TODO: 範囲チェック
 	const tBufferPointer & ptr = GetBufferPointer();
 	try
 	{

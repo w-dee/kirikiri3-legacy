@@ -504,8 +504,8 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 			buf = readbuf;
 		}
 
-		risse_offset pitch = 0;
-		void *scanline = StartLines(dest_y, 1, pitch);
+		risse_offset dest_pitch = 0;
+		void *scanline = StartLines(dest_y, 1, dest_pitch);
 
 		switch(bitcount)
 		{

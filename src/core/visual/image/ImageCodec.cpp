@@ -223,14 +223,18 @@ void tImageEncoder::Encode(tStreamInstance * stream, tImageInstance * image,
 				tProgressCallback * callback,
 				tDictionaryInstance * dict)
 {
-	// TODO: image のロック
-	// TODO: this のロック
 	if(Encoded) { RISSE_ASSERT(!Encoded); /* TODO: 例外 */ }
 	Encoded = true;
-	ImageBuffer = image->GetBuffer();
-	if(!ImageBuffer) { RISSE_ASSERT(ImageBuffer); /* TODO: 例外 */ }
-	BufferPointer = & ImageBuffer->GetBufferPointer();
-	Descriptor = & ImageBuffer->GetDescriptor();
+
+	{
+		// Image をロック
+		volatile tObjectInterface::tSynchronizer sync(image); // sync
+
+		ImageBuffer = image->GetBuffer();
+		if(!ImageBuffer) { RISSE_ASSERT(ImageBuffer); /* TODO: 例外 */ }
+		BufferPointer = & ImageBuffer->GetBufferPointer();
+		Descriptor = & ImageBuffer->GetDescriptor();
+	}
 
 	try
 	{

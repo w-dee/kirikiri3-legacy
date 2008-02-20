@@ -649,7 +649,8 @@ void tBMPImageDecoder::Process(tStreamInstance * stream,
 			bi.BitFields.R.Mask = 0x00ff0000;
 			bi.BitFields.G.Mask = 0x0000ff00;
 			bi.BitFields.B.Mask = 0x000000ff;
-			bi.BitFields.A.Mask = 0x00000000;
+			bi.BitFields.A.Mask = 0xff000000; // ??
+				// 32bpp BMP の最上位バイトって正式にアルファチャンネルだっけ？
 			break;
 		case 16:
 			bi.BitFields.R.Mask = 0x7c00;

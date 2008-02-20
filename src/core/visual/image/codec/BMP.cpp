@@ -699,7 +699,7 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 	// 今のところ dict の '_type' は '24' (別名'R8G8B8') と '32'
 	// (別名 'A8R8G8B8') を受け付ける
 	// (デフォルトは 24)
-	int pixel_bytes = 4;
+	int pixel_bytes = 3;
 	if(dict)
 	{
 		tVariant val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','t','y','p','e'>()));

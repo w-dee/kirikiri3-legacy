@@ -74,6 +74,20 @@ public:
 	//! @note		イメージバッファが他と共有されている場合は内容をクローンして独立させる
 	void Independ(bool clone = true);
 
+	//! @brief		指定位置のピクセルを ARGB32 形式の整数で得る
+	//! @note		きわめて低速。
+	//! @param		x			X位置
+	//! @param		y			Y位置
+	//! @return		0xAARRGGBB 形式のピクセル値
+	risse_uint32 GetARGB32(risse_size x, risse_size y);
+
+	//! @brief		指定位置のピクセルを ARGB32 形式の整数で設定する
+	//! @note		きわめて低速。
+	//! @param		x			X位置
+	//! @param		y			Y位置
+	//! @param		v			0xAARRGGBB 形式のピクセル値
+	void SetARGB32(risse_size x, risse_size y, risse_uint32 v);
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
@@ -85,6 +99,8 @@ public: // Risse用メソッドなど
 	void independ(const tMethodArgument &args);
 	void load(const tString & filename, const tMethodArgument & args);
 	void save(const tString & filename, const tMethodArgument & args);
+	risse_uint32 getARGB32(risse_size x, risse_size y) { return GetARGB32(x, y); }
+	void setARGB32(risse_size x, risse_size y, risse_uint32 v) { SetARGB32(x, y, v); }
 };
 //---------------------------------------------------------------------------
 

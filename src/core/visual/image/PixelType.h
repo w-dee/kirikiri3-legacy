@@ -37,8 +37,8 @@ public:
 	{
 		pfGray8, //!< 8bpp グレースケール (risse_uint8)
 		pfARGB32, //!< 32bpp Alpha, R, G, B (もっとも一般的) (risa_gl::pixel)
-		NumFormats //!< 形式の最大数
 	};
+	static const int NumFormats = 2; //!< 形式の最大数
 
 	//! @brief		ピクセル形式デスクリプタ
 	struct tDescriptor
@@ -67,6 +67,18 @@ public:
 	//! @param		length			変換する長さ(ピクセル単位)
 	static void Convert(RISSE_RESTRICT void * dest, tFormat dest_format,
 		RISSE_RESTRICT const void * src, tFormat src_format, risse_size length);
+
+	//! @brief		ARGB32 形式の数値へ変換する
+	//! @param		pixe			ピクセルへのポインタ
+	//! @param		pixel_format	ピクセルのフォーマット
+	//! @return		ARGB32 形式の値
+	static risse_uint32 ConvertToARGB32(const void * pixel, tFormat pixel_format);
+
+	//! @brief		ARGB32 形式の数値から変換する
+	//! @param		pixe			ピクセルへのポインタ
+	//! @param		pixel_format	ピクセルのフォーマット
+	//! @param		v				ARGB32形式の値
+	static void ConvertFromARGB32(void * pixel, tFormat pixel_format, risse_uint32 v);
 };
 //---------------------------------------------------------------------------
 

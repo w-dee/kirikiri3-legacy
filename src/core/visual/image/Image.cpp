@@ -109,6 +109,31 @@ void tImageInstance::construct()
 
 
 //---------------------------------------------------------------------------
+risse_uint32 tImageInstance::GetARGB32(risse_size x, risse_size y)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	RISSE_ASSERT(*ImageBuffer);
+
+	return (*ImageBuffer)->GetARGB32(x, y);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageInstance::SetARGB32(risse_size x, risse_size y, risse_uint32 v)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	RISSE_ASSERT(*ImageBuffer);
+
+	Independ(true);
+	(*ImageBuffer)->SetARGB32(x, y, v);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tImageInstance::initialize(const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
@@ -288,6 +313,8 @@ void tImageClass::RegisterMembers()
 	BindFunction(this, tSS<'i','n','d','e','p','e','n','d'>(), &tImageInstance::independ);
 	BindFunction(this, tSS<'l','o','a','d'>(), &tImageInstance::load);
 	BindFunction(this, tSS<'s','a','v','e'>(), &tImageInstance::save);
+	BindFunction(this, tSS<'g','e','t','A','R','G','B','3','2'>(), &tImageInstance::getARGB32);
+	BindFunction(this, tSS<'s','e','t','A','R','G','B','3','2'>(), &tImageInstance::setARGB32);
 }
 //---------------------------------------------------------------------------
 

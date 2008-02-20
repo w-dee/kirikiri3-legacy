@@ -130,6 +130,48 @@ void tPixel::Convert(RISSE_RESTRICT void * dest, tPixel::tFormat dest_format,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+risse_uint32 tPixel::ConvertToARGB32(const void * pixel, tFormat pixel_format)
+{
+	RISSE_ASSERT(pixel != NULL);
+
+	switch(pixel_format)
+	{
+	case pfGray8:
+		return *static_cast<const risse_uint8*>(pixel) * 0x00010101 + 0xff000000;
+
+	case pfARGB32:
+		return *static_cast<const risse_uint32*>(pixel);
+	}
+
+	return 0;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPixel::ConvertFromARGB32(void * pixel, tFormat pixel_format, risse_uint32 v)
+{
+	RISSE_ASSERT(pixel != NULL);
+
+	switch(pixel_format)
+	{
+	case pfGray8:
+		// いまのところ Alpha 成分は無視
+		*static_cast<risse_uint8*>(pixel) =
+			(
+				(v & 0x00ff0000) *   54      + // R
+				(v & 0x0000ff00) * (183<< 8) + // G
+				(v & 0x000000ff) * ( 19<<24)   // B
+			) >> 24;
+		return;
+
+	case pfARGB32:
+		*static_cast<risse_uint32*>(pixel) = v;
+		return;
+	}
+}
+//---------------------------------------------------------------------------
 
 
 

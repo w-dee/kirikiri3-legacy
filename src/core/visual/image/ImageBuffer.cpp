@@ -42,6 +42,51 @@ void tImageBuffer::DecBufferLockCount()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+risse_uint32 tImageBuffer::GetARGB32(risse_size x, risse_size y)
+{
+	const tBufferPointer & ptr = GetBufferPointer();
+	risse_uint32 ret;
+	try
+	{
+		ret = 
+			tPixel::ConvertToARGB32(
+				static_cast<const risse_uint8*>(ptr.Buffer) + ptr.Pitch * y +
+					x * tPixel::GetDescriptorFromFormat(Descriptor.PixelFormat).Size,
+				Descriptor.PixelFormat);
+	}
+	catch(...)
+	{
+		ptr.Release();
+		throw;
+	}
+	ptr.Release();
+	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageBuffer::SetARGB32(risse_size x, risse_size y, risse_uint32 v)
+{
+	const tBufferPointer & ptr = GetBufferPointer();
+	try
+	{
+		tPixel::ConvertFromARGB32(
+				static_cast<risse_uint8*>(ptr.Buffer) + ptr.Pitch * y +
+					x * tPixel::GetDescriptorFromFormat(Descriptor.PixelFormat).Size,
+				Descriptor.PixelFormat,
+				v);
+	}
+	catch(...)
+	{
+		ptr.Release();
+		throw;
+	}
+	ptr.Release();
+}
+//---------------------------------------------------------------------------
+
 
 
 

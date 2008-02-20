@@ -166,6 +166,20 @@ public:
 		return BufferPointer;
 	}
 
+	//! @brief		指定位置のピクセルを ARGB32 形式の整数で得る
+	//! @note		きわめて低速。
+	//! @param		x			X位置
+	//! @param		y			Y位置
+	//! @return		0xAARRGGBB 形式のピクセル値
+	risse_uint32 GetARGB32(risse_size x, risse_size y);
+
+	//! @brief		指定位置のピクセルを ARGB32 形式の整数で設定する
+	//! @note		きわめて低速。
+	//! @param		x			X位置
+	//! @param		y			Y位置
+	//! @param		v			0xAARRGGBB 形式のピクセル値
+	void SetARGB32(risse_size x, risse_size y, risse_uint32 v);
+
 public: // サブクラスで実装する
 	//! @brief		内容をクローンする
 	//! @param		copy_image		内容をコピーするか(偽にするとコピーされたイメージバッファの内容は不定)

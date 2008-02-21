@@ -18,12 +18,15 @@ class MySound extends Sound
 
 	function onLabel(name)
 	{
+		System::stderr.print("\{name}\n");
 		label_sum = label_sum * 10 + (+name);
 	}
 }
 
+var queue = new EventQueue();
 
 var c = new MySound();
+c.queue = queue;
 c.open("/media/muted_conga_hi.ogg");
 
 c.play();
@@ -32,10 +35,12 @@ c.play();
 var th = Thread.new() function()
 {
 	while(c.status != 1); // 再生が停止するまで無限ループ
+	queue.quit();
 }
 
 
 th.start();
+queue.loop();
 th.join();
 
 

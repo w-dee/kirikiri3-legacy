@@ -725,7 +725,8 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 	GetDimensions(&width, &height);
 
 	// prepare header
-	int bitfields_size = pixel_bytes == 3 ? 0: 16; // BITFIELDS のサイズ
+	int bitfields_size = 0; // pixel_bytes == 3 ? 0: 16; // BITFIELDS のサイズ
+		// XXX: 32bit A8R8G8B8 の場合は BI_BITFIELDS 使わないことにする
 	risse_size bmppitch = width * pixel_bytes;
 	bmppitch = (((bmppitch - 1) >> 2) + 1) << 2;
 

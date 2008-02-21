@@ -6,6 +6,11 @@ var boot_script_source = File::getFileSystemAt('/boot/').source;
 
 File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
 
+function compareFile(a, b)
+{
+	return File::open(a) { |st| break st.read() } == File::open(b) { |st| break st.read() };
+}
+
 // ビットマップファイルのファイル名
 var filenames = [
 	"bmpR5G6R5.bmp",
@@ -23,12 +28,16 @@ var filenames = [
 for(var i = 0; i < filenames.length; i++)
 {
 	var filename = filenames[i];
+	System::stderr.print("file \{filename}\n");
+
 	var image = new Image();
 	image.load("/root/media/\{filename}");
 	var dic = new Dictionary();
 	dic['_type'] = 'A8R8G8B8'; // ビットマップサブタイプ
 	image.save("/root/tmp/\{filename}", dic);
+
+	assert(compareFile("/root/media/expected/\{filename}", "/root/tmp/\{filename}"));
 }
 
-System::stdout.print("ok"); //=> "ok"
+System::stdout.print("ok"); //=> ok
 

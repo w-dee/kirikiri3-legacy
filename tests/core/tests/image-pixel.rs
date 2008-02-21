@@ -7,6 +7,11 @@ var boot_script_source = File::getFileSystemAt('/boot/').source;
 File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
 
 
+function compareFile(a, b)
+{
+	return File::open(a) { |st| break st.read() } == File::open(b) { |st| break st.read() };
+}
+
 var pixels = [
 	[ 0xff000000, 0xff0000ff, 0xff00ff00 ],
 	[ 0xffff0000, 0xffff00ff, 0xffffff00 ],
@@ -43,5 +48,8 @@ var dic = new Dictionary();
 dic['_type'] = 'A8R8G8B8'; // ビットマップサブタイプ
 image.save("/root/tmp/pixelsA8R8G8B8.bmp", dic);
 
-System::stdout.print("ok"); //=> "ok"
+assert(compareFile("/root/tmp/pixelsR8G8B8.bmp", "/root/media/expected/pixelsR8G8B8.bmp"));
+assert(compareFile("/root/tmp/pixelsA8R8G8B8.bmp", "/root/media/expected/pixelsA8R8G8B8.bmp"));
+
+System::stdout.print("ok"); //=> ok
 

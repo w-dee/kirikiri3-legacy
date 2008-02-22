@@ -10,8 +10,8 @@
 //! @file
 //! @brief BMPコーデック
 //---------------------------------------------------------------------------
-#ifndef BMPH
-#define BMPH
+#ifndef BMPCodecH
+#define BMPCodecH
 
 #include "visual/image/ImageCodec.h"
 

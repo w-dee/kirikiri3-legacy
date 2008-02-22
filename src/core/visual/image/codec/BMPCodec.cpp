@@ -11,7 +11,7 @@
 //! @brief BMP形式コーデック
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/codec/BMP.h"
+#include "visual/image/codec/BMPcodec.h"
 #include "base/exception/RisaException.h"
 
 

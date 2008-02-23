@@ -336,20 +336,19 @@ tImageCodecFactoryManager::~tImageCodecFactoryManager()
 
 
 //---------------------------------------------------------------------------
-void tImageCodecFactoryManager::Register(const tString & extension, tImageCodecFactory * factory)
+void tImageCodecFactoryManager::Register(const tString & extension, tImageDecoderFactory * factory)
 {
-	Map.insert(tMap::value_type(extension, factory));
+	DecoderMap.insert(tDecoderMap::value_type(extension, factory));
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tImageCodecFactoryManager::Unregister(const tString & extension)
+void tImageCodecFactoryManager::Register(const tString & extension, tImageEncoderFactory * factory)
 {
-	Map.erase(extension);
+	EncoderMap.insert(tEncoderMap::value_type(extension, factory));
 }
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 tImageDecoder * tImageCodecFactoryManager::CreateDecoder(const tString & filename)
@@ -359,8 +358,8 @@ tImageDecoder * tImageCodecFactoryManager::CreateDecoder(const tString & filenam
 	ext.ToLowerCaseNC();
 
 	// ファクトリを探す
-	tMap::iterator factory = Map.find(ext);
-	if(factory != Map.end())
+	tDecoderMap::iterator factory = DecoderMap.find(ext);
+	if(factory != DecoderMap.end())
 	{
 		// ファクトリが見つかった
 		tImageDecoder * decoder;
@@ -388,8 +387,8 @@ tImageEncoder * tImageCodecFactoryManager::CreateEncoder(const tString & filenam
 	ext.ToLowerCaseNC();
 
 	// ファクトリを探す
-	tMap::iterator factory = Map.find(ext);
-	if(factory != Map.end())
+	tEncoderMap::iterator factory = EncoderMap.find(ext);
+	if(factory != EncoderMap.end())
 	{
 		// ファクトリが見つかった
 		tImageEncoder * encoder;

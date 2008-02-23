@@ -174,14 +174,28 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief	 	イメージコーデックファクトリ
+//! @brief	 	イメージデコーダファクトリ
 //! @note		Risa は 拡張子で画像形式を判断する。ファクトリの登録は
 //!				tImageCodecFactoryManager を通して行うこと。
 //---------------------------------------------------------------------------
-class tImageCodecFactory : public tCollectee
+class tImageDecoderFactory : public tCollectee
 {
 public:
 	virtual tImageDecoder * CreateDecoder() = 0; //!< デコーダを作成する
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief	 	イメージエンコーダファクトリ
+//! @note		Risa は 拡張子で画像形式を判断する。ファクトリの登録は
+//!				tImageCodecFactoryManager を通して行うこと。
+//---------------------------------------------------------------------------
+class tImageEncoderFactory : public tCollectee
+{
+public:
 	virtual tImageEncoder * CreateEncoder() = 0; //!< エンコーダを作成する
 };
 //---------------------------------------------------------------------------
@@ -194,8 +208,10 @@ public:
 //---------------------------------------------------------------------------
 class tImageCodecFactoryManager : public singleton_base<tImageCodecFactoryManager>
 {
-	typedef gc_map<tString, tImageCodecFactory *>  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
-	tMap Map; //!< 拡張子→ファクトリのマップ
+	typedef gc_map<tString, tImageDecoderFactory *>  tDecoderMap; //!< デコーダ:拡張子→ファクトリのマップの型のtypedef
+	typedef gc_map<tString, tImageEncoderFactory *>  tEncoderMap; //!< エンコーダ:拡張子→ファクトリのマップの型のtypedef
+	tDecoderMap DecoderMap; //!< デコーダ:拡張子→ファクトリのマップ
+	tEncoderMap EncoderMap; //!< エンコーダ:拡張子→ファクトリのマップ
 
 public:
 	//! @brief	 	コンストラクタ
@@ -204,14 +220,15 @@ public:
 	//! @brief	 	デストラクタ
 	~tImageCodecFactoryManager();
 
-	//! @brief	 	ファクトリを登録する
+	//! @brief	 	デコーダファクトリを登録する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
 	//! @param		factory		ファクトリ
-	void Register(const tString & extension, tImageCodecFactory * factory);
+	void Register(const tString & extension, tImageDecoderFactory * factory);
 
-	//! @brief	 	ファクトリの登録を解除する
+	//! @brief	 	エンコーダファクトリを登録する
 	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
-	void Unregister(const tString & extension);
+	//! @param		factory		ファクトリ
+	void Register(const tString & extension, tImageEncoderFactory * factory);
 
 	//! @brief	 	デコーダを作成する
 	//! @param		filename ファイル名

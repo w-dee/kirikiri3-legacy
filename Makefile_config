@@ -169,6 +169,32 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: boost configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
 	@#-----------------------------------------------------------------------------
+	@echo "libjpeg ..."
+	@(set -e ;\
+		if [ -f $(LIBJPEG_DIR)/lib/libjpeg.dll.a ]; then LIBJPEG_LIBNAME=jpeg.dll; else LIBJPEG_LIBNAME=jpeg; fi; \
+		echo "####  libjpeg config  ####" ;\
+		echo "LIBJPEG_CFLAGS   := -I$(LIBJPEG_DIR)/include" ;\
+		echo "LIBJPEG_CXXFLAGS := -I$(LIBJPEG_DIR)/include" ;\
+		echo "LIBJPEG_CPPFLAGS := -I$(LIBJPEG_DIR)/include" ;\
+		echo "LIBJPEG_LIBS     := -L$(LIBJPEG_DIR)/lib -l$$LIBJPEG_LIBNAME" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libjpeg configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
+	@echo "libpng ..."
+	@(set -e ;\
+		if [ -f $(LIBPNG_DIR)/lib/libpng.dll.a ]; then LIBPNG_LIBNAME=png.dll; else LIBPNG_LIBNAME=png; fi; \
+		echo "####  libpng config  ####" ;\
+		echo "LIBPNG_CFLAGS   := -I$(LIBPNG_DIR)/include" ;\
+		echo "LIBPNG_CXXFLAGS := -I$(LIBPNG_DIR)/include" ;\
+		echo "LIBPNG_CPPFLAGS := -I$(LIBPNG_DIR)/include" ;\
+		echo "LIBPNG_LIBS     := -L$(LIBPNG_DIR)/lib -l$$LIBPNG_LIBNAME" ;\
+		touch $(TOP_DIR)/config_success ;\
+	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libpng configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@rm -f $(TOP_DIR)/config_success
+	@#-----------------------------------------------------------------------------
 	@echo "libogg ..."
 	@(set -e ;\
 		if [ -f $(LIBOGG_DIR)/lib/libogg.dll.a ]; then LIBOGG_LIBNAME=ogg.dll; else LIBOGG_LIBNAME=ogg; fi; \
@@ -179,7 +205,7 @@ $(MAKEFILE_BUILD_CONFIGS) : $(TOP_DIR)/Makefile_config $(WXWIDGETS_CONFIG)
 		echo "LIBOGG_LIBS     := -L$(LIBOGG_DIR)/lib -l$$LIBOGG_LIBNAME" ;\
 		touch $(TOP_DIR)/config_success ;\
 	) | tee -a $(MAKEFILE_BUILD_CONFIG_RELEASE) >> $(MAKEFILE_BUILD_CONFIG_DEBUG)
-	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libvogg configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
+	@if [ ! -f $(TOP_DIR)/config_success ]; then echo "error: libogg configuration failed."; rm -f $(MAKEFILE_BUILD_CONFIGS); exit 1; fi
 	@rm -f $(TOP_DIR)/config_success
 	@#-----------------------------------------------------------------------------
 	@echo "libvorbis ..."

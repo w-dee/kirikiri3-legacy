@@ -82,7 +82,7 @@ void tImageDecoder::Decode(tStreamInstance * stream, tImageInstance * image,
 
 #ifdef RISSE_ASSERT_ENABLED
 	// デコーダがちゃんと dict の中身をクリアする実装になってるかをチェックする
-	if(dict) RISSE_ASSERT(dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','d','u','m','m','y'>()).IsVoid()));
+	if(dict) RISSE_ASSERT(dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','d','u','m','m','y'>())).IsVoid());
 #endif
 
 

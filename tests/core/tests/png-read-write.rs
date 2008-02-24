@@ -36,7 +36,53 @@ for(var i = 0; i < filenames.length; i++)
 	dic['_type'] = 'A8R8G8B8'; // ビットマップサブタイプ
 	image.save("/root/tmp/\{output_filename}", dic);
 
-//	assert(compareFile("/root/media/expected/\{output_filename}", "/root/tmp/\{filename}"));
+	assert(compareFile("/root/media/expected/A8R8G8B8_\{output_filename}", "/root/tmp/\{output_filename}"));
+}
+
+// pngR8G8B8 に対して
+{
+	var filename = "pngR8G8B8.png";
+	System::stderr.print("file \{filename}\n");
+
+	var image = new Image();
+	image.load("/root/media/\{filename}");
+
+	var dic = new Dictionary();
+	dic['_type'] = 'R8G8B8'; // PNG サブタイプ
+	image.save("/root/tmp/\{filename}", dic);
+
+	var image = new Image();
+	image.load("/root/tmp/\{filename}");
+
+	var output_filename = File::chopExtension(filename) + ".bmp";
+	var dic = new Dictionary();
+	dic['_type'] = 'R8G8B8'; // ビットマップサブタイプ
+	image.save("/root/tmp/\{output_filename}", dic);
+
+	assert(compareFile("/root/media/expected/R8G8B8_\{output_filename}", "/root/tmp/\{output_filename}"));
+}
+
+// pngR8G8B8 に対して
+{
+	var filename = "pngR8G8B8.png";
+	System::stderr.print("file \{filename}\n");
+
+	var image = new Image();
+	image.load("/root/media/\{filename}");
+
+	var dic = new Dictionary();
+	dic['_type'] = 'GRAY8'; // PNG サブタイプ
+	image.save("/root/tmp/\{filename}", dic);
+
+	var image = new Image();
+	image.load("/root/tmp/\{filename}");
+
+	var output_filename = File::chopExtension(filename) + ".bmp";
+	var dic = new Dictionary();
+	dic['_type'] = 'R8G8B8'; // ビットマップサブタイプ
+	image.save("/root/tmp/\{output_filename}", dic);
+
+	assert(compareFile("/root/media/expected/GRAY8_\{output_filename}", "/root/tmp/\{output_filename}"));
 }
 
 System::stdout.print("ok"); //=> ok

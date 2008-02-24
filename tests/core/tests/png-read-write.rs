@@ -85,5 +85,36 @@ for(var i = 0; i < filenames.length; i++)
 	assert(compareFile("/root/media/expected/GRAY8_\{output_filename}", "/root/tmp/\{output_filename}"));
 }
 
+// vpAg
+{
+	var filename = "pngvpAg.png";
+	System::stderr.print("file \{filename}\n");
+
+	var image = new Image();
+	var dic = new Dictionary();
+	image.load("/root/media/\{filename}", dic);
+
+	assert(dic['vpag_w']    == 640);
+	assert(dic['vpag_h']    == 480);
+	assert(dic['vpag_unit'] == "pixel");
+	assert(dic['offs_x']    == 123);
+	assert(dic['offs_y']    == 94);
+	assert(dic['offs_unit'] == "pixel");
+
+	image.save("/root/tmp/\{filename}", dic);
+
+	var image = new Image();
+	image.load("/root/tmp/\{filename}", dic);
+
+	assert(dic['vpag_w']    == 640);
+	assert(dic['vpag_h']    == 480);
+	assert(dic['vpag_unit'] == "pixel");
+	assert(dic['offs_x']    == 123);
+	assert(dic['offs_y']    == 94);
+	assert(dic['offs_unit'] == "pixel");
+
+}
+
+
 System::stdout.print("ok"); //=> ok
 

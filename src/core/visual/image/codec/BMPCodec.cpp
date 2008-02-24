@@ -504,8 +504,7 @@ void tBMPImageDecoder::InternalLoadBMP(tStreamAdapter src,
 			buf = readbuf;
 		}
 
-		risse_offset dest_pitch = 0;
-		void *scanline = StartLines(dest_y, 1, dest_pitch);
+		void *scanline = StartLines(dest_y, 1, NULL);
 
 		switch(bitcount)
 		{
@@ -707,11 +706,11 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 		if(!val.IsVoid())
 		{
 			tString str = val.operator tString();
-			if(str == RISSE_WS("24") ||
-				str == RISSE_WS("R8G8B8"))
+			if(str == tSS<'2','4'>() ||
+				str == tSS<'R','8','G','8','B','8'>())
 				pixel_bytes = 3;
-			else if(str == RISSE_WS("32") ||
-				str == RISSE_WS("A8R8G8B8"))
+			else if(str == tSS<'3','2'>() ||
+				str == tSS<'A','8','R','8','G','8','B','8'>())
 				pixel_bytes = 4;
 			else
 				tIllegalArgumentExceptionClass::Throw(
@@ -768,9 +767,8 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 		if(callback) callback->CallOnProgress(height, height - y);
 		if(pixel_bytes == 4)
 		{
-			risse_offset pitch = 0;
 			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * width);
-			void * inbuf = GetLines(NULL, y, 1, pitch, tPixel::pfARGB32);
+			void * inbuf = GetLines(NULL, y, 1, NULL, tPixel::pfARGB32);
 			Convert32BitTo32Bit(
 				static_cast<risse_uint32*>(buf),
 				static_cast<risse_uint32*>(inbuf),
@@ -778,10 +776,9 @@ void tBMPImageEncoder::Process(tStreamInstance * stream,
 		}
 		else if(pixel_bytes == 3)
 		{
-			risse_offset pitch = 0;
 			if(!buf) buf = MallocAtomicCollectee(pixel_bytes * width);
 			const risse_uint32 *inbuf = static_cast<const risse_uint32 *>(
-				GetLines(NULL, y, 1, pitch, tPixel::pfARGB32));
+				GetLines(NULL, y, 1, NULL, tPixel::pfARGB32));
 			risse_uint8 *destbuf = static_cast<risse_uint8*>(buf);
 			// 32bpp を 24bpp に詰め直す(alphaは無視)
 			for(risse_size x = 0; x < width; x++)

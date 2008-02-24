@@ -37,7 +37,7 @@ public:
 	const tImageBuffer::tDescriptor * Descriptor; //!< 格納先イメージバッファの記述子
 	void * LastConvertBuffer; //!< 最後に作成した変換用バッファ
 	risse_size LastConvertBufferSize; //!< 最後に作成した変換用バッファのサイズ
-	risse_offset LastCnvertBufferPitch; //!< 最後に作成した変換用バッファのピッチ
+	risse_offset LastConvertBufferPitch; //!< 最後に作成した変換用バッファのピッチ
 	risse_size LastLineY; //!< 最後に StartLines() で要求された y
 	risse_size LastLineH; //!< 最後に StartLines() で要求された h
 
@@ -93,13 +93,13 @@ protected:
 	//! @brief		nライン分のバッファを取得する(サブクラスから呼ばれる)
 	//! @param		y		縦座標値(ピクセル単位)
 	//! @param		h		縦幅(ピクセル単位)
-	//! @param		pitch	ピッチ(次のラインへのバイト数) を格納する変数領域
+	//! @param		pitch	ピッチ(次のラインへのバイト数) を格納する変数へのポインタ (NULL=要らない場合)
 	//! @return		指定位置から指定縦幅分のバッファ
 	//! @note		指定y位置からhライン分のバッファを取得する。このバッファに SetDimensions() で
 	//!				指定したピクセル形式でデータを書き込んだら、DoneLines() を呼ぶこと。
 	//! @note		できればあまり大きな単位でStartLines() -> DoneLines()をおこなわず、
 	//!				大きくとも16ピクセル縦幅などの大きさで StartLines() -> DoneLines() を繰り返した方が効率的。
-	void * StartLines(risse_size y, risse_size h, risse_offset & pitch);
+	void * StartLines(risse_size y, risse_size h, risse_offset * pitch);
 
 	//! @brief		バッファにデータを書き込んだ事を通知する(サブクラスから呼ばれる)
 	//! @note		StartLines() で取得したバッファへの書き込みが完了したことを通知するためにサブクラスから呼ばれる
@@ -158,11 +158,13 @@ protected:
 	//! @param		buf		格納先バッファ(NULLの場合はこのメソッド内で割り当てられる)
 	//! @param		y		縦座標値(ピクセル単位)
 	//! @param		h		縦幅(ピクセル単位)
-	//! @param		pitch	buf の ピッチ(次のラインへのバイト数)
-	//!						bufにNULLを渡した場合は戻りのバッファに対応するpitchが書き込まれる
+	//! @param		pitch	buf の ピッチ(次のラインへのバイト数)を格納する変数へのポインタ; 要らない場合はNULL
+	//!						bufにNULLを渡した場合は戻りのバッファに対応するpitchが書き込まれる;
+	//!						もしhに2以上を渡し、bufに格納先バッファを指定した場合は、pitch の指す先に
+	//!						画像のピッチを渡さなければならない。
 	//! @param		pixel_format	取得したいピクセル形式
 	//! @return		バッファ
-	void * GetLines(void * buf, risse_size y, risse_size h, risse_offset & pitch,
+	void * GetLines(void * buf, risse_size y, risse_size h, risse_offset * pitch,
 		tPixel::tFormat pixel_format);
 
 };

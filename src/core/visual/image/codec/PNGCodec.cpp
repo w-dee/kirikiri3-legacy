@@ -301,8 +301,7 @@ void tPNGImageDecoder::Process(tStreamInstance * stream,
 			for(i=0; i<height; i++)
 			{
 				if(callback) callback->CallOnProgress(height, i);
-				risse_offset dummy_pitch;
-				void *scanline = StartLines(i, 1, dummy_pitch);
+				void *scanline = StartLines(i, 1, NULL);
 				png_read_row(png_ptr, (png_bytep)scanline, NULL);
 				DoneLines();
 			}
@@ -334,8 +333,7 @@ void tPNGImageDecoder::Process(tStreamInstance * stream,
 			// set the pixel data
 			for(i=0; i<height; i++)
 			{
-				risse_offset dummy_pitch;
-				void *scanline = StartLines(i, 1, dummy_pitch);
+				void *scanline = StartLines(i, 1, NULL);
 				memcpy(scanline, row_pointers[i], rowbytes);
 				DoneLines();
 			}
@@ -373,6 +371,258 @@ void tPNGImageDecoder::PushMetadata(const tString & key, const tVariant & value)
 
 
 
+//---------------------------------------------------------------------------
+// function - user_write_data
+static void PNG_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+	static_cast<tStreamAdapter *>(png_get_io_ptr(png_ptr))->WriteBuffer((void*)data, length);
+}
+//---------------------------------------------------------------------------
+// function - user_flush
+static void PNG_flush(png_structp png_ptr)
+{
+	static_cast<tStreamAdapter *>(png_get_io_ptr(png_ptr))->Flush();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tPNGImageEncoder::Process(tStreamInstance * stream,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict)
+{
+	// 今のところ dict の '_type' は bmp と同じく '24' (別名'R8G8B8') と '32'
+	// (別名 'A8R8G8B8') と 'grayscale' (別名 'GRAY8') を受け付ける。
+	// 32 の場合はアルファチャンネルが含まれる。
+	// (デフォルトは 24)。
+	// そのほか、vpag_w, vpag_h, vpag_unit と offs_x, offs_y, offs_unit も
+	// 受け付ける
+	int color_type = PNG_COLOR_TYPE_RGB;
+	bool store_vpAg = false;
+	risse_uint32 vpAg_w, vpAg_h;
+	int vpAg_unit = PNG_OFFSET_PIXEL;
+	bool store_oFFs = false;
+	risse_int32 oFFs_x, oFFs_y;
+	int oFFs_unit = PNG_OFFSET_PIXEL;
+
+
+	if(dict)
+	{
+		// _type の処理
+		tVariant val, val1, val2;
+		val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','t','y','p','e'>()));
+		if(!val.IsVoid())
+		{
+			tString str = val.operator tString();
+			if(str == tSS<'g','r','a','y','s','c','a','l','e'>() ||
+				str == tSS<'G','R','A','Y','8'>())
+				color_type = PNG_COLOR_TYPE_GRAY;
+			else if(str == tSS<'2','4'>() ||
+				str == tSS<'R','8','G','8','B','8'>())
+				color_type = PNG_COLOR_TYPE_RGB;
+			else if(str == tSS<'3','2'>() ||
+				str == tSS<'A','8','R','8','G','8','B','8'>())
+				color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+			else
+				tIllegalArgumentExceptionClass::Throw(
+					RISSE_WS_TR("unknown png sub-type in '_type' parameter"));
+		}
+
+		// vpAg 関連
+		val1 = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'v','p','a','g','_','w'>()));
+		val2 = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'v','p','a','g','_','h'>()));
+		if(!val1.IsVoid() && !val2.IsVoid())
+		{
+			store_vpAg = true;
+			vpAg_w = static_cast<risse_uint32>((risse_int64)val1);
+			vpAg_h = static_cast<risse_uint32>((risse_int64)val2);
+			val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'v','p','a','g','_','u','n','i','t'>()));
+			if(!val.IsVoid())
+			{
+				tString str = val.operator tString();
+				if(str == tSS<'p','i','x','e','l'>())
+					vpAg_unit = PNG_OFFSET_PIXEL;
+				else if(str == tSS<'m','i','c','r','o','m','e','t','e','r'>())
+					vpAg_unit = PNG_OFFSET_MICROMETER;
+				else
+					tIllegalArgumentExceptionClass::Throw(
+						RISSE_WS_TR("unknown unit for 'vpag_unit' parameter"));
+			}
+		}
+
+		// oFFs 関連
+		val1 = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'o','f','f','s','_','x'>()));
+		val2 = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'o','f','f','s','_','y'>()));
+		if(!val1.IsVoid() && !val2.IsVoid())
+		{
+			store_oFFs = true;
+			oFFs_x = static_cast<risse_int32>((risse_int64)val1);
+			oFFs_y = static_cast<risse_int32>((risse_int64)val2);
+			val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'o','f','f','s','_','u','n','i','t'>()));
+			if(!val.IsVoid())
+			{
+				tString str = val.operator tString();
+				if(str == tSS<'p','i','x','e','l'>())
+					oFFs_unit = PNG_OFFSET_PIXEL;
+				else if(str == tSS<'m','i','c','r','o','m','e','t','e','r'>())
+					oFFs_unit = PNG_OFFSET_MICROMETER;
+				else
+					tIllegalArgumentExceptionClass::Throw(
+						RISSE_WS_TR("unknown unit for 'offs_unit' parameter"));
+			}
+		}
+	}
+
+	tStreamAdapter dest(stream);
+	risse_size width = 0;
+	risse_size height = 0;
+	GetDimensions(&width, &height);
+
+
+	png_structp png_ptr = NULL;
+	png_infop info_ptr = NULL;
+	png_bytep row_buffer = NULL;
+
+	try
+	{
+		// create png_struct
+		png_ptr = png_create_write_struct_2
+			(PNG_LIBPNG_VER_STRING,
+			(png_voidp)this, PNG_error, PNG_warning,
+			(png_voidp)this, PNG_malloc, PNG_free);
+
+		// create png_info
+		info_ptr = png_create_info_struct(png_ptr);
+
+		// set write function
+		png_set_write_fn(png_ptr, (png_voidp)&dest,
+			PNG_write_data, PNG_flush);
+
+
+		// set IHDR
+		png_set_IHDR(png_ptr, info_ptr, width, height,
+			8,
+			color_type, PNG_INTERLACE_NONE,
+			PNG_COMPRESSION_TYPE_DEFAULT,
+			PNG_FILTER_TYPE_DEFAULT);
+
+		// set oFFs
+		if(store_oFFs)
+			png_set_oFFs(png_ptr, info_ptr, oFFs_x, oFFs_y, oFFs_unit);
+
+		// write info
+		png_write_info(png_ptr, info_ptr);
+
+		// write vpAg private chunk
+		if(store_vpAg)
+		{
+			png_byte png_vpAg[5] = {118, 112,  65, 103, '\0'};
+			unsigned char vpag_chunk_data[9];
+		#define PNG_write_be32(p, a) (\
+			((unsigned char *)(p))[0] = (unsigned char)(((a) >>24) & 0xff), \
+			((unsigned char *)(p))[1] = (unsigned char)(((a) >>16) & 0xff), \
+			((unsigned char *)(p))[2] = (unsigned char)(((a) >> 8) & 0xff), \
+			((unsigned char *)(p))[3] = (unsigned char)(((a)     ) & 0xff)  )
+			PNG_write_be32(vpag_chunk_data,     vpAg_w);
+			PNG_write_be32(vpag_chunk_data + 4, vpAg_h);
+			vpag_chunk_data[8] = (unsigned char)vpAg_unit;
+			png_write_chunk(png_ptr, png_vpAg, vpag_chunk_data, 9);
+		}
+
+		// write image
+		if(color_type == PNG_COLOR_TYPE_RGB)
+		{
+			row_buffer = (png_bytep)png_malloc(png_ptr, 3 * width + 6);
+			try
+			{
+				png_bytep row_pointer = row_buffer;
+
+				for(risse_size i = 0; i < height; i++)
+				{
+					const risse_uint32 *in = static_cast<const risse_uint32 *>(
+						GetLines(NULL, i, 1, NULL, tPixel::pfARGB32));
+					png_bytep out = row_buffer;
+					for(risse_size x = 0; x < width; x++)
+					{
+						risse_uint32 v = *in;
+						out[2] = static_cast<risse_uint8>(v);
+						out[1] = static_cast<risse_uint8>(v >> 8);
+						out[0] = static_cast<risse_uint8>(v >> 16);
+						out += 3;
+						in ++;
+					}
+					png_write_row(png_ptr, row_pointer);
+				}
+			}
+			catch(...)
+			{
+				png_free(png_ptr, row_buffer);
+				throw;
+			}
+			png_free(png_ptr, row_buffer);
+		}
+		else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+		{
+			row_buffer = (png_bytep)png_malloc(png_ptr, 4 * width + 6);
+			try
+			{
+				png_bytep row_pointer = row_buffer;
+
+				for(risse_size i = 0; i < height; i++)
+				{
+					const risse_uint32 *in = static_cast<const risse_uint32 *>(
+						GetLines(NULL, i, 1, NULL, tPixel::pfARGB32));
+					png_bytep out = row_buffer;
+					for(risse_size x = 0; x < width; x++)
+					{
+						risse_uint32 v = *in;
+						out[2] = static_cast<risse_uint8>(v);
+						out[1] = static_cast<risse_uint8>(v >> 8);
+						out[0] = static_cast<risse_uint8>(v >> 16);
+						out[3] = static_cast<risse_uint8>(v >> 24);
+						out += 4;
+						in ++;
+					}
+					png_write_row(png_ptr, row_pointer);
+				}
+			}
+			catch(...)
+			{
+				png_free(png_ptr, row_buffer);
+				throw;
+			}
+			png_free(png_ptr, row_buffer);
+		}
+		else
+		{
+			for(risse_size i = 0; i < height; i++)
+			{
+				const risse_uint32 *in = static_cast<const risse_uint32 *>(
+					GetLines(NULL, i, 1, NULL, tPixel::pfGray8));
+				png_bytep row_pointer = (png_bytep)in;
+				png_write_row(png_ptr, row_pointer);
+			}
+		}
+
+		// finish writing
+		png_write_end(png_ptr, info_ptr);
+
+	}
+	catch(...)
+	{
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		throw;
+	}
+
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -385,12 +635,13 @@ class tPNGImageCodecFactory : public tImageDecoderFactory, public tImageEncoderF
 								public singleton_base<tPNGImageCodecFactory>
 {
 	virtual tImageDecoder * CreateDecoder() { return new tPNGImageDecoder; }
-	virtual tImageEncoder * CreateEncoder() { return NULL; /*new tPNGImageEncoder*/; }
+	virtual tImageEncoder * CreateEncoder() { return new tPNGImageEncoder; }
 public:
 	//! @brief		コンストラクタ
 	tPNGImageCodecFactory()
 	{
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','p','n','g'>(), (tImageDecoderFactory*)this);
+		tImageCodecFactoryManager::instance()->Register(tSS<'.','p','n','g'>(), (tImageEncoderFactory*)this);
 	}
 };
 //---------------------------------------------------------------------------

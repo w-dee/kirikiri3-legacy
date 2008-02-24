@@ -16,7 +16,8 @@ CPPFILES=\
 	ImageBuffer.cpp                    \
 	ImageCodec.cpp                     \
 	PixelType.cpp                      \
-	codec/BMPCodec.cpp                 
+	codec/BMPCodec.cpp                 \
+	codec/PNGCodec.cpp                 
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

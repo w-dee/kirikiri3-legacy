@@ -152,20 +152,6 @@ extern const float PFV_8[4];
 extern const float PFV_INIT[4];
 extern const float PFV_0P5[4];
 
-extern const float RISA_VFASTATAN2_C1[4] ;
-extern const float RISA_VFASTATAN2_C2[4] ;
-extern const float RISA_VFASTATAN2_E [4] ;
-extern const float RISA_VFASTSINCOS_SS1[4] ;
-extern const float RISA_VFASTSINCOS_SS2[4] ;
-extern const float RISA_VFASTSINCOS_SS3[4] ;
-extern const float RISA_VFASTSINCOS_SS4[4] ;
-extern const float RISA_VFASTSINCOS_CC1[4] ;
-extern const float RISA_VFASTSINCOS_CC2[4] ;
-extern const float RISA_VFASTSINCOS_CC3[4] ;
-extern const float RISA_V_R_2PI[4] ;
-extern const float RISA_V_PI[4] ;
-extern const float RISA_V_2PI[4] ;
-
 STIN __m128 _mm_untnorm_ps(__m128 x)
 {
 	_SALIGN16(const risse_uint32)	PIV0[4]	 = {

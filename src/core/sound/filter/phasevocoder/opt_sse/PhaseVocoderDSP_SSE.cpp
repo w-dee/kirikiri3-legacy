@@ -17,7 +17,6 @@
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"
 #include "base/mathlib/RealFFT.h"
 #include <string.h>
-#include "risseUtils.h"
 
 
 namespace Risa {

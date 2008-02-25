@@ -25,8 +25,8 @@ namespace Risa {
 //---------------------------------------------------------------------------
 // 定数など
 //---------------------------------------------------------------------------
-extern const float RISA_VFASTATAN2_C1[4] ;
-extern const float RISA_VFASTATAN2_C2[4] ;
+extern const risse_uint32 RISA_VFASTATAN2_C1[4] ;
+extern const risse_uint32 RISA_VFASTATAN2_C1_XOR_C2[4] ;
 extern const float RISA_VFASTATAN2_E [4] ;
 extern const float RISA_VFASTSINCOS_SS1[4] ;
 extern const float RISA_VFASTSINCOS_SS2[4] ;
@@ -56,14 +56,19 @@ static inline __m128 VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 //   float abs_y = fabs(y)+1e-10;     // kludge to prevent 0/0 condition
 
 	__m128 x_sign = _mm_and_ps(x, PM128(PCS_RRRR));// 0x80000000 if x < 0
-	__m128 x_mask = _mm_cmpgt_ps(x, PM128(PFV_0)); // 0xffffffff if x > 0
+	__m128 x_mask = _mm_cmple_ps(x, PM128(PFV_0)); // 0xffffffff if x <= 0
 	__m128 abs_y2 = _mm_xor_ps(abs_y , x_sign);
 	__m128 abs_y1 = _mm_xor_ps(abs_y2, PM128(PCS_RRRR));
 	__m128 r      = _mm_div_ps(_mm_add_ps(x, abs_y1), _mm_add_ps(x, abs_y2));
 	r             = _mm_xor_ps(r, x_sign);
+	__m128 coeff_1_or_2 = _mm_xor_ps(
+							_mm_and_ps(x_mask, PM128(RISA_VFASTATAN2_C1_XOR_C2)),
+							PM128(RISA_VFASTATAN2_C1)); // x<=0?coeff_2:coeff_1
+/*
 	__m128 coeff_1_or_2 = _mm_or_ps(
 		_mm_and_ps   (x_mask, PM128(RISA_VFASTATAN2_C1)),
-		_mm_andnot_ps(x_mask, PM128(RISA_VFASTATAN2_C2)));
+		_mm_andnot_ps(x_mask, PM128(RISA_VFASTATAN2_C2))); // x>=0?coeff_1:coeff_2
+*/
 	__m128 angle  = _mm_sub_ps(coeff_1_or_2, _mm_mul_ps(PM128(RISA_VFASTATAN2_C1), r));
 /*
    if (x>=0)

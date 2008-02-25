@@ -41,7 +41,7 @@
 	 http://homepage3.nifty.com/blacksword/
 */
 
-
+#include "prec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -10,7 +10,7 @@
 //! @file
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
-#include "risse/include/risseTypes.h"
+#include "prec.h"
 #include <math.h>
 #include "base/cpu/opt_sse/xmmlib.h"
 #include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
@@ -21,11 +21,17 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 #define vat_c1 (M_PI /4)
+#define vat_c1_i 0x3f490fdbL
 #define vat_c2 (vat_c1*3)
+#define vat_c2_i 0x4016cbe4L
+// vat_c1_i と vat_c2_i はそれぞれIEEE float での数値表現を16進数で表した物
+
 #define vat_e  1e-10
 
-_ALIGN16(const float) RISA_VFASTATAN2_C1[4] = { vat_c1, vat_c1, vat_c1, vat_c1 };
-_ALIGN16(const float) RISA_VFASTATAN2_C2[4] = { vat_c2, vat_c2, vat_c2, vat_c2 };
+_ALIGN16(const risse_uint32) RISA_VFASTATAN2_C1[4] =
+	{ vat_c1_i, vat_c1_i, vat_c1_i, vat_c1_i };
+_ALIGN16(const risse_uint32) RISA_VFASTATAN2_C1_XOR_C2[4] =
+	{ vat_c1_i^vat_c2_i, vat_c1_i^vat_c2_i, vat_c1_i^vat_c2_i, vat_c1_i^vat_c2_i };
 _ALIGN16(const float) RISA_VFASTATAN2_E [4] = { vat_e,  vat_e,  vat_e,  vat_e  };
 
 

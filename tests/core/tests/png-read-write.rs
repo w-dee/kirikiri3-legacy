@@ -94,11 +94,11 @@ for(var i = 0; i < filenames.length; i++)
 	var dic = new Dictionary();
 	image.load("/root/media/\{filename}", dic);
 
-	assert(dic['vpag_w']    == 640);
-	assert(dic['vpag_h']    == 480);
+	assert(dic['vpag_w']    == "640");
+	assert(dic['vpag_h']    == "480");
 	assert(dic['vpag_unit'] == "pixel");
-	assert(dic['offs_x']    == 123);
-	assert(dic['offs_y']    == 94);
+	assert(dic['offs_x']    == "123");
+	assert(dic['offs_y']    == "94");
 	assert(dic['offs_unit'] == "pixel");
 
 	image.save("/root/tmp/\{filename}", dic);
@@ -106,11 +106,11 @@ for(var i = 0; i < filenames.length; i++)
 	var image = new Image();
 	image.load("/root/tmp/\{filename}", dic);
 
-	assert(dic['vpag_w']    == 640);
-	assert(dic['vpag_h']    == 480);
+	assert(dic['vpag_w']    == "640");
+	assert(dic['vpag_h']    == "480");
 	assert(dic['vpag_unit'] == "pixel");
-	assert(dic['offs_x']    == 123);
-	assert(dic['offs_y']    == 94);
+	assert(dic['offs_x']    == "123");
+	assert(dic['offs_y']    == "94");
 	assert(dic['offs_unit'] == "pixel");
 
 }

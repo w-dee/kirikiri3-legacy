@@ -94,18 +94,23 @@ static int PNG_read_chunk_callback(png_structp png_ptr,png_unknown_chunkp chunk)
 		risse_uint8  unit   = chunk->data[8];
 
 		// push information into meta-info
-		user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','w'>(), (risse_int64)width);
-		user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','h'>(), (risse_int64)height);
+		user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','w'>(),
+			tVariant(tString::AsString((risse_int64)width)));
+		user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','h'>(),
+			tVariant(tString::AsString((risse_int64)height)));
 		switch(unit)
 		{
 		case PNG_OFFSET_PIXEL:
-			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(), tVariant(tSS<'p','i','x','e','l'>()));
+			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(),
+				tVariant(tSS<'p','i','x','e','l'>()));
 			break;
 		case PNG_OFFSET_MICROMETER:
-			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(), tVariant(tSS<'m','i','c','r','o','m','e','t','e','r'>()));
+			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(),
+				tVariant(tSS<'m','i','c','r','o','m','e','t','e','r'>()));
 			break;
 		default:
-			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(), tVariant(tSS<'u','n','k','n','o','w','n'>()));
+			user_struct->Decoder->PushMetadata(tSS<'v','p','a','g','_','u','n','i','t'>(),
+				tVariant(tSS<'u','n','k','n','o','w','n'>()));
 			break;
 		}
 		return 1; // chunk read success
@@ -198,18 +203,23 @@ void tPNGImageDecoder::Process(tStreamInstance * stream,
 			png_get_oFFs(png_ptr, info_ptr, &offset_x, &offset_y, &offset_unit_type))
 		{
 			// push offset information into metainfo data
-			PushMetadata(tSS<'o','f','f','s','_','x'>(), (risse_int64)offset_x);
-			PushMetadata(tSS<'o','f','f','s','_','y'>(), (risse_int64)offset_y);
+			PushMetadata(tSS<'o','f','f','s','_','x'>(),
+				tVariant(tString::AsString((risse_int64)offset_x)));
+			PushMetadata(tSS<'o','f','f','s','_','y'>(),
+				tVariant(tString::AsString((risse_int64)offset_y)));
 			switch(offset_unit_type)
 			{
 			case PNG_OFFSET_PIXEL:
-				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(), tVariant(tSS<'p','i','x','e','l'>()));
+				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(),
+					tVariant(tSS<'p','i','x','e','l'>()));
 				break;
 			case PNG_OFFSET_MICROMETER:
-				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(), tVariant(tSS<'m','i','c','r','o','m','e','t','e','r'>()));
+				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(),
+					tVariant(tSS<'m','i','c','r','o','m','e','t','e','r'>()));
 				break;
 			default:
-				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(), tVariant(tSS<'u','n','k','n','o','w','n'>()));
+				PushMetadata(tSS<'o','f','f','s','_','u','n','i','t'>(),
+					tVariant(tSS<'u','n','k','n','o','w','n'>()));
 				break;
 			}
 		}

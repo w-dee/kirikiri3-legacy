@@ -45,7 +45,7 @@ static void PNG_free (png_structp ps,void*/* png_structp*/ mem)
 // user_error_fn
 static void PNG_error (png_structp ps, png_const_charp msg)
 {
-	tIOExceptionClass::Throw(tString(RISSE_WS("error on reading PNG: %1"), tString(msg)));
+	tIOExceptionClass::Throw(tString(RISSE_WS_TR("error on reading PNG: %1"), tString(msg)));
 }
 //---------------------------------------------------------------------------
 // user_warning_fn

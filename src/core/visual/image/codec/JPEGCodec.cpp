@@ -47,7 +47,7 @@ struct my_error_mgr
 METHODDEF(void)
 my_error_exit(j_common_ptr cinfo)
 {
-	tIOExceptionClass::Throw(tString(RISSE_WS("error on reading JPEG: error code %1"),
+	tIOExceptionClass::Throw(tString(RISSE_WS_TR("error on reading JPEG: error code %1"),
 						tString::AsString((risse_int64)cinfo->err->msg_code)));
 }
 //---------------------------------------------------------------------------
@@ -213,7 +213,7 @@ void tJPEGImageDecoder::Process(tStreamInstance * stream,
 		// check output color space
 		if ((cinfo.out_color_space == JCS_CMYK) || (cinfo.out_color_space == JCS_YCCK))
 			tIOExceptionClass::Throw(
-				tString(RISSE_WS("error on reading JPEG: unsupported color space")));
+				tString(RISSE_WS_TR("error on reading JPEG: unsupported color space")));
 		else
 			cinfo.out_color_space = JCS_RGB;
 

@@ -18,7 +18,8 @@ CPPFILES=\
 	PixelType.cpp                      \
 	codec/BMPCodec.cpp                 \
 	codec/PNGCodec.cpp                 \
-	codec/JPEGCodec.cpp                
+	codec/JPEGCodec.cpp                \
+	codec/TLGCodec.cpp                 
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

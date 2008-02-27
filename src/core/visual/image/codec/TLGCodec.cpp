@@ -30,19 +30,22 @@ static void TLG5ComposeColors3To4(
 	risse_int width)
 {
 	risse_int x;
-	risse_uint8 pc[3];
-	risse_uint8 c[3];
-	pc[0] = pc[1] = pc[2] = 0;
+	risse_uint8 pc0, pc1, pc2;
+	risse_uint8 c0, c1, c2;
+	pc0 = pc1 = pc2 = 0;
+	const risse_uint8 * buf0 = buf[0];
+	const risse_uint8 * buf1 = buf[1];
+	const risse_uint8 * buf2 = buf[2];
 	for(x = 0; x < width; x++)
 	{
-		c[0] = buf[0][x];
-		c[1] = buf[1][x];
-		c[2] = buf[2][x];
-		c[0] += c[1]; c[2] += c[1];
+		c0 = buf0[x];
+		c1 = buf1[x];
+		c2 = buf2[x];
+		c0 += c1; c2 += c1;
 		*(risse_uint32 *)outp =
-								((((pc[0] += c[0]) + upper[0]) & 0xff)      ) +
-								((((pc[1] += c[1]) + upper[1]) & 0xff) <<  8) +
-								((((pc[2] += c[2]) + upper[2]) & 0xff) << 16) +
+								((((pc0 += c0) + upper[0]) & 0xff)      ) +
+								((((pc1 += c1) + upper[1]) & 0xff) <<  8) +
+								((((pc2 += c2) + upper[2]) & 0xff) << 16) +
 								0xff000000;
 		outp += 4;
 		upper += 4;
@@ -59,21 +62,25 @@ static void TLG5ComposeColors4To4(
 	risse_int width)
 {
 	risse_int x;
-	risse_uint8 pc[4];
-	risse_uint8 c[4];
-	pc[0] = pc[1] = pc[2] = pc[3] = 0;
+	risse_uint8 pc0, pc1, pc2, pc3;
+	risse_uint8 c0, c1, c2, c3;
+	pc0 = pc1 = pc2 = pc3 = 0;
+	const risse_uint8 * buf0 = buf[0];
+	const risse_uint8 * buf1 = buf[1];
+	const risse_uint8 * buf2 = buf[2];
+	const risse_uint8 * buf3 = buf[3];
 	for(x = 0; x < width; x++)
 	{
-		c[0] = buf[0][x];
-		c[1] = buf[1][x];
-		c[2] = buf[2][x];
-		c[3] = buf[3][x];
-		c[0] += c[1]; c[2] += c[1];
+		c0 = buf0[x];
+		c1 = buf1[x];
+		c2 = buf2[x];
+		c3 = buf3[x];
+		c0 += c1; c2 += c1;
 		*(risse_uint32 *)outp =
-								((((pc[0] += c[0]) + upper[0]) & 0xff)      ) +
-								((((pc[1] += c[1]) + upper[1]) & 0xff) <<  8) +
-								((((pc[2] += c[2]) + upper[2]) & 0xff) << 16) +
-								((((pc[3] += c[3]) + upper[3]) & 0xff) << 24);
+								((((pc0 += c0) + upper[0]) & 0xff)      ) +
+								((((pc1 += c1) + upper[1]) & 0xff) <<  8) +
+								((((pc2 += c2) + upper[2]) & 0xff) << 16) +
+								((((pc3 += c3) + upper[3]) & 0xff) << 24);
 		outp += 4;
 		upper += 4;
 	}
@@ -956,6 +963,8 @@ void tTLGImageDecoder::ProcessTLG(tStreamAdapter & src,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
+DWORD start = GetTickCount();
+
 	// read header
 	unsigned char mark[12];
 	src.ReadBuffer(mark, 11);
@@ -968,6 +977,8 @@ void tTLGImageDecoder::ProcessTLG(tStreamAdapter & src,
 	else
 		tIOExceptionClass::Throw(
 			RISSE_WS_TR("error on reading TLG: invalid TLG header or unsupported TLG version"));
+
+fprintf(stderr, "%dms\n", GetTickCount() - start);
 }
 //---------------------------------------------------------------------------
 

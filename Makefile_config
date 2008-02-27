@@ -15,7 +15,7 @@ ifdef USE_SSE
 endif
 
 ifdef USE_SSE
- CPU_OPTIONS = -msse -DRISA_USE_SSE
+ CPU_OPTIONS = -msse -DRISA_USE_SSE -DRISA_USE_MMX
 else
 ifdef USE_MMX
  CPU_OPTIONS = -msse -DRISE_USE_MMX

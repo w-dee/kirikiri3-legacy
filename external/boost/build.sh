@@ -26,21 +26,28 @@ jam_build_cmd()
 		# 直接バッチファイルを実行できないようなので
 		# バッチファイルを引数にしてsystem関数を呼ぶ
 		# プログラムをコンパイルしてそれを実行する
+		# MINGW gcc 4.2 dw2 の場合はビルドしたバイナリがうごかない(^^;
+		# --debugオプションをつける
 		echo "
 #include <stdlib.h>
 
 int main(void)
 {
-	return system(\"build.bat mingw\");
+	return system(\"build.bat mingw --debug\");
 }
 	" > launch.c
 		gcc -o launch.exe launch.c
 		./launch.exe
+
+		
+
 		;;
 	*)
 		./build.sh
 		;;
 	esac
+
+
 
 	# bin. で始まるディレクトリ下のファイルをカレントディレクトリにコピー
 	for dir in bin.*; do

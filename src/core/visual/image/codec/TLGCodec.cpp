@@ -130,14 +130,15 @@ static void TLG5ComposeColors3To4(
 	RISSE_RESTRICT risse_uint8 * RISSE_RESTRICT const * buf,
 	risse_int width)
 {
-	risse_int x;
+	risse_int x = 0;
 	risse_uint8 pc0, pc1, pc2;
 	risse_uint8 c0, c1, c2;
 	pc0 = pc1 = pc2 = 0;
 	const risse_uint8 * buf0 = buf[0];
 	const risse_uint8 * buf1 = buf[1];
 	const risse_uint8 * buf2 = buf[2];
-	for(x = 0; x < width; x++)
+
+	for(; x < width; x++)
 	{
 		c0 = buf0[x];
 		c1 = buf1[x];
@@ -197,22 +198,33 @@ static risse_int TLG5DecompressSlide(
 	risse_int insize, risse_uint8 *text, risse_int initialr)
 {
 	risse_int r = initialr;
-	risse_uint flags = 0;
 	const risse_uint8 *inlim = in + insize;
-	while(in < inlim)
+
+getmore:
+	risse_uint flags = 0[in++] | 0x100;
+
+loop:
 	{
-		if(((flags >>= 1) & 256) == 0)
-		{
-			flags = 0[in++] | 0xff00;
-		}
-		if(flags & 1)
+		bool b= flags & 1;
+		flags >>= 1;
+		if(!flags) goto getmore;
+
+		if(b)
 		{
 			risse_int mpos = in[0] | ((in[1] & 0xf) << 8);
 			risse_int mlen = (in[1] & 0xf0) >> 4;
 			in += 2;
-			mlen += 3;
-			if(mlen == 18) mlen += 0[in++];
+			if(mlen == 15) mlen += 0[in++];
 
+				0[out++] = text[r++] = text[mpos++];
+				mpos &= (4096 - 1);
+				r &= (4096 - 1);
+				0[out++] = text[r++] = text[mpos++];
+				mpos &= (4096 - 1);
+				r &= (4096 - 1);
+				0[out++] = text[r++] = text[mpos++];
+				mpos &= (4096 - 1);
+				r &= (4096 - 1);
 			while(mlen--)
 			{
 				0[out++] = text[r++] = text[mpos++];
@@ -222,13 +234,17 @@ static risse_int TLG5DecompressSlide(
 		}
 		else
 		{
+/*
 			unsigned char c = 0[in++];
 			0[out++] = c;
 			text[r++] = c;
-/*			0[out++] = text[r++] = 0[in++];*/
+*/
+			0[out++] = text[r++] = 0[in++];
 			r &= (4096 - 1);
 		}
 	}
+	if(in < inlim) goto loop;
+
 	return r;
 }
 //---------------------------------------------------------------------------

@@ -64,8 +64,8 @@ _ALIGN16(const risse_uint32) RISA_V_I32_1[4] = { 1, 1, 1, 1 };
 
 
 //---------------------------------------------------------------------------
-static void _DeinterleaveApplyingWindow(RISSE_RESTRICT float * dest[], RISSE_RESTRICT const float * src,
-					RISSE_RESTRICT float * win, int numch, size_t destofs, size_t len)
+static void _DeinterleaveApplyingWindow(float * RISSE_RESTRICT dest[], const float * RISSE_RESTRICT src,
+					float * RISSE_RESTRICT win, int numch, size_t destofs, size_t len)
 {
 	size_t n;
 	switch(numch)
@@ -179,15 +179,15 @@ static void _DeinterleaveApplyingWindow(RISSE_RESTRICT float * dest[], RISSE_RES
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, DeinterleaveApplyingWindow, (RISSE_RESTRICT float * dest[], RISSE_RESTRICT const float * src,
-					RISSE_RESTRICT float * win, int numch, size_t destofs, size_t len),
+	void, DeinterleaveApplyingWindow, (float * RISSE_RESTRICT dest[], const float * RISSE_RESTRICT src,
+					float * RISSE_RESTRICT win, int numch, size_t destofs, size_t len),
 	_DeinterleaveApplyingWindow, (dest, src, win, numch, destofs, len) )
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-static void  _InterleaveOverlappingWindow(RISSE_RESTRICT float * dest, RISSE_RESTRICT const float * const * src,
-					RISSE_RESTRICT float * win, int numch, size_t srcofs, size_t len)
+static void  _InterleaveOverlappingWindow(float * RISSE_RESTRICT dest, const float * RISSE_RESTRICT const * RISSE_RESTRICT src,
+					float * RISSE_RESTRICT win, int numch, size_t srcofs, size_t len)
 {
 	size_t n;
 	switch(numch)
@@ -299,8 +299,8 @@ static void  _InterleaveOverlappingWindow(RISSE_RESTRICT float * dest, RISSE_RES
 
 //---------------------------------------------------------------------------
 RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
-	void, InterleaveOverlappingWindow, (RISSE_RESTRICT float * dest, RISSE_RESTRICT const float * const * src,
-					RISSE_RESTRICT float * win, int numch, size_t srcofs, size_t len),
+	void, InterleaveOverlappingWindow, (float * dest, const float * RISSE_RESTRICT const * RISSE_RESTRICT src,
+					float * win, int numch, size_t srcofs, size_t len),
 	_InterleaveOverlappingWindow, (dest, src, win, numch, srcofs, len) )
 //---------------------------------------------------------------------------
 

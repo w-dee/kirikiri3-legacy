@@ -27,7 +27,7 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-    void rdft(int, int, RISSE_RESTRICT float *, RISSE_RESTRICT int *, RISSE_RESTRICT float *);
+    void rdft(int, int, float * RISSE_RESTRICT, int * RISSE_RESTRICT, float * RISSE_RESTRICT);
 
 
 //---------------------------------------------------------------------------

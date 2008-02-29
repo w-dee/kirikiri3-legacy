@@ -733,10 +733,38 @@ void BindProperty(CC * _class, const tString & name,
 				setter ? &tBinderPropertySetter<CC, SIC, ST >::Call : NULL
 				), context), attribute, is_members);
 }
+// non-static without calling info getter, const getter
+template <typename CC, typename GIC, typename SIC, typename GR, typename ST>
+void BindProperty(CC * _class, const tString & name,
+	GR (GIC::*getter)() const, void (SIC::*setter)(ST),
+	tMemberAttribute attribute = tMemberAttribute(),
+	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+{
+	attribute.Set(tMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tVariantBlock(
+			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tClassBase *)_class,
+				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
+				getter ? &tBinderPropertyGetter<CC, GIC, GR >::Call : NULL,
+				setter ? reinterpret_cast<void (tObjectBase::*)()>(setter) : NULL,
+				setter ? &tBinderPropertySetter<CC, SIC, ST >::Call : NULL
+				), context), attribute, is_members);
+}
 // non-static without calling info getter, non-const getter, read-only
 template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	GR (GIC::*getter)()/*, void (SIC::*setter)(ST)*/,
+	tMemberAttribute attribute = tMemberAttribute(),
+	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+{
+	BindProperty<CC, GIC, tObjectBase, GR, const tVariant &>(
+		_class, name, getter, NULL, attribute, context, is_members);
+}
+// non-static without calling info getter, const getter, read-only
+template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename ST*/>
+void BindProperty(CC * _class, const tString & name,
+	GR (GIC::*getter)() const/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
 	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
@@ -813,10 +841,38 @@ void BindProperty(CC * _class, const tString & name,
 				setter ? &tBinderPropertySetter<CC, SIC, ST >::Call : NULL
 				), context), attribute, is_members);
 }
+// non-static with calling info getter, const getter
+template <typename CC, typename GIC, typename SIC, typename ST>
+void BindProperty(CC * _class, const tString & name,
+	void (GIC::*getter)(const tNativePropGetInfo &) const, void (SIC::*setter)(ST),
+	tMemberAttribute attribute = tMemberAttribute(),
+	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+{
+	attribute.Set(tMemberAttribute::pcProperty);
+	_class->RegisterNormalMember(name,
+		tVariantBlock(
+			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tClassBase *)_class,
+				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
+				getter ? &tBinderPropertyGetter_Info<CC, GIC>::Call : NULL,
+				setter ? reinterpret_cast<void (tObjectBase::*)()>(setter) : NULL,
+				setter ? &tBinderPropertySetter<CC, SIC, ST >::Call : NULL
+				), context), attribute, is_members);
+}
 // non-static with calling info getter, non-const getter, read-only
 template <typename CC, typename GIC/*, typename SIC, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	void (GIC::*getter)(const tNativePropGetInfo &)/*, void (SIC::*setter)(ST)*/,
+	tMemberAttribute attribute = tMemberAttribute(),
+	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+{
+	BindProperty<CC, GIC, tObjectBase, const tVariant &>(
+		_class, name, getter, NULL, attribute, context, is_members);
+}
+// non-static with calling info getter, const getter, read-only
+template <typename CC, typename GIC/*, typename SIC, typename ST*/>
+void BindProperty(CC * _class, const tString & name,
+	void (GIC::*getter)(const tNativePropGetInfo &) const/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
 	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
 {

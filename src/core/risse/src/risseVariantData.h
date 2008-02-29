@@ -106,11 +106,13 @@ protected:
 		risse_ptruint Ptr; //!< 何らかのポインタ
 	};
 
-	//! @brief boolean ストレージがfalseの時のTypeの値
+	//! @brief boolean ストレージがfalseの時のTypeの値とストレージがtrueの時のTypeの値
 	//! @note  この数字は最下位の2ビットが10である以外は特に意味はない
-	static const risse_ptruint BooleanFalse = 0x42;
-	//! @brief boolean ストレージがtrueの時のTypeの値
-	static const risse_ptruint BooleanTrue = 0x72;
+	enum tBooleanStorageConsts
+	{
+		BooleanFalse = 0x42,
+		BooleanTrue = 0x72
+	};
 
 	//! @brief null ストレージ型
 	struct tNull

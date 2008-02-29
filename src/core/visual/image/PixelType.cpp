@@ -75,8 +75,8 @@ namespace Risa {
 //! @brief		変換ループ(汎用)
 //---------------------------------------------------------------------------
 template <typename src_type, typename dest_type>
-static void ConvertLoop(RISSE_RESTRICT void * dest, risse_size dest_size,
-	RISSE_RESTRICT const void * src, risse_size src_size, risse_size length)
+static void ConvertLoop(void * RISSE_RESTRICT dest, risse_size dest_size,
+	const void * RISSE_RESTRICT src, risse_size src_size, risse_size length)
 {
 	// sizeof(src_type) とかを使った方がスマートかな………
 	char * d = static_cast<char *>(dest);
@@ -96,8 +96,8 @@ static void ConvertLoop(RISSE_RESTRICT void * dest, risse_size dest_size,
 
 
 //---------------------------------------------------------------------------
-void tPixel::Convert(RISSE_RESTRICT void * dest, tPixel::tFormat dest_format,
-		RISSE_RESTRICT const void * src, tPixel::tFormat src_format, risse_size length)
+void tPixel::Convert(void * RISSE_RESTRICT dest, tPixel::tFormat dest_format,
+		const void * RISSE_RESTRICT src, tPixel::tFormat src_format, risse_size length)
 {
 	RISSE_ASSERT(dest != NULL);
 	RISSE_ASSERT(src != NULL);
@@ -117,8 +117,8 @@ void tPixel::Convert(RISSE_RESTRICT void * dest, tPixel::tFormat dest_format,
 	// 変換が必要
 
 	// 変換テーブル
-	typedef void (*tConvertLoop)(RISSE_RESTRICT void * dest, risse_size dest_size,
-		RISSE_RESTRICT const void * src, risse_size src_size, risse_size length);
+	typedef void (*tConvertLoop)(void * RISSE_RESTRICT dest, risse_size dest_size,
+		const void * RISSE_RESTRICT src, risse_size src_size, risse_size length);
 	static tConvertLoop Loops[/*dest*/NumFormats][/*src*/NumFormats] = {
 		{ NULL, ConvertLoop<risa_gl::pixel, risse_uint8> },
 		{ ConvertLoop<risse_uint8, risa_gl::pixel>, NULL },

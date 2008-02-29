@@ -151,15 +151,17 @@ void tCodeInterpreter::Execute(
 				break;
 
 			case ocAssignNewBinding: // binding	= 新しいバインディングオブジェクトの代入
-				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) =
-					tVariant(engine->BindingClass).
-								New(0, tMethodArgument::Empty());
-				tBindingInstance * obj =
-					AR(code[1]).ExpectAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
-				obj->SetInfo(new tBindingInfo(This, new tSharedVariableFrames(shared_overlay)));
-				code += 2;
-				break;
+				{
+					RISSE_ASSERT(CI(code[1]) < framesize);
+					AR(code[1]) =
+						tVariant(engine->BindingClass).
+									New(0, tMethodArgument::Empty());
+					tBindingInstance * obj =
+						AR(code[1]).ExpectAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
+					obj->SetInfo(new tBindingInfo(This, new tSharedVariableFrames(shared_overlay)));
+					code += 2;
+					break;
+				}
 
 			case ocAssignThis		: // this	 = thisの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);

@@ -65,8 +65,8 @@ public:
 	//! @param		src				変換元
 	//! @param		src_format		変換元形式
 	//! @param		length			変換する長さ(ピクセル単位)
-	static void Convert(RISSE_RESTRICT void * dest, tFormat dest_format,
-		RISSE_RESTRICT const void * src, tFormat src_format, risse_size length);
+	static void Convert(void * RISSE_RESTRICT dest, tFormat dest_format,
+		const void * RISSE_RESTRICT src, tFormat src_format, risse_size length);
 
 	//! @brief		ARGB32 形式の数値へ変換する
 	//! @param		pixe			ピクセルへのポインタ

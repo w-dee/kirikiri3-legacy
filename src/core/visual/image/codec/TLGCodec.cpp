@@ -15,6 +15,9 @@
 #include "base/exception/RisaException.h"
 
 
+#if defined(RISA_USE_MMX) || defined(RISA_USE_SSE)
+	#include "base/cpu/opt_sse/xmmlib.h"
+#endif
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(56439,41578,12253,18753,50573,34933,38961,51441);
@@ -23,6 +26,104 @@ RISSE_DEFINE_SOURCE_ID(56439,41578,12253,18753,50573,34933,38961,51441);
 
 
 //---------------------------------------------------------------------------
+#ifdef NEVER_USED // RISA_USE_MMX
+// MMX version
+// 実装してみたのは良いんですがC言語版の方が速いんです…………
+
+static void TLG5ComposeColors3To4(
+	RISSE_RESTRICT risse_uint8 *outp,
+	RISSE_RESTRICT const risse_uint8 *upper,
+	RISSE_RESTRICT risse_uint8 * RISSE_RESTRICT const * buf,
+	risse_int width)
+{
+	risse_int x;
+	__m64 pc = _mm_setzero_si64();
+	const risse_uint8 * buf0 = buf[0];
+	const risse_uint8 * buf1 = buf[1];
+	const risse_uint8 * buf2 = buf[2];
+	__m64 mask = _mm_set_pi32(0xff000000, 0xff000000);
+
+	for(x = 0; x < width; x+=4)
+	{
+		risse_uint8 g;
+		risse_uint32 c0;
+
+		g = buf1[x+0];
+		c0 =
+			(risse_uint8)(buf0[x+0]+g) + (g << 8) + ((risse_uint8)(buf2[x+0]+g) << 16);
+		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
+		*(risse_uint32*)(outp+0) =
+			_mm_cvtsi64_si32(
+				_mm_add_pi8(
+					pc,
+					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+0))
+				) | mask
+			);
+
+
+		g = buf1[x+1];
+		c0 =
+			(risse_uint8)(buf0[x+1]+g) + (g << 8) + ((risse_uint8)(buf2[x+1]+g) << 16);
+		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
+		*(risse_uint32*)(outp+4) =
+			_mm_cvtsi64_si32(
+				_mm_add_pi8(
+					pc,
+					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+4))
+				) | mask
+			);
+
+
+		g = buf1[x+2];
+		c0 =
+			(risse_uint8)(buf0[x+2]+g) + (g << 8) + ((risse_uint8)(buf2[x+2]+g) << 16);
+		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
+		*(risse_uint32*)(outp+8) =
+			_mm_cvtsi64_si32(
+				_mm_add_pi8(
+					pc,
+					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+8))
+				) | mask
+			);
+
+
+		g = buf1[x+3];
+		c0 =
+			(risse_uint8)(buf0[x+3]+g) + (g << 8) + ((risse_uint8)(buf2[x+3]+g) << 16);
+		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
+		*(risse_uint32*)(outp+12) =
+			_mm_cvtsi64_si32(
+				_mm_add_pi8(
+					pc,
+					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+12))
+				) | mask
+			);
+
+		outp += 16;
+		upper += 16;
+	}
+	for(x; x < width; x++)
+	{
+		risse_uint8 g;
+		g = buf1[x];
+		risse_uint32 c0 =
+			(risse_uint8)(buf0[x]+g) + (g << 8) + ((risse_uint8)(buf2[x]+g) << 16);
+
+		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
+		*(risse_uint32*)outp =
+			_mm_cvtsi64_si32(
+				_mm_add_pi8(
+					pc,
+					_mm_cvtsi32_si64(*(const risse_uint32*)upper)
+				) | mask
+			);
+		outp += 4;
+		upper += 4;
+	}
+	_mm_empty();
+}
+#else
+// generic version
 static void TLG5ComposeColors3To4(
 	RISSE_RESTRICT risse_uint8 *outp,
 	RISSE_RESTRICT const risse_uint8 *upper,
@@ -51,6 +152,7 @@ static void TLG5ComposeColors3To4(
 		upper += 4;
 	}
 }
+#endif
 //---------------------------------------------------------------------------
 
 
@@ -138,6 +240,7 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
+
 	// load TLG v5.0 lossless compressed graphic
 	unsigned char mark[12];
 	int width, height, colors, blockheight;
@@ -157,7 +260,9 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 
 
 	// decomperss
+DWORD dim = GetTickCount();
 	SetDimensions(width, height, tPixel::pfARGB32);
+fprintf(stderr, "dim %dms\n", GetTickCount() - dim);
 
 	risse_uint8 *inbuf = NULL;
 	risse_uint8 *outbuf[4];
@@ -172,25 +277,40 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 	for(risse_int i = 0; i < colors; i++)
 		outbuf[i] = static_cast<risse_uint8*>(AlignedMallocAtomicCollectee(blockheight * width + 10, 4));
 
+static DWORD total =0;
+static DWORD io = 0;
+static DWORD lzss = 0;
+static DWORD filter = 0;
+
+DWORD total_start =  GetTickCount();
+
 	risse_uint8 *prevline = NULL;
 	for(risse_int y_blk = 0; y_blk < height; y_blk += blockheight)
 	{
 		// read file and decompress
 		for(risse_int c = 0; c < colors; c++)
 		{
+DWORD io_start = GetTickCount();
 			src.ReadBuffer(mark, 1);
 			risse_uint32 size;
 			size = src.ReadI32LE();
+io += GetTickCount() - io_start;
 			if(mark[0] == 0)
 			{
 				// modified LZSS compressed data
+DWORD io_start = GetTickCount();
 				src.ReadBuffer(inbuf, size);
+io += GetTickCount() - io_start;
+DWORD lzss_start = GetTickCount();
 				r = TLG5DecompressSlide(outbuf[c], inbuf, size, text, r);
+lzss += GetTickCount() - lzss_start;
 			}
 			else
 			{
 				// raw data
+DWORD io_start = GetTickCount();
 				src.ReadBuffer(outbuf[c], size);
+io += GetTickCount() - io_start;
 			}
 		}
 
@@ -207,6 +327,7 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 			if(prevline)
 			{
 				// not first line
+DWORD filter_start = GetTickCount();
 				switch(colors)
 				{
 				case 3:
@@ -220,6 +341,7 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 					outbufp[2] += width; outbufp[3] += width;
 					break;
 				}
+filter += GetTickCount() - filter_start;
 			}
 			else
 			{
@@ -274,6 +396,12 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 		}
 
 	}
+total += GetTickCount()- total_start;
+
+fprintf(stderr, "total %dms\n", total);
+fprintf(stderr, "io %dms\n", io);
+fprintf(stderr, "lzss %dms\n", lzss);
+fprintf(stderr, "filter %dms\n", filter);
 
 }
 //---------------------------------------------------------------------------
@@ -963,8 +1091,6 @@ void tTLGImageDecoder::ProcessTLG(tStreamAdapter & src,
 					tPixel::tFormat pixel_format, tProgressCallback * callback,
 					tDictionaryInstance * dict)
 {
-DWORD start = GetTickCount();
-
 	// read header
 	unsigned char mark[12];
 	src.ReadBuffer(mark, 11);
@@ -977,8 +1103,6 @@ DWORD start = GetTickCount();
 	else
 		tIOExceptionClass::Throw(
 			RISSE_WS_TR("error on reading TLG: invalid TLG header or unsupported TLG version"));
-
-fprintf(stderr, "%dms\n", GetTickCount() - start);
 }
 //---------------------------------------------------------------------------
 

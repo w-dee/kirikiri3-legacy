@@ -236,11 +236,13 @@ void tHistoryTextCtrl::OnChar(wxKeyEvent & event)
 		}
 
 		case WXK_TAB: // TAB
+		{
 			// ログビューアにフォーカスを合わせる
 			wxWindow * top = GetParent();
 			while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
 			reinterpret_cast<tConsoleFrame*>(top)->SetFocusToLogViewer();
 			break;
+		}
 
 		default:
 			event.Skip(true);

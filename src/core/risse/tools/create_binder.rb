@@ -143,6 +143,19 @@ STDOUT.print "
 				&tBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call
 					), context), attribute, is_members);
 	}
+	// const非static関数用binder登録関数
+	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
+	void BindFunction(CC * _class, const tString & name,
+		R (IC::*f)(#{argnum.join{|n|"T#{n}"}}) const, tMemberAttribute attribute = tMemberAttribute(),
+		const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	{
+		_class->RegisterNormalMember(name,
+			tVariant(tNativeBindFunction<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
+				(tClassBase *)_class,
+				reinterpret_cast<void (tObjectBase::*)()>(f),
+				&tBinderFunctor#{argnum}<CC, IC, R #{argnum.append{|n|"T#{n}"}}>::Call
+					), context), attribute, is_members);
+	}
 
 "
 end

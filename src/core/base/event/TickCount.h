@@ -81,12 +81,12 @@ namespace Risa {
 		#define RISA_DECLARE_GETTICK tTickCountBasicType GetTick() { return ::timeGetTime(); }
 		#include <mmsystem.h>
 		#define RISA_TICKCOUNT_DEPENDS_ON depends_on<tWinTimerResolutionAdjuster>
-		//! @brief Win32/Win64? でタイマの分解能を最低でも10msにするクラス
+		//! @brief Win32/Win64? でタイマの分解能を1msにするクラス
 		//! @note
 		//! いくつかの環境(おそらく性能の低いコンピュータ)ではタイマの分解能が
 		//! デフォルトで20msぐらいになっている環境がある。
 		//! サウンドなどのサービスの中にはタイマの分解能に敏感な
-		//! 物があるため、最低でも10msの精度に合わせる。ちなみにこの分解能を
+		//! 物があるため、1msの精度に合わせる。ちなみにこの分解能を
 		//! 上げると、どうやらコンテキストスイッチングの時間制度も上がる模様。
 		class tWinTimerResolutionAdjuster :
 			public singleton_base<tWinTimerResolutionAdjuster>
@@ -95,7 +95,7 @@ namespace Risa {
 		public:
 			tWinTimerResolutionAdjuster()
 			{
-				TimerPrecision = 10;
+				TimerPrecision = 1;
 				// retrieve minimum timer resolution
 				TIMECAPS tc;
 				timeGetDevCaps(&tc, sizeof(tc));

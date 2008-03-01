@@ -642,6 +642,11 @@ static inline risse_uint32 avg(risse_uint32 a, risse_uint32 b, risse_uint32 c, r
 
 #define TLG6_DO_CHROMA_DECODE_PROTO(B, G, R, A, POST_INCREMENT) do \
 			{ \
+				risse_uint32 i = *in;                                \
+				risse_uint8 IB = i;                                  \
+				risse_uint8 IG = i >> 8;                             \
+				risse_uint8 IR = i >> 16;                            \
+				risse_uint8 IA = i >> 24;                            \
 				risse_uint32 u = *prevline; \
 				p = med(p, u, up, \
 					(0xff0000 & ((R)<<16)) + (0xff00 & ((G)<<8)) + (0xff & (B)) + ((A) << 24) ); \
@@ -653,6 +658,11 @@ static inline risse_uint32 avg(risse_uint32 a, risse_uint32 b, risse_uint32 c, r
 			} while(--w);
 #define TLG6_DO_CHROMA_DECODE_PROTO2(B, G, R, A, POST_INCREMENT) do \
 			{ \
+				risse_uint32 i = *in;                                \
+				risse_uint8 IB = i;                                  \
+				risse_uint8 IG = i >> 8;                             \
+				risse_uint8 IR = i >> 16;                            \
+				risse_uint8 IA = i >> 24;                            \
 				risse_uint32 u = *prevline; \
 				p = avg(p, u, up, \
 					(0xff0000 & ((R)<<16)) + (0xff00 & ((G)<<8)) + (0xff & (B)) + ((A) << 24) ); \
@@ -714,10 +724,6 @@ static void TLG6DecodeLineGeneric(
 		if(i&1) in += oddskip * ww;
 		switch(filtertypes[i])
 		{
-#define IA	(char)((*in>>24)&0xff)
-#define IR	(char)((*in>>16)&0xff)
-#define IG  (char)((*in>>8 )&0xff)
-#define IB  (char)((*in    )&0xff)
 		TLG6_DO_CHROMA_DECODE( 0, IB, IG, IR); 
 		TLG6_DO_CHROMA_DECODE( 1, IB+IG, IG, IR+IG); 
 		TLG6_DO_CHROMA_DECODE( 2, IB, IG+IB, IR+IB+IG); 
@@ -742,9 +748,6 @@ static void TLG6DecodeLineGeneric(
 		else
 			in += skipblockbytes + 1;
 		if(i&1) in -= oddskip * ww;
-#undef IR
-#undef IG
-#undef IB
 	}
 }
 //---------------------------------------------------------------------------

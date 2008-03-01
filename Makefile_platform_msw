@@ -19,6 +19,7 @@ DLL_SUFFIX=.dll
 PLATFORM_SUBDIR=msw
 
 # システム標準のライブラリ (プラットフォームによって変える必要あり)
+# TODO: win64対応
 COMMON_LIBS = \
 	-lunicows \
 	-lkernel32 \
@@ -40,4 +41,17 @@ COMMON_LIBS = \
 
 # windows では DLL の検索にも PATH を使う
 LD_LIBRARY_PATH_ENV_NAME = PATH
+
+# PROCESSOR_ARCHITECTURE 環境変数によってARCHを設定
+ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+ ARCH=x86
+ USE_YASM=1
+else
+ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+ ARCH=x86_64
+ USE_YASM=1
+else
+ ARCH=unknown
+endif
+endif
 

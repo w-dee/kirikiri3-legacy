@@ -1,6 +1,6 @@
 # core 共通の subsys用 makefile 定義
 
-OBJS = $(CPPFILES:.cpp=.o)
+OBJS = $(CPPFILES:.cpp=.o) $(ASMFILES:.yas=.o)
 include $(TOP_DIR)/Makefile_common
 
 

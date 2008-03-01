@@ -298,3 +298,19 @@ endif
 # 利用する
 
 WXRC = $(LD_LIBRARY_PATH_ENV_NAME)=$$$(LD_LIBRARY_PATH_ENV_NAME):$(WXWIDGETS_DIR)/lib $(WXWIDGETS_DIR)/bin/wxrc
+
+# YASM
+YASM = yasm
+ifeq ($(PLATFORM),windows)
+ ifeq ($(ARCH),x86)
+   YASM_FLAGS = -f win32 -I $(TOP_DIR)/src/core/base/cpu/opt_x86
+ else
+   YASM_FLAGS = -f win64 -I $(TOP_DIR)/src/core/base/cpu/opt_x86
+ endif
+else
+ ifeq ($(ARCH),x86)
+   YASM_FLAGS = -f elf32 -I $(TOP_DIR)/src/core/base/cpu/opt_x86
+ else
+   YASM_FLAGS = -f elf64 -I $(TOP_DIR)/src/core/base/cpu/opt_x86
+ endif
+endif

@@ -26,104 +26,6 @@ RISSE_DEFINE_SOURCE_ID(56439,41578,12253,18753,50573,34933,38961,51441);
 
 
 //---------------------------------------------------------------------------
-#ifdef NEVER_USED // RISA_USE_MMX
-// MMX version
-// 実装してみたのは良いんですがC言語版の方が速いんです…………
-
-static void TLG5ComposeColors3To4(
-	RISSE_RESTRICT risse_uint8 *outp,
-	RISSE_RESTRICT const risse_uint8 *upper,
-	RISSE_RESTRICT risse_uint8 * RISSE_RESTRICT const * buf,
-	risse_int width)
-{
-	risse_int x;
-	__m64 pc = _mm_setzero_si64();
-	const risse_uint8 * buf0 = buf[0];
-	const risse_uint8 * buf1 = buf[1];
-	const risse_uint8 * buf2 = buf[2];
-	__m64 mask = _mm_set_pi32(0xff000000, 0xff000000);
-
-	for(x = 0; x < width; x+=4)
-	{
-		risse_uint8 g;
-		risse_uint32 c0;
-
-		g = buf1[x+0];
-		c0 =
-			(risse_uint8)(buf0[x+0]+g) + (g << 8) + ((risse_uint8)(buf2[x+0]+g) << 16);
-		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
-		*(risse_uint32*)(outp+0) =
-			_mm_cvtsi64_si32(
-				_mm_add_pi8(
-					pc,
-					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+0))
-				) | mask
-			);
-
-
-		g = buf1[x+1];
-		c0 =
-			(risse_uint8)(buf0[x+1]+g) + (g << 8) + ((risse_uint8)(buf2[x+1]+g) << 16);
-		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
-		*(risse_uint32*)(outp+4) =
-			_mm_cvtsi64_si32(
-				_mm_add_pi8(
-					pc,
-					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+4))
-				) | mask
-			);
-
-
-		g = buf1[x+2];
-		c0 =
-			(risse_uint8)(buf0[x+2]+g) + (g << 8) + ((risse_uint8)(buf2[x+2]+g) << 16);
-		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
-		*(risse_uint32*)(outp+8) =
-			_mm_cvtsi64_si32(
-				_mm_add_pi8(
-					pc,
-					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+8))
-				) | mask
-			);
-
-
-		g = buf1[x+3];
-		c0 =
-			(risse_uint8)(buf0[x+3]+g) + (g << 8) + ((risse_uint8)(buf2[x+3]+g) << 16);
-		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
-		*(risse_uint32*)(outp+12) =
-			_mm_cvtsi64_si32(
-				_mm_add_pi8(
-					pc,
-					_mm_cvtsi32_si64(*(const risse_uint32*)(upper+12))
-				) | mask
-			);
-
-		outp += 16;
-		upper += 16;
-	}
-	for(x; x < width; x++)
-	{
-		risse_uint8 g;
-		g = buf1[x];
-		risse_uint32 c0 =
-			(risse_uint8)(buf0[x]+g) + (g << 8) + ((risse_uint8)(buf2[x]+g) << 16);
-
-		pc = _mm_add_pi8(pc, _mm_cvtsi32_si64(c0));
-		*(risse_uint32*)outp =
-			_mm_cvtsi64_si32(
-				_mm_add_pi8(
-					pc,
-					_mm_cvtsi32_si64(*(const risse_uint32*)upper)
-				) | mask
-			);
-		outp += 4;
-		upper += 4;
-	}
-	_mm_empty();
-}
-#else
-// generic version
 static void TLG5ComposeColors3To4(
 	RISSE_RESTRICT risse_uint8 *outp,
 	RISSE_RESTRICT const risse_uint8 *upper,
@@ -153,7 +55,6 @@ static void TLG5ComposeColors3To4(
 		upper += 4;
 	}
 }
-#endif
 //---------------------------------------------------------------------------
 
 
@@ -191,61 +92,13 @@ static void TLG5ComposeColors4To4(
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-static risse_int TLG5DecompressSlide(
+//--------------------------------------------------------------------------
+extern "C" {
+// 実体は opt_x86 あるいは opt_default のディレクトリの中
+risse_int TLG5DecompressSlide(
 	RISSE_RESTRICT risse_uint8 *out,
 	RISSE_RESTRICT const risse_uint8 *in,
-	risse_int insize, risse_uint8 *text, risse_int initialr)
-{
-	risse_int r = initialr;
-	const risse_uint8 *inlim = in + insize;
-
-getmore:
-	risse_uint flags = 0[in++] | 0x100;
-
-loop:
-	{
-		bool b= flags & 1;
-		flags >>= 1;
-		if(!flags) goto getmore;
-
-		if(b)
-		{
-			risse_int mpos = in[0] | ((in[1] & 0xf) << 8);
-			risse_int mlen = (in[1] & 0xf0) >> 4;
-			in += 2;
-			if(mlen == 15) mlen += 0[in++];
-
-				0[out++] = text[r++] = text[mpos++];
-				mpos &= (4096 - 1);
-				r &= (4096 - 1);
-				0[out++] = text[r++] = text[mpos++];
-				mpos &= (4096 - 1);
-				r &= (4096 - 1);
-				0[out++] = text[r++] = text[mpos++];
-				mpos &= (4096 - 1);
-				r &= (4096 - 1);
-			while(mlen--)
-			{
-				0[out++] = text[r++] = text[mpos++];
-				mpos &= (4096 - 1);
-				r &= (4096 - 1);
-			}
-		}
-		else
-		{
-/*
-			unsigned char c = 0[in++];
-			0[out++] = c;
-			text[r++] = c;
-*/
-			0[out++] = text[r++] = 0[in++];
-			r &= (4096 - 1);
-		}
-	}
-	if(in < inlim) goto loop;
-
-	return r;
+	risse_int insize, risse_uint8 *text, risse_int initialr);
 }
 //---------------------------------------------------------------------------
 

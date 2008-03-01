@@ -21,6 +21,12 @@ CPPFILES=\
 	codec/JPEGCodec.cpp                \
 	codec/TLGCodec.cpp                 
 
+ifdef USE_YASM
+ ASMFILES = codec/opt_x86/tlg5.yas
+else
+ CPPFILES += codec/opt_default/tlg5.cpp
+endif
+
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし
 #-----------------------------------------

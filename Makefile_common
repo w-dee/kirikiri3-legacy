@@ -51,6 +51,11 @@ ifdef PRESERVE_ASM
 	$(CXX) -c -masm=intel $(DEFAULT_CXXFLAGS) $(CXXFLAGS) $(INCLUDES) $< -S -o $(@:.o=.s)
 endif
 
+## yasmソース→オブジェクトファイル
+
+%.o: %.yas
+	$(YASM) $(YASM_FLAGS) $< -o $@
+
 
 ## コンパイル済みヘッダ
 %.h.gch: %.h

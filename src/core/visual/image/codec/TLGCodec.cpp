@@ -777,7 +777,8 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 					tDictionaryInstance * dict)
 {
 	// load TLG v6.0 lossless/near-lossless compressed graphic
-
+static DWORD total = 0;
+DWORD total_start = GetTickCount();
 	unsigned char buf[12];
 
 	src.ReadBuffer(buf, 4);
@@ -811,8 +812,15 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 
 	max_bit_length = src.ReadI32LE();
 
+static DWORD dim = 0;
+static DWORD io = 0;
+static DWORD golomb = 0;
+static DWORD filter = 0;
+
+DWORD dim_start = GetTickCount();
 	// set destination size
 	SetDimensions(width, height, tPixel::pfARGB32);
+dim += GetTickCount() - dim_start;
 
 	// compute some values
 	risse_int x_block_count = (risse_int)((width - 1)/ TLG6_W_BLOCK_SIZE) + 1;
@@ -867,7 +875,9 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 		for(risse_int c = 0; c < colors; c++)
 		{
 			// read bit length
+DWORD io_start = GetTickCount();
 			risse_int bit_length = src.ReadI32LE();
+io += GetTickCount() - io_start;
 
 			// get compress method
 			int method = (bit_length >> 30)&3;
@@ -878,7 +888,9 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 			if(bit_length % 8) byte_length++;
 
 			// read source from input
+io_start = GetTickCount();
 			src.ReadBuffer(bit_pool, byte_length);
+io += GetTickCount() - io_start;
 
 			// decode values
 			// two most significant bits of bitlength are
@@ -888,6 +900,7 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 			// 10 means modified LZSS method (not yet supported),
 			// 11 means raw (uncompressed) data (not yet supported).
 
+DWORD golomb_start = GetTickCount();
 			switch(method)
 			{
 			case 0:
@@ -902,6 +915,7 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 				tIOExceptionClass::Throw(
 					tString(RISSE_WS_TR("error on reading TLG6: unsupported entropy coding method")));
 			}
+golomb += GetTickCount() - golomb_start;
 		}
 
 		// for each line
@@ -915,6 +929,7 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 
 			int dir = (yy&1)^1;
 			int oddskip = ((ylim - yy -1) - (yy-y));
+DWORD filter_start = GetTickCount();
 			if(main_count)
 			{
 				int start =
@@ -945,12 +960,21 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 					skipbytes,
 					pixelbuf + start, colors==3?0xff000000:0, oddskip, dir);
 			}
+filter += GetTickCount() - filter_start;
 
 			DoneLines();
 			prevline = curline;
 		}
 
 	}
+total += GetTickCount() - total_start;
+
+fprintf(stderr, "total %dms\n", total);
+fprintf(stderr, "dim %dms\n", dim);
+fprintf(stderr, "io %dms\n", io);
+fprintf(stderr, "golomb %dms\n", golomb);
+fprintf(stderr, "filter %dms\n", filter);
+
 }
 //---------------------------------------------------------------------------
 

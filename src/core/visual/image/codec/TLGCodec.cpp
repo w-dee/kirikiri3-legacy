@@ -915,8 +915,77 @@ static void TLG6DecodeLineSSE(
 		// forward
 		case  32+( 0<<1)  : FILT_F( 0, Med); break;
 		case  32+( 0<<1)+1: FILT_F( 0, Avg); break;
-		case  32+( 1<<1)  : FILT_F( 1, Med); break;
-		case  32+( 1<<1)+1: FILT_F( 1, Avg); break;
+//		case  32+( 1<<1)  : FILT_F( 1, Med); break;
+//		case  32+( 1<<1)+1: FILT_F( 1, Avg); break;
+
+		case  32+( 1<<1)  :
+			do
+			{
+				/* fetch 2pixels from in */
+				v = PM64(in);
+				/* do chroma filter */
+				v = Filter1(v);
+				/* appy predictor for lower pixel */
+				w = v;
+				u = _mm_cvtsi32_si64(prevline[0]);
+//				p = MedPredictor(p, u, up, w);
+				{
+					__m64 max_a_b = _mm_max_pu8(p, u);
+					__m64 min_a_b = _mm_min_pu8(p, u);
+					__m64 tmp= _mm_max_pu8(min_a_b, _mm_min_pu8(max_a_b, up));
+					p =_mm_sub_pi8(_mm_add_pi8(_mm_add_pi8(v, max_a_b), min_a_b), tmp);
+				}
+				up = u;
+				/* store the pixel value */
+				curline[0] = _mm_cvtsi64_si32(p);
+				/* appy predictor for higher pixel */
+				w = _mm_srli_si64(v, 32);
+				u = _mm_cvtsi32_si64(prevline[1]);
+//				p = MedPredictor(p, u, up, w);
+				{
+					__m64 max_a_b = _mm_max_pu8(p, u);
+					__m64 min_a_b = _mm_min_pu8(p, u);
+					__m64 tmp= _mm_max_pu8(min_a_b, _mm_min_pu8(max_a_b, up));
+					p =_mm_sub_pi8(_mm_add_pi8(_mm_add_pi8(v, max_a_b), min_a_b), tmp);
+				}
+				up = u;
+				/* store the pixel value */
+				curline[1] = _mm_cvtsi64_si32(p);
+				/* to the next */
+				curline +=2;
+				prevline +=2;
+				in += 2;
+			} while(--cnt);
+			break;
+
+		case  32+( 1<<1)+1:
+			do
+			{
+				/* fetch 2pixels from in */
+				v = PM64(in);
+				/* do chroma filter */
+				v = Filter1(v);
+				/* appy predictor for lower pixel */
+				w = v;
+				u = _mm_cvtsi32_si64(prevline[0]);
+				p = MedPredictor(p, u, up, w);
+				up = u;
+				/* store the pixel value */
+				curline[0] = _mm_cvtsi64_si32(p);
+				/* appy predictor for higher pixel */
+				w = _mm_srli_si64(v, 32);
+				u = _mm_cvtsi32_si64(prevline[1]);
+				p = AvgPredictor(p, u, up, w);
+				up = u;
+				/* store the pixel value */
+				curline[1] = _mm_cvtsi64_si32(p);
+				/* to the next */
+				curline +=2;
+				prevline +=2;
+				in += 2;
+			} while(--cnt);
+			break;
+
 		case  32+( 2<<1)  : FILT_F( 2, Med); break;
 		case  32+( 2<<1)+1: FILT_F( 2, Avg); break;
 		case  32+( 3<<1)  : FILT_F( 3, Med); break;

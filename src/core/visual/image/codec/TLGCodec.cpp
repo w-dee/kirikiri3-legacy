@@ -13,6 +13,7 @@
 #include "prec.h"
 #include "visual/image/codec/TLGCodec.h"
 #include "base/exception/RisaException.h"
+#include <limits.h>
 
 
 #if defined(RISA_USE_MMX) || defined(RISA_USE_SSE)
@@ -607,6 +608,356 @@ void TLG6DecodeGolombValues(
 
 
 //---------------------------------------------------------------------------
+#ifdef RISA_USE_SSE
+// SSE 版 MED (vの加算も行う)
+static inline __m64 MedPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
+{
+/*
+	unsigned char min_a_b = a>b?b:a;
+	unsigned char max_a_b = a<b?b:a;
+	if(c >= max_a_b)
+		return min_a_b+v;
+	else if(c < min_a_b)
+		return max_a_b+v;
+	else
+		return a+b-c+v;
+*/
+	// 注意、_mm_max_pu8 と _mm_min_pu8 は SSE 命令
+	__m64 max_a_b = _mm_max_pu8(a, b);
+	__m64 min_a_b = _mm_min_pu8(a, b);
+	__m64 tmp= _mm_max_pu8(min_a_b, _mm_min_pu8(max_a_b, c));
+	return _mm_sub_pi8(_mm_add_pi8(_mm_add_pi8(v, max_a_b), min_a_b), tmp);
+}
+
+// SSE 版 AVG (vの加算も行う)
+static inline __m64 AvgPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
+{
+	// 注意、_mm_avg_pu8 は SSE 命令
+	return _mm_add_pi8(v, _mm_avg_pu8(a, b));
+}
+
+_ALIGN16(static const risse_uint32) RMASK[2]	 = {0x00ff0000, 0x00ff0000};
+_ALIGN16(static const risse_uint32) GMASK[2]	 = {0x0000ff00, 0x0000ff00};
+_ALIGN16(static const risse_uint32) BMASK[2]	 = {0x000000ff, 0x000000ff};
+
+_ALIGN16(static const risse_uint32) RDMASK[2]	 = {0x00fe0000, 0x00fe0000};
+_ALIGN16(static const risse_uint32) GDMASK[2]	 = {0x0000fe00, 0x0000fe00};
+
+
+
+
+
+// MMX 版フィルタタイプ  0 IR           IG          IB
+static inline __m64 Filter0(__m64 v) { return v; }
+
+// MMX 版フィルタタイプ  1 IR+IG        IG          IB+IG
+static inline __m64 Filter1(__m64 v) {
+	return
+		_mm_add_pi8(
+			_mm_add_pi8(
+				_mm_srli_pi32(_mm_and_si64(v, PM64(GMASK)), 8),
+				_mm_slli_pi32(_mm_and_si64(v, PM64(GMASK)), 8)
+			),
+			v
+		);
+}
+
+// MMX 版フィルタタイプ  2 IR+IB+IG     IG+IB       IB
+static inline __m64 Filter2(__m64 v) {
+	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 8), PM64(GMASK)), v);
+	// tmp = [IA, IR, IG+IB, IB]
+	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(tmp, PM64(GMASK)), 8), tmp);
+}
+
+// MMX 版フィルタタイプ  3 IR           IG+IR       IB+IR+IG
+static inline __m64 Filter3(__m64 v) {
+	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 8), PM64(GMASK)), v);
+	// tmp = [IA, IR, IG+IR, IB]
+	return _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(tmp, PM64(GMASK)), 8), tmp);
+}
+
+// MMX 版フィルタタイプ  4 IR+IB+IR+IG  IG+IB+IR    IB+IR
+static inline __m64 Filter4(__m64 v) {
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 16), PM64(BMASK)), v);
+	// v = [IA, IR, IG, IB+IR]
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v,  8), PM64(GMASK)), v);
+	// v = [IA, IR, IG+IB+IR, IB+IR]
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v,  8), PM64(RMASK)), v);
+	// v = [IA, IR+IG+IB+IR, IG+IB+IR, IB+IR]
+	return v;
+}
+
+// MMX 版フィルタタイプ  5 IR           IG+IB+IR    IB+IR
+static inline __m64 Filter5(__m64 v) {
+	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 16), PM64(BMASK)), v);
+	// tmp = [IA, IR, IG, IB+IR]
+	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(tmp, PM64(BMASK)), 8), tmp);
+}
+
+// MMX 版フィルタタイプ  6 IR           IG          IB+IG
+static inline __m64 Filter6(__m64 v) {
+	return _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(v, PM64(GMASK)), 8), v);
+}
+
+// MMX 版フィルタタイプ  7 IR           IG+IB       IB
+static inline __m64 Filter7(__m64 v) {
+	return _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 8), PM64(GMASK)), v);
+}
+
+// MMX 版フィルタタイプ  8 IR+IG        IG          IB
+static inline __m64 Filter8(__m64 v) {
+	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(v, PM64(GMASK)), 8), v);
+}
+
+// MMX 版フィルタタイプ  9 IR+IB        IG+IR+IB    IB+IG+IR+IB
+static inline __m64 Filter9(__m64 v) {
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
+	// v = [IA, IR+IB, IG, IB]
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
+	// v = [IA, IR+IB, IG+IR+IB, IB]
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(BMASK)), v);
+	// v = [IA, IR+IB, IG+IB+IR, IB+IG+IR+IB]
+	return v;
+}
+
+// MMX 版フィルタタイプ 10 IR           IG+IR       IB+IR
+static inline __m64 Filter10(__m64 v) {
+	__m64
+	u = _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(v, PM64(RMASK)), 8), v);
+	// u = [IA, IR, IG+IR, IB]
+	u = _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(v, PM64(RMASK)),16), u);
+	// v = [IA, IR, IG+IR, IB+IR]
+	return u;
+}
+
+// MMX 版フィルタタイプ 11 IR+IB        IG+IB       IB
+static inline __m64 Filter11(__m64 v) {
+	__m64
+	u = _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(v, PM64(BMASK)), 8), v);
+	// u = [IA, IR, IG+IB, IB]
+	u = _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(v, PM64(BMASK)),16), u);
+	// v = [IA, IR+IB, IG+IB, IB]
+	return u;
+}
+
+// MMX 版フィルタタイプ 12 IR+IB        IG+IR+IB    IB
+static inline __m64 Filter12(__m64 v) {
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
+	// v = [IA, IR+IB, IG, IB]
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
+	// v = [IA, IR+IB, IG+IR+IB, IB]
+	return v;
+}
+
+// MMX 版フィルタタイプ 13 IR+IB+IG     IG+IR+IB+IG IB+IG
+static inline __m64 Filter13(__m64 v) {
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(BMASK)), v);
+	// v = [IA, IR, IG, IB+IG]
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
+	// v = [IA, IR+IB+IG, IG, IB+IG]
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
+	// v = [IA, IR+IB+IG, IG+IR+IB+IG, IB+IG]
+	return v;
+}
+
+// MMX 版フィルタタイプ 14 IR+IB+IG+IR  IG+IR       IB+IG+IR
+static inline __m64 Filter14(__m64 v) {
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
+	// v = [IA, IR, IG+IR, IB]
+	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(BMASK)), v);
+	// v = [IA, IR, IG+IR, IB+IG+IR]
+	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
+	// v = [IA, IR+IB+IG+IR, IG+IR, IB+IG+IR]
+	return v;
+}
+
+// MMX 版フィルタタイプ 15 IR+(IB<<1)   IG+(IB<<1)  IB
+static inline __m64 Filter15(__m64 v) {
+	__m64
+	u = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 9), PM64(GDMASK)), v);
+	// u = [IA, IR, IG+(IB<<1), IB]
+	u = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v,17), PM64(RDMASK)), u);
+	// v = [IA, IR+(IB<<1), IG+(IB<<1), IB]
+	return u;
+}
+
+// SSE版 TLG6DecodeLine
+static void TLG6DecodeLineSSE(
+	RISSE_RESTRICT risse_uint32 *prevline,
+	RISSE_RESTRICT risse_uint32 *curline,
+	risse_int block_count,
+	RISSE_RESTRICT risse_uint8 *filtertypes,
+	risse_int skipblockbytes,
+	RISSE_RESTRICT risse_uint32 *in,
+	risse_uint32 initialp,
+	risse_int oddskip,
+	risse_int dir)
+{
+	int i;
+
+
+	dir &= 1;
+	dir <<= 5;
+
+	if(dir)
+	{
+		// forward
+		skipblockbytes -= TLG6_W_BLOCK_SIZE;
+	}
+	else
+	{
+		// backward
+		skipblockbytes += TLG6_W_BLOCK_SIZE;
+		in += TLG6_W_BLOCK_SIZE - 1;
+	}
+
+	oddskip *= TLG6_W_BLOCK_SIZE;
+	in += oddskip;
+
+	__m64 p, up, w, u, v;
+	p = up = _mm_cvtsi32_si64(initialp);
+
+#define FILT_F(FILTER_TYPE, PRED_TYPE) \
+			do                                          \
+			{                                           \
+				/* fetch 2pixels from in */             \
+				v = PM64(in);                           \
+				/* do chroma filter */                  \
+				v = Filter##FILTER_TYPE(v);             \
+				/* appy predictor for lower pixel */    \
+				w = v;                                  \
+				u = _mm_cvtsi32_si64(prevline[0]);      \
+				p = PRED_TYPE##Predictor(p, u, up, w);  \
+				up = u;                                 \
+				/* store the pixel value */             \
+				curline[0] = _mm_cvtsi64_si32(p);       \
+				/* appy predictor for higher pixel */   \
+				w = _mm_srli_si64(v, 32);               \
+				u = _mm_cvtsi32_si64(prevline[1]);      \
+				p = PRED_TYPE##Predictor(p, u, up, w);  \
+				up = u;                                 \
+				/* store the pixel value */             \
+				curline[1] = _mm_cvtsi64_si32(p);       \
+				/* to the next */                       \
+				curline +=2;                            \
+				prevline +=2;                           \
+				in += 2;                                \
+			} while(--cnt)
+
+#define FILT_B(FILTER_TYPE, PRED_TYPE) \
+			do                                          \
+			{                                           \
+				/* fetch 2pixels from in */             \
+				v = PM64(in - 1);                       \
+				/* do chroma filter */                  \
+				v = Filter##FILTER_TYPE(v);             \
+				/* appy predictor for higher pixel */   \
+				w = _mm_srli_si64(v, 32);               \
+				u = _mm_cvtsi32_si64(prevline[0]);      \
+				p = PRED_TYPE##Predictor(p, u, up, w);  \
+				up = u;                                 \
+				/* store the pixel value */             \
+				curline[0] = _mm_cvtsi64_si32(p);       \
+				/* appy predictor for lower pixel */    \
+				w = v;                                  \
+				u = _mm_cvtsi32_si64(prevline[1]);      \
+				p = PRED_TYPE##Predictor(p, u, up, w);  \
+				up = u;                                 \
+				/* store the pixel value */             \
+				curline[1] = _mm_cvtsi64_si32(p);       \
+				/* to the next */                       \
+				curline +=2;                            \
+				prevline +=2;                           \
+				in -= 2;                                \
+			} while(--cnt)
+
+
+
+	for(i = 0; i < block_count; i ++)
+	{
+		int cnt = TLG6_W_BLOCK_SIZE/2;
+		if(i&1) in += oddskip; else in -= oddskip;
+		switch(dir + filtertypes[i])
+		{
+		// backward
+		case     ( 0<<1)  : FILT_B( 0, Med); break;
+		case     ( 0<<1)+1: FILT_B( 0, Avg); break;
+		case     ( 1<<1)  : FILT_B( 1, Med); break;
+		case     ( 1<<1)+1: FILT_B( 1, Avg); break;
+		case     ( 2<<1)  : FILT_B( 2, Med); break;
+		case     ( 2<<1)+1: FILT_B( 2, Avg); break;
+		case     ( 3<<1)  : FILT_B( 3, Med); break;
+		case     ( 3<<1)+1: FILT_B( 3, Avg); break;
+		case     ( 4<<1)  : FILT_B( 4, Med); break;
+		case     ( 4<<1)+1: FILT_B( 4, Avg); break;
+		case     ( 5<<1)  : FILT_B( 5, Med); break;
+		case     ( 5<<1)+1: FILT_B( 5, Avg); break;
+		case     ( 6<<1)  : FILT_B( 6, Med); break;
+		case     ( 6<<1)+1: FILT_B( 6, Avg); break;
+		case     ( 7<<1)  : FILT_B( 7, Med); break;
+		case     ( 7<<1)+1: FILT_B( 7, Avg); break;
+		case     ( 8<<1)  : FILT_B( 8, Med); break;
+		case     ( 8<<1)+1: FILT_B( 8, Avg); break;
+		case     ( 9<<1)  : FILT_B( 9, Med); break;
+		case     ( 9<<1)+1: FILT_B( 9, Avg); break;
+		case     (10<<1)  : FILT_B(10, Med); break;
+		case     (10<<1)+1: FILT_B(10, Avg); break;
+		case     (11<<1)  : FILT_B(11, Med); break;
+		case     (11<<1)+1: FILT_B(11, Avg); break;
+		case     (12<<1)  : FILT_B(12, Med); break;
+		case     (12<<1)+1: FILT_B(12, Avg); break;
+		case     (13<<1)  : FILT_B(13, Med); break;
+		case     (13<<1)+1: FILT_B(13, Avg); break;
+		case     (14<<1)  : FILT_B(14, Med); break;
+		case     (14<<1)+1: FILT_B(14, Avg); break;
+		case     (15<<1)  : FILT_B(15, Med); break;
+		case     (15<<1)+1: FILT_B(15, Avg); break;
+		// forward
+		case  32+( 0<<1)  : FILT_F( 0, Med); break;
+		case  32+( 0<<1)+1: FILT_F( 0, Avg); break;
+		case  32+( 1<<1)  : FILT_F( 1, Med); break;
+		case  32+( 1<<1)+1: FILT_F( 1, Avg); break;
+		case  32+( 2<<1)  : FILT_F( 2, Med); break;
+		case  32+( 2<<1)+1: FILT_F( 2, Avg); break;
+		case  32+( 3<<1)  : FILT_F( 3, Med); break;
+		case  32+( 3<<1)+1: FILT_F( 3, Avg); break;
+		case  32+( 4<<1)  : FILT_F( 4, Med); break;
+		case  32+( 4<<1)+1: FILT_F( 4, Avg); break;
+		case  32+( 5<<1)  : FILT_F( 5, Med); break;
+		case  32+( 5<<1)+1: FILT_F( 5, Avg); break;
+		case  32+( 6<<1)  : FILT_F( 6, Med); break;
+		case  32+( 6<<1)+1: FILT_F( 6, Avg); break;
+		case  32+( 7<<1)  : FILT_F( 7, Med); break;
+		case  32+( 7<<1)+1: FILT_F( 7, Avg); break;
+		case  32+( 8<<1)  : FILT_F( 8, Med); break;
+		case  32+( 8<<1)+1: FILT_F( 8, Avg); break;
+		case  32+( 9<<1)  : FILT_F( 9, Med); break;
+		case  32+( 9<<1)+1: FILT_F( 9, Avg); break;
+		case  32+(10<<1)  : FILT_F(10, Med); break;
+		case  32+(10<<1)+1: FILT_F(10, Avg); break;
+		case  32+(11<<1)  : FILT_F(11, Med); break;
+		case  32+(11<<1)+1: FILT_F(11, Avg); break;
+		case  32+(12<<1)  : FILT_F(12, Med); break;
+		case  32+(12<<1)+1: FILT_F(12, Avg); break;
+		case  32+(13<<1)  : FILT_F(13, Med); break;
+		case  32+(13<<1)+1: FILT_F(13, Avg); break;
+		case  32+(14<<1)  : FILT_F(14, Med); break;
+		case  32+(14<<1)+1: FILT_F(14, Avg); break;
+		case  32+(15<<1)  : FILT_F(15, Med); break;
+		case  32+(15<<1)+1: FILT_F(15, Avg); break;
+		default: ;
+		}
+		in += skipblockbytes;
+	}
+
+	_mm_empty();
+}
+
+#endif
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 static inline risse_uint32 make_gt_mask(risse_uint32 a, risse_uint32 b){
 	risse_uint32 tmp2 = ~b;
 	risse_uint32 tmp = ((a & tmp2) + (((a ^ tmp2) >> 1) & 0x7f7f7f7f) ) & 0x80808080;
@@ -754,10 +1105,27 @@ static void TLG6DecodeLineGeneric(
 
 
 //---------------------------------------------------------------------------
+#ifdef RISA_USE_SSE
+
+RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
+	static void, TLG6DecodeLine, (
+		RISSE_RESTRICT risse_uint32 *prevline,
+		RISSE_RESTRICT risse_uint32 *curline,
+		risse_int block_count,
+		RISSE_RESTRICT risse_uint8 *filtertypes,
+		risse_int skipblockbytes,
+		RISSE_RESTRICT risse_uint32 *in,
+		risse_uint32 initialp,
+		risse_int oddskip,
+		risse_int dir),
+	TLG6DecodeLineSSE, (prevline, curline, block_count, filtertypes, skipblockbytes,
+					in, initialp, oddskip, dir) )
+
+#else
+
 static void TLG6DecodeLine(
 	RISSE_RESTRICT risse_uint32 *prevline,
 	RISSE_RESTRICT risse_uint32 *curline,
-	risse_int width,
 	risse_int block_count,
 	RISSE_RESTRICT risse_uint8 *filtertypes,
 	risse_int skipblockbytes,
@@ -766,9 +1134,11 @@ static void TLG6DecodeLine(
 	risse_int oddskip,
 	risse_int dir)
 {
-	TLG6DecodeLineGeneric(prevline, curline, width, 0, block_count,
+	TLG6DecodeLineGeneric(prevline, curline, INT_MAX, 0, block_count,
 		filtertypes, skipblockbytes, in, initialp, oddskip, dir);
 }
+
+#endif
 //---------------------------------------------------------------------------
 
 
@@ -941,7 +1311,6 @@ DWORD filter_start = GetTickCount();
 				TLG6DecodeLine(
 					prevline,
 					curline,
-					width,
 					main_count,
 					ft,
 					skipbytes,

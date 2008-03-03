@@ -39,25 +39,24 @@ void * _AlignedMallocCollectee(size_t size, size_t align, bool atomic)
 		GC_MALLOC       (size + align + sizeof(void*));
 	void *org_ptr = ptr;
 
-	// ptr を整数値としてアクセスするために、整数によるエイリアスを
-	// 作成する
-	risse_ptruint *iptr =
-		reinterpret_cast<risse_ptruint *>(&ptr);
-
-	// *iptr にアラインメント分と sizeof(void*) を加算
-	*iptr += align + sizeof(void*);
-
-	// *iptr をアラインメントに合わせる
-	// align-1 の not を iptr に and すると言うことはすなわち
-	// *iptr を超えない、もっとも大きなアラインメントされたアドレスに
-	// *iptr が調整されるということ
-	*iptr &= ~(risse_ptruint)(align - 1);
-
 	// ptr の直前に、オリジナルのメモリブロックのポインタを格納する
 	(reinterpret_cast<void**>(ptr))[-1] = org_ptr;
 
-	// ptr を返す
-	return ptr;
+	// ptr を整数値としてアクセスするために、整数に変換する
+	risse_ptruint iptr =
+		reinterpret_cast<risse_ptruint>(ptr);
+
+	// iptr にアラインメント分と sizeof(void*) を加算
+	iptr += align + sizeof(void*);
+
+	// iptr をアラインメントに合わせる
+	// align-1 の not を iptr に and すると言うことはすなわち
+	// iptr を超えない、もっとも大きなアラインメントされたアドレスに
+	// iptr が調整されるということ
+	iptr &= ~(risse_ptruint)(align - 1);
+
+	// iptr をポインタに変換して返す
+	return reinterpret_cast<void*>(iptr);
 }
 //---------------------------------------------------------------------------
 

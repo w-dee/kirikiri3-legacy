@@ -120,11 +120,16 @@ namespace Risse
  // GNU C 3.1 or later has this no-inline attribute specifier
  #if (__GNUC__ == 3 && __GNUC_MINOR__ > 0 ) || __GNUC__ > 3
   #define RISSE_NOINLINE __attribute__ ((noinline))
+  #define RISSE_FORCEINLINE inline __attribute__ ((always_inline))
  #endif
 #endif
 
 #ifndef RISSE_NOINLINE
  #define RISSE_NOINLINE
+#endif
+
+#ifndef RISSE_FORCEINLINE
+ #define RISSE_FORCEINLINE inline
 #endif
 
 // restricted pointers

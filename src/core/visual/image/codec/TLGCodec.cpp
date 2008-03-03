@@ -610,7 +610,7 @@ void TLG6DecodeGolombValues(
 //---------------------------------------------------------------------------
 #ifdef RISA_USE_SSE
 // SSE 版 MED (vの加算も行う)
-static inline __m64 MedPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
+static __m64 RISSE_FORCEINLINE MedPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
 {
 /*
 	unsigned char min_a_b = a>b?b:a;
@@ -630,7 +630,7 @@ static inline __m64 MedPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
 }
 
 // SSE 版 AVG (vの加算も行う)
-static inline __m64 AvgPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
+static __m64 RISSE_FORCEINLINE AvgPredictor(__m64 a, __m64 b, __m64 c, __m64 v)
 {
 	// 注意、_mm_avg_pu8 は SSE 命令
 	return _mm_add_pi8(v, _mm_avg_pu8(a, b));
@@ -648,10 +648,10 @@ _ALIGN16(static const risse_uint32) GDMASK[2]	 = {0x0000fe00, 0x0000fe00};
 
 
 // MMX 版フィルタタイプ  0 IR           IG          IB
-static inline __m64 Filter0(__m64 v) { return v; }
+static __m64 RISSE_FORCEINLINE Filter0(__m64 v) { return v; }
 
 // MMX 版フィルタタイプ  1 IR+IG        IG          IB+IG
-static inline __m64 Filter1(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter1(__m64 v) {
 	return
 		_mm_add_pi8(
 			_mm_add_pi8(
@@ -663,21 +663,21 @@ static inline __m64 Filter1(__m64 v) {
 }
 
 // MMX 版フィルタタイプ  2 IR+IB+IG     IG+IB       IB
-static inline __m64 Filter2(__m64 v) {
+static RISSE_FORCEINLINE __m64 Filter2(__m64 v) {
 	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 8), PM64(GMASK)), v);
 	// tmp = [IA, IR, IG+IB, IB]
 	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(tmp, PM64(GMASK)), 8), tmp);
 }
 
 // MMX 版フィルタタイプ  3 IR           IG+IR       IB+IR+IG
-static inline __m64 Filter3(__m64 v) {
+static RISSE_FORCEINLINE __m64 Filter3(__m64 v) {
 	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 8), PM64(GMASK)), v);
 	// tmp = [IA, IR, IG+IR, IB]
 	return _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(tmp, PM64(GMASK)), 8), tmp);
 }
 
 // MMX 版フィルタタイプ  4 IR+IB+IR+IG  IG+IB+IR    IB+IR
-static inline __m64 Filter4(__m64 v) {
+static RISSE_FORCEINLINE __m64 Filter4(__m64 v) {
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 16), PM64(BMASK)), v);
 	// v = [IA, IR, IG, IB+IR]
 	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v,  8), PM64(GMASK)), v);
@@ -688,29 +688,29 @@ static inline __m64 Filter4(__m64 v) {
 }
 
 // MMX 版フィルタタイプ  5 IR           IG+IB+IR    IB+IR
-static inline __m64 Filter5(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter5(__m64 v) {
 	__m64 tmp = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v, 16), PM64(BMASK)), v);
 	// tmp = [IA, IR, IG, IB+IR]
 	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(tmp, PM64(BMASK)), 8), tmp);
 }
 
 // MMX 版フィルタタイプ  6 IR           IG          IB+IG
-static inline __m64 Filter6(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter6(__m64 v) {
 	return _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(v, PM64(GMASK)), 8), v);
 }
 
 // MMX 版フィルタタイプ  7 IR           IG+IB       IB
-static inline __m64 Filter7(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter7(__m64 v) {
 	return _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 8), PM64(GMASK)), v);
 }
 
 // MMX 版フィルタタイプ  8 IR+IG        IG          IB
-static inline __m64 Filter8(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter8(__m64 v) {
 	return _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(v, PM64(GMASK)), 8), v);
 }
 
 // MMX 版フィルタタイプ  9 IR+IB        IG+IR+IB    IB+IG+IR+IB
-static inline __m64 Filter9(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter9(__m64 v) {
 	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
 	// v = [IA, IR+IB, IG, IB]
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
@@ -721,7 +721,7 @@ static inline __m64 Filter9(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 10 IR           IG+IR       IB+IR
-static inline __m64 Filter10(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter10(__m64 v) {
 	__m64
 	u = _mm_add_pi8(_mm_srli_pi32(_mm_and_si64(v, PM64(RMASK)), 8), v);
 	// u = [IA, IR, IG+IR, IB]
@@ -731,7 +731,7 @@ static inline __m64 Filter10(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 11 IR+IB        IG+IB       IB
-static inline __m64 Filter11(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter11(__m64 v) {
 	__m64
 	u = _mm_add_pi8(_mm_slli_pi32(_mm_and_si64(v, PM64(BMASK)), 8), v);
 	// u = [IA, IR, IG+IB, IB]
@@ -741,7 +741,7 @@ static inline __m64 Filter11(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 12 IR+IB        IG+IR+IB    IB
-static inline __m64 Filter12(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter12(__m64 v) {
 	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
 	// v = [IA, IR+IB, IG, IB]
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
@@ -750,7 +750,7 @@ static inline __m64 Filter12(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 13 IR+IB+IG     IG+IR+IB+IG IB+IG
-static inline __m64 Filter13(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter13(__m64 v) {
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(BMASK)), v);
 	// v = [IA, IR, IG, IB+IG]
 	v = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 16), PM64(RMASK)), v);
@@ -761,7 +761,7 @@ static inline __m64 Filter13(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 14 IR+IB+IG+IR  IG+IR       IB+IG+IR
-static inline __m64 Filter14(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter14(__m64 v) {
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(GMASK)), v);
 	// v = [IA, IR, IG+IR, IB]
 	v = _mm_add_pi8(_mm_and_si64(_mm_srli_pi32(v,  8), PM64(BMASK)), v);
@@ -772,7 +772,7 @@ static inline __m64 Filter14(__m64 v) {
 }
 
 // MMX 版フィルタタイプ 15 IR+(IB<<1)   IG+(IB<<1)  IB
-static inline __m64 Filter15(__m64 v) {
+static __m64 RISSE_FORCEINLINE Filter15(__m64 v) {
 	__m64
 	u = _mm_add_pi8(_mm_and_si64(_mm_slli_pi32(v, 9), PM64(GDMASK)), v);
 	// u = [IA, IR, IG+(IB<<1), IB]
@@ -915,77 +915,8 @@ static void TLG6DecodeLineSSE(
 		// forward
 		case  32+( 0<<1)  : FILT_F( 0, Med); break;
 		case  32+( 0<<1)+1: FILT_F( 0, Avg); break;
-//		case  32+( 1<<1)  : FILT_F( 1, Med); break;
-//		case  32+( 1<<1)+1: FILT_F( 1, Avg); break;
-
-		case  32+( 1<<1)  :
-			do
-			{
-				/* fetch 2pixels from in */
-				v = PM64(in);
-				/* do chroma filter */
-				v = Filter1(v);
-				/* appy predictor for lower pixel */
-				w = v;
-				u = _mm_cvtsi32_si64(prevline[0]);
-//				p = MedPredictor(p, u, up, w);
-				{
-					__m64 max_a_b = _mm_max_pu8(p, u);
-					__m64 min_a_b = _mm_min_pu8(p, u);
-					__m64 tmp= _mm_max_pu8(min_a_b, _mm_min_pu8(max_a_b, up));
-					p =_mm_sub_pi8(_mm_add_pi8(_mm_add_pi8(v, max_a_b), min_a_b), tmp);
-				}
-				up = u;
-				/* store the pixel value */
-				curline[0] = _mm_cvtsi64_si32(p);
-				/* appy predictor for higher pixel */
-				w = _mm_srli_si64(v, 32);
-				u = _mm_cvtsi32_si64(prevline[1]);
-//				p = MedPredictor(p, u, up, w);
-				{
-					__m64 max_a_b = _mm_max_pu8(p, u);
-					__m64 min_a_b = _mm_min_pu8(p, u);
-					__m64 tmp= _mm_max_pu8(min_a_b, _mm_min_pu8(max_a_b, up));
-					p =_mm_sub_pi8(_mm_add_pi8(_mm_add_pi8(v, max_a_b), min_a_b), tmp);
-				}
-				up = u;
-				/* store the pixel value */
-				curline[1] = _mm_cvtsi64_si32(p);
-				/* to the next */
-				curline +=2;
-				prevline +=2;
-				in += 2;
-			} while(--cnt);
-			break;
-
-		case  32+( 1<<1)+1:
-			do
-			{
-				/* fetch 2pixels from in */
-				v = PM64(in);
-				/* do chroma filter */
-				v = Filter1(v);
-				/* appy predictor for lower pixel */
-				w = v;
-				u = _mm_cvtsi32_si64(prevline[0]);
-				p = MedPredictor(p, u, up, w);
-				up = u;
-				/* store the pixel value */
-				curline[0] = _mm_cvtsi64_si32(p);
-				/* appy predictor for higher pixel */
-				w = _mm_srli_si64(v, 32);
-				u = _mm_cvtsi32_si64(prevline[1]);
-				p = AvgPredictor(p, u, up, w);
-				up = u;
-				/* store the pixel value */
-				curline[1] = _mm_cvtsi64_si32(p);
-				/* to the next */
-				curline +=2;
-				prevline +=2;
-				in += 2;
-			} while(--cnt);
-			break;
-
+		case  32+( 1<<1)  : FILT_F( 1, Med); break;
+		case  32+( 1<<1)+1: FILT_F( 1, Avg); break;
 		case  32+( 2<<1)  : FILT_F( 2, Med); break;
 		case  32+( 2<<1)+1: FILT_F( 2, Avg); break;
 		case  32+( 3<<1)  : FILT_F( 3, Med); break;

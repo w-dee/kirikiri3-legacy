@@ -1,0 +1,122 @@
+;//---------------------------------------------------------------------------
+;/*
+;	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+;	 stands for "Risa Is a Stagecraft Architecture"
+;	Copyright (C) 2000-2008 W.Dee <dee@kikyou.info> and contributors
+;
+;	See details of license at "license.txt"
+;*/
+;//---------------------------------------------------------------------------
+; TLG 関連x86用アセンブリ言語版ルーチン
+
+%include		"yasm.yah"
+
+globaldef		TLG5DecompressSlide
+
+	segment_code
+;--------------------------------------------------------------------
+
+	function_align
+TLG5DecompressSlide:					; modified LZSS decompressor
+	push	edi
+	push	esi
+	push	ebx
+	push	ecx
+	push	edx
+	mov	eax,	[esp + 40]		; eax as R
+	mov	ebx,	[esp + 28]		; ebx as in
+	mov	edi,	[esp + 24]		; edi as out
+	mov	esi,	[esp + 36]		; esi as text
+	mov	edx,	[esp + 32]
+
+	push	ebp
+
+	lea	ebp,	[ebx + edx]		; ebp as limit
+
+	cmp	ebx,	ebp		; edx == 0 ?
+	jae	near .sdpexit		; then exit
+
+	loop_align
+	.sdgetmore:
+	movzx	ecx,	byte [ebx]		; load new flags ; ecx as flags
+	or	ecx,	0100h		; set flag sentinel
+	inc	ebx		; in++
+
+	.sdploop:
+	shr	ecx,	1		; flags >>= 1
+	jz	.sdgetmore		; go to sdgetmore if ecx == 0
+	jc	.sdpdiclook		; go to .sdpdiclook if last LSB flags
+
+	.sdpbyte:
+		; byte store
+	mov	dl,	[ebx]		; load literal input
+	inc	eax		; R++
+	inc	ebx		; in++
+	mov	[esi+eax-1],dl		; store to text[R-1]
+	inc	edi		; out++
+	and	eax,	0fffh		; R &= 0xfff
+	cmp	ebx,	ebp		; in < limit ?
+	mov	[edi-1],	dl		; store to the output
+
+	jb	.sdploop		; then go to .sdploop
+	jmp	.sdpexit		; else exit
+
+	.sdpdiclook:
+		; dictionary lookup
+	push	ecx
+
+	movzx	edx,	word [ebx]		; load 2bytes from input
+	mov	ecx,	edx
+	shr	ecx,	12		; ecx is now length
+	and	edx,	0fffh		; edx is now pos
+
+	add	ecx,	byte 3		; length += 3
+	add	ebx,	byte 2		; in+=2
+
+	cmp	ecx,	byte 18		; length != 18 ?
+	jne	.sdpdics1		; then go to .sdpdics1
+
+		; additional length
+	push	edx
+
+	movzx	edx,	byte [ebx]		; retrieve one byte
+	add	ecx,	edx		; add it to the length
+	inc	ebx		; in++
+
+	pop	edx
+
+	.sdpdics1:
+	push	ebx
+
+	.sdpdicloop:
+		; lookup loop
+	mov	bl,	[esi+edx]		; restore from dictionary
+	inc	eax		; R++
+	inc	edx		; pos++
+	mov	[esi+eax-1],bl		; store to text[R-1]
+	and	edx,	0fffh		; pos &= 0xfff
+	inc	edi		; out++
+	and	eax,	0fffh		; R &= 0xfff
+	dec	ecx		; length--
+	mov	[edi-1],	bl		; store to the output
+
+	jnz	.sdpdicloop		; go to .sdpdicloop if length!=0
+
+	pop	ebx
+	pop	ecx
+
+	cmp	ebx,	ebp		; in < limit ?
+	jb	near .sdploop		; then go to .sdploop
+	jmp	.sdpexit		; else exit
+
+
+	.sdpexit:
+	pop	ebp
+	pop	edx
+	pop	ecx
+	pop	ebx
+	pop	esi
+	pop	edi
+	ret
+
+

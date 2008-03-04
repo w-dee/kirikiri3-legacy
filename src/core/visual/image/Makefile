@@ -22,9 +22,11 @@ CPPFILES=\
 	codec/TLGCodec.cpp                 
 
 ifdef USE_YASM
- ASMFILES = codec/opt_x86/tlg5.yas
+ ASMFILES = \
+      codec/opt_x86/tlg_core.yas       \
+      codec/opt_x86/tlg6_golomb.yas
 else
- CPPFILES += codec/opt_default/tlg5.cpp
+ CPPFILES += codec/opt_default/tlg_core.cpp
 endif
 
 #-----------------------------------------

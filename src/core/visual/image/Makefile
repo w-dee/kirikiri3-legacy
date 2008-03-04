@@ -19,7 +19,7 @@ CPPFILES=\
 	codec/BMPCodec.cpp                 \
 	codec/PNGCodec.cpp                 \
 	codec/JPEGCodec.cpp                \
-	codec/TLGCodec.cpp                 
+	codec/TLGDecoder.cpp               
 
 ifdef USE_YASM
  ASMFILES = \

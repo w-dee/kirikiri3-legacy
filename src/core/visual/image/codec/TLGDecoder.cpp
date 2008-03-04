@@ -302,12 +302,15 @@ char TLG6GolombBitLengthTable
 	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT] =
 	{ { 0 } };
 }
+static bool TLG6TableInit = false;
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 static void TLG6MakeTable()
 {
+	if(TLG6TableInit) return;
+	TLG6TableInit = true;
 
 	/* table which indicates first set bit position + 1. */
 	/* this may be replaced by BSF (IA32 instrcution). */
@@ -1259,13 +1262,12 @@ void tTLGImageDecoder::Process(tStreamInstance * stream,
 
 
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージコーデックファクトリ
+//! @brief		TLGイメージデコーダファクトリ
 //---------------------------------------------------------------------------
-class tTLGImageCodecFactory : public tImageDecoderFactory, public tImageEncoderFactory,
-								public singleton_base<tTLGImageCodecFactory>
+class tTLGImageDecoderFactory : public tImageDecoderFactory,
+								public singleton_base<tTLGImageDecoderFactory>
 {
 	virtual tImageDecoder * CreateDecoder() { return new tTLGImageDecoder; }
-	virtual tImageEncoder * CreateEncoder() { return NULL /*new tTLGImageEncoder*/; }
 public:
 	//! @brief		コンストラクタ
 	tTLGImageCodecFactory()
@@ -1275,9 +1277,6 @@ public:
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g'>(), (tImageDecoderFactory*)this);
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g','5'>(), (tImageDecoderFactory*)this);
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g','6'>(), (tImageDecoderFactory*)this);
-		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g'>(), (tImageEncoderFactory*)this);
-		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g','5'>(), (tImageEncoderFactory*)this);
-		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g','6'>(), (tImageEncoderFactory*)this);
 	}
 };
 //---------------------------------------------------------------------------

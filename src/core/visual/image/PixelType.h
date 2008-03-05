@@ -94,6 +94,9 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	tPixelConstsModule(tScriptEngine * engine);
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tPixelConstsModule() {}
+
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
 };

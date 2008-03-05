@@ -82,6 +82,8 @@ public:
 class tWaveDecoderFactory : public tCollectee
 {
 public:
+	virtual ~tWaveDecoderFactory() {} //!< デストラクタ(おそらく呼ばれない)
+
 	virtual tWaveDecoder * Create(const tString & filename) = 0; //!< デコーダを作成する
 };
 //---------------------------------------------------------------------------

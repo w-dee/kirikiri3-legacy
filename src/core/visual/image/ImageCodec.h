@@ -44,6 +44,9 @@ public:
 public:
 	tImageDecoder(); //!< コンストラクタ
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tImageDecoder() {}
+
 public:
 	//! @brief		stream から image に対してデコードを行う
 	//! @param		stream		入力ストリーム
@@ -123,6 +126,9 @@ class tImageEncoder : public tCollectee
 public:
 	tImageEncoder(); //!< コンストラクタ
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tImageEncoder() {}
+
 public:
 	//! @brief		image から stream に対してエンコードを行う
 	//! @param		stream		出力ストリーム
@@ -186,6 +192,8 @@ protected:
 class tImageDecoderFactory : public tCollectee
 {
 public:
+	virtual ~tImageDecoderFactory() {;} //!< デストラクタ(おそらく呼ばれない)
+
 	virtual tImageDecoder * CreateDecoder() = 0; //!< デコーダを作成する
 };
 //---------------------------------------------------------------------------
@@ -201,6 +209,8 @@ public:
 class tImageEncoderFactory : public tCollectee
 {
 public:
+	virtual ~tImageEncoderFactory() {;} //!< デストラクタ(おそらく呼ばれない)
+
 	virtual tImageEncoder * CreateEncoder() = 0; //!< エンコーダを作成する
 };
 //---------------------------------------------------------------------------

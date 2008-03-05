@@ -304,6 +304,9 @@ template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindPropertyGetter : public tObjectInterface
 {
 public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tNativeBindPropertyGetter() {}
+
 	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッドのtypedef
 	//! @param		f			呼び出し先オブジェクト
 	//! @param		info		呼び出し情報
@@ -343,6 +346,9 @@ template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindPropertySetter : public tObjectInterface
 {
 public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tNativeBindPropertySetter() {}
+
 	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
 	//! @param		f			呼び出し先オブジェクト
 	//! @param		info		呼び出し情報
@@ -389,6 +395,10 @@ class tNativeBindProperty : public tObjectInterface
 
 	tObjectInterface * Getter; //!< Risseプロパティが読み込まれる際に呼ばれるメソッド
 	tObjectInterface * Setter; //!< Risseプロパティが書き込まれる際に呼ばれるメソッド
+
+public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tNativeBindProperty() {}
 
 protected:
 	//! @brief		コンストラクタ

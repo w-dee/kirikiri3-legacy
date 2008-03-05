@@ -35,6 +35,9 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	tModuleBase(const tString & name, tScriptEngine * engine);
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tModuleBase() {}
+
 	//! @brief		各メンバをインスタンスに追加する
 	virtual void RegisterMembers();
 

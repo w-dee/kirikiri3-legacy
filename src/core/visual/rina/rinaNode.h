@@ -75,6 +75,9 @@ public:
 	//! @param		graph		グラフインスタンス
 	tProcessNode(tGraph * graph);
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tProcessNode() {}
+
 public:
 	//! @brief		グラフインスタンスを得る
 	tGraph * GetGraph() const { return Graph; }

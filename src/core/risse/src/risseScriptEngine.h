@@ -29,6 +29,10 @@ class tBindingInfo;
 class tLineOutputInterface : public tCollectee
 {
 public:
+public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tLineOutputInterface() {}
+
 	//! @brief		情報を通知する
 	//! @param		info		情報
 	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意

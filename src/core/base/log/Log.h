@@ -119,6 +119,9 @@ class tLogger;
 class tLogReceiver
 {
 public:
+	//! @brief	デストラクタ(おそらく呼ばれない)
+	virtual ~tLogReceiver() {}
+
 	//! @brief ログが追加されるとき
 	//! @param	item  ログアイテム
 	//! @note  このメソッドは複数のスレッドから呼ばれることがある。

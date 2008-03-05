@@ -283,6 +283,9 @@ public:
 	//! @param		node		このピン配列を保持するノードインスタンス
 	tPins(tProcessNode * node) { Node = node; }
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tPins() {}
+
 	//! @brief		このピン配列を保持しているノードインスタンスを得る
 	//! @return		このピン配列を保持しているノードインスタンス
 	tProcessNode * GetNode() const { return Node; }

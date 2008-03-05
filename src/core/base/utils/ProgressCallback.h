@@ -28,6 +28,9 @@ public:
 	//! @brief		コンストラクタ
 	tProgressCallback() : Last(-1) {}
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tProgressCallback() {}
+
 	//! @brief		進捗コールバックを呼ぶ
 	//! @param		total		全体の処理量
 	//! @param		done		終了した処理量

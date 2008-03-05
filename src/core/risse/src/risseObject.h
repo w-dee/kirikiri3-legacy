@@ -52,6 +52,9 @@ public:
 	//! @param		rtti		RTTI
 	tObjectInterface(const tRTTI * rtti, tCriticalSection * cs) { RTTI = rtti; CS = cs; }
 
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tObjectInterface() {}
+
 	//! @brief		オブジェクトに対して操作を行う
 	//! @param		code	オペレーションコード
 	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
@@ -157,6 +160,9 @@ public:
 class tIdentifyObject : public tObjectInterface
 {
 public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tIdentifyObject() {}
+
 	tIdentifyObject() : tObjectInterface((const tRTTI *)NULL, (tCriticalSection *)NULL) {;}
 
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);

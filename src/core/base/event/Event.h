@@ -81,9 +81,11 @@ class tEventInfo;
 //---------------------------------------------------------------------------
 //! @brief		イベントの発生先インターフェース
 //---------------------------------------------------------------------------
-class tEventDestination
+class tEventDestination : public tCollectee
 {
 public:
+	virtual ~tEventDestination() {} //!< デストラクタ(おそらく呼ばれない)
+
 	virtual void OnEvent(tEventInfo * info) = 0; //!< イベントが配信されるとき
 };
 //---------------------------------------------------------------------------
@@ -139,6 +141,9 @@ public:
 	{
 	}
 
+	//! @brief	デストラクタ(おそらく呼ばれない)
+	virtual ~tEventInfo() {}
+
 	int GetId() const { return Id; } //!< IDを得る
 	void * GetSource() { return Source; } //!< イベント発生源を得る
 	risse_uint64 GetTick() const { return Tick; } //!< Tick を得る
@@ -166,6 +171,9 @@ public:
 	class tStateListener
 	{
 	public:
+		//! @brief		デストラクタ(おそらく呼ばれない)
+		virtual ~tStateListener() {}
+
 		//! @brief		イベントを配信可能かどうかのステータスが変わった際に
 		//!				呼ばれる
 		//! @param		b		イベントを配信可能かどうか
@@ -179,6 +187,9 @@ private:
 public:
 	//! @brief		コンストラクタ
 	tEventSystem() { CanDeliverEvents = true; }
+
+	//! @brief	デストラクタ(おそらく呼ばれない)
+	virtual ~tEventSystem() {}
 
 	bool GetCanDeliverEvents() const
 	{ volatile tCriticalSection::tLocker cs_holder(CS);

@@ -164,6 +164,9 @@ protected:
 	//!						画像のピッチを渡さなければならない。
 	//! @param		pixel_format	取得したいピクセル形式
 	//! @return		バッファ
+	//! @note		buf に NULL を指定するとバッファがこのメソッド内で割り当てられるが、
+	//!				そのバッファの内容が有効なのは次のこのメソッドの呼び出しまでなので注意
+	//!				(つまりこのメソッドの呼び出しごとにバッファの内容は上書きされる)
 	void * GetLines(void * buf, risse_size y, risse_size h, risse_offset * pitch,
 		tPixel::tFormat pixel_format);
 

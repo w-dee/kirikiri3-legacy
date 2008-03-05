@@ -8,10 +8,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TLG5/TLG6形式コーデック
+//! @brief TLGデコーダ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/codec/TLGCodec.h"
+#include "visual/image/codec/TLGDecoder.h"
 #include "base/exception/RisaException.h"
 #include <limits.h>
 
@@ -1270,7 +1270,7 @@ class tTLGImageDecoderFactory : public tImageDecoderFactory,
 	virtual tImageDecoder * CreateDecoder() { return new tTLGImageDecoder; }
 public:
 	//! @brief		コンストラクタ
-	tTLGImageCodecFactory()
+	tTLGImageDecoderFactory()
 	{
 		TLG6MakeTable(); // テーブルを作成
 

@@ -8,10 +8,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TLGコーデック
+//! @brief TLGデコーダ
 //---------------------------------------------------------------------------
-#ifndef TLGCodecH
-#define TLGCodecH
+#ifndef TLGDecoderH
+#define TLGDecoderH
 
 #include "visual/image/ImageCodec.h"
 
@@ -25,6 +25,10 @@ namespace Risa {
 #define TLG6_GOLOMB_N_COUNT  4
 #define TLG6_LeadingZeroTable_BITS 12
 #define TLG6_LeadingZeroTable_SIZE  (1<<TLG6_LeadingZeroTable_BITS)
+extern "C" {
+extern char TLG6GolombBitLengthTable
+	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT];
+}
 //---------------------------------------------------------------------------
 
 

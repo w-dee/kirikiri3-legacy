@@ -301,6 +301,7 @@ risse_uint8 TLG6LeadingZeroTable[TLG6_LeadingZeroTable_SIZE];
 char TLG6GolombBitLengthTable
 	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT] =
 	{ { 0 } };
+risse_uint32 TLG6GolombCodeTable[256][8];
 }
 static bool TLG6TableInit = false;
 //---------------------------------------------------------------------------
@@ -336,6 +337,38 @@ static void TLG6MakeTable()
 		if(a != TLG6_GOLOMB_N_COUNT*2*128)
 			*(char*)0 = 0;   /* THIS MUST NOT BE EXECUETED! */
 				/* (this is for compressed table data check) */
+	}
+
+
+	// TLG6GolombCodeTable を作成する
+	for(int v = 0; v < 256; v++)
+	{
+		int firstbit = 0;
+		for(int i = 0; i < 8; i++)
+			if(v & (1<<i)) { firstbit = i + 1; break; }
+		for(int k = 0; k < 8; k++)
+		{
+			if(firstbit == 0)
+			{
+				// v==0 のとき、ビットが見つからない
+				TLG6GolombCodeTable[v][k] = 0; // 対応できない
+				continue;
+			}
+
+			if(firstbit + k > 8)
+			{
+				// 8bit を超える場合
+				TLG6GolombCodeTable[v][k] = 0; // 対応できない
+				continue;
+			}
+
+			int n = ((v >> firstbit) & ((1<<k)-1)) + ((firstbit-1)<<k);
+			int sign = (n&1) - 1;
+	
+			TLG6GolombCodeTable[v][k] = ((firstbit + k) << 8) + 
+				((n >> 1) << 16) +
+				(((n ^ sign) + sign + 1) & 0xff);
+		}
 	}
 }
 //---------------------------------------------------------------------------

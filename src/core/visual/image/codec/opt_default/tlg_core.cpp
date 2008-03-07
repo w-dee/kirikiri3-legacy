@@ -80,12 +80,13 @@ loop:
 extern risse_uint8 TLG6LeadingZeroTable[TLG6_LeadingZeroTable_SIZE];
 extern char TLG6GolombBitLengthTable
 	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT];
+extern 	risse_uint32 TLG6GolombCodeTable[256][8];
 //---------------------------------------------------------------------------
 }
 
 //---------------------------------------------------------------------------
+#define TLG6_BYTEOF(a, x) (((risse_uint8*)(a))[(x)])
 #if RISSE_HOST_IS_BIG_ENDIAN || !(defined(_X86_) || defined(_AMD64_))
-	#define TLG6_BYTEOF(a, x) (((risse_uint8*)(a))[(x)])
 
 	#define TLG6_FETCH_32BITS(addr) ((risse_uint32)TLG6_BYTEOF((addr), 0) +  \
 									((risse_uint32)TLG6_BYTEOF((addr), 1) << 8) + \
@@ -108,6 +109,8 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 	risse_int pixel_count,
 	RISSE_RESTRICT risse_uint8 *bit_pool)
 {
+//static int lteight = 0;
+//static int gtnine = 0;
 	/*
 		decode values packed in "bit_pool".
 		values are coded using golomb code.
@@ -181,41 +184,59 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 				risse_uint32 t = TLG6_FETCH_32BITS(bit_pool) >> bit_pos;
 				risse_int bit_count;
 				risse_int b;
-				if(t)
+
+				v = TLG6GolombCodeTable[t&0xff][k];
+				if(v)
 				{
-					b = TLG6LeadingZeroTable[t&(TLG6_LeadingZeroTable_SIZE-1)];
-					bit_count = b;
-					while(!b)
-					{
-						bit_count += TLG6_LeadingZeroTable_BITS;
-						bit_pos += TLG6_LeadingZeroTable_BITS;
-						bit_pool += bit_pos >> 3;
-						bit_pos &= 7;
-						t = TLG6_FETCH_32BITS(bit_pool) >> bit_pos;
-						b = TLG6LeadingZeroTable[t&(TLG6_LeadingZeroTable_SIZE-1)];
-						bit_count += b;
-					}
-					bit_count --;
+					b = (v >> 8) & 0xff;
+					a += v >> 16;
+					*(ACCECSS_TYPE*)pixelbuf = (unsigned char) v;
 				}
 				else
 				{
-					bit_pool += 5;
-					bit_count = bit_pool[-1];
-					bit_pos = 0;
-					t = TLG6_FETCH_32BITS(bit_pool);
-					b = 0;
+					if(t)
+					{
+						b = TLG6LeadingZeroTable[t&(TLG6_LeadingZeroTable_SIZE-1)];
+						bit_count = b;
+						while(!b)
+						{
+							bit_count += TLG6_LeadingZeroTable_BITS;
+							bit_pos += TLG6_LeadingZeroTable_BITS;
+							bit_pool += bit_pos >> 3;
+							bit_pos &= 7;
+							t = TLG6_FETCH_32BITS(bit_pool) >> bit_pos;
+							b = TLG6LeadingZeroTable[t&(TLG6_LeadingZeroTable_SIZE-1)];
+							bit_count += b;
+						}
+						bit_count --;
+	//					if(bit_count + k > 8) gtnine ++; else lteight++;
+						v = (bit_count << k) + ((t >> b) & ((1<<k)-1));
+						b += k;
+						sign = (v & 1) - 1;
+						v >>= 1;
+						a += v;
+						*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
+					}
+					else
+					{
+						bit_pool += 5;
+						bit_count = bit_pool[-1];
+						bit_pos = 0;
+						t = TLG6_FETCH_32BITS(bit_pool);
+						b = 0;
+						v = (bit_count << k) + ((t >> b) & ((1<<k)-1));
+						b = k;
+						sign = (v & 1) - 1;
+						v >>= 1;
+						a += v;
+						*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
+					}
 				}
 
 
-				v = (bit_count << k) + ((t >> b) & ((1<<k)-1));
-				sign = (v & 1) - 1;
-				v >>= 1;
-				a += v;
-				*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
 				pixelbuf += 4;
 
 				bit_pos += b;
-				bit_pos += k;
 				bit_pool += bit_pos >> 3;
 				bit_pos &= 7;
 
@@ -226,6 +247,7 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 			zero ^= 1;
 		}
 	}
+//fprintf(stderr, "%d %d\n", gtnine, lteight);
 }
 //---------------------------------------------------------------------------
 

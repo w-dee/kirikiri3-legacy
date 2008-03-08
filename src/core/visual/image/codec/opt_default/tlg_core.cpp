@@ -101,6 +101,36 @@ extern 	risse_uint32 TLG6GolombCodeTable[256][8];
 
 
 //---------------------------------------------------------------------------
+// GNU C 3.4 or later has __builtin_ctz and prefetch function
+#if (__GNUC__ == 3 && __GNUC_MINOR__ >= 4 ) || __GNUC__ >= 4
+	#define TLG6_BSF(__x) __builtin_ctz(__x)
+	#define TLG6_PREFETCH_FOR_READ(__x) __builtin_prefetch(__x);
+	#define TLG6_PREFETCH_FOR_WRITE(__x) __builtin_prefetch(__x, 1);
+#else
+	inline int TLG6_BSF(risse_uint32 r)
+	{
+		risse_uint32 cnt=0, b=1;
+		while(b) { if(r&b) return cnt; cnt ++; b <<= 1; }
+		return 0;
+	}
+	#define TLG6_PREFETCH_FOR_READ(__x)
+	#define TLG6_PREFETCH_FOR_WRITE(__x)
+#endif
+
+// likely and unlikely 
+#ifndef likely
+	#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+	#define likely(cond) __builtin_expect(!!(int)(cond), 1)
+	#define unlikely(cond) __builtin_expect((int)(cond), 0)
+#else
+	#define likely(cond) (cond)
+	#define unlikely(cond) (cond)
+	#endif
+#endif /* !likely */
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		ゴロム・ライス符号展開ルーチン
 //---------------------------------------------------------------------------
 template <typename ACCECSS_TYPE>
@@ -121,113 +151,109 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 	int a = 0; /* summary of absolute values of errors */
 
 
-#define FILL_BITS while(bit_pos <= 24) { bits += (*(bit_pool++) << bit_pos); bit_pos += 8; }
+#define FILL_BITS do { while(unlikely(bit_pos <= 24)) { bits += (*(bit_pool++) << bit_pos); bit_pos += 8; } } while(0)
 #define STEP_BITS(n) (bits >>= (n), bit_pos -= (n))
 
 	risse_int bit_pos = 0;
 	risse_uint32 bits = 0;
 
 	FILL_BITS;
-	risse_uint8 zero = (bits & 1) ^ 1;
+	bool first_is_nonzero = (bits & 1);
 	STEP_BITS(1);
 
 	risse_int8 * limit = pixelbuf + pixel_count*4;
 
-	while(pixelbuf < limit)
+	if(first_is_nonzero) goto nonzero;
+
+	while(true)
 	{
-		/* get running count */
 		int count;
 
+		/* get running count */
+		TLG6_PREFETCH_FOR_WRITE(pixelbuf + 64);
+
 		{
-			risse_int b = TLG6LeadingZeroTable[bits&(TLG6_LeadingZeroTable_SIZE-1)];
-			int bit_count = b;
-			while(!b)
-			{
-				bit_count += TLG6_LeadingZeroTable_BITS;
-				STEP_BITS(TLG6_LeadingZeroTable_BITS);
-				FILL_BITS;
-				b = TLG6LeadingZeroTable[bits&(TLG6_LeadingZeroTable_SIZE-1)];
-				bit_count += b;
-			}
+			risse_int b = TLG6_BSF(bits);
+			STEP_BITS(b+1);
+			FILL_BITS;
+
+			count = 1 << b;
+			count += (bits) & (count-1);
 
 			STEP_BITS(b);
 			FILL_BITS;
-
-			bit_count --;
-			count = 1 << bit_count;
-			count += (bits) & (count-1);
-
-			STEP_BITS(bit_count);
-			FILL_BITS;
 		}
 
-		if(zero)
+		/* zero values */
+		if(sizeof(ACCECSS_TYPE) == sizeof(risse_uint32))
 		{
-			/* zero values */
-//fprintf(stderr, "! zero : %d\n", count);
-
-			if(sizeof(ACCECSS_TYPE) == sizeof(risse_uint32))
-			{
-				/* fill distination with zero */
-				do { *(ACCECSS_TYPE*)pixelbuf = 0; pixelbuf+=4; } while(--count);
-			}
-			else
-			{
-				/* do nothing but skip */
-				pixelbuf += count * sizeof(risse_uint32);
-			}
-
-			zero ^= 1;
+			/* fill distination with zero */
+			do { *(ACCECSS_TYPE*)pixelbuf = 0; pixelbuf+=4; } while(--count);
 		}
 		else
 		{
-			/* non-zero values */
+			/* do nothing but skip */
+			pixelbuf += count * sizeof(risse_uint32);
+		}
 
-			/* fill distination with glomb code */
+		if(unlikely(pixelbuf >= limit)) break;
 
-			do
-			{
-				int k = TLG6GolombBitLengthTable[a][n], v, sign;
+nonzero:
+		/* get running count */
+		{
+			risse_int b = TLG6_BSF(bits);
+			STEP_BITS(b+1);
+			FILL_BITS;
 
-				risse_int bit_count;
-				risse_int b;
+			count = 1 << b;
+			count += (bits) & (count-1);
+
+			STEP_BITS(b);
+			FILL_BITS;
+		}
+
+		/* non-zero values */
+
+		/* fill distination with glomb code */
+		do
+		{
+			TLG6_PREFETCH_FOR_READ(bit_pool + 64);
+			TLG6_PREFETCH_FOR_WRITE(pixelbuf + 48);
+
+			int k = TLG6GolombBitLengthTable[a][n], v, sign;
+
+			risse_int bit_count;
+			risse_int b;
 
 //fprintf(stderr, "* bits : %08x\n", bits);
-				v = TLG6GolombCodeTable[bits&0xff][k];
-				if(v)
+			v = TLG6GolombCodeTable[bits&0xff][k];
+			if(likely(v))
+			{
+				b = (v >> 8) & 0xff;
+				a += v >> 16;
+				STEP_BITS(b);
+				FILL_BITS;
+				*(ACCECSS_TYPE*)pixelbuf = (unsigned char) v;
+			}
+			else
+			{
+				if(likely(bits))
 				{
-					b = (v >> 8) & 0xff;
-					a += v >> 16;
-					STEP_BITS(b);
-					FILL_BITS;
-					*(ACCECSS_TYPE*)pixelbuf = (unsigned char) v;
-				}
-				else if(bits)
-				{
-					b = TLG6LeadingZeroTable[bits&(TLG6_LeadingZeroTable_SIZE-1)];
-					bit_count = b;
-					while(!b)
 					{
-						bit_count += TLG6_LeadingZeroTable_BITS;
-						STEP_BITS(TLG6_LeadingZeroTable_BITS);
+						bit_count = TLG6_BSF(bits);
+						STEP_BITS(bit_count);
+						STEP_BITS(1);
+							// 注意: ここを単に STEP_BITS(bit_count+1) に
+							// すると bit_count が 31 だった場合に
+							// シフト演算が機能しなくなる。c >>= 32 で
+							// c が 0 になることを期待するかもしれないが
+							// x86 の場合は シフト回数の下位 5 ビットだ
+							// けがマスクされて使用されるため c >>= 32
+							// だと c の変化はない。
 						FILL_BITS;
-						b = TLG6LeadingZeroTable[bits&(TLG6_LeadingZeroTable_SIZE-1)];
-						bit_count += b;
 					}
-
-					STEP_BITS(b);
-					FILL_BITS;
-
-					bit_count --;
 //fprintf(stderr, "+ bit_count : %d\n", bit_count);
 //fprintf(stderr, "+ bits : %08x, k : %d\n", bits, k);
-					v = (bit_count << k) + (bits & ((1<<k)-1));
-					STEP_BITS(k);
-					FILL_BITS;
-					sign = (v & 1) - 1;
-					v >>= 1;
-					a += v;
-					*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
 				}
 				else
 				{
@@ -237,24 +263,25 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 //fprintf(stderr, "- bit_count : %d\n", bit_count);
 					FILL_BITS;
 //fprintf(stderr, "- bits : %08x, k : %d\n", bits, k);
-					v = (bit_count << k) + (bits & ((1<<k)-1));
-					STEP_BITS(k);
-					FILL_BITS;
-					sign = (v & 1) - 1;
-					v >>= 1;
-					a += v;
-					*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
 				}
+				v = (bit_count << k) + (bits & ((1<<k)-1));
+				STEP_BITS(k);
+				FILL_BITS;
+				sign = (v & 1) - 1;
+				v >>= 1;
+				a += v;
+				*(ACCECSS_TYPE*)pixelbuf = (unsigned char) ((v ^ sign) + sign + 1);
+			}
 
 
-				pixelbuf += 4;
+			pixelbuf += 4;
 
-				if (--n < 0) {
-					a >>= 1;  n = TLG6_GOLOMB_N_COUNT - 1;
-				}
-			} while(--count);
-			zero ^= 1;
-		}
+			if (unlikely(--n < 0)) {
+				a >>= 1;  n = TLG6_GOLOMB_N_COUNT - 1;
+			}
+		} while(--count);
+
+		if(unlikely(pixelbuf >= limit)) break;
 	}
 }
 //---------------------------------------------------------------------------

@@ -64,7 +64,7 @@ tMethodArgument & tMethodArgument::Allocate(risse_size ac, risse_size bc)
 		sizeof(tMethodArgumentOf<1>) - sizeof(tVariant *) +
 		sizeof(tVariant) * (ac+bc)];
 
-	tMethodArgument & ret = *reinterpret_cast<tMethodArgument*>(alloc);
+	tMethodArgument & ret = *static_cast<tMethodArgument*>(alloc);
 
 	ret.ArgumentCount = ac;
 	ret.BlockArgumentCount = bc;

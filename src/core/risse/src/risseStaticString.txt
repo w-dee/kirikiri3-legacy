@@ -168,3 +168,4 @@ ss_identify							identify						#!< "identify" メソッド名
 ss_Dictionary						Dictionary						#!< "Dictionary" クラス名
 ss_count							count							#!< "count" プロパティ名
 ss_clear							clear							#!< "clear" メソッド名
+ss_eachPair							eachPair						#!< "eachPair" メソッド名

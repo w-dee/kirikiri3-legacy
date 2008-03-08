@@ -420,6 +420,7 @@ public:
 	{
 		HashMask = InitialHashMask;
 		Elms = new tElement[HashMask + 1];
+		for(risse_size i = 0; i <= HashMask; i++) Elms[i].Flags = 0;
 		InternalClear();
 	}
 

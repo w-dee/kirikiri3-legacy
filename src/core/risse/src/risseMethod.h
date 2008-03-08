@@ -149,6 +149,10 @@ protected:
 	risse_size BlockArgumentCount; //!< ブロック引数の配列の個数
 	const tVariant * Arguments[1]; //!< 引数を表す値へのポインタの配列
 
+private:
+	tMethodArgument(const tMethodArgument &); // non copy-able
+	void operator = (const tMethodArgument &); // non copy-able
+
 public:
 	//! @brief		引数0の引数を表すstaticオブジェクトへの参照を返す
 	//! @return		引数0の引数を表すstaticオブジェクトへの参照
@@ -171,13 +175,13 @@ public:
 
 public:
 	//! @brief		引数=0のtMethodArgumentOfオブジェクトを返す(New()のエイリアス)
-	static const tMethodArgument Empty()
+	static const tMethodArgument & Empty()
 	{
 		return GetEmptyArgument();
 	}
 
 	//! @brief		引数=0のtMethodArgumentOfオブジェクトを返す
-	static const tMethodArgument New()
+	static const tMethodArgument & New()
 	{
 		return Empty();
 	}
@@ -224,13 +228,6 @@ public:
 	}
 
 public:
-	//! @brief		tMethodArgumentへのキャスト
-	//! @return		tMethodArgumentへの参照
-	//! @note		バイナリレイアウトが同一なのでtMethodArgumentへは安全に
-	//!				キャストできるはず
-	operator const tMethodArgument & () const
-		{ return * reinterpret_cast<const tMethodArgument *>(this); }
-
 	//! @brief		普通の引数の個数を得る
 	//! @return		普通の引数の個数
 	risse_size GetArgumentCount() const { return ArgumentCount; }

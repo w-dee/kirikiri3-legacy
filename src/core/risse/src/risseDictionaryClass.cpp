@@ -101,6 +101,30 @@ risse_size tDictionaryInstance::get_count()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tDictionaryInstance::eachPair(const tNativeCallInfo &info)
+{
+	info.args.ExpectBlockArgumentCount(1);
+
+	const tVariant & block = info.args.GetBlockArgument(0);
+
+	volatile tSynchronizer sync(this); // sync
+
+	// TODO: ロックどうする
+	// TODO: 途中で辞書配列の内容が変わったときどうする
+	tMemberHashTable::tIterator iterator(HashTable);
+	tVariant key, value;
+	while(!iterator.End())
+	{
+		key = iterator.GetKey(); // 値をコピー
+		value = iterator.GetValue(); // 値をコピー
+		block.FuncCall(GetRTTI()->GetScriptEngine(), NULL, 0, tMethodArgument::New(key, value));
+		++iterator;
+	}
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -133,6 +157,7 @@ void tDictionaryClass::RegisterMembers()
 	BindFunction(this, mnISet, &tDictionaryInstance::iset);
 	BindFunction(this, ss_clear, &tDictionaryInstance::clear);
 	BindProperty(this, ss_count, &tDictionaryInstance::get_count);
+	BindFunction(this, ss_eachPair, &tDictionaryInstance::eachPair);
 }
 //---------------------------------------------------------------------------
 

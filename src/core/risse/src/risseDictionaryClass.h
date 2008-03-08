@@ -49,6 +49,7 @@ public: // Risse用メソッドなど
 	void iset(const tVariant & value, const tVariant & key);
 	void clear();
 	risse_size get_count();
+	void eachPair(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 

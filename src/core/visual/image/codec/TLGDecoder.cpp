@@ -364,9 +364,10 @@ static void TLG6MakeTable()
 
 			int n = ((v >> firstbit) & ((1<<k)-1)) + ((firstbit-1)<<k);
 			int sign = (n&1) - 1;
+			n >>= 1;
 	
 			TLG6GolombCodeTable[v][k] = ((firstbit + k) << 8) + 
-				((n >> 1) << 16) +
+				(n << 16) +
 				(((n ^ sign) + sign + 1) & 0xff);
 		}
 	}

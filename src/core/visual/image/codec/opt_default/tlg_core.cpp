@@ -218,6 +218,7 @@ nonzero:
 					FILL_BITS;
 //fprintf(stderr, "- bits : %08x, k : %d\n", bits, k);
 				}
+
 				v = (bit_count << k) + (bits & ((1<<k)-1));
 				STEP_BITS(k);
 				FILL_BITS;

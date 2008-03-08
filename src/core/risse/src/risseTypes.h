@@ -132,6 +132,36 @@ namespace Risse
  #define RISSE_FORCEINLINE inline
 #endif
 
+// likely and unlikely 
+#ifndef likely
+	#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+	#define RISSE_LIKELY(cond) __builtin_expect(!!(cond), 1)
+	#define RISSE_UNLIKELY(cond) __builtin_expect(!!(cond), 0)
+#else
+	#define RISSE_LIKELY(cond) (cond)
+	#define RISSE_UNLIKELY(cond) (cond)
+	#endif
+#endif /* !likely */
+
+// GNU C 3.4 or later has __builtin_ctz and prefetch function
+#if (__GNUC__ == 3 && __GNUC_MINOR__ >= 4 ) || __GNUC__ >= 4
+	#define RISSE_BSF(__x) __builtin_ctz(__x)
+	#define RISSE_PREFETCH_FOR_READ(__x) __builtin_prefetch(__x);
+	#define RISSE_PREFETCH_FOR_WRITE(__x) __builtin_prefetch(__x, 1);
+#else
+	static inline int RISSE_BSF(risse_uint32 r)
+	{
+		risse_uint32 cnt=0, b=1;
+		while(b) { if(r&b) return cnt; cnt ++; b <<= 1; }
+		return 0;
+	}
+	#define RISSE_PREFETCH_FOR_READ(__x)
+	#define RISSE_PREFETCH_FOR_WRITE(__x)
+#endif
+
+//---------------------------------------------------------------------------
+
+
 // restricted pointers
 #if (__GNUC__ == 3 && __GNUC_MINOR__ > 4 ) || __GNUC__ > 3
 	#define RISSE_RESTRICT __restrict__

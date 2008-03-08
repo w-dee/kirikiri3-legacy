@@ -85,52 +85,6 @@ extern 	risse_uint32 TLG6GolombCodeTable[256][8];
 }
 
 //---------------------------------------------------------------------------
-#define TLG6_BYTEOF(a, x) (((risse_uint8*)(a))[(x)])
-#if RISSE_HOST_IS_BIG_ENDIAN || !(defined(_X86_) || defined(_AMD64_))
-
-	#define TLG6_FETCH_32BITS(addr) ((risse_uint32)TLG6_BYTEOF((addr), 0) +  \
-									((risse_uint32)TLG6_BYTEOF((addr), 1) << 8) + \
-									((risse_uint32)TLG6_BYTEOF((addr), 2) << 16) + \
-									((risse_uint32)TLG6_BYTEOF((addr), 3) << 24) )
-#else
-	// intel architectures allows mis-alignment access of dwords ...
-	// (of course there is a penalty)
-	#define TLG6_FETCH_32BITS(addr) (*(risse_uint32*)addr)
-#endif
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-// GNU C 3.4 or later has __builtin_ctz and prefetch function
-#if (__GNUC__ == 3 && __GNUC_MINOR__ >= 4 ) || __GNUC__ >= 4
-	#define TLG6_BSF(__x) __builtin_ctz(__x)
-	#define TLG6_PREFETCH_FOR_READ(__x) __builtin_prefetch(__x);
-	#define TLG6_PREFETCH_FOR_WRITE(__x) __builtin_prefetch(__x, 1);
-#else
-	inline int TLG6_BSF(risse_uint32 r)
-	{
-		risse_uint32 cnt=0, b=1;
-		while(b) { if(r&b) return cnt; cnt ++; b <<= 1; }
-		return 0;
-	}
-	#define TLG6_PREFETCH_FOR_READ(__x)
-	#define TLG6_PREFETCH_FOR_WRITE(__x)
-#endif
-
-// likely and unlikely 
-#ifndef likely
-	#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
-	#define likely(cond) __builtin_expect(!!(int)(cond), 1)
-	#define unlikely(cond) __builtin_expect((int)(cond), 0)
-#else
-	#define likely(cond) (cond)
-	#define unlikely(cond) (cond)
-	#endif
-#endif /* !likely */
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 //! @brief		ゴロム・ライス符号展開ルーチン
 //---------------------------------------------------------------------------
 template <typename ACCECSS_TYPE>
@@ -151,7 +105,7 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 	int a = 0; /* summary of absolute values of errors */
 
 
-#define FILL_BITS do { while(unlikely(bit_pos <= 24)) { bits += (*(bit_pool++) << bit_pos); bit_pos += 8; } } while(0)
+#define FILL_BITS do { while(RISSE_UNLIKELY(bit_pos <= 24)) { bits += (*(bit_pool++) << bit_pos); bit_pos += 8; } } while(0)
 #define STEP_BITS(n) (bits >>= (n), bit_pos -= (n))
 
 	risse_int bit_pos = 0;
@@ -170,10 +124,10 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 		int count;
 
 		/* get running count */
-		TLG6_PREFETCH_FOR_WRITE(pixelbuf + 64);
+		RISSE_PREFETCH_FOR_WRITE(pixelbuf + 64);
 
 		{
-			risse_int b = TLG6_BSF(bits);
+			risse_int b = RISSE_BSF(bits);
 			STEP_BITS(b+1);
 			FILL_BITS;
 
@@ -196,12 +150,12 @@ static RISSE_FORCEINLINE void DecodeGolombValues(
 			pixelbuf += count * sizeof(risse_uint32);
 		}
 
-		if(unlikely(pixelbuf >= limit)) break;
+		if(RISSE_UNLIKELY(pixelbuf >= limit)) break;
 
 nonzero:
 		/* get running count */
 		{
-			risse_int b = TLG6_BSF(bits);
+			risse_int b = RISSE_BSF(bits);
 			STEP_BITS(b+1);
 			FILL_BITS;
 
@@ -217,8 +171,8 @@ nonzero:
 		/* fill distination with glomb code */
 		do
 		{
-			TLG6_PREFETCH_FOR_READ(bit_pool + 64);
-			TLG6_PREFETCH_FOR_WRITE(pixelbuf + 48);
+			RISSE_PREFETCH_FOR_READ(bit_pool + 64);
+			RISSE_PREFETCH_FOR_WRITE(pixelbuf + 48);
 
 			int k = TLG6GolombBitLengthTable[a][n], v, sign;
 
@@ -227,7 +181,7 @@ nonzero:
 
 //fprintf(stderr, "* bits : %08x\n", bits);
 			v = TLG6GolombCodeTable[bits&0xff][k];
-			if(likely(v))
+			if(RISSE_LIKELY(v))
 			{
 				b = (v >> 8) & 0xff;
 				a += v >> 16;
@@ -237,10 +191,10 @@ nonzero:
 			}
 			else
 			{
-				if(likely(bits))
+				if(RISSE_LIKELY(bits))
 				{
 					{
-						bit_count = TLG6_BSF(bits);
+						bit_count = RISSE_BSF(bits);
 						STEP_BITS(bit_count);
 						STEP_BITS(1);
 							// 注意: ここを単に STEP_BITS(bit_count+1) に
@@ -276,12 +230,12 @@ nonzero:
 
 			pixelbuf += 4;
 
-			if (unlikely(--n < 0)) {
+			if(RISSE_UNLIKELY(--n < 0)) {
 				a >>= 1;  n = TLG6_GOLOMB_N_COUNT - 1;
 			}
 		} while(--count);
 
-		if(unlikely(pixelbuf >= limit)) break;
+		if(RISSE_UNLIKELY(pixelbuf >= limit)) break;
 	}
 }
 //---------------------------------------------------------------------------

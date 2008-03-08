@@ -22,14 +22,6 @@ CPPFILES=\
 	codec/TLGDecoder.cpp               \
 	codec/TLGEncoder.cpp               
 
-ifdef USE_YASM
- ASMFILES = \
-      codec/opt_x86/tlg_core.yas       \
-      codec/opt_x86/tlg6_golomb.yas
-else
- CPPFILES += codec/opt_default/tlg_core.cpp
-endif
-
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし
 #-----------------------------------------

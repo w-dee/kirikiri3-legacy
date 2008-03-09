@@ -482,14 +482,14 @@ void tTLGImageEncoder::EncodeTLG5(tStreamInstance * stream,
 
 class TLG6BitStream
 {
-	tStreamAdapter * OutStream; // output stream
+	gc_vector<risse_uint8> & OutStream; // output stream
 	int BufferBitPos; // bit position of output buffer
 	risse_size BufferBytePos; // byte position of output buffer
 	risse_uint8 *Buffer; // output buffer
 	risse_size BufferCapacity; // output buffer capacity
 
 public:
-	TLG6BitStream(tStreamAdapter * outstream) :
+	TLG6BitStream(gc_vector<risse_uint8> & outstream) :
 		OutStream(outstream),
 		BufferBitPos(0),
 		BufferBytePos(0),
@@ -512,7 +512,9 @@ public:
 		if(Buffer && (BufferBitPos || BufferBytePos))
 		{
 			if(BufferBitPos) BufferBytePos ++;
-			OutStream->Write(Buffer, BufferBytePos);
+			size_t pos = OutStream.size();
+			OutStream.resize(pos + BufferBytePos);
+			memcpy(&(OutStream[0]) + pos, Buffer, BufferBytePos);
 			BufferBytePos = 0;
 			BufferBitPos = 0;
 		}
@@ -1112,10 +1114,10 @@ public:
 	for(; d < len; d++) \
 	{ FILTER_FUNC(0); }
 
-static void ApplyColorFilter(risse_uint8 * bufb, risse_uint8 * bufg, risse_uint8 * bufr, int len, int code)
+static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int code)
 {
 	int d;
-	risse_uint8 t;
+	char t;
 	switch(code)
 	{
 	case 0:
@@ -1392,23 +1394,23 @@ static void ApplyColorFilter(risse_uint8 * bufb, risse_uint8 * bufg, risse_uint8
 
 }
 //---------------------------------------------------------------------------
-static int DetectColorFilter(risse_uint8 *b, risse_uint8 *g, risse_uint8 *r, int size, risse_size &outsize)
+static int DetectColorFilter(char *b, char *g, char *r, int size, risse_size &outsize)
 {
 #ifndef FILTER_TEST
 	risse_size minbits = risse_size_max;
 	int mincode = -1;
 
-	risse_uint8 bbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
-	risse_uint8 gbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
-	risse_uint8 rbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
+	char bbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
+	char gbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
+	char rbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
 	TryCompressGolomb bc, gc, rc;
 
 	for(int code = 0; code < FILTER_TRY_COUNT; code++)   // 17..27 are currently not used
 	{
 		// copy bbuf, gbuf, rbuf into b, g, r.
-		memcpy(bbuf, b, sizeof(risse_uint8)*size);
-		memcpy(gbuf, g, sizeof(risse_uint8)*size);
-		memcpy(rbuf, r, sizeof(risse_uint8)*size);
+		memcpy(bbuf, b, sizeof(char)*size);
+		memcpy(gbuf, g, sizeof(char)*size);
+		memcpy(rbuf, r, sizeof(char)*size);
 
 		// copy compressor
 		bc.Reset();
@@ -1497,9 +1499,9 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 	// prepare pointers to buffers
 	risse_size max_bit_length = 0;
 
-	risse_uint8 *buf[MAX_COLOR_COMPONENTS];
+	char *buf[MAX_COLOR_COMPONENTS];
 	for(int i = 0; i < MAX_COLOR_COMPONENTS; i++) buf[i] = NULL;
-	risse_uint8 *block_buf[MAX_COLOR_COMPONENTS];
+	char *block_buf[MAX_COLOR_COMPONENTS];
 	for(int i = 0; i < MAX_COLOR_COMPONENTS; i++) block_buf[i] = NULL;
 	risse_uint8 *filtertypes = NULL;
 
@@ -1510,10 +1512,10 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 	// allocate buffer
 	for(int c = 0; c < colors; c++)
 	{
-		buf[c] = static_cast<risse_uint8 *>(
-			AlignedMallocAtomicCollectee(sizeof(risse_uint8 *)* W_BLOCK_SIZE * H_BLOCK_SIZE * 3, 4));
-		block_buf[c] = static_cast<risse_uint8 *>(
-			AlignedMallocAtomicCollectee(sizeof(risse_uint8) *H_BLOCK_SIZE * width, 4));
+		buf[c] = static_cast<char *>(
+			AlignedMallocAtomicCollectee(sizeof(char *)* W_BLOCK_SIZE * H_BLOCK_SIZE * 3, 4));
+		block_buf[c] = static_cast<char *>(
+			AlignedMallocAtomicCollectee(sizeof(char) *H_BLOCK_SIZE * width, 4));
 	}
 	int w_block_count = (int)((width - 1) / W_BLOCK_SIZE) + 1;
 	int h_block_count = (int)((width - 1) / H_BLOCK_SIZE) + 1;
@@ -1523,7 +1525,8 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 		AlignedMallocAtomicCollectee(sizeof(risse_uint32) * width, 4));
 
 
-	TLG6BitStream bs(&out);
+	gc_vector<risse_uint8> temp_storage; // エントロピーコーディング用
+	TLG6BitStream bs(temp_storage);
 
 	int fc = 0;
 	for(risse_size y = 0; y < height; y += H_BLOCK_SIZE)
@@ -1731,7 +1734,16 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 			// 11 means raw (uncompressed) data (not yet implemented).
 			if(max_bit_length < bitlength) max_bit_length = bitlength;
 			bitlength |= (method << 30);
-			WriteInt32(bitlength, &out);
+
+			// temp_storage に bitlength を書き出す
+			temp_storage.resize(temp_storage.size() + 4);
+			risse_uint8 * p = &(temp_storage[0]) + temp_storage.size() - 4;
+			p[0] = (bitlength >>  0) & 0xff;
+			p[1] = (bitlength >>  8) & 0xff;
+			p[2] = (bitlength >> 16) & 0xff;
+			p[3] = (bitlength >> 24) & 0xff;
+
+			// temp_storage に ビットストリームを書き出す
 			bs.Flush();
 		}
 
@@ -1769,6 +1781,9 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 		fclose(f);
 */
 	}
+
+	// write entropy values (temp_storage の中身を出力ストリームに書き出す)
+	out.WriteBuffer(&(temp_storage[0]), temp_storage.size());
 
 
 #ifdef WRITE_ENTROPY_VALUES

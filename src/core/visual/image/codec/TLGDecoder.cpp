@@ -805,14 +805,14 @@ static void TLG6DecodeLineSSE(
 				v = PM64(in);                           \
 				/* do chroma filter */                  \
 				v = Filter##FILTER_TYPE(v);             \
-				/* appy predictor for lower pixel */    \
+				/* apply predictor for lower pixel */    \
 				w = v;                                  \
 				u = _mm_cvtsi32_si64(prevline[0]);      \
 				p = PRED_TYPE##Predictor(p, u, up, w);  \
 				up = u;                                 \
 				/* store the pixel value */             \
 				curline[0] = _mm_cvtsi64_si32(p);       \
-				/* appy predictor for higher pixel */   \
+				/* apply predictor for higher pixel */   \
 				w = _mm_srli_si64(v, 32);               \
 				u = _mm_cvtsi32_si64(prevline[1]);      \
 				p = PRED_TYPE##Predictor(p, u, up, w);  \
@@ -832,14 +832,14 @@ static void TLG6DecodeLineSSE(
 				v = PM64(in - 1);                       \
 				/* do chroma filter */                  \
 				v = Filter##FILTER_TYPE(v);             \
-				/* appy predictor for higher pixel */   \
+				/* apply predictor for higher pixel */   \
 				w = _mm_srli_si64(v, 32);               \
 				u = _mm_cvtsi32_si64(prevline[0]);      \
 				p = PRED_TYPE##Predictor(p, u, up, w);  \
 				up = u;                                 \
 				/* store the pixel value */             \
 				curline[0] = _mm_cvtsi64_si32(p);       \
-				/* appy predictor for lower pixel */    \
+				/* apply predictor for lower pixel */    \
 				w = v;                                  \
 				u = _mm_cvtsi32_si64(prevline[1]);      \
 				p = PRED_TYPE##Predictor(p, u, up, w);  \

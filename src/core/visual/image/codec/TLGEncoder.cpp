@@ -1763,7 +1763,7 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 		comp.Encode(filtertypes, fc, outbuf, outlen);
 		WriteInt32(outlen, &out);
 		out.WriteBuffer(outbuf, outlen);
-
+/*
 		{
 			int n = 0;
 			for(int y = 0; y < h_block_count; y++)
@@ -1779,7 +1779,7 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 				fprintf(stderr, "\n");
 			}
 		}
-
+*/
 	}
 
 	// write entropy values (temp_storage の中身を出力ストリームに書き出す)

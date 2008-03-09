@@ -1117,7 +1117,7 @@ public:
 static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int code)
 {
 	int d;
-	char t;
+	unsigned char t;
 	switch(code)
 	{
 	case 0:
@@ -1131,30 +1131,30 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 2:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufg[d],\
-			bufg[d] -= bufb[d];
+			bufr[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufb[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 3:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufg[d],\
-			bufg[d] -= bufr[d];
+			bufb[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufr[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 4:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufg[d],\
-			bufg[d] -= bufb[d],\
-			bufb[d] -= bufr[d];
+			bufr[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufr[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 5:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufb[d],\
-			bufb[d] -= bufr[d];
+			bufg[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufr[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1178,9 +1178,9 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 9:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufg[d],\
-			bufg[d] -= bufr[d],\
-			bufr[d] -= bufb[d];
+			bufb[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufb[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1200,24 +1200,24 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 12:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufr[d],\
-			bufr[d] -= bufb[d];
+			bufg[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufb[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 13:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufr[d],\
-			bufr[d] -= bufb[d],\
-			bufb[d] -= bufg[d];
+			bufg[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufg[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 14:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufb[d],\
-			bufb[d] -= bufg[d],\
-			bufg[d] -= bufr[d];
+			bufr[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufr[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1238,33 +1238,33 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 17:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufb[d],\
-			bufb[d] -= bufg[d];
+			bufr[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufg[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 18:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufb[d];
+			bufr[d+n] -= bufb[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 19:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufr[d],\
-			bufr[d] -= bufg[d];
+			bufb[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufg[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 20:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufr[d];
+			bufb[d+n] -= bufr[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 21:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufg[d]>>1;
+			bufb[d+n] -= bufg[d+n]>>1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1276,17 +1276,17 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 23:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufb[d],\
-			bufb[d] -= bufr[d],\
-			bufr[d] -= bufg[d];
+			bufg[d+n] -= bufb[d+n],\
+			bufb[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufg[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 24:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufr[d],\
-			bufr[d] -= bufg[d],\
-			bufg[d] -= bufb[d];
+			bufb[d+n] -= bufr[d+n],\
+			bufr[d+n] -= bufg[d+n],\
+			bufg[d+n] -= bufb[d+n];
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1312,7 +1312,7 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 28:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufb[d]>>1;
+			bufr[d+n] -= bufb[d+n]>>1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1334,19 +1334,19 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 31:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufr[d]>>1;
+			bufb[d+n] -= bufr[d+n]>>1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 32:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufb[d]<<1;
+			bufr[d+n] -= bufb[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 33:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufg[d]<<1;
+			bufb[d+n] -= bufg[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1360,32 +1360,32 @@ static void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int
 		break;
 	case 35:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufb[d]<<1;
+			bufg[d+n] -= bufb[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 36:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufg[d]<<1;
+			bufr[d+n] -= bufg[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 37:
 		#define FILTER_FUNC(n) \
-			bufr[d] -= bufg[d]<<1,\
-			bufb[d] -= bufg[d]<<1;
+			bufr[d+n] -= bufg[d+n]<<1,\
+			bufb[d+n] -= bufg[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 38:
 		#define FILTER_FUNC(n) \
-			bufg[d] -= bufr[d]<<1;
+			bufg[d+n] -= bufr[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
 	case 39:
 		#define FILTER_FUNC(n) \
-			bufb[d] -= bufr[d]<<1;
+			bufb[d+n] -= bufr[d+n]<<1;
 		DO_FILTER
 		#undef FILTER_FUNC
 		break;
@@ -1763,23 +1763,23 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 		comp.Encode(filtertypes, fc, outbuf, outlen);
 		WriteInt32(outlen, &out);
 		out.WriteBuffer(outbuf, outlen);
-/*
-		FILE *f = fopen("ft.txt", "wt");
-		int n = 0;
-		for(int y = 0; y < h_block_count; y++)
+
 		{
-			for(int x = 0; x < w_block_count; x++)
+			int n = 0;
+			for(int y = 0; y < h_block_count; y++)
 			{
-				int t = filtertypes[n++];
-				risse_uint8 b;
-				if(t & 1) b = 'A'; else b = 'M';
-				t >>= 1;
-				fprintf(f, "%c%x", b, t);
+				for(int x = 0; x < w_block_count; x++)
+				{
+					int t = filtertypes[n++];
+					risse_uint8 b;
+					if(t & 1) b = 'A'; else b = 'M';
+					t >>= 1;
+					fprintf(stderr, "%c%x", b, t);
+				}
+				fprintf(stderr, "\n");
 			}
-			fprintf(f, "\n");
 		}
-		fclose(f);
-*/
+
 	}
 
 	// write entropy values (temp_storage の中身を出力ストリームに書き出す)

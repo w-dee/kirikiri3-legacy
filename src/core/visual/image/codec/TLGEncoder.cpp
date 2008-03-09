@@ -1581,7 +1581,7 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 							risse_uint8 pa =
 								xx > 0 ? ((sl[xx-1] >> (c*8)) & 0xff) : 0;
 							risse_uint8 pb = (usl[xx] >> (c*8)) & 0xff  ;
-							risse_uint8 px = *sl;
+							risse_uint8 px = (sl[xx] >> (c*8)) & 0xff;
 
 							risse_uint8 py;
 

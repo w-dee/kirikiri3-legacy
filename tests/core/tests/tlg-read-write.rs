@@ -34,6 +34,31 @@ for(var i = 0; i < filenames.length; i++)
 	image.save("/root/tmp/\{output_filename}", dic);
 
 	assert(compareFile("/root/media/expected/\{output_filename}", "/root/tmp/\{output_filename}"));
+
+	var output_filename = File::chopExtension(filename) + "_A8R8G8B8.tlg5";
+	var dic = new Dictionary();
+	dic['_type'] = 'A8R8G8B8'; // サブタイプ
+	dic['_version'] = 'tlg5'; // バージョン
+	image.save("/root/tmp/\{output_filename}", dic);
+
+	var output_filename = File::chopExtension(filename) + "_A8R8G8B8.tlg6";
+	var dic = new Dictionary();
+	dic['_type'] = 'A8R8G8B8'; // サブタイプ
+	dic['_version'] = 'tlg6'; // バージョン
+	image.save("/root/tmp/\{output_filename}", dic);
+
+	var output_filename = File::chopExtension(filename) + "_R8G8B8.tlg5";
+	var dic = new Dictionary();
+	dic['_type'] = 'R8G8B8'; // サブタイプ
+	dic['_version'] = 'tlg5'; // バージョン
+	image.save("/root/tmp/\{output_filename}", dic);
+
+	var output_filename = File::chopExtension(filename) + "_R8G8B8.tlg6";
+	var dic = new Dictionary();
+	dic['_type'] = 'R8G8B8'; // サブタイプ
+	dic['_version'] = 'tlg6'; // バージョン
+	image.save("/root/tmp/\{output_filename}", dic);
+
 }
 
 

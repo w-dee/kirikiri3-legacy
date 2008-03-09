@@ -907,7 +907,7 @@ public:
 FILE *vstxt = fopen("vs.txt", "wt");
 #endif
 #define GOLOMB_GIVE_UP_BYTES 4
-static void CompressValuesGolomb(TLG6BitStream &bs, risse_uint8 *buf, int size)
+static void CompressValuesGolomb(TLG6BitStream &bs, char *buf, int size)
 {
 	// golomb encoding, -- http://oku.edu.mie-u.ac.jp/~okumura/compression/golomb/
 
@@ -1034,7 +1034,7 @@ public:
 		LastNonZero = false;
 	}
 
-	int Try(risse_uint8 *buf, int size)
+	int Try(char *buf, int size)
 	{
 		for(int i = 0; i < size; i++)
 		{
@@ -1420,11 +1420,11 @@ static int DetectColorFilter(risse_uint8 *b, risse_uint8 *g, risse_uint8 *r, int
 
 		// try to compress
 		risse_size bits;
-		bits  = (bc.Try(bbuf, size), bc.Flush());
+		bits  = (bc.Try((char*)bbuf, size), bc.Flush());
 		if(minbits != risse_size_max && minbits < bits) continue;
-		bits += (gc.Try(gbuf, size), gc.Flush());
+		bits += (gc.Try((char*)gbuf, size), gc.Flush());
 		if(minbits != risse_size_max && minbits < bits) continue;
-		bits += (rc.Try(rbuf, size), rc.Flush());
+		bits += (rc.Try((char*)rbuf, size), rc.Flush());
 
 		if(minbits == risse_size_max || minbits > bits)
 			minbits = bits, mincode = code;
@@ -1714,7 +1714,7 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 		for(int c = 0; c < colors; c++)
 		{
 			int method;
-			CompressValuesGolomb(bs, block_buf[c], gwp);
+			CompressValuesGolomb(bs, (char *)(block_buf[c]), gwp);
 			method = 0;
 #ifdef WRITE_ENTROPY_VALUES
 			fwrite(block_buf[c], 1, gwp, vs);
@@ -1795,6 +1795,74 @@ void tTLGImageEncoder::EncodeTLG6(tStreamInstance * stream,
 
 
 
+//---------------------------------------------------------------------------
+tTLGImageEncoder::tCallback::tRetValue
+	tTLGImageEncoder::tCallback::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+{
+	if(code == ocFuncCall && name.IsEmpty())
+	{
+		// このオブジェクトに対する関数呼び出し
+		args.ExpectArgumentCount(2);
+
+		tString key = args[0].operator tString();
+		if(key.GetLength() != 0 && key[0] != RISSE_WC('_'))
+		{
+			// 先頭が _ で始まるキー名は格納しません
+			risse_size key_len = 0;
+			char * key_utf8 = key.AsNarrowString(&key_len);
+			char key_len_s[21]; key_len_s[20] = '\0';
+			snprintf(key_len_s, 20, "%lu", (unsigned long)key_len);
+			size_t key_len_s_len = strlen(key_len_s);
+
+			tString value = args[1].operator tString();
+			risse_size value_len = 0;
+			char * value_utf8 = value.AsNarrowString(&value_len);
+			char value_len_s[21]; value_len_s[20] = '\0';
+			snprintf(value_len_s, 20, "%lu", (unsigned long)value_len);
+			size_t value_len_s_len = strlen(value_len_s);
+
+			// MetaData のサイズを拡張
+			size_t org_size = Encoder.MetaData.size();
+			Encoder.MetaData.resize(org_size +
+				key_len_s_len + 1 + key_len + // key_len:key
+				1 + // =
+				value_len_s_len + 1 + value_len + // value_len:value
+				1 // ,
+				);
+
+			// MetaData に追加
+			char * p = &(Encoder.MetaData[0]) + org_size;
+			strcpy(p, key_len_s);
+			p += key_len_s_len;
+			strcpy(p, ":");
+			p ++;
+			strcpy(p, key_utf8);
+			p += key_len;
+			strcpy(p, "=");
+			p ++;
+			strcpy(p, value_len_s);
+			p += value_len_s_len;
+			strcpy(p, ":");
+			p ++;
+			strcpy(p, value_utf8);
+			p += value_len;
+			strcpy(p, ",");
+		}
+
+		return rvNoError;
+	}
+
+	// それ以外の機能はこのインターフェースにはない
+	return rvMemberNotFound;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tTLGImageEncoder::tTLGImageEncoder() : DictCallback(*this)
+{
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -1828,7 +1896,7 @@ void tTLGImageEncoder::Process(tStreamInstance * stream,
 	int version = 500;
 	if(dict)
 	{
-		tVariant val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'v','e','r','s','i','o','n'>()));
+		tVariant val = dict->Invoke(tSS<'[',']'>(), tVariant(tSS<'_','v','e','r','s','i','o','n'>()));
 		if(!val.IsVoid())
 		{
 			tString str = val.operator tString();
@@ -1840,10 +1908,36 @@ void tTLGImageEncoder::Process(tStreamInstance * stream,
 		}
 	}
 
+	// メタデータを作成するため dict の eachPair を呼び出す
+	tMethodArgument & args = tMethodArgument::Allocate(0, 1);
+	tVariant block_arg0(&DictCallback);
+	args.SetBlockArgument(0, &block_arg0);
+	dict->Do(ocFuncCall, NULL, tSS<'e','a','c','h','P','a','i','r'>(), 0, args);
+
+	// TLG sds のヘッダを書き出す
+	tStreamAdapter src(stream);
+	src.WriteBuffer("TLG0.0\x00sds\x1a\x00    ", 15);
+	risse_uint64 rawlen_pos = src.GetPosition() - 4; // 後でここに TLG の本体サイズを書き込む
+
+	// バージョンにしたがって本体を書き出す
 	if(version == 500)
 		EncodeTLG5(stream, callback, pixel_bytes);
 	else if(version == 600)
 		EncodeTLG6(stream, callback, pixel_bytes);
+
+	// rawlen を書き込む
+	risse_uint64 sds_start = src.GetPosition();
+	src.SetPosition(rawlen_pos);
+	WriteInt32(static_cast<risse_uint32>(sds_start - rawlen_pos + 4), &src);
+
+	// tags チャンクを書き込む
+	src.SetPosition(sds_start);
+	src.WriteBuffer("tags", 4); // tags chunk
+	WriteInt32(static_cast<risse_uint32>(MetaData.size()), &src);
+	if(MetaData.size() > 0) src.WriteBuffer(&(MetaData[0]), MetaData.size());
+
+	// ends チャンクを書き込む
+	src.WriteBuffer("ends\0\0\0\0", 8); // ends chunk
 }
 //---------------------------------------------------------------------------
 

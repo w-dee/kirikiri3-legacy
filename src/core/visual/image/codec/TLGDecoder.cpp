@@ -1460,6 +1460,11 @@ void tTLGImageDecoder::Process(tStreamInstance * stream,
 				if(name) delete [] name;
 				if(value) delete [] value;
 			}
+			else if(!memcmp(chunkname, "ends", 4))
+			{
+				// end stream
+				break;
+			}
 			else
 			{
 				// skip the chunk

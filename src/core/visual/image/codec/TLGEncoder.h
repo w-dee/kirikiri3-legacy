@@ -27,6 +27,7 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class tTLGImageEncoder : public tImageEncoder
 {
+	gc_vector<char> MetaData; //!< メタデータ
 private:
 	void EncodeTLG5(tStreamInstance * stream,
 					tProgressCallback * callback,
@@ -34,7 +35,21 @@ private:
 	void EncodeTLG6(tStreamInstance * stream,
 					tProgressCallback * callback,
 					int compos);
+
+	//! @brief		辞書配列からのコールバックを受け取るためのRisseメソッド
+	class tCallback : public tObjectInterface
+	{
+		tTLGImageEncoder & Encoder; //!< TLGイメージエンコーダインスタンス
+	public:
+		tCallback(tTLGImageEncoder & encoder) : Encoder(encoder) {}
+		virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+	};
+	tCallback DictCallback; //!< 辞書配列からのコールバックを受け取るための Risse メソッド
+
 public:
+	//! @brief		コンストラクタ
+	tTLGImageEncoder();
+
 	//! @brief		エンコードを行う
 	//! @param		stream		入力ストリーム
 	//! @param		pixel_format	要求するピクセル形式

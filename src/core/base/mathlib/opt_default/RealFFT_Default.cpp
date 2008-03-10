@@ -11,6 +11,7 @@
 //! @brief 実数離散フーリエ変換
 //---------------------------------------------------------------------------
 #include "risse/include/risseTypes.h"
+using namespace Risse;
 
 /*
 	Real Discrete FFT package from

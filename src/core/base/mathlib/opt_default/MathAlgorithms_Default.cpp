@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include <stdlib.h>
 #include "risse/include/risseTypes.h"
+using namespace Risse;
 
 
 namespace Risa {

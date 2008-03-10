@@ -14,10 +14,17 @@
 #define RingBufferH
 
 #include <stddef.h>
+
+#ifndef RISA_RINGBUFFER_NO_GC
 #include "base/gc/RisaGC.h"
+#endif
 /*
 	リングバッファ, ring buffer, circular buffer, 環状バッファ
 */
+/*
+	Risa環境外で使う場合は RISA_RINGBUFFER_NO_GC を define すること
+*/
+
 namespace Risa {
 //---------------------------------------------------------------------------
 
@@ -27,7 +34,10 @@ namespace Risa {
 //!				コンストラクタやデストラクタが必要な物は扱うことが出来ない
 //---------------------------------------------------------------------------
 template <typename T>
-class tRingBuffer : public tCollectee
+class tRingBuffer
+#ifndef RISA_RINGBUFFER_NO_GC
+ : public tCollectee
+#endif
 {
 	T * Buffer; //!< バッファ
 	size_t Size; //!< バッファのサイズ
@@ -40,6 +50,7 @@ public:
 	tRingBuffer(size_t size)
 	{
 		Size = size;
+#ifndef RISA_RINGBUFFER_NO_GC
 		// GC_selective_alloc (gc_allocator.h 内で宣言)は、
 		// 型に応じてGC_MALLOCあるいはGC_MALLOC_ATOMICを使い分けることができる。
 		// うーん、GC_type_traits<T> はインスタンス化しないと GC_is_ptr_free
@@ -47,16 +58,21 @@ public:
 		Buffer = static_cast<T*>(
 			GC_selective_alloc(
 				sizeof(T)*Size, GC_type_traits<T>().GC_is_ptr_free));
+#else
+		Buffer = static_cast<T*>(malloc(sizeof(T)*Size));
+#endif
 		WritePos = ReadPos = 0;
 		DataSize = 0;
 	}
-/*
+
+#ifdef RISA_RINGBUFFER_NO_GC
 	//! @brief デストラクタ
 	~tRingBuffer()
 	{
-		GC_FREE(Buffer);
+		free(Buffer);
 	}
-*/
+#endif
+
 	//! @brief	サイズを得る
 	size_t GetSize() { return Size; }
 

@@ -44,6 +44,7 @@
 #define _XMMLIB_H_INCLUDED
 
 #include "risse/include/risseTypes.h"
+using namespace Risse;
 #include <malloc.h>
 
 namespace Risa {

@@ -3,6 +3,7 @@ all_target: all_cpp prepare binary
 
 PRESERVE_ASM=1
 DEBUG=no
+CXXFLAGS=-DRISA_RINGBUFFER_NO_GC
 USE_SSE=1
 
 CORE_DIR=../../../core
@@ -10,7 +11,7 @@ include $(CORE_DIR)/Makefile_core_common
 
 
 all_cpp:
-	cat \
+	cat ../empty.cpp \
 		$(CORE_DIR)/sound/opt_sse/WaveFormatConverter_SSE.cpp \
 		$(CORE_DIR)/sound/filter/phasevocoder/opt_sse/PhaseVocoderDSP_SSE.cpp \
 		$(CORE_DIR)/base/mathlib/opt_sse/RealFFT_SSE.cpp \
@@ -29,7 +30,7 @@ BIN=$(BUILD_OUT_DIR)/bin/$(PROGRAM_ID)$(BIN_SUFFIX)
 LDFLAGS = -g $(CUI_LDFLAGS)
 
 # CXXFLAGS
-CXXFLAGS += -mfpmath=sse,387 -ffast-math -O3 -fprefetch-loop-arrays -mtune=pentium3
+CXXFLAGS += -mfpmath=sse,387 -ffast-math -O3 -march=pentium3 -mtune=i686
 
 #----------------------------#
 

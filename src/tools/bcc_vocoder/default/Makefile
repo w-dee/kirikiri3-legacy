@@ -3,13 +3,14 @@ all_target: all_cpp prepare binary
 
 PRESERVE_ASM=1
 DEBUG=no
+CXXFLAGS=-DRISA_RINGBUFFER_NO_GC
 
 CORE_DIR=../../../core
 include $(CORE_DIR)/Makefile_core_common
 
 
 all_cpp:
-	cat \
+	cat ../empty.cpp \
 		$(CORE_DIR)/sound/opt_default/WaveFormatConverter_Default.cpp \
 		$(CORE_DIR)/sound/filter/phasevocoder/opt_default/PhaseVocoderDSP_Default.cpp \
 		$(CORE_DIR)/base/mathlib/opt_default/RealFFT_Default.cpp \

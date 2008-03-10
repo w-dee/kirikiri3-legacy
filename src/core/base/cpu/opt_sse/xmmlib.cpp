@@ -41,7 +41,8 @@
 	 http://homepage3.nifty.com/blacksword/
 */
 
-#include "prec.h"
+#include "risse/include/risseTypes.h"
+using namespace Risse;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

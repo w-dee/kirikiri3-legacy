@@ -11,7 +11,8 @@
 //! @brief Phase Vocoder のCPUごとの最適化
 //---------------------------------------------------------------------------
 
-#include "prec.h"
+#include "risse/include/risseTypes.h"
+using namespace Risse;
 #include <math.h>
 #include "base/mathlib/MathAlgorithms.h"
 #include "sound/filter/phasevocoder/PhaseVocoderDSP.h"

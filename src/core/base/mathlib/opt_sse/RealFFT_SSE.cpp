@@ -10,7 +10,9 @@
 //! @file
 //! @brief 実数離散フーリエ変換
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risse/include/risseTypes.h"
+using namespace Risse;
+#include "base/cpu/opt_sse/xmmlib.h"
 
 /*
 	and
@@ -38,7 +40,6 @@
 	W.Dee: implemented backward transformation of Real Discrete FFT.
 */
 
-#include "base/cpu/opt_sse/xmmlib.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

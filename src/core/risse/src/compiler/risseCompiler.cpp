@@ -400,13 +400,12 @@ void tCompilerFunctionGroup::GenerateVMCode()
 void tCompiler::Compile(tASTNode * root, const tBindingInfo & binding,
 	bool need_result, bool is_expression)
 {
-/*
 	// (テスト) ASTのダンプを行う
 	FPrint(stderr, RISSE_WS("========== AST ==========\n"));
 	tString str;
 	root->Dump(str);
 	FPrint(stderr, str.c_str());
-*/
+
 	// トップレベルのSSA形式インスタンスを作成する
 	tSSAForm * form = CreateTopLevelSSAForm(root->GetPosition(), RISSE_WS("toplevel"),
 		&binding, need_result, is_expression);

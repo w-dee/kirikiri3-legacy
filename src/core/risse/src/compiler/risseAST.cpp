@@ -102,6 +102,52 @@ tString tASTNode_Context::GetDumpComment() const
 
 
 //---------------------------------------------------------------------------
+tString tASTNode_Import::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("package");
+	if(index == 1) return RISSE_WS("id");
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tASTNode_ImportAs::GetChildNameAt(risse_size index) const
+{
+	if(index == 0) return RISSE_WS("name");
+	if(index == 1) return RISSE_WS("as");
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tASTNode_ImportList::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tString(RISSE_WS("item")) + ::Risse::int64_to_str(index, buf);
+	}
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tString tASTNode_ImportLoc::GetChildNameAt(risse_size index) const
+{
+	if(index < inherited::GetChildCount())
+	{
+		risse_char buf[40];
+		return tString(RISSE_WS("item")) + ::Risse::int64_to_str(index, buf);
+	}
+	return tString();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tString tASTNode_Factor::GetDumpComment() const
 {
 	tString ret = ASTFactorTypeNames[FactorType];

@@ -357,6 +357,8 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	func_call_expr func_call_expr_head func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
+	import import_id_list import_id import_as_opt
+	import_id_loc_list import_id_loc
 	assert
 	if if_head
 	block block_or_statement statement
@@ -466,6 +468,7 @@ statement
 	: ";" nl								{ $$ = N(ExprStmt)(@1.first, NULL); }
 	| ";"									{ $$ = N(ExprStmt)(@1.first, NULL); }
 	| expr_with_comma snl					{ $$ = N(ExprStmt)(@1.first, $1); }
+	| import
 	| assert
 	| if
 	| while
@@ -485,6 +488,51 @@ statement
 	| goto
 	| definition
 ;
+
+/*---------------------------------------------------------------------------
+  import
+  ---------------------------------------------------------------------------*/
+
+import
+	: "import" onl
+	  import_id_list "in" onl
+	  import_id_list snl				{ $$ = N(Import)(@1.first, $6, $3); }
+	| "import" onl
+	  import_id_list snl				{ $$ = N(Import)(@1.first, $3, NULL); }
+;
+
+import_id_list
+	: import_id							{ $$ = N(ImportList)(@1.first);
+										  C(ImportList, $$)->AddChild($1); }
+	| import_id_list "," onl import_id	{ $$ = $1;
+										  C(ImportList, $$)->AddChild($4); }
+;
+
+import_id
+	: import_id_loc_list import_as_opt	{ $$ = N(ImportAs)(@1.first, $1, $2); }
+;
+
+import_as_opt
+	: /*empty*/						{ $$ = NULL; }
+	| "as" onl import_id_loc_list	{ $$ = $3; }
+;
+
+import_id_loc_list
+	: import_id_loc					{ $$ = N(ImportLoc)(@1.first);
+									  C(ImportLoc, $$)->AddChild($1); }
+	| import_id_loc_list "." onl
+	  import_id_loc					{ $$ = $1;
+									  C(ImportLoc, $$)->AddChild($4); }
+;
+
+import_id_loc
+	: "(" {BI} onl expr onl
+	  ")" {EI}				{ $$ = $4; }
+	| embeddable_string		{ $$ = $1; }
+	| T_ID					{ $$ =  N(Factor)(@1.first, aftConstant, *$1); }
+	| "*"					{ $$ = NULL; /* 注意! * の場合はここに NULL が入る */ }
+;
+
 
 /*---------------------------------------------------------------------------
   assertion

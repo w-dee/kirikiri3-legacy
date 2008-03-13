@@ -64,6 +64,10 @@ namespace Risse
 //---------------------------------------------------------------------------
 RISSE_AST_ENUM_DEF(NodeType)
 	RISSE_AST_ENUM_ITEM(ant, Context		)		//!< コンテキスト
+	RISSE_AST_ENUM_ITEM(ant, Import			)		//!< import 文
+	RISSE_AST_ENUM_ITEM(ant, ImportList		)		//!< import 文のリスト
+	RISSE_AST_ENUM_ITEM(ant, ImportAs		)		//!< import のリスト中の as ペア
+	RISSE_AST_ENUM_ITEM(ant, ImportLoc		)		//!< import のリスト中の位置指定子
 	RISSE_AST_ENUM_ITEM(ant, Assert			)		//!< assert 文
 	RISSE_AST_ENUM_ITEM(ant, ExprStmt		)		//!< 式のみのステートメント
 	RISSE_AST_ENUM_ITEM(ant, Factor			)		//!< 項
@@ -587,6 +591,182 @@ public:
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	import 文(type=antImport)
+//---------------------------------------------------------------------------
+class tASTNode_Import : public tASTNode
+{
+	tASTNode * PackageList; //!< パッケージリスト
+	tASTNode * IdList; //!< 識別子リスト
+
+public:
+	//! @brief		コンストラクタ
+	//! @brief		position			ソースコード上の位置
+	//! @param		package_list		パッケージリスト
+	//! @param		id_list				識別子リスト
+	tASTNode_Import(risse_size position,
+		tASTNode * package_list,
+		tASTNode * id_list) :
+		tASTNode(position, antImport),
+		PackageList(package_list),
+		IdList(id_list)
+	{
+	}
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	virtual risse_size GetChildCount() const
+	{
+		return 2; // 子は二つ
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	virtual tASTNode * GetChildAt(risse_size index) const
+	{
+		if(index == 0) return PackageList;
+		if(index == 1) return IdList;
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	virtual tString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tString GetDumpComment() const { return tString(); }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	import 文のリスト(type=antImportList)
+//---------------------------------------------------------------------------
+class tASTNode_ImportList : public tASTNode_List
+{
+	typedef tASTNode_List inherited;
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tASTNode_ImportList(risse_size position) :
+		tASTNode_List(position, antImportList) {;}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tString GetDumpComment() const { return tString(); }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	import のリスト中の as ペア(type=antImportAs)
+//---------------------------------------------------------------------------
+class tASTNode_ImportAs : public tASTNode
+{
+	tASTNode * Name; //!< 名前を表すノード
+	tASTNode * As; //!< 別名を表すノード
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	//! @param		name			名前
+	//! @param		as				別名を表すノード
+	tASTNode_ImportAs(risse_size position,
+		tASTNode * name, tASTNode * as) :
+		tASTNode(position, antImportAs),
+		Name(name),
+		As(as) {;}
+
+	//! @brief		子ノードの個数を得る
+	//! @return		子ノードの個数
+	risse_size GetChildCount() const
+	{
+		return 2;
+	}
+
+	//! @brief		指定されたインデックスの子ノードを得る
+	//! @param		index		インデックス
+	//! @return		子ノード
+	tASTNode * GetChildAt(risse_size index) const
+	{
+		switch(index)
+		{
+		case 0: return Name;
+		case 1: return As;
+		}
+		return NULL;
+	}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tString GetDumpComment() const { return tString(); }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief	import のリスト中の位置指定子(type=antImportLoc)
+//---------------------------------------------------------------------------
+class tASTNode_ImportLoc : public tASTNode_List
+{
+	typedef tASTNode_List inherited;
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		position		ソースコード上の位置
+	tASTNode_ImportLoc(risse_size position) :
+		tASTNode_List(position, antImportLoc) {;}
+
+	//! @brief		指定されたインデックスの子ノードの名前を得る
+	//! @param		index		インデックス
+	//! @return		名前
+	tString GetChildNameAt(risse_size index) const;
+
+	//! @brief		ダンプ時のこのノードのコメントを得る
+	//! @return		ダンプ時のこのノードのコメント
+	tString GetDumpComment() const { return tString(); }
+
+	//! @brief		SSA 形式の読み込み用の表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @param		param	PrepareSSA() の戻り値
+	//! @return		SSA 形式における変数 (このノードの結果が格納される)
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
 };
 //---------------------------------------------------------------------------
 

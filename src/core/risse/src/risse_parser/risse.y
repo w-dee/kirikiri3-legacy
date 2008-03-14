@@ -39,7 +39,7 @@ RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 #define YYMAXDEPTH 20000
 
 /*! パーサへのアクセス */
-#define PR (reinterpret_cast<tParser*>(pr))
+#define PR (static_cast<tParser*>(pr))
 
 /*! 字句解析器 */
 #define LX (PR->GetLexer())
@@ -54,7 +54,7 @@ RISSE_DEFINE_SOURCE_ID(26374,32704,8215,19346,5601,19578,20566,1441);
 #ifdef C
  #undef C
 #endif
-#define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), reinterpret_cast<tASTNode_##XXXX *>(EXP))
+#define C(XXXX, EXP) (RISSE_ASSERT((EXP)->GetType() == ant##XXXX), static_cast<tASTNode_##XXXX *>(EXP))
 
 /* 改行の無視/認識区間を字句解析器に伝えるマクロ */
 #define BR (LX->PushRecognizeNewLine())
@@ -357,7 +357,8 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	func_call_expr func_call_expr_head func_call_expr_body
 	inline_array array_elm_list array_elm
 	inline_dic dic_elm dic_elm_list
-	import import_id_list import_id import_as_opt
+	import import_id_list import_id_list_no_as_opt import_id
+	import_id_no_as_opt import_as_opt
 	import_id_loc_list import_id_loc
 	assert
 	if if_head
@@ -493,10 +494,14 @@ statement
   import
   ---------------------------------------------------------------------------*/
 
+/*
+	in の後のパッケージリストには as を指定することはできない
+*/
+
 import
 	: "import" onl
 	  import_id_list "in" onl
-	  import_id_list snl				{ $$ = N(Import)(@1.first, $6, $3); }
+	  import_id_list_no_as_opt snl		{ $$ = N(Import)(@1.first, $6, $3); }
 	| "import" onl
 	  import_id_list snl				{ $$ = N(Import)(@1.first, $3, NULL); }
 ;
@@ -508,21 +513,54 @@ import_id_list
 										  C(ImportList, $$)->AddChild($4); }
 ;
 
+import_id_list_no_as_opt
+	: import_id_no_as_opt				{ $$ = N(ImportList)(@1.first);
+										  C(ImportList, $$)->AddChild($1); }
+	| import_id_list_no_as_opt "," onl
+	  import_id_no_as_opt				{ $$ = $1;
+										  C(ImportList, $$)->AddChild($4); }
+;
+
+/*
+	アスタリスクは単独、あるいはドットでつなげた名前の末尾にのみ許す
+	つまり
+	a.b.* や * は ok
+	*.a や *.* は ng
+
+	アスタリスクが含まれた場合は as は後に続かない
+
+	アスタリスクは ImportLoc に NULL を追加することで表現する
+*/
+
 import_id
-	: import_id_loc_list import_as_opt	{ $$ = N(ImportAs)(@1.first, $1, $2); }
+	: "*"								{ tASTNode_ImportLoc * loc = N(ImportLoc)(@1.first);
+										  loc->AddChild(NULL);
+										  $$ = N(ImportAs)(@1.first, loc, NULL); }
+	| import_id_loc_list import_as_opt	{ $$ = N(ImportAs)(@1.first, $1, $2); }
+	| import_id_loc_list "." onl "*"	{ C(ImportLoc, $1)->AddChild(NULL);
+										  $$ = N(ImportAs)(@1.first, $1, NULL); }
+;
+
+import_id_no_as_opt
+	: "*"								{ tASTNode_ImportLoc * loc = N(ImportLoc)(@1.first);
+										  loc->AddChild(NULL);
+										  $$ = N(ImportAs)(@1.first, loc, NULL); }
+	| import_id_loc_list				{ $$ = N(ImportAs)(@1.first, $1, NULL); }
+	| import_id_loc_list "." onl "*"	{ C(ImportLoc, $1)->AddChild(NULL);
+										  $$ = N(ImportAs)(@1.first, $1, NULL); }
 ;
 
 import_as_opt
-	: /*empty*/						{ $$ = NULL; }
-	| "as" onl import_id_loc_list	{ $$ = $3; }
+	: /*empty*/							{ $$ = NULL; }
+	| "as" onl import_id_loc_list		{ $$ = $3; }
 ;
 
 import_id_loc_list
-	: import_id_loc					{ $$ = N(ImportLoc)(@1.first);
-									  C(ImportLoc, $$)->AddChild($1); }
+	: import_id_loc						{ $$ = N(ImportLoc)(@1.first);
+										  C(ImportLoc, $$)->AddChild($1); }
 	| import_id_loc_list "." onl
-	  import_id_loc					{ $$ = $1;
-									  C(ImportLoc, $$)->AddChild($4); }
+	  import_id_loc						{ $$ = $1;
+										  C(ImportLoc, $$)->AddChild($4); }
 ;
 
 import_id_loc
@@ -530,7 +568,6 @@ import_id_loc
 	  ")" {EI}				{ $$ = $4; }
 	| embeddable_string		{ $$ = $1; }
 	| T_ID					{ $$ =  N(Factor)(@1.first, aftConstant, *$1); }
-	| "*"					{ $$ = NULL; /* 注意! * の場合はここに NULL が入る */ }
 ;
 
 

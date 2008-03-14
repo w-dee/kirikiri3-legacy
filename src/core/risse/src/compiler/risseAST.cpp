@@ -762,6 +762,237 @@ tSSAVariable * tASTNode_Context::DoReadSSA(
 
 
 //---------------------------------------------------------------------------
+tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
+{
+	// このノードは、global.import(  ) への呼び出しを生成する。
+	// global.import を呼び出すための AST を一時的に作成し、それを処理させる
+	// ようにする
+
+	tASTNode * packages = NULL;
+	tASTNode * ids = NULL;
+
+	// 識別子リストがあるか無いかで処理が大きく変わる
+	if(IdList)
+	{
+		// 識別子リストがある場合
+
+		// 識別子リストにドットで名前をつなげて表すことはいまのところ
+		// できないのでチェック (as の方はドットで繋がる場合がある)
+		bool id_wildcard_found = false; // '*' が見つかったかどうか
+		risse_size id_wildcard_pos = 0;
+		for(risse_size i = 0; i < IdList->GetChildCount(); i++)
+		{
+			tASTNode_ImportAs * import_as =
+				static_cast<tASTNode_ImportAs *>(IdList->GetChildAt(i));
+			if(import_as->GetName()->GetChildCount() != 1)
+				tCompileExceptionClass::Throw(
+					form->GetFunction()->GetFunctionGroup()->
+						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
+					tString(
+					RISSE_WS_TR("cannot use dotted location in import id")),
+						form->GetScriptBlockInstance(), import_as->GetPosition());
+
+			if(import_as->GetName()->GetChildAt(0) == NULL)
+			{
+				// ここに null が入っているのは '*' が指定されていた場合
+				RISSE_ASSERT(import_as->GetAs() == NULL); // as は指定できないはず
+				id_wildcard_found = true;
+				id_wildcard_pos = import_as->GetName()->GetPosition();
+			}
+		}
+
+		if(id_wildcard_found && IdList->GetChildCount() != 1)
+		{
+			// '*' が指定されている場合は識別子リストは 1 つだけのはず
+			tCompileExceptionClass::Throw(
+				form->GetFunction()->GetFunctionGroup()->
+					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
+				tString(
+				RISSE_WS_TR("'*' should appear only once in import id")),
+					form->GetScriptBlockInstance(), id_wildcard_pos);
+		}
+
+		// パッケージリストは配列で渡す。
+		// [ ["sound"], ["graphic", "rina"] ]
+		//
+		// 識別子リストは辞書配列で渡す。
+		// %[ "PLAY" => ["PLAY"], "STOP" => ["STOP"], "Layer" => ["rina", "L"] ]
+		//
+		// これは import PLAY, STOP, Layer as rina.L in sound, graphic.rina; を表す
+		//
+		// 識別子リストに 辞書配列ではなくて true を渡すとすべての
+		// 識別子がインポートされる。import * in package; に相当。
+
+		// パッケージリストを作成する。パッケージリストはここでは二次元配列となる。
+		tASTNode_Array * package_array = new tASTNode_Array(PackageList->GetPosition());
+		for(risse_size i = 0; i < PackageList->GetChildCount(); i++)
+		{
+			tASTNode_ImportAs * import_as = 
+				static_cast<tASTNode_ImportAs *>(PackageList->GetChildAt(i));
+			RISSE_ASSERT(import_as != NULL);
+			RISSE_ASSERT(import_as->GetAs() == NULL); // as の指定はないはず
+			tASTNode_ImportLoc * import_loc =
+				static_cast<tASTNode_ImportLoc *>(import_as->GetName());
+			RISSE_ASSERT(import_loc != NULL);
+
+			tASTNode_Array * loc_array = new tASTNode_Array(import_loc->GetPosition());
+			for(risse_size j = 0; j < import_loc->GetChildCount(); j++)
+			{
+				tASTNode * child = import_loc->GetChildAt(j);
+				if(!child) child = new tASTNode_Factor(
+										import_loc->GetPosition(), aftConstant,
+										tVariant(tString(RISSE_WS("*"))));
+				loc_array->AddChild(child);
+			}
+
+			package_array->AddChild(loc_array);
+		}
+		packages = package_array;
+
+		// 識別子リストを作成する。識別子リストは辞書配列になる。
+		if(id_wildcard_found)
+		{
+			// この場合は true を入れておく
+			ids = new tASTNode_Factor(id_wildcard_pos, aftConstant, tVariant(true));
+		}
+		else
+		{
+			// 辞書配列を作成する
+			tASTNode_Dict * dic = new tASTNode_Dict(IdList->GetPosition());
+			for(risse_size i = 0; i < IdList->GetChildCount(); i++)
+			{
+				tASTNode_ImportAs * import_as = 
+					static_cast<tASTNode_ImportAs *>(IdList->GetChildAt(i));
+				// name は子が1個だけのはず(上でチェック済み)
+				tASTNode * name_node =
+					import_as->GetName()->GetChildAt(0);
+
+				// as の配列を作る
+				tASTNode * as_node;
+				tASTNode_ImportLoc * as_loc =
+					static_cast<tASTNode_ImportLoc*>(import_as->GetAs());
+				if(as_loc)
+				{
+					// 配列に格納
+					tASTNode_Array * loc_array = new tASTNode_Array(as_loc->GetPosition());
+					for(risse_size j = 0; j < as_loc->GetChildCount(); j++)
+					{
+						tASTNode * child = as_loc->GetChildAt(j);
+						RISSE_ASSERT(child != NULL);
+						loc_array->AddChild(child);
+					}
+					as_node = loc_array;
+				}
+				else
+				{
+					// as の指定がない場合はnameと一緒
+					as_node = name_node;
+				}
+				tASTNode_DictPair * pair = new tASTNode_DictPair(import_as->GetPosition(),
+									name_node, as_node);
+				dic->AddChild(pair);
+			}
+
+			ids = dic;
+		}
+	}
+	else
+	{
+		// 識別子リストがない場合
+		// パッケージリストは辞書配列の配列で渡す。
+		// [ %[ "package" => ["sound"], "as" => ["s"]], %["package" => ["graphic", "rina", "*"]] ]
+		// これは import sound as s, graphic.rina.*; の場合
+
+		// パッケージリストを作成する。
+		tASTNode_Array * package_array = new tASTNode_Array(PackageList->GetPosition());
+		for(risse_size i = 0; i < PackageList->GetChildCount(); i++)
+		{
+			tASTNode_ImportAs * import_as = 
+				static_cast<tASTNode_ImportAs *>(PackageList->GetChildAt(i));
+			RISSE_ASSERT(import_as != NULL);
+			tASTNode_ImportLoc * import_loc =
+				static_cast<tASTNode_ImportLoc *>(import_as->GetName());
+			RISSE_ASSERT(import_loc != NULL);
+
+			// package 位置の処理
+			tASTNode_Array * loc_array = new tASTNode_Array(import_loc->GetPosition());
+			for(risse_size j = 0; j < import_loc->GetChildCount(); j++)
+			{
+				tASTNode * child = import_loc->GetChildAt(j);
+				if(!child) child = new tASTNode_Factor(
+										import_loc->GetPosition(), aftConstant,
+										tVariant(tString(RISSE_WS("*"))));
+				loc_array->AddChild(child);
+			}
+
+			tASTNode_DictPair * loc_pair =
+				new tASTNode_DictPair(import_loc->GetPosition(),
+					new tASTNode_Factor(import_loc->GetPosition(), aftConstant,
+										tVariant(tString(RISSE_WS("package")))),
+					loc_array);
+
+			// as の処理
+			tASTNode_ImportLoc * import_loc_as =
+				static_cast<tASTNode_ImportLoc *>(import_as->GetAs());
+			tASTNode_DictPair * as_pair = NULL;
+			if(import_loc_as)
+			{
+				// 配列に格納
+				tASTNode_Array * loc_array = new tASTNode_Array(import_loc_as->GetPosition());
+				for(risse_size j = 0; j < import_loc_as->GetChildCount(); j++)
+				{
+					tASTNode * child = import_loc_as->GetChildAt(j);
+					RISSE_ASSERT(child != NULL);
+					loc_array->AddChild(child);
+				}
+				as_pair =
+					new tASTNode_DictPair(import_loc_as->GetPosition(),
+						new tASTNode_Factor(import_loc_as->GetPosition(), aftConstant,
+											tVariant(tString(RISSE_WS("as")))),
+						loc_array);
+			}
+
+			// 辞書配列にペアを入れる
+			tASTNode_Dict * dict = new tASTNode_Dict(import_as->GetPosition());
+			dict->AddChild(loc_pair);
+			if(as_pair) dict->AddChild(as_pair);
+
+			// 配列に追加
+			package_array->AddChild(dict);
+		}
+		packages = package_array;
+	}
+
+	// global.import() の部分を作成
+	tASTNode_Factor * global = new tASTNode_Factor(GetPosition(), aftGlobal);
+	tASTNode_Factor * import =
+		new tASTNode_Factor(GetPosition(), aftConstant,
+			tVariant(tString(RISSE_WS("import"))));
+	tASTNode_MemberSel * global_import =
+		new tASTNode_MemberSel(GetPosition(), global, import, matDirect);
+
+	tASTNode_FuncCall * funccall = new tASTNode_FuncCall(GetPosition(), false);
+	funccall->SetExpression(global_import);
+
+	tASTNode_FuncCallArg * arg;
+
+	arg = new tASTNode_FuncCallArg(GetPosition(), packages, false);
+	funccall->AddChild(arg);
+	if(ids)
+	{
+		arg = new tASTNode_FuncCallArg(GetPosition(), ids, false);
+		funccall->AddChild(arg);
+	}
+
+	tASTNode_ExprStmt * funccall_expr = new tASTNode_ExprStmt(GetPosition(), funccall);
+
+	// funccall_expr に SSA 形式を生成させる
+	return funccall_expr->DoReadSSA(form, param);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tSSAVariable * tASTNode_Assert::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// このノードは、スクリプトエンジンインスタンスの AssertionEnabled が

@@ -647,7 +647,7 @@ public:
 	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
-	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
+	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const;
 };
 //---------------------------------------------------------------------------
 
@@ -701,6 +701,14 @@ public:
 		tASTNode(position, antImportAs),
 		Name(name),
 		As(as) {;}
+
+	//! @brief		名前を表すノードを得る
+	//! @return		名前を表すノード
+	tASTNode * GetName() const { return Name; }
+
+	//! @brief		別名を表すノードを得る
+	//! @return		別名を表すノード
+	tASTNode * GetAs() const { return As; }
 
 	//! @brief		子ノードの個数を得る
 	//! @return		子ノードの個数

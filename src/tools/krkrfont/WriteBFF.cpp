@@ -10,7 +10,7 @@
 //! @file
 //! @brief BFF (3 Bitmap Font File) の書き出し
 //---------------------------------------------------------------------------
-#include <prec.h>
+#include "prec.h"
 #include <wx/progdlg.h>
 #include <wx/file.h>
 #include "FreeType.h"

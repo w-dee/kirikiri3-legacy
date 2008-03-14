@@ -2,7 +2,7 @@
 # Copyright (C) 2007 W.Dee and contributors
 # This file is distributed under the same license as the Kirikiri3 package.
 # W.Dee <dee@kikyou.info>, 2005.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Kirikiri3-krkrrel 1.00\n"
@@ -46,7 +46,7 @@ msgstr "ファイル分類用正規表現リストファイルを指定"
 msgid "force making a new archive set (not a patch)"
 msgstr "パッチを作成せずに新規にファイルを作成"
 
-#
+# 
 #: ConsoleMain.cpp:50
 msgid "show archive patch generation history"
 msgstr "アーカイブのパッチ世代履歴を表示"

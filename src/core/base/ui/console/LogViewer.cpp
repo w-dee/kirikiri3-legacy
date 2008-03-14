@@ -995,7 +995,7 @@ void tLogScrollView::OnChar(wxKeyEvent & event)
 				// テキストコントロールにフォーカスを合わせる
 				wxWindow * top = GetParent();
 				while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
-				reinterpret_cast<tConsoleFrame*>(top)->SetFocusToTextCtrl(keycode);
+				static_cast<tConsoleFrame*>(top)->SetFocusToTextCtrl(keycode);
 				break;
 			}
 			else

@@ -12,7 +12,7 @@
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
 //! tFreeTypeDriver もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../prec.h"
 #include "NativeFreeTypeDriver.h"
 #include <fontconfig/fontconfig.h>
 

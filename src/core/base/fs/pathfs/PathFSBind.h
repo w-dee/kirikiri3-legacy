@@ -40,7 +40,7 @@ public:
 
 	tPathFS * GetFileSystem() 
 	{
-		return reinterpret_cast<tPathFS*>(
+		return static_cast<tPathFS*>(
 			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 

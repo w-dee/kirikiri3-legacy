@@ -208,7 +208,7 @@ risse_uint tXP4ArchiveStream::Read(void *buffer, risse_size read_size)
 		else
 		{
 			// read directly from stream
-			Stream->ReadBuffer(reinterpret_cast<risse_uint8*>(buffer) + write_size, one_size);
+			Stream->ReadBuffer(static_cast<risse_uint8*>(buffer) + write_size, one_size);
 		}
 
 		// adjust members

@@ -258,7 +258,7 @@ void tTextReadStream::ReadBuffer()
 
 		// risse_char に変換する
 		in[read] = 0;
-		BufferRemain = Utf8ToRisseCharString(reinterpret_cast<char *>(in), Buffer);
+		BufferRemain = Utf8ToRisseCharString(static_cast<char *>(in), Buffer);
 
 		if(BufferRemain == static_cast<size_t>(-1L))
 		{

@@ -583,7 +583,7 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 	obj.AssertClass(tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()->
 									GetMemoryStreamClass());
 	tMemoryStreamInstance *memstream = 
-		reinterpret_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
+		static_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
 
 	memstream->SetMemoryBlock(node->GetMemoryStreamBlock()); // ここでアタッチ
 

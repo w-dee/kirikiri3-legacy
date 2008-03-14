@@ -254,7 +254,7 @@ risse_size tMemoryStreamInstance::get(const tOctet & buf)
 		}
 
 		memcpy(const_cast<risse_uint8*>(buf.Pointer()),
-			reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
+			static_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
 			read_size);
 
 		CurrentPos += read_size;
@@ -287,7 +287,7 @@ risse_size tMemoryStreamInstance::put(const tOctet & buf)
 			Block->ChangeSize(newpos);
 		}
 
-		memcpy(reinterpret_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
+		memcpy(static_cast<risse_uint8*>(Block->GetBlock()) + CurrentPos,
 			buf.Pointer(), write_size);
 
 		CurrentPos = newpos;

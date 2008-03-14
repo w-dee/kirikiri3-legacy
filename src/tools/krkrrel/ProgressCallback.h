@@ -23,6 +23,7 @@ class iRisaProgressCallback
 {
 public:
 	virtual void OnProgress(int percent) = 0; // パーセント単位での達成率
+	virtual ~iRisaProgressCallback() {;}
 };
 //---------------------------------------------------------------------------
 

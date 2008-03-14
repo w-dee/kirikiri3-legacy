@@ -213,7 +213,7 @@ size_t tOggVorbisDecoder::read_func(void *ptr, size_t size, size_t nmemb, void *
 {
 	// read function (wrapper for tBinaryStream)
 
-	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = static_cast<tOggVorbisDecoder*>(datasource);
 
 	risse_uint bytesread = decoder->Stream.Read(ptr, risse_uint(size * nmemb));
 
@@ -227,7 +227,7 @@ int tOggVorbisDecoder::seek_func(void *datasource, ogg_int64_t offset, int whenc
 {
 	// seek function (wrapper for tBinaryStream)
 
-	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = static_cast<tOggVorbisDecoder*>(datasource);
 
 	tStreamConstants::tOrigin seek_type = tStreamConstants::soSet;
 
@@ -275,7 +275,7 @@ long tOggVorbisDecoder::tell_func(void *datasource)
 {
 	// tell function (wrapper for tBinaryStream)
 
-	tOggVorbisDecoder * decoder = reinterpret_cast<tOggVorbisDecoder*>(datasource);
+	tOggVorbisDecoder * decoder = static_cast<tOggVorbisDecoder*>(datasource);
 
 	return decoder->Stream.GetPosition();
 }

@@ -201,7 +201,7 @@ void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 				// NULL を探す
 				tQueue & queue = Queues[i];
 				tQueue::iterator i = std::find(queue.begin(), queue.end(),
-								reinterpret_cast<tEventInfo*>(NULL));
+								static_cast<tEventInfo*>(NULL));
 				// NULL を除去
 				if(i != queue.end())
 				{
@@ -209,7 +209,7 @@ void tEventQueueInstance::DeliverEvents(risse_uint64 mastertick)
 					{
 						i = queue.erase(i);
 						if(i == queue.end()) break;
-						if(*i != reinterpret_cast<tEventInfo*>(NULL)) break;
+						if(*i != static_cast<tEventInfo*>(NULL)) break;
 					} while(true);
 				}
 			}

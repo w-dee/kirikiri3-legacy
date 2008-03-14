@@ -172,7 +172,7 @@ static inline void * AlignedMallocAtomicCollectee(size_t size, size_t align)
 //---------------------------------------------------------------------------
 static inline void AlignedFreeCollectee(void * ptr)
 {
-	GC_FREE((reinterpret_cast<void**>(ptr))[-1]);
+	GC_FREE((static_cast<void**>(ptr))[-1]);
 }
 
 //---------------------------------------------------------------------------

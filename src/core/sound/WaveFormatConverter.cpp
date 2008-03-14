@@ -43,8 +43,8 @@ static void PCMConvertLoop(void * RISSE_RESTRICT dest, const void * RISSE_RESTRI
 	else
 	{
 		// 型が違うので変換を行う
-		risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-		const risse_uint8 * s = reinterpret_cast<const risse_uint8*>(src);
+		risse_uint8 * d = static_cast<risse_uint8*>(dest);
+		const risse_uint8 * s = static_cast<const risse_uint8*>(src);
 		const risse_uint8 * s_lim = s + SRCTYPE::size * numsamples;
 
 		while(s < s_lim)

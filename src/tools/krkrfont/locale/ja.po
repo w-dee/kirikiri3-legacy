@@ -2,7 +2,7 @@
 # Copyright (C) 2007 W.Dee and contributors
 # This file is distributed under the same license as the Kirikiri3 package.
 # W.Dee <dee@kikyou.info>, 2005.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""

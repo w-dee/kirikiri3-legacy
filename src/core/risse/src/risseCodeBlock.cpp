@@ -64,7 +64,7 @@ void tCodeBlock::Assign(const tCodeGenerator *gen)
 	// コードのコピー
 	const gc_vector<risse_uint32> & gen_code = gen->GetCode();
 	CodeSize = gen_code.size();
-	Code = reinterpret_cast<risse_uint32*>(
+	Code = static_cast<risse_uint32*>(
 		MallocAtomicCollectee(CodeSize * sizeof(risse_uint32)));
 		// 注意
 		// MallocAtomicCollectee を使って Code 領域を確保しているため、
@@ -147,12 +147,12 @@ void tCodeBlock::Fixup()
 	{
 		Consts[TryIdentifierRelocations[i].first].Clear();
 		Consts[TryIdentifierRelocations[i].first] =
-			reinterpret_cast<tObjectInterface *>
+			static_cast<tObjectInterface *>
 			(ScriptBlockInstance->GetTryIdentifierAt(TryIdentifierRelocations[i].second));
 				// 再配置を行う。GetTryIdentifierAt の戻りは void * で
 				// そのポインタは tObjectInterface ではないが、
 				// 実装上の都合 void * を tObjectInterface に
-				// reinterpret_cast して使う。このポインタは識別子代わりに
+				// static_cast して使う。このポインタは識別子代わりに
 				// 使う物で、このポインタの指す先に実際にアクセスを行うような
 				// ことは行わないのでこれでよいが、注意のこと。
 	}

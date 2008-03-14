@@ -22,8 +22,8 @@ namespace Risa {
 //---------------------------------------------------------------------------
 void PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
-	float * d = reinterpret_cast<float*>(dest);
-	const risse_int16 * s = reinterpret_cast<const risse_int16*>(src);
+	float * d = static_cast<float*>(dest);
+	const risse_int16 * s = static_cast<const risse_int16*>(src);
 	const risse_int16 * s_lim = s + numsamples;
 
 	while(s < s_lim)
@@ -40,8 +40,8 @@ void PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE
 //---------------------------------------------------------------------------
 void PCMConvertLoopFloat32ToInt16(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
-	risse_uint16 * d = reinterpret_cast<risse_uint16*>(dest);
-	const float * s = reinterpret_cast<const float*>(src);
+	risse_uint16 * d = static_cast<risse_uint16*>(dest);
+	const float * s = static_cast<const float*>(src);
 	const float * s_lim = s + numsamples;
 
 	while(s < s_lim)

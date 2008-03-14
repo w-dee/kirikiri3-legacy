@@ -20,7 +20,7 @@ default: $(BIN)
 
 #----------------------------#
 
-INCLUDES = -I.
+INCLUDES =
 
 XRCFILES = krkrfont_res.xrc
 

@@ -35,7 +35,7 @@ tStreamAdapter::tStreamAdapter(const tVariant & stream)
 	tScriptEngine * engine = stream.GetObjectInterface()->GetRTTI()->GetScriptEngine();
 	stream.AssertClass(engine->StreamClass);
 
-	Stream = reinterpret_cast<tStreamInstance *>(stream.GetObjectInterface());
+	Stream = static_cast<tStreamInstance *>(stream.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ risse_uint64 tStreamAdapter::Tell()
 //---------------------------------------------------------------------------
 risse_size tStreamAdapter::Read(void *buffer, risse_size read_size)
 {
-	tOctetBlock ref_blk(tOctetBlock::MakeReference(reinterpret_cast<risse_uint8*>(buffer), read_size));
+	tOctetBlock ref_blk(tOctetBlock::MakeReference(static_cast<risse_uint8*>(buffer), read_size));
 	tOctet ref(&ref_blk);
 	return (risse_int64)Stream->Invoke(ss_get, tVariant(ref));
 }

@@ -42,7 +42,7 @@ public:
 
 	tXP4FS * GetFileSystem() 
 	{
-		return reinterpret_cast<tXP4FS*>(
+		return static_cast<tXP4FS*>(
 			tNI_BaseFileSystem::GetFileSystem().get());
 	} //!< ファイルシステムオブジェクトを得る
 

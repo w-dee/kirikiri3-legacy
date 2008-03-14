@@ -3179,7 +3179,7 @@ public: // ユーティリティ
 	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
 		if(GetType() != vtObject) return NULL;
-		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
+		ObjectT * intf = static_cast<ObjectT*>(GetObjectInterface());
 		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
 			return NULL;
 		return intf;
@@ -3202,7 +3202,7 @@ public: // ユーティリティ
 	ObjectT * AssertAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
 		if(GetType() != vtObject) ThrowBadContextException();
-		ObjectT * intf = reinterpret_cast<ObjectT*>(GetObjectInterface());
+		ObjectT * intf = static_cast<ObjectT*>(GetObjectInterface());
 		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
 			ThrowBadContextException();
 		return intf;
@@ -3221,7 +3221,7 @@ public: // ユーティリティ
 	ObjectT * ExpectAndGetObjectInterafce(tClassBase * cls) const
 	{
 		AssertClass(cls);
-		return reinterpret_cast<ObjectT*>(GetObjectInterface());
+		return static_cast<ObjectT*>(GetObjectInterface());
 	}
 
 	//! @brief		型名を得る

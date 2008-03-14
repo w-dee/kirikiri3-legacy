@@ -282,7 +282,7 @@ public:
 		if(GetArgumentCount() <= n) return false;
 		// この時点で tVariant と tVariantData の両方が
 		// 使用可能である (二つのクラス間の関係が定義できている) とは限らないため
-		// やむを得ず reinterpret_cast をつかう。これはダウンキャストなので
+		// やむを得ず static_cast をつかう。これはダウンキャストなので
 		// 正常に動作するはずである。
 		return !reinterpret_cast<const tVariantData*>(Arguments[n])->IsVoid();
 	}

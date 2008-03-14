@@ -680,15 +680,15 @@ tString tASTNode_ClassDecl::GetDumpComment() const
 tString tASTNode::GetAccessTargetId()
 {
 	if(!this) return tString();
-	if(GetType() == antId) return reinterpret_cast<tASTNode_Id*>(this)->GetName();
+	if(GetType() == antId) return static_cast<tASTNode_Id*>(this)->GetName();
 
 	// obj.mem.mem.mem ... 等の . 演算子 / :: 演算子をどんどんと右にたどっていき、
 	// id を見つける。見つかったらそれを返す。
 	tASTNode * target = this;
 	while(target->GetType() == antMemberSel)
 	{
-		tASTNode * membername = reinterpret_cast<tASTNode_MemberSel*>(target)->GetMemberName();
-		if(membername->GetType() == antId) return reinterpret_cast<tASTNode_Id*>(membername)->GetName();
+		tASTNode * membername = static_cast<tASTNode_MemberSel*>(target)->GetMemberName();
+		if(membername->GetType() == antId) return static_cast<tASTNode_Id*>(membername)->GetName();
 		target = membername;
 	}
 
@@ -870,7 +870,7 @@ void tASTNode_VarDecl::SetAttribute(tDeclAttribute attrib)
 	// 子に再帰する
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
-		tASTNode_VarDeclPair * pair = reinterpret_cast<tASTNode_VarDeclPair*>(GetChildAt(i));
+		tASTNode_VarDeclPair * pair = static_cast<tASTNode_VarDeclPair*>(GetChildAt(i));
 		RISSE_ASSERT(pair->GetType() == antVarDeclPair);
 		pair->SetAttribute(attrib);
 	}
@@ -908,7 +908,7 @@ tASTNode_VarDeclPair::tASTNode_VarDeclPair(risse_size position,
 	{
 		// Name がメンバ選択演算子だった場合
 		tASTNode_MemberSel * memsel =
-			reinterpret_cast<tASTNode_MemberSel*>(Name);
+			static_cast<tASTNode_MemberSel*>(Name);
 		// ofMemberEnsure を指定する
 		memsel->SetFlags(memsel->GetFlags() | tOperateFlags::ofMemberEnsure);
 	}
@@ -923,7 +923,7 @@ void tASTNode_VarDeclPair::SetAttribute(tDeclAttribute attrib)
 	if(Name->GetType() == antMemberSel)
 	{
 		// Name がメンバ選択演算子だった場合
-		reinterpret_cast<tASTNode_MemberSel*>(Name)->SetAttribute(attrib);
+		static_cast<tASTNode_MemberSel*>(Name)->SetAttribute(attrib);
 	}
 }
 //---------------------------------------------------------------------------
@@ -961,12 +961,12 @@ tSSAVariable * tASTNode_VarDeclPair::DoReadSSA(
 //---------------------------------------------------------------------------
 void tASTNode_VarDeclPair::PrepareVarDecl(tSSAForm * form, const tASTNode * name)
 {
-	if(name->GetType() == antId && !reinterpret_cast<const tASTNode_Id*>(name)->GetIsPrivate())
+	if(name->GetType() == antId && !static_cast<const tASTNode_Id*>(name)->GetIsPrivate())
 	{
 		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
 
 		// グローバル変数として作成すべきかどうかをチェック
-		tString str_name = reinterpret_cast<const tASTNode_Id*>(name)->GetName();
+		tString str_name = static_cast<const tASTNode_Id*>(name)->GetName();
 		if(form->GetLocalNamespace()->GetHasScope())
 		{
 			// ローカル変数として作成する
@@ -984,10 +984,10 @@ void tASTNode_VarDeclPair::GenerateVarDecl(tSSAForm * form,
 	risse_size position,
 	const tASTNode * name, tSSAVariable * init, tDeclAttribute attrib)
 {
-	if(name->GetType() == antId && !reinterpret_cast<const tASTNode_Id*>(name)->GetIsPrivate())
+	if(name->GetType() == antId && !static_cast<const tASTNode_Id*>(name)->GetIsPrivate())
 	{
 		// name ノードに id が直接来ている場合、かつプライベート (@付き) 変数ではない場合
-		tString str_name = reinterpret_cast<const tASTNode_Id*>(name)->GetName();
+		tString str_name = static_cast<const tASTNode_Id*>(name)->GetName();
 
 		// グローバル変数として作成すべきかどうかをチェック
 		if(form->GetLocalNamespace()->GetHasScope())
@@ -1045,7 +1045,7 @@ tSSAVariable * tASTNode_MemberSel::DoReadSSA(
 			tSSAForm *form, void * param) const
 {
 	// メンバ選択演算子
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+	tPrepareSSA * pws = static_cast<tPrepareSSA *>(param);
 
 	// 文の作成
 	tSSAVariable * ret_var = NULL;
@@ -1075,7 +1075,7 @@ tSSAVariable * tASTNode_MemberSel::DoReadSSA(
 bool tASTNode_MemberSel::DoWriteSSA(
 		tSSAForm *form, void * param, tSSAVariable * value) const
 {
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+	tPrepareSSA * pws = static_cast<tPrepareSSA *>(param);
 
 	// 文の作成
 	tOperateFlags new_flags = Flags;
@@ -1156,7 +1156,7 @@ tSSAVariable * tASTNode_Id::DoReadSSA(
 {
 	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
 	// 動作をしない可能性があるので注意
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+	tPrepareSSA * pws = static_cast<tPrepareSSA *>(param);
 
 	// 識別子
 	if(pws->MemberSel)
@@ -1184,7 +1184,7 @@ bool tASTNode_Id::DoWriteSSA(
 {
 	// PrepareSSA と このメソッドの間でローカル変数の状態が変わると意図した
 	// 動作をしない可能性があるので注意
-	tPrepareSSA * pws = reinterpret_cast<tPrepareSSA *>(param);
+	tPrepareSSA * pws = static_cast<tPrepareSSA *>(param);
 
 	if(pws->MemberSel)
 	{
@@ -1789,7 +1789,7 @@ void * tASTNode_Array::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 tSSAVariable * tASTNode_Array::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// インライン配列からの読み出し (配列オブジェクトを作成し、初期化して返す)
-	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+	tPrepareSSA * data = static_cast<tPrepareSSA*>(param);
 
 	// 配列オブジェクトを作成
 	tSSAVariable * array_var = NULL;
@@ -1850,7 +1850,7 @@ bool tASTNode_Array::DoWriteSSA(tSSAForm *form, void * param,
 		tSSAVariable * value) const
 {
 	// インライン配列への書き込み
-	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+	tPrepareSSA * data = static_cast<tPrepareSSA*>(param);
 
 	RISSE_ASSERT(data->Mode != pmRead);
 	RISSE_ASSERT(data->Elements.size() == GetChildCount());
@@ -1907,7 +1907,7 @@ void * tASTNode_Dict::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 	{
 		RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antDictPair);
 		tASTNode_DictPair * pair_node =
-			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
+			static_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		if(mode == pmReadWrite)
 		{
@@ -1934,7 +1934,7 @@ void * tASTNode_Dict::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 tSSAVariable * tASTNode_Dict::DoReadSSA(tSSAForm *form, void * param) const
 {
 	// インライン辞書配列からの読み出し (辞書配列オブジェクトを作成し、初期化して返す)
-	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+	tPrepareSSA * data = static_cast<tPrepareSSA*>(param);
 
 	// 辞書配列オブジェクトを作成
 	tSSAVariable * dict_var = NULL;
@@ -1947,7 +1947,7 @@ tSSAVariable * tASTNode_Dict::DoReadSSA(tSSAForm *form, void * param) const
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		tASTNode_DictPair * pair_node =
-			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
+			static_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
 		tSSAVariable * name_var;
@@ -1977,7 +1977,7 @@ bool tASTNode_Dict::DoWriteSSA(tSSAForm *form, void * param,
 		tSSAVariable * value) const
 {
 	// インライン辞書配列への書き込み (右辺値を辞書配列と見なし、値を設定する)
-	tPrepareSSA * data = reinterpret_cast<tPrepareSSA*>(param);
+	tPrepareSSA * data = static_cast<tPrepareSSA*>(param);
 
 	RISSE_ASSERT(data->Names.size() == GetChildCount());
 	RISSE_ASSERT(data->Values.size() == GetChildCount());
@@ -1986,7 +1986,7 @@ bool tASTNode_Dict::DoWriteSSA(tSSAForm *form, void * param,
 	for(risse_size i = 0; i < GetChildCount(); i++)
 	{
 		tASTNode_DictPair * pair_node =
-			reinterpret_cast<tASTNode_DictPair*>(GetChildAt(i));
+			static_cast<tASTNode_DictPair*>(GetChildAt(i));
 
 		// 名前の値を得る
 		tSSAVariable * name_var;
@@ -2952,7 +2952,7 @@ void tASTNode_Try::GenerateCatchBlock(tSSAForm * form,
 		{
 			RISSE_ASSERT(inherited::GetChildAt(i)->GetType() == antCatch);
 			tASTNode_Catch * catch_node =
-				reinterpret_cast<tASTNode_Catch*>(inherited::GetChildAt(i));
+				static_cast<tASTNode_Catch*>(inherited::GetChildAt(i));
 
 			tASTNode * condition = catch_node->GetCondition();
 
@@ -3115,7 +3115,7 @@ tSSAVariable * tASTNode_FuncCall::DoReadSSA(
 			RISSE_ASSERT(!(inherited::GetChildAt(i) &&
 				inherited::GetChildAt(i)->GetType() != antFuncCallArg));
 			tASTNode_FuncCallArg * arg =
-				reinterpret_cast<tASTNode_FuncCallArg *>(
+				static_cast<tASTNode_FuncCallArg *>(
 												inherited::GetChildAt(i));
 			if(arg)
 			{
@@ -3201,7 +3201,7 @@ tSSAVariable * tASTNode_FuncCall::DoReadSSA(
 			if((*i)->GetType() == antFuncDecl)
 			{
 				tASTNode_FuncDecl * block_arg =
-					reinterpret_cast<tASTNode_FuncDecl*>(*i);
+					static_cast<tASTNode_FuncDecl*>(*i);
 				if(block_arg->GetIsBlock()) { block_found = true; break; }
 			}
 		}
@@ -3241,7 +3241,7 @@ tSSAVariable * tASTNode_FuncCall::DoReadSSA(
 		if((*i)->GetType() == antFuncDecl)
 		{
 			tASTNode_FuncDecl * block_arg =
-				reinterpret_cast<tASTNode_FuncDecl*>(*i);
+				static_cast<tASTNode_FuncDecl*>(*i);
 
 			// ブロックの中身を 遅延評価ブロックとして評価する
 			tSSAVariable * lazyblock_var =
@@ -3391,7 +3391,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 	for(risse_size i = 0; i < inherited::GetChildCount(); i++)
 	{
 		tASTNode_FuncDeclArg * child =
-			reinterpret_cast<tASTNode_FuncDeclArg*>(inherited::GetChildAt(i));
+			static_cast<tASTNode_FuncDeclArg*>(inherited::GetChildAt(i));
 		RISSE_ASSERT(child->GetType() == antFuncDeclArg);
 		RISSE_ASSERT(child->GetCollapse() == false); // TODO: 配列圧縮
 
@@ -3459,7 +3459,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 	for(risse_size i = 0; i < Blocks.size(); i++)
 	{
 		tASTNode_FuncDeclArg * child =
-			reinterpret_cast<tASTNode_FuncDeclArg*>(Blocks[i]);
+			static_cast<tASTNode_FuncDeclArg*>(Blocks[i]);
 		RISSE_ASSERT(child->GetType() == antFuncDeclBlock);
 
 		tSSAVariable * param_var = NULL;
@@ -3645,7 +3645,7 @@ tSSAVariable * tASTNode_ClassDecl::GenerateClassDecl(tSSAForm *form) const
 {
 	// Body は antContext かつ actTopLevel でなくてはならない
 	RISSE_ASSERT(Body->GetType() == antContext);
-	RISSE_ASSERT(reinterpret_cast<tASTNode_Context*>(Body)->GetContextType() == actTopLevel);
+	RISSE_ASSERT(static_cast<tASTNode_Context*>(Body)->GetContextType() == actTopLevel);
 
 	// モジュールはスーパークラスを持つことはできない
 	RISSE_ASSERT(!(IsModule && SuperClass));

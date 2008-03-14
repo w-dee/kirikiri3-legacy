@@ -49,9 +49,9 @@ static void CrossFadeBlend(void *dest, void *src1, void *src2,
 			(ratioend - ratiostart) * ((risse_int64)1<<32) / 100
 		) / samples);
 
-	risse_uint8 * d = reinterpret_cast<risse_uint8*>(dest);
-	const risse_uint8 * s1 = reinterpret_cast<const risse_uint8*>(src1);
-	const risse_uint8 * s2 = reinterpret_cast<const risse_uint8*>(src2);
+	risse_uint8 * d = static_cast<risse_uint8*>(dest);
+	const risse_uint8 * s1 = static_cast<const risse_uint8*>(src1);
+	const risse_uint8 * s2 = static_cast<const risse_uint8*>(src2);
 
 	risse_uint ratio = (risse_int)(ratiostart * ((risse_int64)1<<32) / 100);
 	for(risse_int i = 0; i < samples; i++)
@@ -658,7 +658,7 @@ void tWaveLoopManager::GetEventAt(risse_int64 from, risse_int64 to,
 	for(; s < (int)Labels.size(); s++)
 	{
 		if(Labels[s].Position >= from && Labels[s].Position < to)
-			events.push_back(*reinterpret_cast<tWaveEvent*>(&(Labels[s])));
+			events.push_back(*static_cast<tWaveEvent*>(&(Labels[s])));
 		else
 			break;
 	}

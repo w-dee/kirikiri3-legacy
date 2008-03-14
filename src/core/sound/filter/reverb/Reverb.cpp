@@ -51,11 +51,11 @@ void tReverbInstance::Filter()
 	if(channels != 2) return; // チャンネルは 2 (stereo)以外は今のところ対応していない
 
 	// 入力バッファを確保
-	if(!Buffer) Buffer = reinterpret_cast<float*>(MallocAtomicCollectee(
+	if(!Buffer) Buffer = static_cast<float*>(MallocAtomicCollectee(
 					sizeof(float) * NumBufferSampleGranules * InputFormat.Channels));
 
 	// 出力バッファを確保
-	float * dest_buf = reinterpret_cast<float*>(PrepareQueue(NumBufferSampleGranules));
+	float * dest_buf = static_cast<float*>(PrepareQueue(NumBufferSampleGranules));
 	if(!dest_buf) return;
 
 	// 入力からデータを読み取る

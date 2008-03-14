@@ -168,8 +168,8 @@ tObjectInterface::tRetValue tExitTryExceptionClass::Operate(RISSE_OBJECTINTERFAC
 		// tExitTryExceptionClass 型を返す
 		if(result)
 		{
-			*result = reinterpret_cast<tObjectInterface*>
-				((tExitTryExceptionClass*)this);
+			*result = static_cast<tObjectInterface*>
+				(static_cast<tExitTryExceptionClass*>(this));
 		}
 	}
 	return rvNoError;

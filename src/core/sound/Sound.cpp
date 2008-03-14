@@ -433,7 +433,7 @@ void tSoundInstance::OnEvent(tEventInfo * info)
 		// ラベルイベント
 		// onLabel を呼ぶ
 		Operate(ocFuncCall, NULL, tSS<'o','n','L','a','b','e','l'>(),
-				0, tMethodArgument::New(reinterpret_cast<tLabelEventInfo*>(info)->Name));
+				0, tMethodArgument::New(static_cast<tLabelEventInfo*>(info)->Name));
 	}
 }
 //---------------------------------------------------------------------------

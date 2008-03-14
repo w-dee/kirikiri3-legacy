@@ -12,9 +12,9 @@
 //! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
 //! tFreeTypeFace もプラットフォームごとに異なった実装となる。
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../prec.h"
 #include "NativeFreeTypeFace.h"
-#include "FreeType.h"
+#include "../FreeType.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

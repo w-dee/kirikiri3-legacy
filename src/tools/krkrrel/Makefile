@@ -17,7 +17,7 @@ LDFLAGS = -g $(CONSOLE_LDFLAGS)
 
 #----------------------------#
 
-INCLUDES = -I.
+INCLUDES =
 
 CPPFILES =  ConsoleMain.cpp \
 			FileList.cpp  \

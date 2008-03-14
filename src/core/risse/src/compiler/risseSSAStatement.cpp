@@ -1247,7 +1247,7 @@ Declared->GetValueState()==tSSAVariable::vsVarying ? wxT("varying") : wxT("")
 void tSSAStatement::RealizeConstantPropagationErrors()
 {
 	if(!Mark) return;
-	tErrorWarningInfo * info = reinterpret_cast<tErrorWarningInfo *>(Mark);
+	tErrorWarningInfo * info = static_cast<tErrorWarningInfo *>(Mark);
 	if(info->Error)
 	{
 		tCompileExceptionClass::Throw(

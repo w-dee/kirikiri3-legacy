@@ -222,7 +222,7 @@ bool tALBuffer::Render(risse_uint8 * & render_buffer, size_t & render_buffer_siz
 				}
 				else
 				{
-					render_buffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+					render_buffer = static_cast<risse_uint8 *>(newbuffer);
 					render_buffer_size = buffer_size_needed;
 				}
 			}
@@ -246,7 +246,7 @@ bool tALBuffer::Render(risse_uint8 * & render_buffer, size_t & render_buffer_siz
 					}
 					else
 					{
-						ConvertBuffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+						ConvertBuffer = static_cast<risse_uint8 *>(newbuffer);
 						ConvertBufferSize = buffer_size_needed;
 					}
 				}

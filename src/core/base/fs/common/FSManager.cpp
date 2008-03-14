@@ -579,7 +579,7 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 			tString(RISSE_WS_TR("failed to open '%1': "), fullpath))
 
 	val.AssertClass(tRisseScriptEngine::instance()->GetScriptEngine()->StreamClass);
-	return reinterpret_cast<tStreamInstance*>(val.GetObjectInterface());
+	return static_cast<tStreamInstance*>(val.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
 
@@ -592,7 +592,7 @@ tStreamInstance * tFileSystemManager::Open(const tVariant & filename, risse_uint
 	{
 		// filename は Stream クラスのインスタンス
 		// そのまま帰す
-		return reinterpret_cast<tStreamInstance*>(filename.GetObjectInterface());
+		return static_cast<tStreamInstance*>(filename.GetObjectInterface());
 	}
 	else
 	{
@@ -1131,7 +1131,7 @@ tVariant tFileClass::ovulate()
 void tFileClass::mount(const tString & point, const tVariant & fs)
 {
 	fs.AssertClass(tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance());
-	tFileSystemManager::instance()->Mount(point, reinterpret_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
+	tFileSystemManager::instance()->Mount(point, static_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
 }
 //---------------------------------------------------------------------------
 

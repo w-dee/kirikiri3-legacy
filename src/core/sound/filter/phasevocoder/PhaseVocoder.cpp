@@ -236,7 +236,7 @@ void tPhaseVocoderInstance::Filter()
 		newqueue.Scale(DSP->GetOutputHopSize());
 
 		// バッファを確保
-		float * dest_buf = reinterpret_cast<float*>(PrepareQueue(outputready));
+		float * dest_buf = static_cast<float*>(PrepareQueue(outputready));
 		if(!dest_buf) return;
 
 		// DSP の出力から dest_buf にコピーする

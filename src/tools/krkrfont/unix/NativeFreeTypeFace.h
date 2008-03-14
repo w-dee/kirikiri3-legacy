@@ -13,8 +13,8 @@
 #ifndef FONTCONFIG_NATIVEFREETYPEFACE_H_
 #define FONTCONFIG_NATIVEFREETYPEFACE_H_
 
-#include "tvpfontstruc.h"
-#include "FreeTypeFace.h"
+#include "../tvpfontstruc.h"
+#include "../FreeTypeFace.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

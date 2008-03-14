@@ -830,7 +830,7 @@ void * tSSAForm::CreateLazyBlock(risse_size pos, const tString & basename,
 	param->Position = pos;
 	param->BlockVariable = block_var;
 	param->AccessMap = accessmap;
-	return reinterpret_cast<void *>(param);
+	return static_cast<void *>(param);
 }
 //---------------------------------------------------------------------------
 

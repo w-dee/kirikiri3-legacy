@@ -240,7 +240,7 @@ void tHistoryTextCtrl::OnChar(wxKeyEvent & event)
 			// ログビューアにフォーカスを合わせる
 			wxWindow * top = GetParent();
 			while(top->GetParent()) top = top->GetParent(); // トップレベルウィンドウを探す
-			reinterpret_cast<tConsoleFrame*>(top)->SetFocusToLogViewer();
+			static_cast<tConsoleFrame*>(top)->SetFocusToLogViewer();
 			break;
 		}
 

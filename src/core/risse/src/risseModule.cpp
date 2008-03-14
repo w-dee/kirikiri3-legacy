@@ -31,7 +31,7 @@ tModuleBase::tModuleBase(const tString & name, tScriptEngine * engine)
 	tVariant instance_v;
 	engine->ModuleClass->Do(ocFuncCall, &instance_v, ss_new, 0, tMethodArgument::New(name));
 	RISSE_ASSERT(dynamic_cast<tObjectBase *>(instance_v.GetObjectInterface()) != NULL);
-	Instance = reinterpret_cast<tObjectBase *>(instance_v.GetObjectInterface());
+	Instance = static_cast<tObjectBase *>(instance_v.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
 

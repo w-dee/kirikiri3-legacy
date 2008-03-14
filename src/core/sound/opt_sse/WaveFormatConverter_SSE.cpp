@@ -31,8 +31,8 @@ _ALIGN16(const float) RISA_V_VEC_MAGNIFY[4] =
 //---------------------------------------------------------------------------
 void _PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
-	float * d = reinterpret_cast<float*>(dest);
-	const risse_int16 * s = reinterpret_cast<const risse_int16*>(src);
+	float * d = static_cast<float*>(dest);
+	const risse_int16 * s = static_cast<const risse_int16*>(src);
 	size_t n;
 
 	// d がアラインメントされるまで一つずつ処理をする

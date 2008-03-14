@@ -13,8 +13,8 @@
 #ifndef _NATIVEFREETYPEDRIVER_H_
 #define _NATIVEFREETYPEDRIVER_H_
 
-#include "tvpfontstruc.h"
-#include "FreeTypeFace.h"
+#include "../tvpfontstruc.h"
+#include "../FreeTypeFace.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

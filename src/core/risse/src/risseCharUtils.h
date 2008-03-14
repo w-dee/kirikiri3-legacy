@@ -379,7 +379,7 @@ static bool inline iswordcha_nc(risse_char ch)
 			{
 				Converted = true;
 				ConvertUTF16ToRisseCharString(Utf32Array,
-					reinterpret_cast<const risse_uint16 *>(utf16));
+					static_cast<const risse_uint16 *>(static_cast<const void *>(utf16)));
 	#ifdef RISSE_CHARUTILS_DEBUG
 				SourceString = utf16;
 	#endif

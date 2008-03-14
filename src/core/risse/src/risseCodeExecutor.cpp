@@ -509,7 +509,7 @@ void tCodeInterpreter::Execute(
 					RISSE_ASSERT(AR(code[1]).GetType() == tVariant::vtObject);
 
 					tCodeBlock * codeblock =
-						reinterpret_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
+						static_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
 					RISSE_ASSERT(dynamic_cast<tCodeBlock*>(codeblock) != NULL);
 					tCodeBlockStackAdapter * adapter =
 						new tCodeBlockStackAdapter(codeblock, frame, shared_overlay);
@@ -526,7 +526,7 @@ void tCodeInterpreter::Execute(
 					RISSE_ASSERT(AR(code[1]).GetType() == tVariant::vtObject);
 
 					tCodeBlock * codeblock =
-						reinterpret_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
+						static_cast<tCodeBlock*>(AR(code[1]).GetObjectInterface());
 					RISSE_ASSERT(dynamic_cast<tCodeBlock*>(codeblock) != NULL);
 					tCodeBlockStackAdapter * adapter =
 						new tCodeBlockStackAdapter(codeblock, NULL, shared_overlay);
@@ -561,7 +561,7 @@ void tCodeInterpreter::Execute(
 					// code[1] ( = ocTryFuncCall で作成されたオブジェクト ) から例外が
 					// 発生したかどうかとその値を受け取る
 					tTryFuncCallReturnObject * try_ret =
-						reinterpret_cast<tTryFuncCallReturnObject*>(
+						static_cast<tTryFuncCallReturnObject*>(
 										AR(code[1]).GetObjectInterface());
 
 					bool raised = try_ret->GetRaised();

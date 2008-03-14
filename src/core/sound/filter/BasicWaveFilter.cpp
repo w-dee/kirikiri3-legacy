@@ -83,7 +83,7 @@ bool tWaveFilterInstance::Render(void *dest, risse_uint samples, risse_uint &wri
 	tWaveSegmentQueue & segmentqueue)
 {
 	written = 0;
-	risse_uint8 * dest_buf = reinterpret_cast<risse_uint8*>(dest);
+	risse_uint8 * dest_buf = static_cast<risse_uint8*>(dest);
 	risse_uint sample_granule_bytes = OutputFormat.GetSampleGranuleSize();
 
 	tWaveSegmentQueue new_segmentqueue;
@@ -153,7 +153,7 @@ void * tWaveFilterInstance::PrepareQueue(risse_uint numsamplegranules)
 		}
 		else
 		{
-			QueuedData = reinterpret_cast<risse_uint8 *>(newbuffer);
+			QueuedData = static_cast<risse_uint8 *>(newbuffer);
 			QueuedDataAllocSize = buffer_size_needed;
 		}
 	}
@@ -190,7 +190,7 @@ risse_uint tWaveFilterInstance::Fill(void * dest, risse_uint numsamplegranules,
 
 	risse_uint desired_type_samplegranule_bytes =
 		tPCMTypes::TypeToSampleBytes(desired_type) * InputFormat.Channels;
-	risse_uint8 * render_buffer = reinterpret_cast<risse_uint8*>(dest);
+	risse_uint8 * render_buffer = static_cast<risse_uint8*>(dest);
 	risse_uint remain = numsamplegranules;
 	if(remain == 0)
 		remain = static_cast<risse_uint>(-1); // remain に整数の最大値を入れる
@@ -251,7 +251,7 @@ risse_uint tWaveFilterInstance::Fill(void * dest, risse_uint numsamplegranules,
 					}
 					else
 					{
-						ConvertBuffer = reinterpret_cast<risse_uint8 *>(newbuffer);
+						ConvertBuffer = static_cast<risse_uint8 *>(newbuffer);
 						ConvertBufferSize = buffer_size_needed;
 					}
 				}

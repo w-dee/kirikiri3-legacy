@@ -120,7 +120,7 @@ tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 	// info チャンクから情報を読み取る
 	Flags = ReadI16LEFromMem(chunk + 0);
 	Flags &=~ RISA__XP4_FILE_MARKED; // MARKED はクリア
-	inarchivename = tString(wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8));
+	inarchivename = tString(wxString(static_cast<const char *>(chunk + 2), wxConvUTF8));
 	deleted = (Flags & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED ;
 
 	// time チャンクを探す
@@ -333,7 +333,7 @@ tXP4Archive::tXP4Archive(const tString & filename, iMapCallback & callback)
 			if(FindChunk(chunkname_targ, chunk, chunksize, &targ_chunk, &targ_chunksize))
 			{
 				// これはアーカイブの元となったファイル名
-				TargetDir = wxString(reinterpret_cast<const char *>(targ_chunk), wxConvUTF8);
+				TargetDir = wxString(static_cast<const char *>(targ_chunk), wxConvUTF8);
 			}
 		}
 	*/

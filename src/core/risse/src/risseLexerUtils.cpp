@@ -553,12 +553,11 @@ bool tLexerUtility::ParseNonDecimalReal(
 	}
 
 	// compose IEEE double
-	risse_real d;
-	*reinterpret_cast<risse_uint64*>(&d) =
+	risse_uint64 d =
 		RISSE_IEEE_D_MAKE_SIGN(0) |
 		RISSE_IEEE_D_MAKE_EXP(exp) |
 		RISSE_IEEE_D_MAKE_SIGNIFICAND(main);
-	val = d;
+	val = *reinterpret_cast<risse_real *>(&d);
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -654,17 +653,15 @@ bool tLexerUtility::ParseNumber2(const risse_char * & ptr, tVariant &val)
 	if(StringMatch(ptr, RISSE_WS("NaN"), true))
 	{
 		// Not a Number
-		risse_real d;
-		*reinterpret_cast<risse_uint64*>(&d) = RISSE_IEEE_D_P_NaN;
-		val = d;
+		risse_uint64 d = RISSE_IEEE_D_P_NaN;
+		val = *reinterpret_cast<risse_real *>(&d);
 		return true;
 	}
 	if(StringMatch(ptr, RISSE_WS("Infinity"), true))
 	{
 		// positive inifinity
-		risse_real d;
-		*reinterpret_cast<risse_uint64*>(&d) = RISSE_IEEE_D_P_INF;
-		val = d;
+		risse_real d = RISSE_IEEE_D_P_INF;
+		val = *reinterpret_cast<risse_real *>(&d);
 		return true;
 	}
 

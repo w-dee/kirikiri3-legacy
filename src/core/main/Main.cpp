@@ -327,25 +327,3 @@ void tApplication::OnActivateApp(wxActivateEvent & event)
 
 
 
-
-
-
-
-namespace boost
-{
-
-//---------------------------------------------------------------------------
-//! @brief		boost の assertion failure を捕捉する
-//---------------------------------------------------------------------------
-void assertion_failed(char const * expr, char const * function, char const * file, long line)
-{
-	// user defined
-	fprintf(stderr, "boost assertion failure on expression '%s' at function '%s' file %s line %ld\n",
-		expr, function, file, line);
-	abort();
-}
-//---------------------------------------------------------------------------
-
-
-} // namespace boost
-

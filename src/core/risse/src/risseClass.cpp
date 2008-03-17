@@ -73,7 +73,7 @@ tClassBase::tClassBase(const tString & name, tClassBase * super_class, bool exte
 
 	// name はクラス名
 	// This に name という名前で値を登録し、書き込み禁止にする
-	RegisterNormalMember(ss_name, name, tMemberAttribute(tMemberAttribute::vcConst));
+	RegisterNormalMember(ss_name, name, tMemberAttribute(tMemberAttribute::mcConst));
 }
 //---------------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ tClassBase::tClassBase(tScriptEngine * engine)
 
 	// クラス名は Object
 	// This に name という名前で値を登録し、書き込み禁止にする
-	RegisterNormalMember(ss_name, ss_Object, tMemberAttribute(tMemberAttribute::vcConst));
+	RegisterNormalMember(ss_name, ss_Object, tMemberAttribute(tMemberAttribute::mcConst));
 }
 //---------------------------------------------------------------------------
 
@@ -153,9 +153,9 @@ void tClassBase::RegisterMembers()
 	tVariant * pThis = new tVariant(this);
 
 	BindFunction(this, mnNew, &tClassBase::risse_new,
-				tMemberAttribute(tMemberAttribute::vcConst), pThis, false);
+				tMemberAttribute(tMemberAttribute::mcConst), pThis, false);
 	BindFunction(this, ss_fertilize, &tClassBase::fertilize,
-				tMemberAttribute(tMemberAttribute::vcConst), pThis, false);
+				tMemberAttribute(tMemberAttribute::mcConst), pThis, false);
 
 	// modules 配列を members に登録
 	if(GetRTTI()->GetScriptEngine()->ArrayClass)

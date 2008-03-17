@@ -103,7 +103,7 @@ void tModuleClass::initialize(const tNativeCallInfo &info)
 		name);
 	(*const_cast<tVariant*>(&info.This)).
 		Do(info.engine, ocDSetAttrib, NULL, ss_name,
-			tMemberAttribute(tMemberAttribute::vcConst));
+			tMemberAttribute(tMemberAttribute::mcConst));
 }
 //---------------------------------------------------------------------------
 

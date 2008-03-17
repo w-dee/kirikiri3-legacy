@@ -178,7 +178,7 @@ public:
 						bool ismembers = false)
 	{
 		RegisterNormalMember(name, value,
-			tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal),
+			tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal),
 			ismembers);
 	}
 

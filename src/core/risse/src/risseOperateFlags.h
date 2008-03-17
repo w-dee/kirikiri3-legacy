@@ -71,7 +71,7 @@ public:
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	変更性
-	bool Has(tMemberAttribute::tVariableControl v) const { return tMemberAttribute(Flags).Has(v); }
+	bool Has(tMemberAttribute::tMutabilityControl v) const { return tMemberAttribute(Flags).Has(v); }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	オーバーライド性

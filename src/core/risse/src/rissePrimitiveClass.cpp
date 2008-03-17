@@ -53,7 +53,7 @@ tPrimitiveClassBase::tPrimitiveClassBase(const tString & name, tClassBase * supe
 
 	BindFunction(this, ss_construct,
 		&tPrimitiveClassBase::construct,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
@@ -100,15 +100,15 @@ void tPrimitiveClass::RegisterMembers()
 
 	BindFunction(this, ss_ovulate,
 		&tPrimitiveClass::ovulate,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, ss_construct,
 		&tPrimitiveClass::construct,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, mnString,
 		&tPrimitiveClass::toString,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------

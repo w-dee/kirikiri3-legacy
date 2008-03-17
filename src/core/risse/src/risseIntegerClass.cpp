@@ -51,11 +51,11 @@ void tIntegerClass::RegisterMembers()
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tIntegerClass::ovulate,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, ss_initialize,
 		&tIntegerClass::initialize,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, ss_times, &tIntegerClass::times);
 }

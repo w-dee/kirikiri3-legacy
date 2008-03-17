@@ -24,10 +24,10 @@ bool tMemberAttribute::Overwrite(tMemberAttribute rhs)
 {
 	bool overwritten = false;
 
-	if(rhs.Variable != vcNone)
+	if(rhs.Mutability != mcNone)
 	{
-		if(Variable != vcNone) overwritten = true;
-		Variable = rhs.Variable;
+		if(Mutability != mcNone) overwritten = true;
+		Mutability = rhs.Mutability;
 	}
 	if(rhs.Override != ocNone)
 	{
@@ -49,13 +49,13 @@ bool tMemberAttribute::Overwrite(tMemberAttribute rhs)
 tString tMemberAttribute::AsString() const
 {
 	tString str;
-	if(Variable != vcNone)
+	if(Mutability != mcNone)
 	{
 		if(!str.IsEmpty()) str += RISSE_WC(' ');
-		switch(Variable)
+		switch(Mutability)
 		{
-			case vcVar:			str += RISSE_WS("var");			break;
-			case vcConst:		str += RISSE_WS("const");		break;
+			case mcVar:			str += RISSE_WS("var");			break;
+			case mcConst:		str += RISSE_WS("const");		break;
 			default: ;
 		}
 	}

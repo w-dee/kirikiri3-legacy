@@ -151,7 +151,7 @@ tObjectBase::tRetValue tObjectBase::Read(const tString & name, tOperateFlags fla
 	// プロパティアクセスの方法を決定する
 	tMemberAttribute attrib = member->Attribute;
 	attrib.Overwrite(flags);
-	RISSE_ASSERT(attrib.GetVariable() != tMemberAttribute::vcNone);
+	RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcConst);
 	RISSE_ASSERT(attrib.GetOverride() != tMemberAttribute::ocNone);
 	RISSE_ASSERT(attrib.GetProperty() != tMemberAttribute::pcNone);
 
@@ -218,7 +218,7 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 		// そのまえに属性チェック
 		tMemberAttribute attrib = member->Attribute;
 		attrib.Overwrite(flags); // flags の指定を優先させる
-		RISSE_ASSERT(attrib.GetVariable() != tMemberAttribute::vcNone);
+		RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcNone);
 		RISSE_ASSERT(attrib.GetOverride() != tMemberAttribute::ocNone);
 		RISSE_ASSERT(attrib.GetProperty() != tMemberAttribute::pcNone);
 
@@ -238,17 +238,17 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 			return rvMemberNotFound; // 見つからなかったというのと同じ扱い
 		}
 
-		switch(attrib.GetVariable())
+		switch(attrib.GetMutability())
 		{
-		case tMemberAttribute::vcNone: // あり得ない
-			RISSE_ASSERT(attrib.GetVariable() != tMemberAttribute::vcNone);
+		case tMemberAttribute::mcNone: // あり得ない
+			RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcNone);
 			break;
 
-		case tMemberAttribute::vcVar: // ふつうのやつ
+		case tMemberAttribute::mcVar: // ふつうのやつ
 			// 下で処理
 			break;
 
-		case tMemberAttribute::vcConst: // 定数
+		case tMemberAttribute::mcConst: // 定数
 			return rvMemberIsReadOnly; // 書き込めません
 		}
 

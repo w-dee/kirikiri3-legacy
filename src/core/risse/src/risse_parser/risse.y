@@ -737,7 +737,7 @@ variable_def_no_semicolon
 	| "const" onl variable_id_list			{ $$ = $3;
 											  C(VarDecl, $$)->SetAttribute(
 											  	tDeclAttribute(
-											  	tDeclAttribute::vcConst)); }
+											  	tDeclAttribute::mcConst)); }
 ;
 
 /* list for the variable definition */
@@ -1087,7 +1087,7 @@ decl_attr
 /* attribute specifiers */
 
 decl_attr_variable
-	: "const"	onl 						{ $$ = new tDeclAttribute(tDeclAttribute::vcConst); }
+	: "const"	onl 						{ $$ = new tDeclAttribute(tDeclAttribute::mcConst); }
 ;
 
 decl_attr_override

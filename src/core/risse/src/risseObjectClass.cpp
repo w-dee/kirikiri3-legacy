@@ -55,7 +55,7 @@ void tObjectClass::RegisterMembers()
 	BindProperty(this, ss_hint, &tObjectClass::get_hint, &tObjectClass::set_hint);
 	BindProperty(this, ss_hash, &tObjectClass::get_hash);
 	BindFunction(this, ss_isA, &tObjectClass::isA, 
-		tMemberAttribute().Set(tMemberAttribute::vcConst).Set(tMemberAttribute::ocFinal));
+		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_eval, &tObjectClass::eval);
 	BindFunction(this, ss_getInstanceMember, &tObjectClass::getInstanceMember);
 	BindFunction(this, ss_setInstanceMember, &tObjectClass::setInstanceMember);

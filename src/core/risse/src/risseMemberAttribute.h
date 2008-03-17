@@ -28,11 +28,11 @@ class tMemberAttribute : public tCollectee
 {
 public:
 	//! @brief	変更性を規定する物
-	enum tVariableControl
+	enum tMutabilityControl
 	{
-		vcNone,
-		vcVar, //!< メンバは変更可能
-		vcConst, //!< 一度assignした値は変更不可
+		mcNone,
+		mcVar, //!< メンバは変更可能
+		mcConst, //!< 一度assignした値は変更不可
 	};
 
 	//! @brief	オーバーライド性を規定する物
@@ -56,7 +56,7 @@ private:
 	{
 		struct
 		{
-			tVariableControl	Variable	: 2;
+			tMutabilityControl	Mutability	: 2;
 			tOverrideControl	Override	: 2;
 			tPropertyControl	Property	: 2;
 		};
@@ -67,7 +67,7 @@ public:
 	//! @brief		デフォルトコンストラクタ
 	tMemberAttribute()
 	{
-		Variable = vcNone;
+		Mutability = mcNone;
 		Override = ocNone;
 		Property = pcNone;
 	}
@@ -91,14 +91,14 @@ public:
 	static tMemberAttribute GetDefault()
 	{
 		tMemberAttribute ret;
-		return ret.Set(vcVar).Set(ocVirtual).Set(pcField);
+		return ret.Set(mcVar).Set(ocVirtual).Set(pcField);
 	}
 
-	//! @brief		コンストラクタ (variableから)
-	//! @param		variable	変更性
-	explicit tMemberAttribute(tVariableControl variable)
+	//! @brief		コンストラクタ (mutabilityから)
+	//! @param		mutability	変更性
+	explicit tMemberAttribute(tMutabilityControl mutability)
 	{
-		Variable = variable;
+		Mutability = mutability;
 		Override = ocNone;
 		Property = pcNone;
 	}
@@ -108,7 +108,7 @@ public:
 	//! @param		override	オーバーライド性
 	explicit tMemberAttribute(tOverrideControl override)
 	{
-		Variable = vcNone;
+		Mutability = mcNone;
 		Override = override;
 		Property = pcNone;
 	}
@@ -117,22 +117,22 @@ public:
 	//! @param		property	プロパティアクセス方法
 	explicit tMemberAttribute(tPropertyControl property)
 	{
-		Variable = vcNone;
+		Mutability = mcNone;
 		Override = ocNone;
 		Property = property;
 	}
 
 	//! @brief		変更性を得る
 	//! @return		変更性
-	tVariableControl GetVariable() const { return Variable; }
+	tMutabilityControl GetMutability() const { return Mutability; }
 	//! @brief		変更性を設定する
 	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tMemberAttribute & Set(tVariableControl v) { Variable = v; return *this; }
+	tMemberAttribute & Set(tMutabilityControl v) { Mutability = v; return *this; }
 	//! @brief		変更性を設定する
 	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tMemberAttribute & operator = (tVariableControl v) { Variable = v; return *this; }
+	tMemberAttribute & operator = (tMutabilityControl v) { Mutability = v; return *this; }
 
 	//! @brief		オーバーライド性を得る
 	//! @return		オーバーライド性
@@ -170,8 +170,7 @@ public:
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	変更性
-	bool Has(tVariableControl v) const { return Variable == v; }
-
+	bool Has(tMutabilityControl v) const { return Mutability == v; }
 
 	//! @brief		属性を持っているかどうかを調べる
 	//! @param		v	オーバーライド性
@@ -186,7 +185,7 @@ public:
 	//! @return		何か属性を持っていれば真
 	bool HasAny() const
 		{ return
-			Variable != vcNone ||
+			Mutability != mcNone ||
 			Override != ocNone ||
 			Property != pcNone;
 		}

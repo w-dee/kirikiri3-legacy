@@ -44,14 +44,14 @@ void tNumberClass::RegisterMembers()
 
 	BindFunction(this, ss_ovulate,
 		&tNumberClass::ovulate,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, ss_construct,
 		&tNumberClass::construct,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindProperty(this, ss_isNaN, &tNumberClass::isNaN,
-		tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------

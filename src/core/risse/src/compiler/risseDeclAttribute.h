@@ -72,10 +72,10 @@ public:
 		Sync = scNone;
 	}
 
-	//! @brief		コンストラクタ (variableから)
-	//! @param		variable	変更性
-	explicit tDeclAttribute(tVariableControl variable) :
-		tMemberAttribute(variable)
+	//! @brief		コンストラクタ (mutabilityから)
+	//! @param		mutability	変更性
+	explicit tDeclAttribute(tMutabilityControl mutability) :
+		tMemberAttribute(mutability)
 	{
 		Context = ccNone;
 		Sync = scNone;
@@ -121,7 +121,7 @@ public:
 	//! @brief		変更性を設定する
 	//! @param		v	変更性
 	//! @return		このオブジェクト自身への参照
-	tMemberAttribute & Set(tVariableControl v) { tMemberAttribute::Set(v); return *this; }
+	tMemberAttribute & Set(tMutabilityControl v) { tMemberAttribute::Set(v); return *this; }
 
 	//! @brief		オーバーライド性を設定する
 	//! @param		v	オーバーライド性

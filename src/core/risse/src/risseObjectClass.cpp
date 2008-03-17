@@ -17,6 +17,7 @@
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
 #include "risseBindingInfo.h"
+#include "risseArrayClass.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -59,6 +60,7 @@ void tObjectClass::RegisterMembers()
 	BindFunction(this, ss_eval, &tObjectClass::eval);
 	BindFunction(this, ss_getInstanceMember, &tObjectClass::getInstanceMember);
 	BindFunction(this, ss_setInstanceMember, &tObjectClass::setInstanceMember);
+	BindFunction(this, ss_getPublicMembers, &tObjectClass::getPublicMembers);
 	BindFunction(this, ss_toException, &tObjectClass::toException);
 	BindFunction(this, ss_p, &tObjectClass::p);
 	BindFunction(this, mnBoolean, &tObjectClass::toBoolean);
@@ -221,6 +223,58 @@ void tObjectClass::setInstanceMember(
 		tOperateFlags::ofInstanceMemberOnly|
 		tOperateFlags::ofMemberEnsure,
 					value, info.This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tObjectClass::getPublicMembers(
+				const tNativeCallInfo & info)
+{
+	bool recursive = true;
+	if(info.args.HasArgument(0))
+		recursive = info.args[0].operator bool();
+
+	if(info.This.GetType() == tVariant::vtObject)
+	{
+		if(recursive)
+		{
+			// TODO: 再帰的な(親クラスも見に行く)enumuration
+			RISSE_ASSERT(!"recursive enumuration is not implemented yet");
+		}
+		else
+		{
+			// メンバ名を配列にして返す
+			tObjectBase * object =
+				static_cast<tObjectBase*>(
+					info.This.GetObjectInterface());
+			tVariant array =
+				tVariant(object->GetRTTI()->GetScriptEngine()->ArrayClass).
+																New();
+			class callback : public tObjectBase::tEnumMemberCallback
+			{
+				tVariant array;
+			public:
+				callback(const tVariant & array_) : array(array_) {}
+				bool OnEnum(const tString & name,
+					const tObjectBase::tMemberData & data)
+				{
+					RISSE_ASSERT(data.Attribute.GetAccess() != tMemberAttribute::acNone);
+					if(data.Attribute.GetAccess() == tMemberAttribute::acPublic)
+						array.Invoke_Object(ss_push, name);
+					return true;
+				}
+			} cb(array);
+			object->Enumurate(&cb);
+			return array;
+		}
+	}
+	else
+	{
+		// TODO: プリミティブ型での実装
+		RISSE_ASSERT(!"enumuration on primitive types is not implemented yet");
+	}
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 

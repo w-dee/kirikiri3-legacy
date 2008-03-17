@@ -43,6 +43,19 @@ public:
 			Value(value), Attribute(attrib) {;}
 	};
 
+	//! @brief		メンバのenumuration用コールバックインターフェース
+	class tEnumMemberCallback : public tCollectee
+	{
+	public:
+		virtual ~ tEnumMemberCallback() {;} // おそらく呼ばれない
+		//! @brief		コールバック
+		//! @param		key			キー(文字列)
+		//! @param		data		tMemberData 構造体
+		//! @return		真ならばenumuration継続、偽ならば中止
+		virtual bool OnEnum(const tString & name, const tMemberData & data) = 0;
+	};
+
+
 protected:
 	typedef tHashTable<tString, tMemberData>
 		tMemberHashTable; //!< ハッシュ表の型
@@ -66,6 +79,12 @@ public:
 	//!										(内部でこれへの参照が保持されるので、
 	//!										スタック上の文字列を指定しないこと！！！)
 	tObjectBase(const tString & prototype_name, const tString & members_name = tString::GetEmptyString());
+
+public:
+	//! @brief		メンバを列挙する
+	//! @param		callback		コールバックインターフェース
+	//! @note		このオブジェクトのメンバのみを列挙する
+	void Enumurate(tEnumMemberCallback * callback);
 
 public:
 

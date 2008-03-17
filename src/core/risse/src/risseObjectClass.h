@@ -50,6 +50,8 @@ public: // Risse用メソッドなど
 	static void setInstanceMember(
 				const tNativeCallInfo & info,
 				const tString & membername, const tVariant & value);
+	static tVariant getPublicMembers(
+				const tNativeCallInfo & info);
 	static tVariant toException(
 				const tNativeCallInfo & info);
 	static void p(const tMethodArgument & args);

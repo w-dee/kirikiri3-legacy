@@ -44,6 +44,21 @@ tObjectBase::tObjectBase(const tString & prototype_name, const tString & members
 
 
 //---------------------------------------------------------------------------
+void tObjectBase::Enumurate(tEnumMemberCallback * callback)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	tMemberHashTable::tIterator iterator(HashTable);
+	while(!iterator.End())
+	{
+		if(!callback->OnEnum(iterator.GetKey(), iterator.GetValue())) return;
+		++iterator;
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tObjectBase::tRetValue tObjectBase::Read(const tString & name, tOperateFlags flags,
 	tVariant &result, const tVariant &This) const
 {

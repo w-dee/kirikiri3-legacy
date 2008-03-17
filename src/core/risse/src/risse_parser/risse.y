@@ -342,6 +342,7 @@ static tDeclAttribute * OverwriteDeclAttribute(
 					decl_attr
 					decl_attr_variable
 					decl_attr_override
+					decl_attr_access
 					method_attr_list
 					method_attr
 
@@ -1081,7 +1082,7 @@ decl_attr_list
 ;
 
 decl_attr
-	: decl_attr_variable | decl_attr_override
+	: decl_attr_variable | decl_attr_override | decl_attr_access
 ;
 
 /* attribute specifiers */
@@ -1092,6 +1093,13 @@ decl_attr_variable
 
 decl_attr_override
 	: "final"	onl 						{ $$ = new tDeclAttribute(tDeclAttribute::ocFinal); }
+;
+
+decl_attr_access
+	: "public"	onl							{ $$ = new tDeclAttribute(tDeclAttribute::acPublic); }
+	| "internal"	onl						{ $$ = new tDeclAttribute(tDeclAttribute::acInternal); }
+	| "protected"	onl						{ $$ = new tDeclAttribute(tDeclAttribute::acProtected); }
+	| "private"	onl							{ $$ = new tDeclAttribute(tDeclAttribute::acPrivate); }
 ;
 
 method_attr_list

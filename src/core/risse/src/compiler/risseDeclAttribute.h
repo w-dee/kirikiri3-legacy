@@ -99,6 +99,15 @@ public:
 		Sync = scNone;
 	}
 
+	//! @brief		コンストラクタ (accessから)
+	//! @param		access	アクセスコントロール
+	explicit tDeclAttribute(tAccessControl access) :
+		tMemberAttribute(access)
+	{
+		Context = ccNone;
+		Sync = scNone;
+	}
+
 	//! @brief		コンストラクタ (contextから)
 	//! @param		context	コンテキスト規定
 	explicit tDeclAttribute(tContextControl context)
@@ -132,6 +141,11 @@ public:
 	//! @param		v	プロパティアクセス方法
 	//! @return		このオブジェクト自身への参照
 	tMemberAttribute & Set(tPropertyControl v) { tMemberAttribute::Set(v); return *this; }
+
+	//! @brief		アクセスコントロールを設定する
+	//! @param		v	アクセスコントロール
+	//! @return		このオブジェクト自身への参照
+	tMemberAttribute & Set(tAccessControl v) { tMemberAttribute::Set(v); return *this; }
 
 	//! @brief		コンテキスト規定を得る
 	//! @return		コンテキスト規定

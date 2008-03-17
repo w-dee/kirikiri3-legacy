@@ -39,6 +39,11 @@ bool tMemberAttribute::Overwrite(tMemberAttribute rhs)
 		if(Property != pcNone) overwritten = true;
 		Property = rhs.Property;
 	}
+	if(rhs.Access != acNone)
+	{
+		if(Access != acNone) overwritten = true;
+		Access = rhs.Access;
+	}
 
 	return overwritten;
 }
@@ -76,6 +81,18 @@ tString tMemberAttribute::AsString() const
 		{
 			case pcField:		str += RISSE_WS("field");		break;
 			case pcProperty:	str += RISSE_WS("property");	break;
+			default: ;
+		}
+	}
+	if(Access != acNone)
+	{
+		if(!str.IsEmpty()) str += RISSE_WC(' ');
+		switch(Access)
+		{
+			case acPublic:		str += RISSE_WS("public");		break;
+			case acInternal:	str += RISSE_WS("internal");	break;
+			case acProtected:	str += RISSE_WS("protected");	break;
+			case acPrivate:		str += RISSE_WS("private");		break;
 			default: ;
 		}
 	}

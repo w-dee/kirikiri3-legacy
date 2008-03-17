@@ -51,6 +51,16 @@ public:
 		pcProperty, //!< 読み出しと書き込みにおいてゲッタとセッタの呼び出しを伴うメンバ
 	};
 
+	//! @brief	アクセスコントロールを規定する物
+	enum tAccessControl
+	{
+		acNone,
+		acPublic, //!< 公開メンバ
+		acInternal, //!< パッケージ外にexportできないメンバ
+		acProtected, //!< 同じクラスあるいは派生クラスからのみアクセス可能なメンバ
+		acPrivate, //!< 同じクラス内からのみアクセス可能なメンバ
+	};
+
 private:
 	union
 	{
@@ -59,8 +69,9 @@ private:
 			tMutabilityControl	Mutability	: 2;
 			tOverrideControl	Override	: 2;
 			tPropertyControl	Property	: 2;
+			tAccessControl		Access		: 3;
 		};
-		risse_uint8 Value;
+		risse_uint16 Value;
 	};
 
 public:
@@ -70,6 +81,7 @@ public:
 		Mutability = mcNone;
 		Override = ocNone;
 		Property = pcNone;
+		Access = acNone;
 	}
 
 	//! @brief		コンストラクタ (risse_uint32 から)
@@ -91,7 +103,7 @@ public:
 	static tMemberAttribute GetDefault()
 	{
 		tMemberAttribute ret;
-		return ret.Set(mcVar).Set(ocVirtual).Set(pcField);
+		return ret.Set(mcVar).Set(ocVirtual).Set(pcField).Set(acPublic);
 	}
 
 	//! @brief		コンストラクタ (mutabilityから)
@@ -101,6 +113,7 @@ public:
 		Mutability = mutability;
 		Override = ocNone;
 		Property = pcNone;
+		Access = acNone;
 	}
 
 
@@ -111,6 +124,7 @@ public:
 		Mutability = mcNone;
 		Override = override;
 		Property = pcNone;
+		Access = acNone;
 	}
 
 	//! @brief		コンストラクタ (propertyから)
@@ -120,6 +134,17 @@ public:
 		Mutability = mcNone;
 		Override = ocNone;
 		Property = property;
+		Access = acNone;
+	}
+
+	//! @brief		コンストラクタ (accessから)
+	//! @param		access	アクセスコントロール
+	explicit tMemberAttribute(tAccessControl access)
+	{
+		Mutability = mcNone;
+		Override = ocNone;
+		Property = pcNone;
+		Access = access;
 	}
 
 	//! @brief		変更性を得る
@@ -158,6 +183,18 @@ public:
 	//! @return		このオブジェクト自身への参照
 	tMemberAttribute & operator =(tPropertyControl v) { Property = v; return *this; }
 
+	//! @brief		アクセスコントロールを得る
+	//! @return		アクセスコントロール
+	tAccessControl GetAccess() const { return Access; }
+	//! @brief		アクセスコントロールを設定する
+	//! @param		v	アクセスコントロール
+	//! @return		このオブジェクト自身への参照
+	tMemberAttribute & Set(tAccessControl v) { Access = v; return *this; }
+	//! @brief		アクセスコントロールを設定する
+	//! @param		v	アクセスコントロール
+	//! @return		このオブジェクト自身への参照
+	tMemberAttribute & operator =(tAccessControl v) { Access = v; return *this; }
+
 	//! @brief		属性を上書きする
 	//! @param		rhs		上書きする属性
 	//! @return		上書きされた属性があった場合に真
@@ -180,6 +217,10 @@ public:
 	//! @param		v	プロパティアクセス方法
 	bool Has(tPropertyControl v) const { return Property == v; }
 
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	可視性
+	bool Has(tAccessControl v) const { return Access == v; }
+
 
 	//! @brief		なにか属性を持っているかどうかを調べる
 	//! @return		何か属性を持っていれば真
@@ -187,7 +228,8 @@ public:
 		{ return
 			Mutability != mcNone ||
 			Override != ocNone ||
-			Property != pcNone;
+			Property != pcNone ||
+			Access != acNone ;
 		}
 
 

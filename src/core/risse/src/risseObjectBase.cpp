@@ -166,9 +166,10 @@ tObjectBase::tRetValue tObjectBase::Read(const tString & name, tOperateFlags fla
 	// プロパティアクセスの方法を決定する
 	tMemberAttribute attrib = member->Attribute;
 	attrib.Overwrite(flags);
-	RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcConst);
+	RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcNone);
 	RISSE_ASSERT(attrib.GetOverride() != tMemberAttribute::ocNone);
 	RISSE_ASSERT(attrib.GetProperty() != tMemberAttribute::pcNone);
+	RISSE_ASSERT(attrib.GetAccess() != tMemberAttribute::acNone);
 
 	// プロパティアクセスの方法に従って情報を取得する
 	switch(attrib.GetProperty())
@@ -236,6 +237,7 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 		RISSE_ASSERT(attrib.GetMutability() != tMemberAttribute::mcNone);
 		RISSE_ASSERT(attrib.GetOverride() != tMemberAttribute::ocNone);
 		RISSE_ASSERT(attrib.GetProperty() != tMemberAttribute::pcNone);
+		RISSE_ASSERT(attrib.GetAccess() != tMemberAttribute::acNone);
 
 		if(flags.Has(tOperateFlags::ofFinalOnly))
 		{

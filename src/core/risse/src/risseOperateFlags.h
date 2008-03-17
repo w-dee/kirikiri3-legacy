@@ -81,6 +81,10 @@ public:
 	//! @param		v	プロパティアクセス方法
 	bool Has(tMemberAttribute::tPropertyControl v) const { return tMemberAttribute(Flags).Has(v); }
 
+	//! @brief		属性を持っているかどうかを調べる
+	//! @param		v	アクセスコントロール
+	bool Has(tMemberAttribute::tAccessControl v) const { return tMemberAttribute(Flags).Has(v); }
+
 	//! @brief		フラグを持っているかどうかを調べる
 	//! @param		v	フラグ
 	bool Has(risse_uint32 v) const { return Flags & v; }

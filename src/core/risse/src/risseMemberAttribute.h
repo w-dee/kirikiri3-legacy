@@ -78,6 +78,7 @@ public:
 	//! @brief		デフォルトコンストラクタ
 	tMemberAttribute()
 	{
+		Value = 0;
 		Mutability = mcNone;
 		Override = ocNone;
 		Property = pcNone;
@@ -110,6 +111,7 @@ public:
 	//! @param		mutability	変更性
 	explicit tMemberAttribute(tMutabilityControl mutability)
 	{
+		Value = 0;
 		Mutability = mutability;
 		Override = ocNone;
 		Property = pcNone;
@@ -121,6 +123,7 @@ public:
 	//! @param		override	オーバーライド性
 	explicit tMemberAttribute(tOverrideControl override)
 	{
+		Value = 0;
 		Mutability = mcNone;
 		Override = override;
 		Property = pcNone;
@@ -131,6 +134,7 @@ public:
 	//! @param		property	プロパティアクセス方法
 	explicit tMemberAttribute(tPropertyControl property)
 	{
+		Value = 0;
 		Mutability = mcNone;
 		Override = ocNone;
 		Property = property;
@@ -141,6 +145,7 @@ public:
 	//! @param		access	アクセスコントロール
 	explicit tMemberAttribute(tAccessControl access)
 	{
+		Value = 0;
 		Mutability = mcNone;
 		Override = ocNone;
 		Property = pcNone;

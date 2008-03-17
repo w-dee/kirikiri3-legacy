@@ -52,6 +52,7 @@ public: // Risse用メソッドなど
 	tVariant shift();
 	size_t get_length() const;
 	void set_length(size_t new_size);
+	tString join(const tMethodArgument & args);
 };
 //---------------------------------------------------------------------------
 

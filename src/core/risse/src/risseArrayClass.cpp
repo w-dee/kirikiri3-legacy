@@ -209,6 +209,23 @@ void tArrayInstance::set_length(size_t new_size)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tString tArrayInstance::join(const tMethodArgument & args)
+{
+	// 文字列を、指定したデリミタで連結して返す
+	volatile tSynchronizer sync(this); // sync
+
+	tString ret;
+	for(tArray::iterator i = Array.begin(); i != Array.end(); i++)
+	{
+		if(i != Array.begin() && args.HasArgument(0))
+			ret += args[0].operator tString();
+		ret += (*i).operator tString();
+	}
+	return ret;
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -247,6 +264,7 @@ void tArrayClass::RegisterMembers()
 	BindFunction(this, ss_unshift, &tArrayInstance::unshift);
 	BindFunction(this, ss_shift, &tArrayInstance::shift);
 	BindProperty(this, ss_length, &tArrayInstance::get_length, &tArrayInstance::set_length);
+	BindFunction(this, ss_join, &tArrayInstance::join);
 }
 //---------------------------------------------------------------------------
 

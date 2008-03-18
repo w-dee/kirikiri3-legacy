@@ -1023,15 +1023,25 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				/* incomplete */
+				AR(code[2]).Do(engine, ocDDelete, &AR(code[1]), AR(code[3]), 0,
+					tMethodArgument::Empty(), This);
 				code += 4;
+				break;
+
+			case ocDDeleteF		: // ddelf	 delete . with flags
+				RISSE_ASSERT(CI(code[1]) < framesize);
+				RISSE_ASSERT(CI(code[2]) < framesize);
+				RISSE_ASSERT(CI(code[3]) < framesize);
+				AR(code[2]).Do(engine, ocDDelete, &AR(code[1]), AR(code[3]), code[4],
+					tMethodArgument::Empty(), This);
+				code += 5;
 				break;
 
 			case ocIDelete		: // idel	 delete [ ]
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);
-				/* incomplete */
+				AR(code[1]) = AR(code[2]).IDelete(AR(code[3]));
 				code += 4;
 				break;
 

@@ -82,6 +82,20 @@ void tDictionaryInstance::iset(const tVariant & value, const tVariant & key)
 
 
 //---------------------------------------------------------------------------
+tVariant tDictionaryInstance::idelete(const tVariant & key)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	tVariant deleted_value;
+	bool deleted = HashTable.Delete(key, &deleted_value);
+
+	// キーが削除されればその削除された値、そうでなければ default の値を返す
+	return deleted ? deleted_value : GetPropertyDirect(ss_default);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tDictionaryInstance::clear()
 {
 	volatile tSynchronizer sync(this); // sync
@@ -155,6 +169,7 @@ void tDictionaryClass::RegisterMembers()
 	BindFunction(this, ss_initialize, &tDictionaryInstance::initialize);
 	BindFunction(this, mnIGet, &tDictionaryInstance::iget);
 	BindFunction(this, mnISet, &tDictionaryInstance::iset);
+	BindFunction(this, mnIDelete, &tDictionaryInstance::idelete);
 	BindFunction(this, ss_clear, &tDictionaryInstance::clear);
 	BindProperty(this, ss_count, &tDictionaryInstance::get_count);
 	BindFunction(this, ss_eachPair, &tDictionaryInstance::eachPair);

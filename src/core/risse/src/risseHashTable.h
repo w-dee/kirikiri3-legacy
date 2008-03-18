@@ -541,8 +541,9 @@ protected:
 	//! @brief		(内部関数)キーを削除する
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
+	//! @param		value	削除された値を入れる先(NULL可)
 	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
-	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash)
+	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash, ValueT * value = NULL)
 	{
 		// delete key ( hash ) and return true if succeeded
 		if(HashTraitsT::HasHint)
@@ -554,6 +555,7 @@ protected:
 			if(HashTraitsT::Compare(key, *(KeyT*)lv1->Key))
 			{
 				// delete lv1
+				if(value) *value = *(ValueT*)lv1->Value;
 				Destruct(*lv1);
 				Count --;
 				return lv1;
@@ -569,6 +571,7 @@ protected:
 				if(HashTraitsT::Compare(key, *(KeyT*)elm->Key))
 				{
 					Count --;
+					if(value) *value = *(ValueT*)elm->Value;
 					prev->Next = elm->Next; // sever from the chain
 					if(elm->Next) elm->Next->Prev = prev;
 					// ここでは *elm を Destruct したり elm を delete
@@ -800,10 +803,11 @@ protected:
 	//! @brief		(内部関数)キーを削除する(あらかじめハッシュが分かっている場合)
 	//! @param		key		キー
 	//! @param		hash	ハッシュ
+	//! @param		value	削除された値を入れる先(NULL可)
 	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
-	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash)
+	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash, ValueT * value = NULL)
 	{
-		tElement * deleted = inherited::InternalDeleteWithHash(key, hash);
+		tElement * deleted = inherited::InternalDeleteWithHash(key, hash, value);
 
 		if(deleted)
 		{
@@ -1019,11 +1023,12 @@ public:
 
 	//! @brief		キーを削除する
 	//! @param		key		キー
+	//! @param		value	削除された値を入れる先(NULL可)
 	//! @return		キーが見つかり、削除されれば真、削除されなければ偽
-	bool Delete(const KeyT &key)
+	bool Delete(const KeyT &key, ValueT * value = NULL)
 	{
 		// delete key and return true if successed
-		return InternalDeleteWithHash(key, HashTraitsT::Make(key));
+		return InternalDeleteWithHash(key, HashTraitsT::Make(key), value);
 	}
 
 

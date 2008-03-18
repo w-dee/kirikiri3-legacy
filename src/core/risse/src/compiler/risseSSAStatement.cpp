@@ -1164,6 +1164,7 @@ void tSSAStatement::AnalyzeConstantPropagation(
 	case ocDGetF:
 	case ocIGet:
 	case ocDDelete:
+	case ocDDeleteF:
 	case ocIDelete:
 	case ocDSetAttrib:
 	case ocDSet:
@@ -1576,7 +1577,7 @@ void tSSAStatement::GenerateCode(tCodeGenerator * gen) const
 	case ocIDelete:
 		RISSE_ASSERT(Declared != NULL);
 		RISSE_ASSERT(Used.size() == 2);
-		gen->PutOperator(Code, Declared, Used[0], Used[1]);
+		gen->PutDelete(Code, Declared, Used[0], Used[1], OperateFlagsValue);
 		break;
 
 	case ocDSet:
@@ -2044,8 +2045,8 @@ tString tSSAStatement::Dump() const
 		ret += Value->AsHumanReadable();
 	}
 
-	// DSet あるいは DGet についてフラグがあればそれを追加
-	if(Code == ocDGet || Code == ocDSet)
+	// DSet DGet DDelete についてフラグがあればそれを追加
+	if(Code == ocDGet || Code == ocDSet || Code == ocDDelete)
 	{
 		ret +=
 			RISSE_WS(" Flags=(") +

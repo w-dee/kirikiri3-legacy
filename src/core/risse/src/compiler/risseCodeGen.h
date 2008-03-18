@@ -407,12 +407,21 @@ public:
 
 	//! @brief		DGetとIGetのコードを置く
 	//! @param		op		オペレーションコード
-	//! @param		dest	結果を格納する変
+	//! @param		dest	結果を格納する変数
 	//! @param		obj		オブジェクトを表す変数
 	//! @param		name	メンバ名を表す変数
 	//! @param		flags	アクセスフラグ
-	void PutGet(tOpCode op, const tSSAVariable * obj,
-		const tSSAVariable * name, const tSSAVariable * value, risse_uint32 flags);
+	void PutGet(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * obj, const tSSAVariable * name, risse_uint32 flags);
+
+	//! @brief		DDeleteとIDeleteのコードを置く
+	//! @param		op		オペレーションコード
+	//! @param		dest	結果を格納する変数
+	//! @param		obj		オブジェクトを表す変数
+	//! @param		name	メンバ名を表す変数
+	//! @param		flags	アクセスフラグ
+	void PutDelete(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * obj, const tSSAVariable * name, risse_uint32 flags);
 
 	//! @brief		DSetとISetのコードを置く
 	//! @param		op		オペレーションコード

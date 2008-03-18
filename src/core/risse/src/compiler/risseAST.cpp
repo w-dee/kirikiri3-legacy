@@ -1344,6 +1344,36 @@ bool tASTNode_MemberSel::DoWriteSSA(
 
 
 //---------------------------------------------------------------------------
+tSSAVariable * tASTNode_MemberSel::DoDeleteSSA(tSSAForm *form) const
+{
+	// メンバ選択演算子
+	tPrepareSSA * pws = static_cast<tPrepareSSA *>(PrepareSSA(form, pmRead));
+
+	// 文の作成
+	tSSAVariable * ret_var = NULL;
+	tOpCode code = ocNoOperation;
+	tOperateFlags new_flags = Flags;
+	switch(AccessType)
+	{
+	case matDirect:		code = ocDDelete;		break;
+	case matDirectThis:	code = ocDDelete;
+			new_flags = new_flags | tOperateFlags::ofUseClassMembersRule;	break;
+	case matIndirect:	code = ocIDelete;		break;
+	}
+	RISSE_ASSERT(code != ocNoOperation);
+
+	tSSAStatement * stmt =
+		form->AddStatement(GetPosition(), code, &ret_var,
+							pws->ObjectVar, pws->MemberNameVar);
+	stmt->SetAccessFlags(new_flags);
+
+	// 戻りの変数を返す
+	return ret_var;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void * tASTNode_Id::PrepareSSA(
 			tSSAForm *form, tPrepareMode mode) const
 {
@@ -1431,6 +1461,37 @@ bool tASTNode_Id::DoWriteSSA(
 		RISSE_ASSERT(result == true);
 		return result;
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tSSAVariable * tASTNode_Id::DoDeleteSSA(tSSAForm *form) const
+{
+	if(IsPrivate)
+	{
+		// TODO: これの実装
+		RISSE_ASSERT(!"deletion of private variable is not implemented");
+	}
+	else
+	{
+		// 普通の変数の場合
+		bool need_access_this_proxy; // this-proxy 上のメンバにアクセスする必要があるかどうか
+		need_access_this_proxy = !form->GetLocalNamespace()->IsAvailable(Name);
+
+		if(need_access_this_proxy)
+		{
+			// this-proxy 上のメンバにアクセスする必要がある
+			return CreateAccessNodeOnThisProxy()->DoDeleteSSA(form);
+		}
+		else
+		{
+			// ローカル変数に見つかった
+			// TODO: これの実装
+			RISSE_ASSERT(!"deletion of local variable is not implemented");
+		}
+	}
+	return NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -1601,7 +1662,23 @@ tSSAVariable * tASTNode_Unary::DoReadSSA(
 		}
 
 	case autDelete:		// "delete"
-		;
+		// 子ノードのタイプは？それに従って分岐
+		switch(Child->GetType())
+		{
+		case antMemberSel:
+			return static_cast<tASTNode_MemberSel *>(Child)->DoDeleteSSA(form);
+
+		case antId:
+			return static_cast<tASTNode_Id *>(Child)->DoDeleteSSA(form);
+
+		default:
+			tCompileExceptionClass::Throw(
+				form->GetFunction()->GetFunctionGroup()->
+					GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
+				tString(
+				RISSE_WS_TR("deletable expression expected as a delete operand")),
+					form->GetScriptBlockInstance(), GetPosition());
+		}
 	}
 	// ありえない
 	RISSE_ASSERT(!"at last at tASTNode_Unary::DoReadSSA");

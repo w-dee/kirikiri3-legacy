@@ -800,6 +800,28 @@ void tCodeGenerator::PutGet(tOpCode op, const tSSAVariable * dest,
 
 
 //---------------------------------------------------------------------------
+void tCodeGenerator::PutDelete(tOpCode op, const tSSAVariable * dest,
+		const tSSAVariable * obj, const tSSAVariable * name, risse_uint32 flags)
+{
+	// 一応 code を assert (完全ではない)
+	RISSE_ASSERT(VMInsnInfo[op].Flags[0] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[1] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[2] == tVMInsnInfo::vifRegister);
+	RISSE_ASSERT(VMInsnInfo[op].Flags[3] == tVMInsnInfo::vifVoid);
+
+	RISSE_ASSERT(!(op == ocIGet && flags != 0)); // フラグをもてるのはocDDeleteのみ
+
+	if(op == ocDDelete && flags != 0) op = ocDDeleteF; // フラグがある場合は ocDDeleteFを置く
+	PutCode(op);
+	PutWord(GetRegNum(dest));
+	PutWord(GetRegNum(obj));
+	PutWord(GetRegNum(name));
+	if(op == ocDDeleteF) PutWord(flags); // フラグを置く
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tCodeGenerator::PutSet(tOpCode op, const tSSAVariable * obj,
 		const tSSAVariable * name, const tSSAVariable * value, risse_uint32 flags)
 {

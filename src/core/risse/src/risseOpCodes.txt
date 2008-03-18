@@ -122,6 +122,7 @@ DGet					dget		R,R,R,-,-,-		----		E	#!< get .
 DGetF					dgetf		R,R,R,O,-,-		----		E	#!< get . with flags (下記参照)
 IGet					iget		R,R,R,-,-,-		[]			E	#!< get [ ]
 DDelete					ddel		R,R,R,-,-,-		----		E	#!< delete .
+DDeleteF				ddelf		R,R,R,O,-,-		----		E	#!< delete . with flags (下記参照)
 IDelete					idel		R,R,R,-,-,-		delete[]	E	#!< delete [ ]
 
 DSetAttrib				dseta		R,R,O,-,-,-		----		E	#!< set member attribute
@@ -132,9 +133,9 @@ DSetF					dsetf		R,R,R,O,-,-		----		E	#!< set . with flags (下記参照)
 ISet					iset		R,R,R,-,-,-		[]=			E	#!< set [ ]
 
 
-// コードジェネレータはフラグが指定されていると DGet あるいは DSet から必要に応じて
-// DGetF あるいは DSetF に変換する
-// DGet のデフォルトのフラグは 0 (何も指定なし)だが、DSet のデフォルトのフラグは
+// コードジェネレータはフラグが指定されていると DGet, DSet DDelete から必要に応じて
+// DGetF, DSetF, DDeleteFに変換する
+// DGet/DDelete のデフォルトのフラグは 0 (何も指定なし)だが、DSet のデフォルトのフラグは
 // ofMemberEnsure (メンバがなければ作成する) なので注意
 
 // tObjectInterfaceにおいて、

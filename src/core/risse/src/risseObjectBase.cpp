@@ -626,6 +626,7 @@ tObjectBase::tRetValue tObjectBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 	case ocDDelete:
 		// delete member
 		// TODO: このオブジェクトそのもに対する操作への対応
+		if(result) *result = tVariant(true); // 戻り値は true 固定
 		return Delete(name, flags);
 
 	case ocFuncCall:

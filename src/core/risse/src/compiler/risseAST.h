@@ -1166,6 +1166,12 @@ public:
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	bool DoWriteSSA(tSSAForm *form, void * param,
 			tSSAVariable * value) const;
+
+	//! @brief		SSA 形式の削除用表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @return		削除結果を表す SSA 形式における変数
+	tSSAVariable * DoDeleteSSA(tSSAForm *form) const;
+
 };
 //---------------------------------------------------------------------------
 
@@ -1249,6 +1255,11 @@ public:
 	bool DoWriteSSA(tSSAForm *form, void * param,
 			tSSAVariable * value) const;
 
+	//! @brief		SSA 形式の削除用表現を生成する
+	//! @param		form	SSA 形式インスタンス
+	//! @return		削除結果を表す SSA 形式における変数
+	tSSAVariable * DoDeleteSSA(tSSAForm *form) const;
+
 	//! @brief		この識別子がローカル名前空間に存在するかどうかを返す
 	//! @param		form	SSA 形式インスタンス
 	//! @return		この識別子がローカル名前空間に存在するかどうか
@@ -1263,6 +1274,7 @@ public:
 	//! @brief		この識別子を this-proxy 内にアクセスする AST ノードを作成して返す
 	//! @return		この識別子を this-proxy 内にアクセスする AST ノード
 	const tASTNode_MemberSel * CreateAccessNodeOnThisProxy() const;
+
 };
 //---------------------------------------------------------------------------
 

@@ -646,8 +646,8 @@ public: // operate
 //		case ocDDelete			://!< delete .
 //			RISSE_BIN_OP(DDelete);
 
-//		case ocIDelete			://!< delete [ ]
-//			RISSE_BIN_OP(IDelete);
+		case ocIDelete			://!< delete [ ]
+			RISSE_BIN_OP(IDelete);
 
 //		case ocDSet				://!< set .
 //			RISSE_BIN_OP(DSet);
@@ -825,6 +825,36 @@ public: // 演算子
 	tVariantBlock IGet_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
+
+	//-----------------------------------------------------------------------
+	//! @brief		間接削除		IDelete idel
+	//! @param		key		キー
+	//! @return		削除されたキーの値(削除できなかった場合は普通void)
+	//-----------------------------------------------------------------------
+	tVariantBlock IDelete(const tVariantBlock & key) const
+	{
+		switch(GetType())
+		{
+		case vtVoid:	return IDelete_Void     (key);
+		case vtInteger:	return IDelete_Integer  (key);
+		case vtReal:	return IDelete_Real     (key);
+		case vtNull:	return IDelete_Null     (key);
+		case vtString:	return IDelete_String   (key);
+		case vtOctet:	return IDelete_Octet    (key);
+		case vtBoolean:	return IDelete_Boolean  (key);
+		case vtObject:	return IDelete_Object   (key);
+		}
+		return tVariant();
+	}
+
+	tVariantBlock IDelete_Void    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIDelete, key); }
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ設定		ISet iset

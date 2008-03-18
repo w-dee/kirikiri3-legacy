@@ -34,6 +34,7 @@ class tBindingInfo;
 class tScriptBlockInstance : public tObjectBase
 {
 private:
+	tVariant Global; //!< パッケージグローバル
 	tString Script; //!< スクリプトの内容
 	tString Name; //!< スクリプトブロックの名称(たいていはファイル名)
 	risse_size LineOffset; //!< スクリプトの行オフセット (ドキュメント埋め込みスクリプト用)
@@ -67,6 +68,10 @@ protected:
 	{ if(!LinesToPosition) CreateLinesToPositionArary(); }
 
 public:
+	//! @brief		パッケージグローバルを返す
+	//! @return		パッケージグローバル
+	const tVariant & GetGlobal() const { return Global; }
+
 	//! @brief		スクリプトエンジンを返す
 	//! @return		スクリプトエンジン
 	tScriptEngine * GetScriptEngine() const { return GetRTTI()->GetScriptEngine(); }
@@ -168,6 +173,7 @@ protected:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(
+		const tVariant & global,
 		const tString &script, const tString & name, risse_size lineofs,
 		const tNativeCallInfo &info);
 	tString mnString() { return GetScript(); }

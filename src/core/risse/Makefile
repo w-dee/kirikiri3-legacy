@@ -92,6 +92,7 @@ CPPFILES =  \
 			src/risseOpCodes.cpp                     \
 			src/risseOperateFlags.cpp                \
 			src/risseOperateRetValue.cpp             \
+			src/rissePackage.cpp                     \
 			src/rissePrimitiveClass.cpp              \
 			src/rissePropertyClass.cpp               \
 			src/risseRealClass.cpp                   \

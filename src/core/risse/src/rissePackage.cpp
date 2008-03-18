@@ -32,7 +32,19 @@ tPackageManager::tPackageManager(tScriptEngine * script_engine)
 	CS = new tCriticalSection();
 
 	// "risse" パッケージを作成する
-	AddPackageGlobal(tSS<'r','i','s','s','e'>(), RissePackage);
+	AddPackageGlobal(tSS<'r','i','s','s','e'>(), RissePackageGlobal);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tPackageManager::GetPackageGlobal(const tString & name)
+{
+	tCriticalSection::tLocker lock(*CS); // sync
+
+	tVariant ret;
+	AddPackageGlobal(name, ret);
+	return ret;
 }
 //---------------------------------------------------------------------------
 
@@ -44,8 +56,16 @@ bool tPackageManager::AddPackageGlobal(const tString & name, tVariant & global)
 	if(i == Map.end())
 	{
 		// 見つからなかったのでパッケージグローバルを作成する
-		tVariant global = tVariant(ScriptEngine->ObjectClass).New();
-		Map.insert(tMap::value_type(name, global));
+		tVariant new_global = tVariant(ScriptEngine->ObjectClass).New();
+		Map.insert(tMap::value_type(name, new_global));
+
+		// 新しい global には "risse" パッケージの中身をすべて import する
+		// "risse" パッケージを作るときだけはさすがにこれはできない。
+		// 初回は RissePackageGlobal は void のはず………
+		if(!RissePackageGlobal.IsVoid())
+			ImportIds(RissePackageGlobal, new_global, NULL);
+
+		global = new_global;
 		return false;
 	}
 	global = i->second;

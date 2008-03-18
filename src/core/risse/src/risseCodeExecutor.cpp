@@ -173,7 +173,9 @@ void tCodeInterpreter::Execute(
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				AR(code[1]) = tVariant(
 					new((tThisProxy*)(&ThisProxy.Storage[0])) tThisProxy(
-						const_cast<tVariant&>(This), engine->GetGlobalObject(), engine));
+						const_cast<tVariant&>(This),
+						const_cast<tVariant&>(CodeBlock->GetScriptBlockInstance()->GetGlobal()),
+						engine));
 				code += 2;
 				break;
 
@@ -185,7 +187,7 @@ void tCodeInterpreter::Execute(
 
 			case ocAssignGlobal	: // global	 = globalの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) = engine->GetGlobalObject();
+				AR(code[1]) = CodeBlock->GetScriptBlockInstance()->GetGlobal();
 				code += 2;
 				break;
 

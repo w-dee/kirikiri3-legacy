@@ -56,6 +56,7 @@ void tRisseScriptBlockInstance::construct()
 
 //---------------------------------------------------------------------------
 void tRisseScriptBlockInstance::initialize(
+	const tVariant & global,
 	const tString &script, const tString & name, risse_size lineofs,
 	const tNativeCallInfo &info)
 {

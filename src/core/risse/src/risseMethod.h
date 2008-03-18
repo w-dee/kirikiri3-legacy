@@ -227,6 +227,26 @@ public:
 		return arg;
 	}
 
+	//! @brief		普通の引数=4のtMethodArgumentOfオブジェクトを返す
+	//! @param		a0		パラメータ0
+	//! @param		a1		パラメータ1
+	//! @param		a2		パラメータ2
+	//! @param		a3		パラメータ3
+	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	//!				パラメータの実体が消えないように保証すること
+	static const tMethodArgumentOf<4> New(const tVariant &a0,
+								const tVariant &a1,
+								const tVariant &a2,
+								const tVariant &a3)
+	{
+		tMethodArgumentOf<4> arg;
+		arg.SetArgument(0, &a0);
+		arg.SetArgument(1, &a1);
+		arg.SetArgument(2, &a2);
+		arg.SetArgument(3, &a3);
+		return arg;
+	}
+
 public:
 	//! @brief		普通の引数の個数を得る
 	//! @return		普通の引数の個数

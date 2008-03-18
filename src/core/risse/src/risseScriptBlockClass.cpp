@@ -324,6 +324,7 @@ void tScriptBlockInstance::construct()
 
 //---------------------------------------------------------------------------
 void tScriptBlockInstance::initialize(
+	const tVariant & global,
 	const tString &script, const tString & name, risse_size lineofs,
 	const tNativeCallInfo &info)
 {
@@ -333,6 +334,7 @@ void tScriptBlockInstance::initialize(
 	info.InitializeSuperClass();
 
 	// 引数を元に設定を行う
+	Global = global;
 	SetScriptAndName(script, name, lineofs);
 }
 //---------------------------------------------------------------------------

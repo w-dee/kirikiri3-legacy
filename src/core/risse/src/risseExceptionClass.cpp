@@ -104,14 +104,16 @@ tTemporaryException::tTemporaryException(const tString classname,
 tVariant * tTemporaryException::Convert(tScriptEngine * engine) const
 {
 	// まず、例外クラスを取得する
+
+	// TODO: パッケージ対応
 	tVariant cls;
 	tObjectInterface::tRetValue ret =
-		engine->GetGlobalObject().Operate(engine, ocDGet, &cls, ExceptionClassName);
+		const_cast<tVariant&>(engine->GetRissePackageGlobal()).Operate(engine, ocDGet, &cls, ExceptionClassName);
 	if(ret != tObjectInterface::rvNoError)
 	{
 		// ExceptionClassNameを取得できなかった。
 		// この場合は ss_RuntimeException を取得する
-		cls = engine->GetGlobalObject().GetPropertyDirect_Object(ss_RuntimeException);
+		cls = engine->GetRissePackageGlobal().GetPropertyDirect_Object(ss_RuntimeException);
 	}
 
 	// 引数を用意する

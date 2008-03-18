@@ -23,6 +23,7 @@
 namespace Risse
 {
 class tBindingInfo;
+class tPackageManager;
 //---------------------------------------------------------------------------
 //! @brief		警告情報等の通知インターフェース
 //---------------------------------------------------------------------------
@@ -67,7 +68,8 @@ private:
 	static bool CommonObjectsInitialized;
 
 protected:
-	tVariant GlobalObject; //!< グローバルオブジェクト
+	tPackageManager * PackageManager; //!< パッケージマネージャオブジェクト
+	tVariant RissePackageGlobal; //!< "risse" パッケージのグローバルオブジェクト
 	tLineOutputInterface *WarningOutput; //!< 警告情報の出力先
 
 public:
@@ -96,8 +98,8 @@ public:
 	//! @brief		コンストラクタ
 	tScriptEngine();
 
-	//! @brief		グローバルオブジェクトを得る
-	tVariant & GetGlobalObject() { return GlobalObject; }
+	//! @brief		"risse" パッケージのグローバルオブジェクトを得る
+	const tVariant & GetRissePackageGlobal() const { return RissePackageGlobal; }
 
 	//! @brief		スクリプトを評価する
 	//! @param		script			スクリプトの内容

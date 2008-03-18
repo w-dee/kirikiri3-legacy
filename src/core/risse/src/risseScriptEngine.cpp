@@ -15,6 +15,7 @@
 #include "risseScriptEngine.h"
 #include "risseCoroutine.h"
 #include "risseStaticStrings.h"
+#include "rissePackage.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
 #include "risseStreamClass.h" // for StreamConsts
@@ -69,11 +70,14 @@ tScriptEngine::tScriptEngine()
 	ModuleClass->SetClassClassRTTI(this);
 	ClassClass->SetClassClassRTTI(this);
 
-	// グローバルオブジェクトを "Object" クラスから作成する
-	GlobalObject = tVariant(ObjectClass).New();
+	// パッケージマネージャを作成する
+	PackageManager = new tPackageManager(this);
+
+	// "risse" パッケージのグローバルオブジェクトを取得する
+	RissePackageGlobal = PackageManager->GetRissePackageGlobal();
 
 	// 各クラスをグローバルオブジェクトに登録する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterInstance(GlobalObject);
+	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterInstance(RissePackageGlobal);
 	#include "risseInternalClasses.inc"
 	#undef RISSE_INTERNALCLASSES_CLASS
 
@@ -94,7 +98,7 @@ tScriptEngine::tScriptEngine()
 	// いくつかのモジュールの作成と include
 	tModuleBase * module;
 	module = new tStreamConstsModule(this);
-	module->RegisterInstance(GlobalObject);
+	module->RegisterInstance(RissePackageGlobal);
 	StreamClass->Do(ocFuncCall, NULL, ss_include, 0, tMethodArgument::New(tVariant(module->GetInstance())));
 
 }
@@ -102,7 +106,8 @@ tScriptEngine::tScriptEngine()
 
 
 //---------------------------------------------------------------------------
-void tScriptEngine::Evaluate(const tString & script, const tString & name,
+void tScriptEngine::Evaluate(
+					const tString & script, const tString & name,
 					risse_size lineofs,
 					tVariant * result, const tBindingInfo * binding,
 					bool is_expression)
@@ -110,18 +115,22 @@ void tScriptEngine::Evaluate(const tString & script, const tString & name,
 	try
 	{
 		// 暫定実装
+
+		// "main" パッケージを取得する
+		tVariant package_global = PackageManager->GetPackageGlobal(RISSE_WS("main"));
+
 		// スクリプトブロックを作成(コンパイル)
 		tRisseScriptBlockInstance * block;
 
 		tVariant sb =
 			tVariant(RisseScriptBlockClass).
-				New(0, tMethodArgument::New(script, name, (risse_int64)lineofs));
+				New(0, tMethodArgument::New(package_global, script, name, (risse_int64)lineofs));
 
 		block =
 			sb.ExpectAndGetObjectInterafce<tRisseScriptBlockInstance>(RisseScriptBlockClass);
 
 		// スクリプトを実行
-		block->Evaluate(binding == NULL ? (tBindingInfo(GlobalObject)) : *binding,
+		block->Evaluate(binding == NULL ? (tBindingInfo(package_global)) : *binding,
 								result, is_expression);
 	}
 	catch(const tTemporaryException * te)

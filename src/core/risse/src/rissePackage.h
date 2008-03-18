@@ -31,7 +31,7 @@ class tPackageManager : public tCollectee
 
 	typedef gc_map<tString, tVariant> tMap; //!< パッケージ完全装飾名 -> パッケージグローバルへのマップのtypedef
 	tMap Map; //!< パッケージ完全装飾名 -> パッケージグローバルへのマップ
-	tVariant RissePackage; //!< "risse" パッケージ
+	tVariant RissePackageGlobal; //!< "risse" パッケージグローバル
 
 	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
 
@@ -42,7 +42,12 @@ public:
 
 	//! @brief		"risse" パッケージを得る
 	//! @return		"risse" パッケージ
-	const tVariant & GetRissePackage() const { return RissePackage; }
+	const tVariant & GetRissePackageGlobal() const { return RissePackageGlobal; }
+
+	//! @brief		パッケージグローバルを取得する
+	//! @param		name		パッケージの完全装飾名
+	//! @return		そのパッケージのグローバルオブジェクト
+	tVariant GetPackageGlobal(const tString & name);
 
 private:
 	//! @brief		パッケージグローバルを作成する

@@ -364,6 +364,19 @@ void tVariantBlock::DeletePropertyDirect_Object   (const tString & name, risse_u
 
 
 //---------------------------------------------------------------------------
+void tVariantBlock::SetAttributeDirect_Object  (const tVariantBlock & key, risse_uint32 attrib) const
+{
+	RISSE_ASSERT(GetType() == vtObject);
+	tObjectInterface * intf = GetObjectInterface();
+	intf->Do(ocDSetAttrib, NULL, key,
+		attrib, tMethodArgument::Empty(),
+		*this // 動作コンテキストは無視されるが一応 this を指定しておく
+		);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tVariantBlock::FuncCall(tScriptEngine * engine, tVariantBlock * ret, risse_uint32 flags,
 	const tMethodArgument & args,
 	const tVariant & This) const

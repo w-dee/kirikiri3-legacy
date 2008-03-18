@@ -129,7 +129,7 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 					data.Value);
 
 				// そのメンバの属性を設定
-				To.GetObjectInterface()->Do(ocDSetAttrib, NULL,
+				To.SetAttributeDirect_Object(
 					as.operator tString(), data.Attribute);
 			}
 

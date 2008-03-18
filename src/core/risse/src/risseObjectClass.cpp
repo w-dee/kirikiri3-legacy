@@ -345,6 +345,10 @@ void tObjectClass::Bless(tObjectInterface * intf)
 		tOperateFlags(tMemberAttribute::GetDefault()) |
 		tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
 		tMethodArgument::New(tVariant((tObjectInterface *)this)) );
+	intf->Do(ocDSetAttrib, NULL, ss_class,
+		(risse_uint32)tMemberAttribute(tMemberAttribute::acInternal) |
+			(risse_uint32)tOperateFlags(tOperateFlags::ofInstanceMemberOnly),
+		tMethodArgument::New(tVariant((tObjectInterface *)this)) );
 }
 //---------------------------------------------------------------------------
 

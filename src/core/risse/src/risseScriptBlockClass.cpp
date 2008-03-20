@@ -40,7 +40,8 @@ tScriptBlockInstance::tScriptBlockInstance()
 
 
 //---------------------------------------------------------------------------
-void tScriptBlockInstance::SetScriptAndName(const tString & script, const tString & name, int lineofs)
+void tScriptBlockInstance::SetScriptAndName(
+	const tString & script, const tString & name, int lineofs)
 {
 	Script = script;
 	Name = name;
@@ -193,6 +194,9 @@ void tScriptBlockInstance::Compile(tASTNode * root, const tBindingInfo & binding
 {
 	volatile tSynchronizer sync(this); // sync
 
+	// パッケージグローバルを binding から取得し、設定する
+	Global = binding.GetGlobal();
+
 	// コンパイラオブジェクトを作成してコンパイルを行う
 	tCompiler * compiler = new tCompiler(this);
 	compiler->Compile(root, binding, need_result, is_expression);
@@ -305,6 +309,7 @@ void tScriptBlockInstance::Evaluate(const tBindingInfo & binding, tVariant * res
 	RISSE_ASSERT(RootCodeBlock != NULL);
 	executor->Execute(
 				tMethodArgument::Empty(),
+				binding.GetGlobal(),
 				binding.GetThis(),
 				NULL,
 				binding.GetFrames(),
@@ -324,7 +329,6 @@ void tScriptBlockInstance::construct()
 
 //---------------------------------------------------------------------------
 void tScriptBlockInstance::initialize(
-	const tVariant & global,
 	const tString &script, const tString & name, risse_size lineofs,
 	const tNativeCallInfo &info)
 {
@@ -334,7 +338,6 @@ void tScriptBlockInstance::initialize(
 	info.InitializeSuperClass();
 
 	// 引数を元に設定を行う
-	Global = global;
 	SetScriptAndName(script, name, lineofs);
 }
 //---------------------------------------------------------------------------

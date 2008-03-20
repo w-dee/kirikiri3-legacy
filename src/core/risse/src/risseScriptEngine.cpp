@@ -116,21 +116,25 @@ void tScriptEngine::Evaluate(
 	{
 		// 暫定実装
 
-		// "main" パッケージを取得する
-		tVariant package_global = PackageManager->GetPackageGlobal(RISSE_WS("main"));
+		// パッケージグローバルを得る
+		tVariant package_global;
+		if(binding == NULL)
+			package_global = PackageManager->GetPackageGlobal(RISSE_WS("main"));
+		else
+			package_global = binding->GetGlobal();
 
 		// スクリプトブロックを作成(コンパイル)
 		tRisseScriptBlockInstance * block;
 
 		tVariant sb =
 			tVariant(RisseScriptBlockClass).
-				New(0, tMethodArgument::New(package_global, script, name, (risse_int64)lineofs));
+				New(0, tMethodArgument::New(script, name, (risse_int64)lineofs));
 
 		block =
 			sb.ExpectAndGetObjectInterafce<tRisseScriptBlockInstance>(RisseScriptBlockClass);
 
 		// スクリプトを実行
-		block->Evaluate(binding == NULL ? (tBindingInfo(package_global)) : *binding,
+		block->Evaluate(binding == NULL ? (tBindingInfo(package_global, package_global)) : *binding,
 								result, is_expression);
 	}
 	catch(const tTemporaryException * te)

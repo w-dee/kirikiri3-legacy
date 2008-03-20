@@ -50,6 +50,7 @@ tCodeInterpreter::tCodeInterpreter(tCodeBlock *cb) :
 //---------------------------------------------------------------------------
 void tCodeInterpreter::Execute(
 		const tMethodArgument & args,
+		const tVariant & global,
 		const tVariant & This,
 		tVariant * frame, tSharedVariableFrames * shared,
 		tVariant * result)
@@ -158,7 +159,7 @@ void tCodeInterpreter::Execute(
 									New(0, tMethodArgument::Empty());
 					tBindingInstance * obj =
 						AR(code[1]).ExpectAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
-					obj->SetInfo(new tBindingInfo(This, new tSharedVariableFrames(shared_overlay)));
+					obj->SetInfo(new tBindingInfo(global, This, new tSharedVariableFrames(shared_overlay)));
 					code += 2;
 					break;
 				}
@@ -174,7 +175,7 @@ void tCodeInterpreter::Execute(
 				AR(code[1]) = tVariant(
 					new((tThisProxy*)(&ThisProxy.Storage[0])) tThisProxy(
 						const_cast<tVariant&>(This),
-						const_cast<tVariant&>(CodeBlock->GetScriptBlockInstance()->GetGlobal()),
+						const_cast<tVariant&>(global),
 						engine));
 				code += 2;
 				break;
@@ -187,7 +188,7 @@ void tCodeInterpreter::Execute(
 
 			case ocAssignGlobal	: // global	 = globalの代入
 				RISSE_ASSERT(CI(code[1]) < framesize);
-				AR(code[1]) = CodeBlock->GetScriptBlockInstance()->GetGlobal();
+				AR(code[1]) = global;
 				code += 2;
 				break;
 

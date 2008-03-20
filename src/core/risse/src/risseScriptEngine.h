@@ -25,6 +25,36 @@ namespace Risse
 class tBindingInfo;
 class tPackageManager;
 //---------------------------------------------------------------------------
+//! @brief		パッケージ検索のためのインターフェース
+//---------------------------------------------------------------------------
+class tPackageFileSystemInterface : public tCollectee
+{
+public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tPackageFileSystemInterface() {}
+
+	//! @brief		指定ディレクトリにあるファイル名をすべて列挙する
+	//! @param		dir		ディレクトリ(区切りには '/' が用いられる)
+	//! @param		files	そこにあるファイル/ディレクトリ名一覧
+	//! @note		. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
+	//!				ディレクトリの場合はfilesの最後を '/' で終わらせること。
+	//!				files は呼び出し側で最初に clear() しておくこと。
+	virtual void List(const tString & dir, gc_vector<tString> & files) = 0;
+
+	//! @brief		ファイル種別を得る
+	//! @param		file	ファイル名
+	//! @return		種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	virtual int GetType(const tString & file) = 0;
+
+	//! @brief		ファイルを読み込む
+	//! @param		file	ファイル名
+	//! @return		読み込まれたファイルの中身
+	virtual tString ReadFile(const tString & file) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 //! @brief		警告情報等の通知インターフェース
 //---------------------------------------------------------------------------
 class tLineOutputInterface : public tCollectee
@@ -71,6 +101,7 @@ protected:
 	tPackageManager * PackageManager; //!< パッケージマネージャオブジェクト
 	tVariant RissePackageGlobal; //!< "risse" パッケージのグローバルオブジェクト
 	tLineOutputInterface *WarningOutput; //!< 警告情報の出力先
+	tPackageFileSystemInterface * PackageFileSystem; //!< パッケージ読み込み用のファイルシステムインターフェース
 
 public:
 	//! @brief		スクリプトエンジンの動作オプション用構造体
@@ -107,10 +138,11 @@ public:
 	//! @param		lineofs			行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!								スクリプトのオフセットを記録できる)
 	//! @param		result			実行の結果(NULL可)
-	//! @param		binding			バインディング情報(NULLの場合はグローバルバインディング)
+	//! @param		binding			バインディング情報(NULLの場合は"main"パッケージグローバル)
 	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
 	//!								する必要がない言語ではfalseでよい)
-	void Evaluate(const tString & script, const tString & name,
+	void Evaluate(
+					const tString & script, const tString & name,
 					risse_size lineofs = 0,
 					tVariant * result = NULL,
 					const tBindingInfo * binding = NULL, bool is_expression = false);
@@ -123,6 +155,14 @@ public:
 	//! @brief		警告情報の出力先を取得する
 	//! @return		警告情報の出力先
 	tLineOutputInterface * GetWarningOutput() const  { return WarningOutput; }
+
+	//! @brief		パッケージ読み込み用のファイルシステムインターフェースを設定する
+	//! @param		intf	パッケージ読み込み用のファイルシステムインターフェース
+	void SetPackageFileSystem(tPackageFileSystemInterface * intf) { PackageFileSystem = intf; }
+
+	//! @brief		パッケージ読み込み用のファイルシステムインターフェースを取得する
+	//! @return		パッケージ読み込み用のファイルシステムインターフェース
+	tPackageFileSystemInterface * GetPackageFileSystem() const { return PackageFileSystem; }
 
 	//! @brief		警告情報を出力する
 	//! @param		info	警告情報

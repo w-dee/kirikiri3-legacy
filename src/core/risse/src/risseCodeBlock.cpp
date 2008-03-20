@@ -293,7 +293,7 @@ tObjectInterface::tRetValue tCodeBlock::Operate(RISSE_OBJECTINTERFACE_OPERATE_IM
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		Executor->Execute(args, This, NULL, NULL, result);
+		Executor->Execute(args, ScriptBlockInstance->GetGlobal(), This, NULL, NULL, result);
 	}
 	return rvNoError;
 }
@@ -332,7 +332,7 @@ tCodeBlockStackAdapter::tRetValue
 	// 仮実装
 	if(code == ocFuncCall && name.IsEmpty())
 	{
-		CodeBlock->GetExecutor()->Execute(args, This, Frame, &Shared, result);
+		CodeBlock->GetExecutor()->Execute(args, CodeBlock->GetScriptBlockInstance()->GetGlobal(), This, Frame, &Shared, result);
 	}
 	return rvNoError;
 }

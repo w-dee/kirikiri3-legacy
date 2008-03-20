@@ -34,7 +34,6 @@ public:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(
-		const tVariant & global,
 		const tString &script, const tString & name, risse_size lineofs,
 		const tNativeCallInfo &info);
 };

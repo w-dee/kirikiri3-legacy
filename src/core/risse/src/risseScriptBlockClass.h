@@ -55,7 +55,8 @@ protected:
 	//! @param		lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
 	//!							スクリプトのオフセットを記録できる)
 	//! @note		構築直後に１回だけ呼ぶこと。
-	void SetScriptAndName(const tString & script, const tString & name, int lineofs);
+	void SetScriptAndName(const tString & script,
+						const tString & name, int lineofs);
 
 	//! @brief		デストラクタ(呼ばれない)
 	virtual ~tScriptBlockInstance() {;}
@@ -68,13 +69,13 @@ protected:
 	{ if(!LinesToPosition) CreateLinesToPositionArary(); }
 
 public:
-	//! @brief		パッケージグローバルを返す
-	//! @return		パッケージグローバル
-	const tVariant & GetGlobal() const { return Global; }
-
 	//! @brief		スクリプトエンジンを返す
 	//! @return		スクリプトエンジン
 	tScriptEngine * GetScriptEngine() const { return GetRTTI()->GetScriptEngine(); }
+
+	//! @brief		パッケージグローバルを得る
+	//! @return		パッケージグローバル
+	const tVariant & GetGlobal() const { return Global; }
 
 	//! @brief		スクリプトの内容を得る	@return スクリプトの内容
 	const tString & GetScript() const { return Script; }
@@ -173,7 +174,6 @@ protected:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(
-		const tVariant & global,
 		const tString &script, const tString & name, risse_size lineofs,
 		const tNativeCallInfo &info);
 	tString mnString() { return GetScript(); }

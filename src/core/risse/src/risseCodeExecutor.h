@@ -41,6 +41,8 @@ public:
 
 	//! @brief		コードを実行する
 	//! @brief		args	引数
+	//! @param		global	メソッドが実行されるべきパッケージグローバル
+	//!						(NULL=パッケージグローバルを指定しない場合)
 	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
 	//!						(NULL="Thisオブジェクト"を指定しない場合)
 	//! @param		frame	メソッドが実行されるべきスタックフレーム
@@ -50,6 +52,7 @@ public:
 	//! @param		result		戻りの値を格納する先
 	virtual void Execute(
 		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & global = tVariant::GetNullObject(),
 		const tVariant & This = tVariant::GetNullObject(),
 		tVariant * frame = NULL, tSharedVariableFrames * shared = NULL,
 		tVariant * result = NULL) = 0;
@@ -71,6 +74,7 @@ public:
 
 	void Execute(
 		const tMethodArgument & args = tMethodArgument::Empty(),
+		const tVariant & global = tVariant::GetNullObject(),
 		const tVariant & This = tVariant::GetNullObject(),
 		tVariant * frame = NULL, tSharedVariableFrames * shared = NULL,
 		tVariant * result = NULL);

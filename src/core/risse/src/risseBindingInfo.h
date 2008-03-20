@@ -38,22 +38,28 @@ public:
 private:
 	tSharedVariableFrames * Frames; //!< 共有フレーム
 	tBindingMap BindingMap; //!< ローカル変数のバインディング
+	tVariant Global; //!< このバインディングのパッケージグローバル
 	tVariant This; //!< このバインディングの "This"
 
 public:
 	//! @brief		コンストラクタ
+	//! @param		global		このバインディングのパッケージグローバル
 	//! @param		This		このバインディングの "This"
 	//! @param		frames		共有フレーム
-	tBindingInfo(const tVariant & This, tSharedVariableFrames * frames)
+	tBindingInfo(const tVariant & global,
+		const tVariant & This, tSharedVariableFrames * frames)
 	{
+		this->Global = global;
 		this->This = This;
 		Frames = frames;
 	}
 
 	//! @brief		コンストラクタ
+	//! @param		global		このバインディングのパッケージグローバル
 	//! @param		This		このバインディングの "This"
-	tBindingInfo(const tVariant & This)
+	tBindingInfo(const tVariant & global, const tVariant & This)
 	{
+		this->Global = global;
 		this->This = This;
 		Frames = NULL;
 	}
@@ -72,6 +78,10 @@ public:
 	//! @brief		ローカル変数のバインディングへの参照を得る
 	//! @return		ローカル変数のバインディングへの参照
 	const tBindingMap & GetBindingMap() const { return BindingMap; }
+
+	//! @brief		このバインディングのパッケージグローバルを得る
+	//! @return		このバインディングのパッケージグローバル
+	const tVariant & GetGlobal() const { return Global; }
 
 	//! @brief		このバインディングの "This" を得る
 	//! @return		このバインディングの "This"

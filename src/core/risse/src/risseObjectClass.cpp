@@ -57,7 +57,6 @@ void tObjectClass::RegisterMembers()
 	BindProperty(this, ss_hash, &tObjectClass::get_hash);
 	BindFunction(this, ss_isA, &tObjectClass::isA, 
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
-	BindFunction(this, ss_eval, &tObjectClass::eval);
 	BindFunction(this, ss_getInstanceMember, &tObjectClass::getInstanceMember);
 	BindFunction(this, ss_setInstanceMember, &tObjectClass::setInstanceMember);
 	BindFunction(this, ss_getPublicMembers, &tObjectClass::getPublicMembers);
@@ -179,21 +178,6 @@ bool tObjectClass::isA(const tVariant & Class,
 {
 	// 自身が引数(=クラス) のインスタンスかどうかを得る
 	return info.This.InstanceOf(info.engine, Class);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tObjectClass::eval(const tString & script,
-							const tNativeCallInfo & info)
-{
-	// eval (式やスクリプトの評価)
-	tString name = info.args.HasArgument(1) ?
-					tString(info.args[1]) : tString(RISSE_WS("(anonymous)"));
-	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
-
-	info.engine->Evaluate(script, name, lineofs, info.result,
-							new tBindingInfo(info.This), true);
 }
 //---------------------------------------------------------------------------
 

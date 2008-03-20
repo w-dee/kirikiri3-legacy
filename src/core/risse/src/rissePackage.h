@@ -65,6 +65,18 @@ private:
 	//! @note		ids の中の辞書配列アイテムは、見つかれば削除される。
 	static void ImportIds(const tVariant & from, const tVariant & to,
 		const tVariant * ids);
+
+	//! @brief		パッケージをパスから検索する
+	//! @param		name		パッケージの完全装飾名が入っている配列
+	//! @param		filenames	見つかったパッケージのファイルパスが格納される配列
+	//!							(呼び出し側で clear() すること)
+	//! @param		packages	見つかったパッケージの完全そう職名が filenames
+	//!							と同じ順番で格納される配列
+	//!							(呼び出し側で clear() すること)
+	void SearchPackage(const tVariant & name,
+				gc_vector<tString> & filenames,
+				gc_vector<tString> & packages
+				);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

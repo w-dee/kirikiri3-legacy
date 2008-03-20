@@ -816,7 +816,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 		// [ ["sound"], ["graphic", "rina"] ]
 		//
 		// 識別子リストは辞書配列で渡す。
-		// %[ "PLAY" => ["PLAY"], "STOP" => ["STOP"], "Layer" => ["rina", "L"] ]
+		// %[ "PLAY" => [["PLAY"]], "STOP" => [["STOP"]], "Layer" => ["rina", "L"] ]
 		//
 		// これは import PLAY, STOP, Layer as rina.L in sound, graphic.rina; を表す
 		//

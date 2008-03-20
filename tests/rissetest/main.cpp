@@ -6,6 +6,7 @@
 #include "gc_cpp.h"
 #include <wx/file.h>
 #include <wx/filename.h>
+#include <wx/dir.h>
 
 
 
@@ -21,6 +22,89 @@ RISSE_DEFINE_SOURCE_ID(1760,7877,28237,16679,32159,45258,11038,1907);
 
 
 using namespace Risse;
+
+//---------------------------------------------------------------------------
+//! @brief		パッケージ検索のためのインターフェース
+//---------------------------------------------------------------------------
+class tPackageFileSystemInterfaceImpl : public tPackageFileSystemInterface
+{
+public:
+	virtual void List(const tString & dir, gc_vector<tString> & files)
+	{
+		wxString native_name(ConvertToNativePathDelimiter(dir.AsWxString()));
+		wxDir dir_object;
+		if(!dir_object.Open(native_name)) return; // ディレクトリを開けなかった
+		wxString filename;
+		bool cont;
+
+		// ファイルを列挙
+		cont = dir_object.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
+		while(cont)
+		{
+			if(!filename.StartsWith(wxT(".")))
+			{
+				files.push_back(tString(filename));
+			}
+			cont = dir_object.GetNext(&filename);
+		}
+		// ディレクトリを列挙
+		cont = dir_object.GetFirst(&filename, wxEmptyString, wxDIR_DIRS);
+		while(cont)
+		{
+			if(!filename.StartsWith(wxT(".")))
+			{
+				files.push_back(tString(filename + wxT("/")));
+			}
+			cont = dir_object.GetNext(&filename);
+		}
+	}
+
+	virtual int GetType(const tString & file)
+	{
+		wxString native_name(ConvertToNativePathDelimiter(file.AsWxString()));
+		if(wxDirExists(native_name)) return 2;
+		if(wxFileExists(native_name)) return 1;
+		return 0;
+	}
+
+	virtual tString ReadFile(const tString & file)
+	{
+		// name を取ってきて eval する
+		wxFile file_object;
+		wxString native_name(ConvertToNativePathDelimiter(file.AsWxString()));
+		if(file_object.Open(native_name))
+		{
+			// 内容を読み込む
+			size_t length = file_object.Length();
+			char *buf = new (PointerFreeGC) char [length + 1];
+			file_object.Read(buf, length);
+			buf[length] = 0;
+
+			return tString(buf);
+		}
+		else
+		{
+			// TODO: IOException
+			return tString();
+		}
+	}
+
+	static wxString ConvertToNativePathDelimiter(const wxString & path)
+	{
+		wxString ret(path);
+		if(ret.Length() > 0)
+		{
+			wxChar pathsep = static_cast<wxChar>(wxFileName::GetPathSeparator());
+			for(size_t n = 0; ret.GetChar(n); n++)
+			{
+				if(ret.GetChar(n) == wxT('/'))
+					ret.GetWritableChar(n) = pathsep;
+			}
+		}
+		return ret;
+	}
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
@@ -248,6 +332,7 @@ int Application::OnRun()
 		tScriptEngine engine;
 		engine.SetAssertionEnabled(true);
 		engine.SetWarningOutput(new tWarningOutput());
+		engine.SetPackageFileSystem(new tPackageFileSystemInterfaceImpl());
 
 		// Script クラスを追加する
 		(new tScriptClass(&engine))->

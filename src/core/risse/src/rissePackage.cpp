@@ -18,6 +18,8 @@
 #include "risseObjectClass.h"
 #include "risseScriptEngine.h"
 #include "risseStaticStrings.h"
+#include "risseBindingInfo.h"
+#include "risseArrayClass.h"
 
 namespace Risse
 {
@@ -51,6 +53,63 @@ tVariant tPackageManager::GetPackageGlobal(const tString & name)
 
 
 //---------------------------------------------------------------------------
+void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
+{
+	tCriticalSection::tLocker lock(*CS); // sync
+
+	// packages はインポートするパッケージを表す辞書配列の配列
+	tVariant::tSynchronizer sync_dest(dest); // sync
+	tVariant::tSynchronizer sync_packages(packages); // sync
+
+	risse_size list_count =
+			(risse_int64)packages.GetPropertyDirect(ScriptEngine, ss_count);
+	for(risse_size i = 0; i < list_count; i++)
+	{
+		tVariant dic =
+			packages.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
+
+		// package を得る
+		tVariant package_loc =
+			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'p','a','c','k','a','g','e'>()));
+		// TODO: package のインスタンスチェック
+		// as を得る
+		tVariant as =
+			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'a','s'>()));
+
+		// package に対応するパッケージのファイル名を得る
+		gc_vector<tString> filenames;
+		gc_vector<tString> locations;
+		SearchPackage(package_loc, filenames, locations);
+
+		// TODO: as がある場合は filenames や locations は要素数が 1 のみのはず
+		// なのでチェック
+
+		// 対応するパッケージを順に読み込む
+		for(risse_size j = 0; j < locations.size(); j++)
+		{
+			tVariant package_global = InitPackage(locations[j], filenames[j]);
+			// もし as が指定されている場合はそれを as に、
+			// そうでない場合は locations[j] で指定された位置に dig して書き込む
+			if(as.IsVoid())
+				Dig(dest, locations[j], package_global); // as の指定無し
+			else
+				Dig(dest, as, package_global); // as の指定あり
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPackageManager::DoImport(tVariant & dest,
+	const tVariant & packages, const tVariant & ids)
+{
+	tCriticalSection::tLocker lock(*CS); // sync
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tPackageManager::AddPackageGlobal(const tString & name, tVariant & global)
 {
 	tMap::iterator i = Map.find(name);
@@ -71,6 +130,29 @@ bool tPackageManager::AddPackageGlobal(const tString & name, tVariant & global)
 	}
 	global = i->second;
 	return true;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tPackageManager::InitPackage(const tString & filename, const tString & name)
+{
+	bool is_existing_package;
+	tVariant package_global;
+	is_existing_package = AddPackageGlobal(name, package_global);
+	tPackageFileSystemInterface * fs = ScriptEngine->GetPackageFileSystem();
+	if(!is_existing_package && fs)
+	{
+		// パッケージの初回の初期化の場合はパッケージを読み込んで初期化する
+
+		// ファイルを読み込む
+		tString content = fs->ReadFile(filename);
+
+		// そのファイルをパッケージ内で実行する
+		tBindingInfo bind(package_global, package_global);
+		ScriptEngine->Evaluate(content, filename, 0, NULL, &bind, false);
+	}
+	return package_global;
 }
 //---------------------------------------------------------------------------
 
@@ -122,7 +204,9 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 				// インポートする場合
 				RISSE_ASSERT(To.GetType() == tVariant::vtObject);
 				tOperateFlags access_flags =
-					tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly;
+					tOperateFlags::ofMemberEnsure|
+					tOperateFlags::ofInstanceMemberOnly|
+					tOperateFlags::ofUseClassMembersRule;
 				tMemberAttribute attrib =
 					tMemberAttribute::GetDefault().Set(tMemberAttribute::mcNone);
 					// 変更性のみは指定しない。これは定数の上書き時に強制的にエラーにしたいため。
@@ -151,6 +235,10 @@ void tPackageManager::SearchPackage(const tVariant & name,
 				gc_vector<tString> & filenames,
 				gc_vector<tString> & packages)
 {
+	// パッケージファイルシステムインターフェースを得る
+	tPackageFileSystemInterface * fs = ScriptEngine->GetPackageFileSystem();
+	if(!fs) return; // パッケージファイルシステムが利用不可能
+
 	// name を '/' や '.' で連結しつつ、ワイルドカードがあるかどうかを調べる
 	tVariant::tSynchronizer sync_name(name); // sync
 	bool wildcard_found = false;
@@ -173,9 +261,6 @@ void tPackageManager::SearchPackage(const tVariant & name,
 		package_fs_loc += loc_component;
 		package_loc += loc_component;
 	}
-
-	// パッケージファイルシステムインターフェースを得る
-	tPackageFileSystemInterface * fs = ScriptEngine->GetPackageFileSystem();
 
 	// パス変数を得る
 	tVariant path = RissePackageGlobal.GetPropertyDirect(
@@ -275,6 +360,91 @@ void tPackageManager::SearchPackage(const tVariant & name,
 			if(filenames.size() > 0) break;
 		}
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant & deepest)
+{
+	tVariant::tSynchronizer sync_dest(dest); // sync
+	tVariant::tSynchronizer sync_id(id); // sync
+
+	tVariant current = dest;
+	risse_size id_count =
+		(risse_int64)id.GetPropertyDirect(ScriptEngine, ss_count);
+	for(risse_size i = 0; i < id_count; i++)
+	{
+		tString one =
+			id.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
+
+		if(i == id_count - 1)
+		{
+			// current に one を deepest の内容で書き込む
+			current.SetPropertyDirect_Object(one,
+						tOperateFlags::ofMemberEnsure|
+						tOperateFlags::ofInstanceMemberOnly|
+						tOperateFlags::ofUseClassMembersRule,
+						deepest);
+		}
+		else
+		{
+			// current に one がすでにある？
+			tVariant value;
+			tObjectInterface::tRetValue rv =
+				current.Operate(ScriptEngine, ocDGet, &value, one,
+					tOperateFlags::ofUseClassMembersRule|tOperateFlags::ofInstanceMemberOnly);
+			if(rv != tObjectInterface::rvNoError)
+			{
+				// うーん、なんかエラー？たぶんメンバが無いんだと思うけど
+				// だったらとりあえず作ってみる
+				value = tVariant(ScriptEngine->ObjectClass).New();
+				current.SetPropertyDirect_Object(one,
+						tOperateFlags::ofMemberEnsure|
+						tOperateFlags::ofInstanceMemberOnly|
+						tOperateFlags::ofUseClassMembersRule,
+						value);
+			}
+			current = value;
+		}
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPackageManager::Dig(tVariant & dest, const tString & id, const tVariant & deepest)
+{
+	// id を . (ドット) で split する
+	// まだこれ書いてる時点では String::split がないんだよなー
+	tVariant array = tVariant(ScriptEngine->ArrayClass).New();
+	risse_size start = 0;
+	risse_size current = 0;
+	risse_size length = id.GetLength();
+	const risse_char *ref = id.c_str();
+	while(true)
+	{
+		while(current < length && ref[current] != RISSE_WC('.')) current ++;
+		if(current >= length) break;
+
+		if(start != current)
+		{
+			tString component = tString(id, start, current - start);
+			array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
+		}
+
+		current ++;
+		start = current;
+	}
+
+	if(start != current)
+	{
+		tString component = tString(id, start, current - start);
+		array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
+	}
+
+	// Dig の tVariant 配列版を呼び出す
+	Dig(dest, array, deepest);
 }
 //---------------------------------------------------------------------------
 

@@ -963,16 +963,16 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 		packages = package_array;
 	}
 
-	// global.import() の部分を作成
-	tASTNode_Factor * global = new tASTNode_Factor(GetPosition(), aftGlobal);
+	// this.import() の部分を作成
+	tASTNode_Factor * this_ = new tASTNode_Factor(GetPosition(), aftThis);
 	tASTNode_Factor * import =
 		new tASTNode_Factor(GetPosition(), aftConstant,
 			tVariant(tString(RISSE_WS("import"))));
-	tASTNode_MemberSel * global_import =
-		new tASTNode_MemberSel(GetPosition(), global, import, matDirect);
+	tASTNode_MemberSel * this_import =
+		new tASTNode_MemberSel(GetPosition(), this_, import, matDirectThis);
 
 	tASTNode_FuncCall * funccall = new tASTNode_FuncCall(GetPosition(), false);
-	funccall->SetExpression(global_import);
+	funccall->SetExpression(this_import);
 
 	tASTNode_FuncCallArg * arg;
 

@@ -36,6 +36,14 @@ tPackageManager::tPackageManager(tScriptEngine * script_engine)
 
 	// "risse" パッケージを作成する
 	AddPackageGlobal(tSS<'r','i','s','s','e'>(), RissePackageGlobal);
+
+	// "risse" パッケージに、パッケージ検索パスを表す "packagePath" を追加
+	tVariant packagePath = tVariant(ScriptEngine->ArrayClass).New();
+	RissePackageGlobal.SetPropertyDirect_Object(tSS<'p','a','c','k','a','g','e','P','a','t','h'>(),
+				tOperateFlags::ofMemberEnsure|
+				tOperateFlags::ofInstanceMemberOnly|
+				tOperateFlags::ofUseClassMembersRule,
+				packagePath);
 }
 //---------------------------------------------------------------------------
 
@@ -55,6 +63,8 @@ tVariant tPackageManager::GetPackageGlobal(const tString & name)
 //---------------------------------------------------------------------------
 void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 {
+	// TODO: dest が プリミティブ型の時は dest に新しくメンバを作成できないのでチェック
+
 	tCriticalSection::tLocker lock(*CS); // sync
 
 	// packages はインポートするパッケージを表す辞書配列の配列
@@ -62,7 +72,7 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 	tVariant::tSynchronizer sync_packages(packages); // sync
 
 	risse_size list_count =
-			(risse_int64)packages.GetPropertyDirect(ScriptEngine, ss_count);
+			(risse_int64)packages.GetPropertyDirect(ScriptEngine, ss_length);
 	for(risse_size i = 0; i < list_count; i++)
 	{
 		tVariant dic =
@@ -87,7 +97,7 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 		// 対応するパッケージを順に読み込む
 		for(risse_size j = 0; j < locations.size(); j++)
 		{
-			tVariant package_global = InitPackage(locations[j], filenames[j]);
+			tVariant package_global = InitPackage(filenames[j], locations[j]);
 			// もし as が指定されている場合はそれを as に、
 			// そうでない場合は locations[j] で指定された位置に dig して書き込む
 			if(as.IsVoid())
@@ -104,7 +114,10 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 void tPackageManager::DoImport(tVariant & dest,
 	const tVariant & packages, const tVariant & ids)
 {
+	// TODO: dest が プリミティブ型の時は dest に新しくメンバを作成できないのでチェック
+
 	tCriticalSection::tLocker lock(*CS); // sync
+
 }
 //---------------------------------------------------------------------------
 
@@ -161,10 +174,11 @@ tVariant tPackageManager::InitPackage(const tString & filename, const tString & 
 void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 		const tVariant * ids)
 {
-	// from と to をロックする
 	// TODO: ローカル namespace へのimport………は無理か
 	// せめて this への import ですかね。グローバル位置で import すると this は
 	// 自動的に global になるので global への import という意味に自動的になる
+
+	// from と to をロックする
 	tVariant::tSynchronizer sync_from(from);
 	tVariant::tSynchronizer sync_to(to);
 
@@ -246,7 +260,7 @@ void tPackageManager::SearchPackage(const tVariant & name,
 	tString package_fs_loc;
 	tString package_loc;
 	risse_size component_count =
-		(risse_int64)name.GetPropertyDirect(ScriptEngine, ss_count);
+		(risse_int64)name.GetPropertyDirect(ScriptEngine, ss_length);
 	for(risse_size i = 0; i < component_count; i++)
 	{
 		tString loc_component =
@@ -268,7 +282,7 @@ void tPackageManager::SearchPackage(const tVariant & name,
 						tSS<'p','a','c','k','a','g','e','P','a','t','h'>());
 	tVariant::tSynchronizer sync_path(path); // sync
 	risse_size path_count =
-		(risse_int64)path.GetPropertyDirect(ScriptEngine, ss_count);
+		(risse_int64)path.GetPropertyDirect(ScriptEngine, ss_length);
 
 	// パスを探す
 	for(risse_size i = 0; i < path_count; i++)
@@ -284,8 +298,6 @@ void tPackageManager::SearchPackage(const tVariant & name,
 
 			// パスにあるファイルを得る
 			gc_map<tString, tString> path_map;
-			tString path_dir =
-				path.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
 			gc_vector<tString> files;
 			tString dirname = path_dir + tSS<'/'>() + package_fs_loc;
 			fs->List(dirname, files);
@@ -300,6 +312,14 @@ void tPackageManager::SearchPackage(const tVariant & name,
 				// パッケージのbasenameを求める
 				bool is_dir = i->EndsWith(RISSE_WC('/'));
 				tString basename = is_dir ? tString(*i, 0, i->GetLength() - 1) : *i;
+
+				if(!is_dir)
+				{
+					if(!basename.EndsWith(tSS<'.','r','s'>()))
+						continue; // ファイルの場合は末尾が .rs でない場合ははじく
+					basename = tString(basename, 0, basename.GetLength() - 3);
+						// 拡張子部分を取り除く
+				}
 
 				// ファイル名を求める
 				tString filename;
@@ -317,6 +337,16 @@ void tPackageManager::SearchPackage(const tVariant & name,
 				}
 
 				// path_map に追加する
+				// 追加する前に basename をチェックし、すでに存在した場合は
+				// ディレクトリよりもファイルを優先させる
+				gc_map<tString, tString>::iterator pmi = path_map.find(basename);
+				if(pmi != path_map.end())
+				{
+					// 存在した
+					 // 末尾が /_init.rs で終わってない(つまりファイル)の場合は
+					 // continue する
+					if(!pmi->first.EndsWith(tSS<'/','_','i','n','i','t','.','r','s'>())) continue;
+				}
 				path_map.insert(gc_map<tString, tString>::value_type(basename, filename));
 			}
 
@@ -334,15 +364,14 @@ void tPackageManager::SearchPackage(const tVariant & name,
 		else
 		{
 			// ワイルドカードを使わない場合
-			switch(fs->GetType(filename))
+			if(fs->GetType(filename + tSS<'.','r','s'>()) == 1)
 			{
-			case 1:
 				// 見つかった
-				filenames.push_back(filename);
+				filenames.push_back(filename + tSS<'.','r','s'>());
 				packages.push_back(package_loc);
-				break;
-
-			case 2:
+			}
+			else if(fs->GetType(filename) == 2)
+			{
 				// 見つかったけどそれはディレクトリ
 				// その下に _init.rs があるかどうかを見る
 				filename += tSS<'/'>();
@@ -353,10 +382,8 @@ void tPackageManager::SearchPackage(const tVariant & name,
 					filenames.push_back(filename);
 					packages.push_back(package_loc);
 				}
-				break;
-
-			default: ;
 			}
+
 			if(filenames.size() > 0) break;
 		}
 	}
@@ -372,7 +399,7 @@ void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant &
 
 	tVariant current = dest;
 	risse_size id_count =
-		(risse_int64)id.GetPropertyDirect(ScriptEngine, ss_count);
+		(risse_int64)id.GetPropertyDirect(ScriptEngine, ss_length);
 	for(risse_size i = 0; i < id_count; i++)
 	{
 		tString one =

@@ -334,6 +334,12 @@ int Application::OnRun()
 		engine.SetWarningOutput(new tWarningOutput());
 		engine.SetPackageFileSystem(new tPackageFileSystemInterfaceImpl());
 
+		// risse パッケージの packagePath に "lib" を追加する
+		tVariant risse_package = engine.GetRissePackageGlobal();
+		tVariant packagePath = risse_package.GetPropertyDirect_Object(
+			tSS<'p','a','c','k','a','g','e','P','a','t','h'>());
+		packagePath.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(tString(tSS<'l','i','b'>())));
+
 		// Script クラスを追加する
 		(new tScriptClass(&engine))->
 				RegisterInstance(engine.GetRissePackageGlobal());

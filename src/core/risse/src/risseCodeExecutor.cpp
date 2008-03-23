@@ -25,6 +25,7 @@
 #include "risseThisProxy.h"
 #include "risseStaticStrings.h"
 #include "risseArrayClass.h"
+#include "risseDictionaryClass.h"
 /*
 	このソースは、実行スピード重視の、いわばダーティーな実装を行う。
 	ダーティーな実装は極力コメントを残し、わかりやすくしておくこと。
@@ -199,8 +200,8 @@ void tCodeInterpreter::Execute(
 				break;
 
 			case ocAssignNewDict	: // dict	 = 新しい辞書配列オブジェクトの代入
-				/* incomplete */
 				RISSE_ASSERT(CI(code[1]) < framesize);
+				AR(code[1]) = tVariant(engine->DictionaryClass).New();
 				code += 2;
 				break;
 

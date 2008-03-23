@@ -181,6 +181,10 @@ public:
 	//! @brief		assertion が有効かどうかを設定する
 	//! @param		b		asssrtion が有効かどうか
 	void SetAssertionEnabled(bool b) { Options.AssertEnabled = b; }
+
+	//! @brief		パッケージマネージャを得る
+	//! @return		パッケージマネージャ
+	tPackageManager * GetPackageManager() const { return PackageManager; }
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

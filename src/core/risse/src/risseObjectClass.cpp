@@ -18,6 +18,7 @@
 #include "risseScriptEngine.h"
 #include "risseBindingInfo.h"
 #include "risseArrayClass.h"
+#include "rissePackage.h"
 
 /*
 	Risseスクリプトから見える"Object" クラスの実装
@@ -51,6 +52,7 @@ void tObjectClass::RegisterMembers()
 
 	BindFunction(this, ss_construct, &tObjectClass::construct);
 	BindFunction(this, ss_initialize, &tObjectClass::initialize);
+	BindFunction(this, ss_import, &tObjectClass::import);
 	BindFunction(this, mnDiscEqual, &tObjectClass::DiscEqual);
 	BindFunction(this, ss_identify, &tObjectClass::identify);
 	BindProperty(this, ss_hint, &tObjectClass::get_hint, &tObjectClass::set_hint);
@@ -79,6 +81,23 @@ void tObjectClass::construct()
 void tObjectClass::initialize()
 {
 	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tObjectClass::import(const tVariant & packages, const tNativeCallInfo & info)
+{
+	if(info.args.HasArgument(1))
+	{
+		// 引数が2個あるぜ
+	}
+	else
+	{
+		// 引数はインポート先パッケージのみ
+		info.engine->GetPackageManager()->
+			DoImport(const_cast<tVariant&>(info.This), packages);
+	}
 }
 //---------------------------------------------------------------------------
 

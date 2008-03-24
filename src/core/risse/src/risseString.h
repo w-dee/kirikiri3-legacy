@@ -226,7 +226,7 @@ public:
 	//!			(そのため、lengthにrisse_size_maxを指定すると offset 以降
 	//!			すべてを得ることができる)
 	tStringBlock(const tStringBlock & ref,
-		risse_size offset, risse_size length);
+		risse_size offset, risse_size length = risse_size_max);
 
 	//! @brief		コンストラクタ(risse_char * から)
 	//! @param		ref		元の文字列
@@ -775,6 +775,36 @@ public: // other utilities
 	//! @param		子文字を大文字に変換する(コレーションなし)
 	//! @note		[a-z] を [A-Z] に変換する。これ以外の文字については変換 *しない*。
 	void ToUpperCaseNC();
+
+	//! @brief		スプリッタ(指定文字で文字列を区切る)
+	//! @note		これは空要素も切り出すので注意
+	//!				tString::tSplitter split(str, RISSE_WC('/')); tString token;
+	//!				while(split(token)) { ... } のようにして使う
+	class tSplitter
+	{
+		risse_size Current;
+		const tStringBlock & Ref;
+		risse_char Delimiter;
+	public:
+		//! @brief		コンストラクタ
+		//! @param		ref		対象となる文字列
+		//! @param		delim	デリミタ
+		tSplitter(const tStringBlock & ref, risse_char delim):
+			Current(0), Ref(ref), Delimiter(delim) {;}
+
+		//! @brief		次の要素を得る
+		//! @param		out			切り出された要素
+		//! @return		要素がもうない場合は false
+		bool operator ()(tStringBlock & out)
+		{
+			if(Ref.GetLength() + 1 == Current) return false; // 終わり
+			risse_size start = Current;
+			while(Current < Ref.GetLength() && Ref[Current] != Delimiter) Current ++;
+			out = tStringBlock(Ref, start, Current - start);
+			Current ++;
+			return true;
+		}
+	};
 
 private:
 	//! @brief		static な空文字列を表すデータ

@@ -27,23 +27,225 @@ RISSE_DEFINE_SOURCE_ID(58978,40915,31180,20110,43417,63480,33374,56600);
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		ダミーのイニシャライザ
+//---------------------------------------------------------------------------
+class tDummyBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
+{
+public:
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global) {;}
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		組み込みパッケージ用の仮想的なファイルシステム
+//! @note		組み込みパッケージに対する要求でなければユーザプログラム指定の
+//!				ファイルシステムインターフェースを呼び出す機構も持つ
+//---------------------------------------------------------------------------
+class tBuiltinPackageFileSystem : public tCollectee
+{
+	//! @brief		ディレクトリのノード
+	struct tNode : public tCollectee
+	{
+		typedef gc_map<tString, tNode *> tChildren;
+		tString Name; //!< 名前
+		tChildren Children; //!< 子アイテムのリスト
+		tBuiltinPackageInitializerInterface * Initializer; //!< パッケージ初期化用インターフェース
+		tNode() { Initializer = NULL; }
+		bool IsFile() const { return Initializer != NULL; }
+	};
+
+	tNode Root; //!< ルートノード
+	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
+	tDummyBuiltinPackageInitializer DummyBuiltinPackageInitializer;
+		//!< ダミーのパッケージイニシャライザ
+
+public:
+	//! @brief			コンストラクタ
+	//! @param			engine		スクリプトエンジンインスタンス
+	tBuiltinPackageFileSystem(tScriptEngine * engine) { ScriptEngine = engine; }
+
+
+	//! @brief		指定ディレクトリにあるファイル名をすべて列挙する
+	//! @param		dir		ディレクトリ(区切りには '/' が用いられる)
+	//! @param		files	そこにあるファイル/ディレクトリ名一覧
+	//! @note		. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
+	//!				ディレクトリの場合はfilesの最後を '/' で終わらせること。
+	//!				files は呼び出し側で最初に clear() しておくこと。
+	void List(const tString & dir, gc_vector<tString> & files)
+	{
+		if(!dir.StartsWith(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()))
+		{
+			tPackageFileSystemInterface * drain = ScriptEngine->GetPackageFileSystem();
+			if(drain) drain->List(dir, files);
+			return;
+		}
+
+		tNode * node = GetNodeAt(tString(dir, 11)); // 11 = length of "[*builtin*]"
+		if(!node) return; // ノードが見つからない
+		if(node->IsFile()) return; // それファイル
+		for(tNode::tChildren::iterator i = node->Children.begin();
+			i != node->Children.end(); i++)
+		{
+			if(i->second->IsFile())
+				files.push_back(i->first);
+			else
+				files.push_back(i->first + tSS<'/'>());
+		}
+	}
+
+	//! @brief		ファイル種別を得る
+	//! @param		file	ファイル名
+	//! @return		種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	int GetType(const tString & file)
+	{
+		if(!file.StartsWith(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()))
+		{
+			tPackageFileSystemInterface * drain = ScriptEngine->GetPackageFileSystem();
+			if(drain) return drain->GetType(file);
+			return 0;
+		}
+
+		tNode * node = GetNodeAt(tString(file, 11)); // 11 = length of "[*builtin*]"
+		if(!node) return 0; // ノードが見つからない
+		return node->IsFile() ? 1 : 2;
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		file		パッケージのありそうなファイル名
+	//! @param		package		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(
+		const tString & file,
+		const tString & package,
+		const tVariant & global)
+	{
+		if(!file.StartsWith(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()))
+		{
+			tPackageFileSystemInterface * drain = ScriptEngine->GetPackageFileSystem();
+			if(drain)
+			{
+				// ファイルを読み込む
+				tString content = drain->ReadFile(file);
+
+				// そのファイルをパッケージ内で実行する
+				tBindingInfo bind(global, global);
+				ScriptEngine->Evaluate(content, file, 0, NULL, &bind, false);
+			}
+			return;
+		}
+		else
+		{
+			// Initializer を呼ぶ
+			tNode * node = GetNodeAt(tString(file, 11)); // 11 = length of "[*builtin*]"
+			if(!node) return; // ノードが見つからない
+			if(!node->IsFile()) return; // ファイルではない
+			node->Initializer->Initialize(ScriptEngine, package, global);
+		}
+	}
+
+	//! @brief		組み込みパッケージを登録する
+	//! @param		name	スラッシュ区切りのディレクトリ/ファイル名
+	//!						(最初の '/' や重複する '/' は含めないこと; 例: 'k3/graphics/rina' )
+	//! @param		init	パッケージ初期化用インターフェース
+	void AddPackage(const tString & name, tBuiltinPackageInitializerInterface * init)
+	{
+		// name をスラッシュごとに split し、tNode に登録していく
+		tString::tSplitter splitter(name + tSS<'.','r','s'>(), RISSE_WC('/'));
+		tNode * current = &Root;
+		tString token;
+		while(splitter(token))
+		{
+			if(token.IsEmpty()) continue;
+			tNode::tChildren::iterator f = current->Children.find(token);
+			if(f == current->Children.end())
+			{
+				// ディレクトリが見つからなかった
+				// そこにディレクトリを作る
+				f = current->Children.insert(
+					tNode::tChildren::value_type(token, new tNode())).first;
+			}
+			RISSE_ASSERT(f->second->Initializer == NULL);
+			// 次へ
+			current = f->second;
+		}
+		// 末尾のノードの initializer に init を設定する
+		current->Initializer = init;
+	}
+
+	//! @brief		ダミーのパッケージイニシャライザをとってくる
+	tBuiltinPackageInitializerInterface * GetDummyBuiltinPackageInitializer()
+		{ return &DummyBuiltinPackageInitializer; }
+
+private:
+	//! @brief		指定の名前を持つノードを検索する
+	//! @param		name		名前
+	//! @return		そのノード(null=見つからない)
+	tNode * GetNodeAt(const tString & name)
+	{
+		tString::tSplitter splitter(name, RISSE_WC('/'));
+		tNode * current = &Root;
+		tString token;
+		while(splitter(token))
+		{
+			if(token.IsEmpty()) continue;
+			tNode::tChildren::iterator f = current->Children.find(token);
+			if(f == current->Children.end()) return NULL;
+			current = f->second;
+		}
+		return current;
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tPackageManager::tPackageManager(tScriptEngine * script_engine)
 {
 	ScriptEngine = script_engine;
 
 	CS = new tCriticalSection();
+	BuiltinPackageFileSystem = new tBuiltinPackageFileSystem(script_engine);
 
 	// "risse" パッケージを作成する
 	AddPackageGlobal(tSS<'r','i','s','s','e'>(), RissePackageGlobal);
 
 	// "risse" パッケージに、パッケージ検索パスを表す "packagePath" を追加
 	tVariant packagePath = tVariant(ScriptEngine->ArrayClass).New();
-	RissePackageGlobal.SetPropertyDirect_Object(tSS<'p','a','c','k','a','g','e','P','a','t','h'>(),
+	RissePackageGlobal.SetPropertyDirect_Object(
+				tSS<'p','a','c','k','a','g','e','P','a','t','h'>(),
 				tOperateFlags::ofMemberEnsure|
-				tOperateFlags::ofInstanceMemberOnly|
-				tOperateFlags::ofUseClassMembersRule,
+					tOperateFlags::ofInstanceMemberOnly|
+					tOperateFlags::ofUseClassMembersRule,
 				packagePath);
+
+	// packagePath に組み込みパッケージ用の仮想ファイルシステムを追加
+	packagePath.Invoke_Object(tSS<'p','u','s','h'>(),
+		tString(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()));
+
+	// 組み込みパッケージ "risse" と デフォルトのパッケージ "main" を追加
+	BuiltinPackageFileSystem->AddPackage(tSS<'r','i','s','s','e'>(),
+		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
+	BuiltinPackageFileSystem->AddPackage(tSS<'m','a','i','n'>(),
+		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
 }
 //---------------------------------------------------------------------------
 
@@ -56,6 +258,17 @@ tVariant tPackageManager::GetPackageGlobal(const tString & name)
 	tVariant ret;
 	AddPackageGlobal(name, ret);
 	return ret;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPackageManager::AddBuiltinPackage(const tString & package,
+	tBuiltinPackageInitializerInterface * init)
+{
+	tCriticalSection::tLocker lock(*CS); // sync
+
+	BuiltinPackageFileSystem->AddPackage(package, init);
 }
 //---------------------------------------------------------------------------
 
@@ -153,17 +366,11 @@ tVariant tPackageManager::InitPackage(const tString & filename, const tString & 
 	bool is_existing_package;
 	tVariant package_global;
 	is_existing_package = AddPackageGlobal(name, package_global);
-	tPackageFileSystemInterface * fs = ScriptEngine->GetPackageFileSystem();
-	if(!is_existing_package && fs)
+	if(!is_existing_package)
 	{
 		// パッケージの初回の初期化の場合はパッケージを読み込んで初期化する
-
-		// ファイルを読み込む
-		tString content = fs->ReadFile(filename);
-
-		// そのファイルをパッケージ内で実行する
-		tBindingInfo bind(package_global, package_global);
-		ScriptEngine->Evaluate(content, filename, 0, NULL, &bind, false);
+		BuiltinPackageFileSystem->Initialize(
+			filename, name, package_global);
 	}
 	return package_global;
 }
@@ -250,8 +457,6 @@ void tPackageManager::SearchPackage(const tVariant & name,
 				gc_vector<tString> & packages)
 {
 	// パッケージファイルシステムインターフェースを得る
-	tPackageFileSystemInterface * fs = ScriptEngine->GetPackageFileSystem();
-	if(!fs) return; // パッケージファイルシステムが利用不可能
 
 	// name を '/' や '.' で連結しつつ、ワイルドカードがあるかどうかを調べる
 	tVariant::tSynchronizer sync_name(name); // sync
@@ -294,13 +499,14 @@ void tPackageManager::SearchPackage(const tVariant & name,
 		if(wildcard_found)
 		{
 			// ワイルドカードを使う場合
-			if(fs->GetType(filename) != 2) continue; // ディレクトリじゃないので次へ
+			if(BuiltinPackageFileSystem->GetType(filename) != 2)
+					continue; // ディレクトリじゃないので次へ
 
 			// パスにあるファイルを得る
 			gc_map<tString, tString> path_map;
 			gc_vector<tString> files;
 			tString dirname = path_dir + tSS<'/'>() + package_fs_loc;
-			fs->List(dirname, files);
+			BuiltinPackageFileSystem->List(dirname, files);
 
 			// files を順に見る
 			for(gc_vector<tString>::iterator i = files.begin();
@@ -329,7 +535,8 @@ void tPackageManager::SearchPackage(const tVariant & name,
 				{
 					filename = dirname + tSS<'/'>() + *i +
 								tSS<'_','i','n','i','t','.','r','s'>();
-					if(fs->GetType(filename) != 1) continue; // それが存在しないあるいはファイルではない
+					if(BuiltinPackageFileSystem->GetType(filename) != 1)
+							continue; // それが存在しないあるいはファイルではない
 				}
 				else
 				{
@@ -364,19 +571,19 @@ void tPackageManager::SearchPackage(const tVariant & name,
 		else
 		{
 			// ワイルドカードを使わない場合
-			if(fs->GetType(filename + tSS<'.','r','s'>()) == 1)
+			if(BuiltinPackageFileSystem->GetType(filename + tSS<'.','r','s'>()) == 1)
 			{
 				// 見つかった
 				filenames.push_back(filename + tSS<'.','r','s'>());
 				packages.push_back(package_loc);
 			}
-			else if(fs->GetType(filename) == 2)
+			else if(BuiltinPackageFileSystem->GetType(filename) == 2)
 			{
 				// 見つかったけどそれはディレクトリ
 				// その下に _init.rs があるかどうかを見る
 				filename += tSS<'/'>();
 				filename += tSS<'_','i','n','i','t','.','r','s'>();
-				if(fs->GetType(filename) == 1)
+				if(BuiltinPackageFileSystem->GetType(filename) == 1)
 				{
 					// それがファイルだった。見つかった。
 					filenames.push_back(filename);

@@ -22,6 +22,8 @@ namespace Risse
 {
 class tCriticalSection;
 class tScriptEngine;
+class tBuiltinPackageFileSystem;
+class tBuiltinPackageInitializerInterface;
 //---------------------------------------------------------------------------
 //! @brief		パッケージ管理クラス
 //---------------------------------------------------------------------------
@@ -32,6 +34,7 @@ class tPackageManager : public tCollectee
 	typedef gc_map<tString, tVariant> tMap; //!< パッケージ完全装飾名 -> パッケージグローバルへのマップのtypedef
 	tMap Map; //!< パッケージ完全装飾名 -> パッケージグローバルへのマップ
 	tVariant RissePackageGlobal; //!< "risse" パッケージグローバル
+	tBuiltinPackageFileSystem * BuiltinPackageFileSystem; //!< 組み込みパッケージ用の仮想ファイルシステム
 
 	tCriticalSection * CS; //!< このオブジェクトを保護するクリティカルセクション
 
@@ -48,6 +51,13 @@ public:
 	//! @param		name		パッケージの完全装飾名
 	//! @return		そのパッケージのグローバルオブジェクト
 	tVariant GetPackageGlobal(const tString & name);
+
+	//! @brief		組み込みパッケージの情報を追加する
+	//! @param		package		パッケージ名
+	//! @param		init		イニシャライザ
+	//!							(パッケージが初めて初期化される際に呼ばれる)
+	void AddBuiltinPackage(const tString & package,
+		tBuiltinPackageInitializerInterface * init);
 
 	//! @brief		インポートを行う
 	//! @param		dest		インポート先オブジェクト
@@ -69,8 +79,8 @@ private:
 	bool AddPackageGlobal(const tString & name, tVariant & global);
 
 	//! @brief		パッケージを初期化する
-	//! @param		name		パッケージグローバルの完全装飾名
 	//! @param		filename	パッケージが入ったファイル名
+	//! @param		name		パッケージグローバルの完全装飾名
 	//! @return		パッケージグローバル
 	tVariant InitPackage(const tString & filename, const tString & name);
 

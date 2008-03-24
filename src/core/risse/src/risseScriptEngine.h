@@ -24,6 +24,7 @@ namespace Risse
 {
 class tBindingInfo;
 class tPackageManager;
+class tScriptEngine;
 //---------------------------------------------------------------------------
 //! @brief		パッケージ検索のためのインターフェース
 //---------------------------------------------------------------------------
@@ -50,6 +51,25 @@ public:
 	//! @param		file	ファイル名
 	//! @return		読み込まれたファイルの中身
 	virtual tString ReadFile(const tString & file) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		組み込みパッケージのための初期化用インターフェース
+//---------------------------------------------------------------------------
+class tBuiltinPackageInitializerInterface : public tCollectee
+{
+public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tBuiltinPackageInitializerInterface() {}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global) = 0;
 };
 //---------------------------------------------------------------------------
 

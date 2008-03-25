@@ -1,4 +1,4 @@
-Script::require("../arith-unary.rs");
+import * in test.unary;
 
 var N = NoSuchMemberException;
 var I = IllegalArgumentClassException;

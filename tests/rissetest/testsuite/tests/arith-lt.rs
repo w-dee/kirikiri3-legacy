@@ -1,4 +1,4 @@
-Script::require("../arith-matrix.rs");
+import * in test.binary;
 
 // "A" = any other instances
 

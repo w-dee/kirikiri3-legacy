@@ -200,7 +200,6 @@ public:
 	{
 		BindFunction(this, ss_construct, &tScriptClass::construct);
 		BindFunction(this, ss_initialize, &tScriptClass::initialize);
-		BindFunction(this, tSS<'r','e','q','u','i','r','e'>(), &tScriptClass::require);
 		BindFunction(this, tSS<'p','r','i','n','t'>(), &tScriptClass::print);
 	}
 
@@ -210,31 +209,6 @@ public:
 
 	static void initialize()
 	{
-	}
-
-	static void require(const tString & name, tScriptEngine * engine)
-	{
-		// name を取ってきて eval する
-		wxFile file;
-		if(file.Open(name.AsWxString()))
-		{
-			// 内容を読み込む
-			size_t length = file.Length();
-			char *buf = new (PointerFreeGC) char [length + 1];
-			file.Read(buf, length);
-			buf[length] = 0;
-
-			// 内容を評価する
-			fflush(stderr);
-			fflush(stdout);
-			engine->Evaluate((tString)(buf), name, 0, NULL);
-			fflush(stderr);
-			fflush(stdout);
-		}
-		else
-		{
-			// TODO: IOException
-		}
 	}
 
 	static void print(const tMethodArgument & args)

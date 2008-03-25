@@ -659,7 +659,7 @@ public: // operate
 
 		case ocDSetAttrib		: //!< dseta
 			args.ExpectArgumentCount(1);
-			SetAttributeDirect(args[0], flags);
+			SetAttributeDirect(engine, args[0], flags);
 			return rvNoError;
 
 #define RISSE_ASSIGN_OP(func) \
@@ -920,32 +920,29 @@ public: // 演算子
 
 	//-----------------------------------------------------------------------
 	//! @brief		属性の設定		DSetAttrib dseta
+	//! @param		engine	スクリプトエンジンインスタンス
 	//! @param		key			キー
 	//! @param		attrib		設定する属性値
 	//-----------------------------------------------------------------------
-	void SetAttributeDirect(const tVariantBlock & key, risse_uint32 attrib) const
+	void SetAttributeDirect(tScriptEngine * engine, const tVariantBlock & key, risse_uint32 attrib) const
 	{
 		switch(GetType())
 		{
-		case vtVoid:	SetAttributeDirect_Void     (key, attrib); return;
-		case vtInteger:	SetAttributeDirect_Integer  (key, attrib); return;
-		case vtReal:	SetAttributeDirect_Real     (key, attrib); return;
-		case vtNull:	SetAttributeDirect_Null     (key, attrib); return;
-		case vtString:	SetAttributeDirect_String   (key, attrib); return;
-		case vtOctet:	SetAttributeDirect_Octet    (key, attrib); return;
-		case vtBoolean:	SetAttributeDirect_Boolean  (key, attrib); return;
-		case vtObject:	SetAttributeDirect_Object   (key, attrib); return;
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
+		case vtString:
+		case vtOctet:
+		case vtBoolean:
+			SetAttributeDirect_Primitive(engine, key, attrib); return;
+		case vtObject:
+			SetAttributeDirect_Object   (        key, attrib); return;
 		}
 	}
 
-	void SetAttributeDirect_Void    (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Integer (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Real    (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Null    (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_String  (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Octet   (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Boolean (const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Object  (const tVariantBlock & key, risse_uint32 attrib) const;
+	void SetAttributeDirect_Primitive(tScriptEngine * engine, const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
+	void SetAttributeDirect_Object   (                        const tVariantBlock & key, risse_uint32 attrib) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall

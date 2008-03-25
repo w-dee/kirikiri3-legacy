@@ -179,7 +179,8 @@ void tClassBase::RegisterMembers()
 			tOperateFlags(tMemberAttribute::GetDefault()) |
 			tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
 			tVariant(GetRTTI()->GetScriptEngine()->ClassClass), *pThis);
-		pThis->SetAttributeDirect(ss_class, tMemberAttribute(tMemberAttribute::acInternal));
+		pThis->SetAttributeDirect(GetRTTI()->GetScriptEngine(),
+				ss_class, tMemberAttribute(tMemberAttribute::acInternal));
 	}
 
 	// members を Object クラスのインスタンスとしてマークする。
@@ -256,7 +257,8 @@ void tClassBase::risse_new(const tNativeCallInfo &info)
 			tOperateFlags(tMemberAttribute::GetDefault()) |
 			tOperateFlags::ofMemberEnsure|tOperateFlags::ofInstanceMemberOnly,
 			info.This, new_object);
-		new_object.SetAttributeDirect(ss_class, tMemberAttribute(tMemberAttribute::acInternal));
+		new_object.SetAttributeDirect(info.engine,
+			ss_class, tMemberAttribute(tMemberAttribute::acInternal));
 		// yet not
 
 		// new メソッドは自分のクラスのfertilizeメソッドを呼ぶ。

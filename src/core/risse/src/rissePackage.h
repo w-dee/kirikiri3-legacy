@@ -90,7 +90,7 @@ private:
 	//! @param		ids			インポートしたいidが入った辞書配列(NULL可)
 	//! @note		ids が null の場合はすべてのpublicな識別子がインポートされる。
 	//! @note		ids の中の辞書配列アイテムは、見つかれば削除される。
-	static void ImportIds(const tVariant & from, const tVariant & to,
+	void ImportIds(const tVariant & from, const tVariant & to,
 		const tVariant * ids);
 
 	//! @brief		パッケージをパスから検索する
@@ -112,13 +112,17 @@ private:
 	//! @note		dest に Object のインスタンスによる階層を作成する。
 	//!				たとえば id が ["a","b","c"] ならば dest.a.b.c という階層
 	//!				を作成する。また、最後の c は deepest の内容になる。
-	void Dig(tVariant & dest, const tVariant & id, const tVariant & deepest);
+	//! @param		attrib		deepest を書き込むときのそのメンバの属性
+	void Dig(tVariant & dest, const tVariant & id, const tVariant & deepest,
+		tMemberAttribute attrib = tMemberAttribute::GetDefault());
 
 	//! @brief		パッケージ用の名前空間を「掘る」
 	//! @param		dest		掘る先のオブジェクト
 	//! @param		id			掘るidがドットで繋がった名前
 	//! @param		deepest		一番深いところの名前空間とする内容
-	void Dig(tVariant & dest, const tString & id, const tVariant & deepest);
+	//! @param		attrib		deepest を書き込むときのそのメンバの属性
+	void Dig(tVariant & dest, const tString & id, const tVariant & deepest,
+		tMemberAttribute attrib = tMemberAttribute::GetDefault());
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

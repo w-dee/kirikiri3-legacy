@@ -91,6 +91,8 @@ void tObjectClass::import(const tVariant & packages, const tNativeCallInfo & inf
 	if(info.args.HasArgument(1))
 	{
 		// 引数が2個あるぜ
+		info.engine->GetPackageManager()->
+			DoImport(const_cast<tVariant&>(info.This), packages, info.args[1]);
 	}
 	else
 	{

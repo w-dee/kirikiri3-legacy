@@ -331,6 +331,41 @@ void tPackageManager::DoImport(tVariant & dest,
 
 	tCriticalSection::tLocker lock(*CS); // sync
 
+	// packages はインポートするパッケージを表す配列の配列
+	tVariant::tSynchronizer sync_dest(dest); // sync
+	tVariant::tSynchronizer sync_packages(packages); // sync
+	tVariant::tSynchronizer sync_ids(ids); // sync
+
+	gc_vector<tVariant> globals; // パッケージグローバルの配列
+
+	// 列挙されたパッケージをとりあえず全て初期化する
+	risse_size list_count =
+			(risse_int64)packages.GetPropertyDirect(ScriptEngine, ss_length);
+	for(risse_size i = 0; i < list_count; i++)
+	{
+		tVariant package_loc =
+			packages.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
+
+		// package に対応するパッケージのファイル名を得る
+		gc_vector<tString> filenames;
+		gc_vector<tString> locations;
+		SearchPackage(package_loc, filenames, locations);
+
+		// 対応するパッケージを順に読み込む
+		for(risse_size j = 0; j < locations.size(); j++)
+		{
+			tVariant package_global = InitPackage(filenames[j], locations[j]);
+			globals.push_back(package_global);
+		}
+	}
+
+	// それぞれのパッケージから識別子をインポートする
+	// ids が true の場合は すべての識別子をインポートすることになる
+	bool import_all = (ids.GetType() == tVariant::vtBoolean) && ids.operator bool();
+	for(gc_vector<tVariant>::iterator i = globals.begin(); i != globals.end(); i++)
+		ImportIds(*i, dest, import_all ? NULL : &ids);
+
+	// TODO: インポートできなかったものは ids に残っているはずなのでそれをチェック
 }
 //---------------------------------------------------------------------------
 
@@ -385,6 +420,8 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 	// せめて this への import ですかね。グローバル位置で import すると this は
 	// 自動的に global になるので global への import という意味に自動的になる
 
+	RISSE_ASSERT(!ids || ids->GetType() == tVariant::vtObject);
+
 	// from と to をロックする
 	tVariant::tSynchronizer sync_from(from);
 	tVariant::tSynchronizer sync_to(to);
@@ -395,10 +432,13 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 
 	class callback : public tObjectBase::tEnumMemberCallback
 	{
+		tPackageManager * Manager;
 		tVariant To;
 		const tVariant * Ids;
 	public:
-		callback(const tVariant & to, const tVariant * ids) : To(to), Ids(ids) {}
+		callback(tPackageManager * manager,
+			const tVariant & to,
+			const tVariant * ids) : Manager(manager), To(to), Ids(ids) {}
 
 		bool OnEnum(const tString & name,
 			const tObjectBase::tMemberData & data)
@@ -423,28 +463,21 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 			if(!as.IsVoid())
 			{
 				// インポートする場合
-				RISSE_ASSERT(To.GetType() == tVariant::vtObject);
-				tOperateFlags access_flags =
-					tOperateFlags::ofMemberEnsure|
-					tOperateFlags::ofInstanceMemberOnly|
-					tOperateFlags::ofUseClassMembersRule;
-				tMemberAttribute attrib =
-					tMemberAttribute::GetDefault().Set(tMemberAttribute::mcNone);
-					// 変更性のみは指定しない。これは定数の上書き時に強制的にエラーにしたいため。
-
-				// To にメンバを作成
-				To.SetPropertyDirect_Object(as.operator tString(),
-					(risse_uint32)attrib | (risse_uint32)access_flags,
-					data.Value);
-
-				// そのメンバの属性を設定
-				To.SetAttributeDirect_Object(
-					as.operator tString(), data.Attribute);
+				if(as.GetType() == tVariant::vtString)
+				{
+					// 文字列指定
+					Manager->Dig(To, as.operator tString(), data.Value, data.Attribute);
+				}
+				else
+				{
+					// 配列指定とみなす
+					Manager->Dig(To, as, data.Value, data.Attribute);
+				}
 			}
 
 			return true;
 		}
-	} cb(to, ids);
+	} cb(this, to, ids);
 	from_objectbase->Enumurate(&cb);
 
 }
@@ -599,7 +632,8 @@ void tPackageManager::SearchPackage(const tVariant & name,
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant & deepest)
+void tPackageManager::Dig(tVariant & dest, const tVariant & id,
+	const tVariant & deepest, tMemberAttribute attrib)
 {
 	tVariant::tSynchronizer sync_dest(dest); // sync
 	tVariant::tSynchronizer sync_id(id); // sync
@@ -615,11 +649,23 @@ void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant &
 		if(i == id_count - 1)
 		{
 			// current に one を deepest の内容で書き込む
-			current.SetPropertyDirect_Object(one,
-						tOperateFlags::ofMemberEnsure|
-						tOperateFlags::ofInstanceMemberOnly|
-						tOperateFlags::ofUseClassMembersRule,
-						deepest);
+
+			// インポートする場合
+			tOperateFlags access_flags =
+				tOperateFlags::ofMemberEnsure|
+				tOperateFlags::ofInstanceMemberOnly|
+				tOperateFlags::ofUseClassMembersRule;
+			tMemberAttribute attrib_spec =
+				tMemberAttribute::GetDefault().Set(tMemberAttribute::mcNone);
+				// 変更性のみは指定しない。これは定数の上書き時に強制的にエラーにしたいため。
+
+			// To にメンバを作成
+			current.SetPropertyDirect(ScriptEngine, one,
+				(risse_uint32)attrib_spec | (risse_uint32)access_flags,
+				deepest);
+
+			// そのメンバの属性を設定
+			current.SetAttributeDirect(ScriptEngine, one, attrib);
 		}
 		else
 		{
@@ -633,7 +679,7 @@ void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant &
 				// うーん、なんかエラー？たぶんメンバが無いんだと思うけど
 				// だったらとりあえず作ってみる
 				value = tVariant(ScriptEngine->ObjectClass).New();
-				current.SetPropertyDirect_Object(one,
+				current.SetPropertyDirect(ScriptEngine, one,
 						tOperateFlags::ofMemberEnsure|
 						tOperateFlags::ofInstanceMemberOnly|
 						tOperateFlags::ofUseClassMembersRule,
@@ -647,38 +693,22 @@ void tPackageManager::Dig(tVariant & dest, const tVariant & id, const tVariant &
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::Dig(tVariant & dest, const tString & id, const tVariant & deepest)
+void tPackageManager::Dig(tVariant & dest, const tString & id,
+	const tVariant & deepest, tMemberAttribute attrib)
 {
 	// id を . (ドット) で split する
-	// まだこれ書いてる時点では String::split がないんだよなー
+
 	tVariant array = tVariant(ScriptEngine->ArrayClass).New();
-	risse_size start = 0;
-	risse_size current = 0;
-	risse_size length = id.GetLength();
-	const risse_char *ref = id.c_str();
-	while(true)
+	tString::tSplitter spliter(id, RISSE_WC('.'));
+	tString component;
+	while(spliter(component))
 	{
-		while(current < length && ref[current] != RISSE_WC('.')) current ++;
-		if(current >= length) break;
-
-		if(start != current)
-		{
-			tString component = tString(id, start, current - start);
-			array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
-		}
-
-		current ++;
-		start = current;
-	}
-
-	if(start != current)
-	{
-		tString component = tString(id, start, current - start);
+		if(component.IsEmpty()) continue;
 		array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
 	}
 
 	// Dig の tVariant 配列版を呼び出す
-	Dig(dest, array, deepest);
+	Dig(dest, array, deepest, attrib);
 }
 //---------------------------------------------------------------------------
 

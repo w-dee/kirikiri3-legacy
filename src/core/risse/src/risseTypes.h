@@ -159,8 +159,12 @@ namespace Risse
 	#define RISSE_PREFETCH_FOR_WRITE(__x)
 #endif
 
-//---------------------------------------------------------------------------
-
+// noreturn
+#ifdef __GNUC__
+	#define RISSE_NORETURN __attribute__((noreturn))
+#else
+	#define RISSE_NORETURN
+#endif
 
 // restricted pointers
 #if (__GNUC__ == 3 && __GNUC_MINOR__ > 4 ) || __GNUC__ > 3

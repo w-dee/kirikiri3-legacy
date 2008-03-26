@@ -71,7 +71,8 @@ public:
 
 	//! @brief		例外を本来の例外に変換し、再び投げる
 	//! @param		engine		スクリプトエンジン
-	void ThrowConverted(tScriptEngine * engine) const { throw Convert(engine); }
+	void ThrowConverted(tScriptEngine * engine) const RISSE_NORETURN
+	{ throw Convert(engine); }
 
 	//! @brief		例外クラス名を得る
 	const tString & GetExceptionClassName() const { return ExceptionClassName; }
@@ -262,11 +263,11 @@ public:
 	//! @brief		例外を投げる
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		expression		ASSERTに失敗した式
-	static void Throw(tScriptEngine * engine, const tString & expression);
+	static void Throw(tScriptEngine * engine, const tString & expression) RISSE_NORETURN;
 
 	//! @brief		例外を投げる
 	//! @param		expression		ASSERTに失敗した式
-	static void Throw(const tString & expression) { Throw(NULL, expression); }
+	static void Throw(const tString & expression) RISSE_NORETURN { Throw(NULL, expression); }
 };
 //---------------------------------------------------------------------------
 
@@ -361,9 +362,9 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「コルーチンを作成できない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCouldNotCreateCoroutine(tScriptEngine * engine);
+	static void ThrowCouldNotCreateCoroutine(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「コルーチンを作成できない」例外を発生
-	static void ThrowCouldNotCreateCoroutine() { ThrowCouldNotCreateCoroutine(NULL); }
+	static void ThrowCouldNotCreateCoroutine() RISSE_NORETURN { ThrowCouldNotCreateCoroutine(NULL); }
 };
 //---------------------------------------------------------------------------
 
@@ -399,29 +400,29 @@ public:
 	//! @brief		例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		msg			例外メッセージ
-	static void Throw(tScriptEngine * engine, const tString & message);
+	static void Throw(tScriptEngine * engine, const tString & message) RISSE_NORETURN;
 	//! @brief		「読み込みエラーが発生した」例外を発生
-	static void Throw(const tString & message)
+	static void Throw(const tString & message) RISSE_NORETURN
 		{ Throw(NULL, message); }
 
 	//! @brief		「読み込みエラーが発生した」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		ストリームなどの名前
 	static void ThrowReadError(tScriptEngine * engine,
-		const tString & name = tString::GetEmptyString());
+		const tString & name = tString::GetEmptyString()) RISSE_NORETURN;
 	//! @brief		「読み込みエラーが発生した」例外を発生
 	static void ThrowReadError(const tString & name =
-		tString::GetEmptyString())
+		tString::GetEmptyString()) RISSE_NORETURN
 		{ ThrowReadError(NULL, name); }
 
 	//! @brief		「書き込みエラーが発生した」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		ストリームなどの名前
 	static void ThrowWriteError(tScriptEngine * engine,
-		const tString & name = tString::GetEmptyString());
+		const tString & name = tString::GetEmptyString()) RISSE_NORETURN;
 	//! @brief		「書き込みエラーが発生した」例外を発生
 	static void ThrowWriteError(const tString & name =
-		tString::GetEmptyString()) { ThrowWriteError(NULL, name); }
+		tString::GetEmptyString()) RISSE_NORETURN { ThrowWriteError(NULL, name); }
 
 	//! @brief		「シークエラーが発生した」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
@@ -429,10 +430,10 @@ public:
 	//! @param		pos			シークしようとした位置
 	static void ThrowSeekError(tScriptEngine * engine,
 		const tString & name = tString::GetEmptyString(),
-		risse_size pos = risse_size_max);
+		risse_size pos = risse_size_max) RISSE_NORETURN;
 	//! @brief		「シークエラーが発生した」例外を発生
 	static void ThrowSeekError(const tString & name =
-		tString::GetEmptyString(), risse_size pos = risse_size_max)
+		tString::GetEmptyString(), risse_size pos = risse_size_max) RISSE_NORETURN
 		{ ThrowSeekError(NULL, name, pos); }
 
 	//! @brief		「ファイルの切りつめに失敗した」例外を発生
@@ -441,10 +442,10 @@ public:
 	//! @param		pos			切りつめようとした位置
 	static void ThrowTruncateError(tScriptEngine * engine,
 		const tString & name = tString::GetEmptyString(),
-		risse_size pos = risse_size_max);
+		risse_size pos = risse_size_max) RISSE_NORETURN;
 	//! @brief		「ファイルの切りつめに失敗した」例外を発生
 	static void ThrowTruncateError(const tString & name =
-		tString::GetEmptyString(), risse_size pos = risse_size_max)
+		tString::GetEmptyString(), risse_size pos = risse_size_max) RISSE_NORETURN
 		{ ThrowTruncateError(NULL, name, pos); }
 /*
 	See tInaccessibleResourceExceptionClass::Throw
@@ -452,10 +453,10 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		ストリームなどの名前
 	static void ThrowStreamIsClosed(tScriptEngine * engine,
-		const tString & name = tString::GetEmptyString());
+		const tString & name = tString::GetEmptyString()) RISSE_NORETURN;
 	//! @brief		「ストリームは閉じられている」例外を発生
 	static void ThrowStreamIsClosed(const tString & name =
-		tString::GetEmptyString())
+		tString::GetEmptyString()) RISSE_NORETURN
 		{ ThrowStreamIsClosed(NULL, name); }
 */
 };
@@ -490,9 +491,9 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「無効なUTF-8文字列です」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowInvalidUTF8String(tScriptEngine * engine);
+	static void ThrowInvalidUTF8String(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「無効なUTF-8文字列です」例外を発生
-	static void ThrowInvalidUTF8String() { ThrowInvalidUTF8String(NULL); }
+	static void ThrowInvalidUTF8String() RISSE_NORETURN { ThrowInvalidUTF8String(NULL); }
 };
 //---------------------------------------------------------------------------
 
@@ -557,10 +558,10 @@ public:
 	//! @param		sb			スクリプトブロック
 	//! @param		pos			スクリプト上の位置
 	static void Throw(tScriptEngine * engine, const tString & reason,
-		const tScriptBlockInstance * sb = NULL, risse_size pos = risse_size_max);
+		const tScriptBlockInstance * sb = NULL, risse_size pos = risse_size_max) RISSE_NORETURN;
 	//! @brief		「コンパイルエラー」例外を発生
 	//! @param		reason		例外の理由
-	static void Throw(const tString & reason)
+	static void Throw(const tString & reason) RISSE_NORETURN
 		{ Throw(NULL, reason); }
 };
 //---------------------------------------------------------------------------
@@ -596,37 +597,37 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「プリミティブ型インスタンスのコンテキストにはインポートできない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCannotImportIntoPrimitiveInstanceContext(tScriptEngine * engine);
+	static void ThrowCannotImportIntoPrimitiveInstanceContext(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「プリミティブ型クラスのコンテキストにはインポートできない」例外を発生
-	static void ThrowCannotImportIntoPrimitiveInstanceContext()
+	static void ThrowCannotImportIntoPrimitiveInstanceContext() RISSE_NORETURN
 		{ ThrowCannotImportIntoPrimitiveInstanceContext(NULL); }
 
 	//! @brief		「パッケージが見つからない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		package_name	パッケージ名
-	static void ThrowPackageNotFound(tScriptEngine * engine, const tString & package_name);
+	static void ThrowPackageNotFound(tScriptEngine * engine, const tString & package_name) RISSE_NORETURN;
 	//! @brief		「パッケージが見つからない」例外を発生
 	//! @param		package_name	パッケージ名
-	static void ThrowPackageNotFound(const tString & package_name)
+	static void ThrowPackageNotFound(const tString & package_name) RISSE_NORETURN
 		{ ThrowPackageNotFound(NULL, package_name); }
 
 	//! @brief		「パッケージは現在初期化中なのでインポートできない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		package_name	パッケージ名
-	static void ThrowPackageIsBeingInitialized(tScriptEngine * engine, const tString & package_name);
+	static void ThrowPackageIsBeingInitialized(tScriptEngine * engine, const tString & package_name) RISSE_NORETURN;
 	//! @brief		「パッケージは現在初期化中なのでインポートできない」例外を発生
 	//! @param		package_name	パッケージ名
-	static void ThrowPackageIsBeingInitialized(const tString & package_name)
+	static void ThrowPackageIsBeingInitialized(const tString & package_name) RISSE_NORETURN
 		{ ThrowPackageIsBeingInitialized(NULL, package_name); }
 
 	//! @brief		「識別子をインポートできない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		ids			インポートできなかった識別子名
 	static void ThrowCannotImportIds(tScriptEngine * engine,
-			const gc_vector<tString> & ids);
+			const gc_vector<tString> & ids) RISSE_NORETURN;
 	//! @brief		「識別子をインポートできない」例外を発生
 	//! @param		ids			インポートできなかった識別子名
-	static void ThrowCannotImportIds(const gc_vector<tString> & ids)
+	static void ThrowCannotImportIds(const gc_vector<tString> & ids) RISSE_NORETURN
 		{ ThrowCannotImportIds(NULL, ids); }
 
 };
@@ -663,17 +664,17 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「extensibleでないクラスのサブクラスを作成しようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine);
+	static void ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「extensibleでないクラスのサブクラスを作成しようとした」例外を発生
-	static void ThrowCannotCreateSubClassOfNonExtensibleClass()
+	static void ThrowCannotCreateSubClassOfNonExtensibleClass() RISSE_NORETURN
 		{ ThrowCannotCreateSubClassOfNonExtensibleClass(NULL); }
 
 	//! @brief		「スーパークラスはクラスではない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowSuperClassIsNotAClass(tScriptEngine * engine);
+	static void ThrowSuperClassIsNotAClass(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「スーパークラスはクラスではない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowSuperClassIsNotAClass()
+	static void ThrowSuperClassIsNotAClass() RISSE_NORETURN
 		{ ThrowSuperClassIsNotAClass(NULL); }
 };
 //---------------------------------------------------------------------------
@@ -710,16 +711,16 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCannotCreateInstanceFromNonClassObject(tScriptEngine * engine);
+	static void ThrowCannotCreateInstanceFromNonClassObject(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「クラスでない物からインスタンスを生成しようとした」例外を発生
-	static void ThrowCannotCreateInstanceFromNonClassObject()
+	static void ThrowCannotCreateInstanceFromNonClassObject() RISSE_NORETURN
 		{ ThrowCannotCreateInstanceFromNonClassObject(NULL); }
 
 	//! @brief		「このクラスからインスタンスは作成できません」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCannotCreateInstanceFromThisClass(tScriptEngine * engine);
+	static void ThrowCannotCreateInstanceFromThisClass(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「このクラスからインスタンスは作成できません」例外を発生
-	static void ThrowCannotCreateInstanceFromThisClass()
+	static void ThrowCannotCreateInstanceFromThisClass() RISSE_NORETURN
 		{ ThrowCannotCreateInstanceFromThisClass(NULL); }
 };
 //---------------------------------------------------------------------------
@@ -753,9 +754,9 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void Throw(tScriptEngine * engine);
+	static void Throw(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「異なるクラスのコンテキストです」例外を発生
-	static void Throw() { Throw(NULL); }
+	static void Throw() RISSE_NORETURN { Throw(NULL); }
 };
 //---------------------------------------------------------------------------
 
@@ -791,16 +792,16 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「関数でない物を呼び出そうとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCannotCallNonFunctionObjectException(tScriptEngine * engine);
+	static void ThrowCannotCallNonFunctionObjectException(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「関数でない物を呼び出そうとした」例外を発生
-	static void ThrowCannotCallNonFunctionObjectException()
+	static void ThrowCannotCallNonFunctionObjectException() RISSE_NORETURN
 		{ ThrowCannotCallNonFunctionObjectException(NULL); }
 
 	//! @brief		「機能が実装されていません」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowOperationIsNotImplemented(tScriptEngine * engine);
+	static void ThrowOperationIsNotImplemented(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「機能が実装されていません」例外を発生
-	static void ThrowOperationIsNotImplemented()
+	static void ThrowOperationIsNotImplemented() RISSE_NORETURN
 		{ ThrowOperationIsNotImplemented(NULL); }
 };
 //---------------------------------------------------------------------------
@@ -830,9 +831,9 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「0で除算をしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowDivideByZeroException(tScriptEngine * engine);
+	static void ThrowDivideByZeroException(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「0で除算をしようとした」例外を発生
-	static void ThrowDivideByZeroException()
+	static void ThrowDivideByZeroException() RISSE_NORETURN
 		{ ThrowDivideByZeroException(NULL); }
 };
 //---------------------------------------------------------------------------
@@ -896,9 +897,9 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「nullオブジェクトにアクセスしようとしました」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void Throw(tScriptEngine * engine);
+	static void Throw(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「nullオブジェクトにアクセスしようとしました」例外を発生
-	static void Throw() { Throw(NULL); }
+	static void Throw() RISSE_NORETURN { Throw(NULL); }
 };
 //---------------------------------------------------------------------------
 
@@ -935,32 +936,32 @@ public:
 	//! @param		method_name	メソッド名
 	//! @param		class_name	クラス名
 	static void ThrowNonAcceptableClass(tScriptEngine * engine,
-		const tString & method_name, const tString & class_name);
+		const tString & method_name, const tString & class_name) RISSE_NORETURN;
 	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		method_name	メソッド名
 	//! @param		class_name	クラス名
-	static void ThrowNonAcceptableClass(const tString & method_name, const tString & class_name)
+	static void ThrowNonAcceptableClass(const tString & method_name, const tString & class_name) RISSE_NORETURN
 		{ ThrowNonAcceptableClass(NULL, method_name, class_name); }
 
 	//! @brief		「このクラスではこのmethod_nameは実行できない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		method_name	メソッド名
 	static void ThrowIllegalOperationMethod(tScriptEngine * engine,
-		const tString & method_name);
+		const tString & method_name) RISSE_NORETURN;
 	//! @brief		「method_nameにクラスclass_nameは受け入れられない」例外を発生
 	//! @param		method_name	メソッド名
-	static void ThrowIllegalOperationMethod(const tString & method_name)
+	static void ThrowIllegalOperationMethod(const tString & method_name) RISSE_NORETURN
 		{ ThrowIllegalOperationMethod(NULL, method_name); }
 
 	//! @brief		「クラスclass_nameのインスタンスを指定すべし」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		class_name	クラス名
 	static void ThrowSpecifyInstanceOfClass(tScriptEngine * engine,
-		const tString & class_name);
+		const tString & class_name) RISSE_NORETURN;
 	//! @brief		「クラスclass_nameのインスタンスを指定すべし」例外を発生
 	//! @param		method_name	メソッド名
 	//! @param		class_name	クラス名
-	static void ThrowSpecifyInstanceOfClass(const tString & class_name)
+	static void ThrowSpecifyInstanceOfClass(const tString & class_name) RISSE_NORETURN
 		{ ThrowSpecifyInstanceOfClass(NULL, class_name); }
 
 
@@ -998,17 +999,17 @@ public:
 	//! @brief		例外を投げる
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		message		メッセージ
-	static void Throw(tScriptEngine * engine, const tString & message);
+	static void Throw(tScriptEngine * engine, const tString & message) RISSE_NORETURN;
 	//! @brief		例外を投げる
 	//! @param		message		メッセージ
-	static void Throw(const tString & message)
+	static void Throw(const tString & message) RISSE_NORETURN
 		{ Throw(NULL, message); }
 
 	//! @brief		「無効な日付文字列」例外を投げる
 	//! @param		engine		スクリプトエンジンインスタンス	
-	static void ThrowInvalidDateString(tScriptEngine * engine);
+	static void ThrowInvalidDateString(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「無効な日付文字列」例外を投げる
-	static void ThrowInvalidDateString() { ThrowInvalidDateString(NULL); }
+	static void ThrowInvalidDateString() RISSE_NORETURN { ThrowInvalidDateString(NULL); }
 };
 //---------------------------------------------------------------------------
 
@@ -1046,22 +1047,22 @@ public:
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		passed		渡された引数の数
 	//! @param		expected	期待した数
-	static void ThrowNormal(tScriptEngine * engine, risse_size passed, risse_size expected);
+	static void ThrowNormal(tScriptEngine * engine, risse_size passed, risse_size expected) RISSE_NORETURN;
 	//! @brief		普通の引数の数が期待した数でなかった場合の例外を発生
 	//! @param		passed		渡された引数の数
 	//! @param		expected	期待した数
-	static void ThrowNormal(risse_size passed, risse_size expected)
+	static void ThrowNormal(risse_size passed, risse_size expected) RISSE_NORETURN
 		{ ThrowNormal(NULL, passed, expected); }
 
 	//! @brief		ブロック引数の数が期待した数でなかった場合の例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		passed		渡された引数の数
 	//! @param		expected	期待した数
-	static void ThrowBlock(tScriptEngine * engine, risse_size passed, risse_size expected);
+	static void ThrowBlock(tScriptEngine * engine, risse_size passed, risse_size expected) RISSE_NORETURN;
 	//! @brief		ブロック引数の数が期待した数でなかった場合の例外を発生
 	//! @param		passed		渡された引数の数
 	//! @param		expected	期待した数
-	static void ThrowBlock(risse_size passed, risse_size expected)
+	static void ThrowBlock(risse_size passed, risse_size expected) RISSE_NORETURN
 		{ ThrowBlock(NULL, passed, expected); }
 };
 //---------------------------------------------------------------------------
@@ -1127,10 +1128,10 @@ public:
 	//! @brief		例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void Throw(tScriptEngine * engine, const tString & name);
+	static void Throw(tScriptEngine * engine, const tString & name) RISSE_NORETURN;
 	//! @brief		例外を発生
 	//! @param		name		メンバ名
-	static void Throw(const tString & name) { Throw(NULL, name); }
+	static void Throw(const tString & name) RISSE_NORETURN { Throw(NULL, name); }
 };
 //---------------------------------------------------------------------------
 
@@ -1164,41 +1165,41 @@ public:
 	//! @brief		「読み出し専用メンバに上書きしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowMemberIsReadOnly(tScriptEngine * engine, const tString & name);
+	static void ThrowMemberIsReadOnly(tScriptEngine * engine, const tString & name) RISSE_NORETURN;
 	//! @brief		「読み出し専用メンバに上書きしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowMemberIsReadOnly(const tString & name)
+	static void ThrowMemberIsReadOnly(const tString & name) RISSE_NORETURN
 		{ ThrowMemberIsReadOnly(NULL, name); }
 
 	//! @brief		「finalメンバをオーバーライドしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowMemberIsFinal(tScriptEngine * engine, const tString & name);
+	static void ThrowMemberIsFinal(tScriptEngine * engine, const tString & name) RISSE_NORETURN;
 	//! @brief		「finalメンバをオーバーライドしようとした」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowMemberIsFinal(const tString & name)
+	static void ThrowMemberIsFinal(const tString & name) RISSE_NORETURN
 		{ ThrowMemberIsFinal(NULL, name); }
 
 	//! @brief		「このプロパティからは読み込むことができない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowPropertyCannotBeRead(tScriptEngine * engine, const tString & name);
+	static void ThrowPropertyCannotBeRead(tScriptEngine * engine, const tString & name) RISSE_NORETURN;
 	//! @brief		「このプロパティからは読み込むことができない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowPropertyCannotBeRead(const tString & name)
+	static void ThrowPropertyCannotBeRead(const tString & name) RISSE_NORETURN
 		{ ThrowPropertyCannotBeRead(NULL, name); }
 
 	//! @brief		「このプロパティには書き込むことができない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowPropertyCannotBeWritten(tScriptEngine * engine, const tString & name);
+	static void ThrowPropertyCannotBeWritten(tScriptEngine * engine, const tString & name) RISSE_NORETURN;
 	//! @brief		「このプロパティには書き込むことができない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		メンバ名
-	static void ThrowPropertyCannotBeWritten(const tString & name)
+	static void ThrowPropertyCannotBeWritten(const tString & name) RISSE_NORETURN
 		{ ThrowPropertyCannotBeWritten(NULL, name); }
 };
 //---------------------------------------------------------------------------
@@ -1232,34 +1233,34 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「コルーチンは既に終了している」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasAlreadyExited(tScriptEngine * engine);
+	static void ThrowCoroutineHasAlreadyExited(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「コルーチンは既に終了している」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasAlreadyExited()
+	static void ThrowCoroutineHasAlreadyExited() RISSE_NORETURN
 		{ ThrowCoroutineHasAlreadyExited(NULL); }
 
 	//! @brief		「コルーチンはまだ開始していない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasNotStartedYet(tScriptEngine * engine);
+	static void ThrowCoroutineHasNotStartedYet(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「コルーチンはまだ開始していない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasNotStartedYet()
+	static void ThrowCoroutineHasNotStartedYet() RISSE_NORETURN
 		{ ThrowCoroutineHasNotStartedYet(NULL); }
 
 	//! @brief		「コルーチンは実行中でない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsNotRunning(tScriptEngine * engine);
+	static void ThrowCoroutineIsNotRunning(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「コルーチンは実行中でない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsNotRunning()
+	static void ThrowCoroutineIsNotRunning() RISSE_NORETURN
 		{ ThrowCoroutineIsNotRunning(NULL); }
 
 	//! @brief		「コルーチンは実行中」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsRunning(tScriptEngine * engine);
+	static void ThrowCoroutineIsRunning(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「コルーチンは実行中」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsRunning()
+	static void ThrowCoroutineIsRunning() RISSE_NORETURN
 		{ ThrowCoroutineIsRunning(NULL); }
 
 };
@@ -1317,10 +1318,10 @@ public: // Risse用メソッドなど
 public:
 	//! @brief		「リソースにアクセスできない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void Throw(tScriptEngine * engine);
+	static void Throw(tScriptEngine * engine) RISSE_NORETURN;
 	//! @brief		「リソースにアクセスできない」例外を発生
 	//! @param		engine		スクリプトエンジンインスタンス
-	static void Throw()
+	static void Throw() RISSE_NORETURN
 		{ Throw(NULL); }
 };
 //---------------------------------------------------------------------------

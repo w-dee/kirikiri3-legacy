@@ -35,30 +35,30 @@ private:
 	//! @brief		CannotCreateInstanceFromNonClassObjectException を投げる
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowCannotCreateInstanceFromNonClassObjectException();
+	static void ThrowCannotCreateInstanceFromNonClassObjectException() RISSE_NORETURN;
 
 	//! @brief		BadContextException を投げる
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowBadContextException();
+	static void ThrowBadContextException() RISSE_NORETURN;
 
 	//! @brief		NoSuchMemberException を投げる
 	//! @param		name		メンバ名
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowNoSuchMemberException(const tString & name);
+	static void ThrowNoSuchMemberException(const tString & name) RISSE_NORETURN;
 
 	//! @brief		IllegalArgumentClassException を投げる
 	//! @param		class_name			クラス名
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	static void ThrowIllegalArgumentClassException(const tString & class_name);
+	static void ThrowIllegalArgumentClassException(const tString & class_name) RISSE_NORETURN;
 
 	//! @brief		IllegalArgumentClassException を投げる
 	//! @param		method_name			メソッド名
 	//! @note		本来 risseExceptionClass.h に書いてある物だが
 	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
-	void ThrowIllegalOperationMethod(const tString & method_name) const;
+	void ThrowIllegalOperationMethod(const tString & method_name) const RISSE_NORETURN;
 
 private: // static オブジェクト
 	//! @brief	null/void/などの特殊な値を表すstaticな領域

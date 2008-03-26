@@ -1205,6 +1205,17 @@ void tImportExceptionClass::ThrowCannotImportIds(
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tImportExceptionClass::ThrowInvalidRelativePckageName(tScriptEngine * engine,
+			const tString & package_name, const tString & ref)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_ImportException,
+			tString(RISSE_WS_TR("invalid relative package name \"%1\" against \"%2\""), package_name, ref));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
 
 
 

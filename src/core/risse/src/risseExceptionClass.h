@@ -630,6 +630,20 @@ public:
 	static void ThrowCannotImportIds(const gc_vector<tString> & ids) RISSE_NORETURN
 		{ ThrowCannotImportIds(NULL, ids); }
 
+	//! @brief		「不正な相対パッケージ名指定」例外を発生
+	//! @param		engine			スクリプトエンジンインスタンス
+	//! @param		package_name	パッケージ名
+	//! @param		ref				基準となったパッケージ名
+	static void ThrowInvalidRelativePckageName(tScriptEngine * engine,
+			const tString & package_name, const tString & ref) RISSE_NORETURN;
+	//! @brief		「不正な相対パッケージ名指定」例外を発生
+	//! @param		ids				パッケージ名
+	//! @param		package_name	パッケージ名
+	//! @param		ref				基準となったパッケージ名
+	static void ThrowInvalidRelativePckageName(
+		const tString & package_name, const tString & ref) RISSE_NORETURN
+		{ ThrowInvalidRelativePckageName(NULL, package_name, ref); }
+
 };
 //---------------------------------------------------------------------------
 

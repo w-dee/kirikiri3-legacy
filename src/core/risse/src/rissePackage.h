@@ -78,6 +78,13 @@ public:
 	void DoImport(const tVariant & global, tVariant & dest, const tVariant & packages, const tVariant & ids);
 
 private:
+	//! @brief		パッケージの相対位置を求める
+	//! @param		global		基準となるglobal
+	//! @param		package		パッケージ配列
+	//! @note		package 配列の先頭にある "" は取り除かれ、
+	//!				代わりに絶対指定のパッケージ配列になる。
+	void AdjustRelativePackage(const tVariant & global, const tVariant & package);
+
 	//! @brief		パッケージを初期化する
 	//! @param		filename	パッケージが入ったファイル名
 	//! @param		name		パッケージグローバルの完全装飾名

@@ -315,6 +315,9 @@ void tPackageManager::DoImport(const tVariant & global, tVariant & dest, const t
 		tVariant package_loc =
 			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'p','a','c','k','a','g','e'>()));
 
+		// package_loc が相対指定ならば絶対指定に変換
+		AdjustRelativePackage(global, package_loc);
+
 		// as を得る
 		tVariant as =
 			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'a','s'>()));
@@ -388,6 +391,9 @@ void tPackageManager::DoImport(const tVariant & global, tVariant & dest,
 	{
 		tVariant package_loc =
 			packages.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
+
+		// package_loc が相対指定ならば絶対指定に変換
+		AdjustRelativePackage(global, package_loc);
 
 		// package_loc に対応するパッケージのファイル名を得る
 		gc_vector<tString> filenames;
@@ -520,6 +526,52 @@ tVariant tPackageManager::InitPackage(const tString & filename, const tString & 
 	}
 
 	return package_global;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPackageManager::AdjustRelativePackage(const tVariant & global, const tVariant & package)
+{
+	// まず package の先頭の "" の数を見る
+	risse_size dot_count = 0;
+	while(true)
+	{
+		tVariant item = package.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)dot_count));
+		if(item.GetType() == tVariant::vtString && item.operator tString().IsEmpty())
+			dot_count ++;
+		else
+			break;
+	}
+
+	// dot_count が 0 ならば絶対指定なのでもどる
+	if(dot_count == 0) return;
+
+	// global から package を取得
+	tString ref_package_name =
+		global.GetPropertyDirect(ScriptEngine, tSS<'p','a','c','k','a','g','e'>()).operator tString();
+
+	// それをドットで分解
+	tString::tSplitter splitter(ref_package_name, RISSE_WC('.'));
+	gc_vector<tString> ref;
+	tString component;
+	while(splitter(component)) ref.push_back(component);
+
+	// 戻りすぎてない？
+	if(ref.size() < (dot_count - 1))
+		tImportExceptionClass::ThrowInvalidRelativePckageName(
+			ScriptEngine,
+			package.Invoke(ScriptEngine, tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())),
+			ref_package_name);
+
+	// package の先頭の "" を取り除く
+	for(risse_size i = 0; i < dot_count; i++)
+		package.Invoke(ScriptEngine, tSS<'s','h','i','f','t'>());
+
+	// package の先頭に ref の先頭を突っ込む
+	for(gc_vector<tString>::reverse_iterator i = ref.rbegin() + (dot_count - 1);
+		i != ref.rend(); i++)
+		package.Invoke(ScriptEngine, tSS<'u','n','s','h','i','f','t'>(), tVariant(*i));
 }
 //---------------------------------------------------------------------------
 
@@ -844,9 +896,9 @@ tVariant tPackageManager::SplitPackageName(const tString & name)
 {
 	// name を . (ドット) で split する
 	tVariant array = tVariant(ScriptEngine->ArrayClass).New();
-	tString::tSplitter spliter(name, RISSE_WC('.'));
+	tString::tSplitter splitter(name, RISSE_WC('.'));
 	tString component;
-	while(spliter(component))
+	while(splitter(component))
 		array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
 
 	return array;

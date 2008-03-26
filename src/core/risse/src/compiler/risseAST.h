@@ -232,6 +232,7 @@ RISSE_AST_ENUM_END
 class tScriptBlockInstance;
 class tSSAForm;
 class tASTNode;
+class tASTNode_Array;
 class tSSAVariable;
 class tSSAVariableAccessMap;
 //---------------------------------------------------------------------------
@@ -754,12 +755,22 @@ public:
 class tASTNode_ImportLoc : public tASTNode_List
 {
 	typedef tASTNode_List inherited;
+	int BackLocCount; //!< 相対位置指定の場合の . (ドット) の数
+			// 1 = カレント, 2 = 親, 3=親の親 ... etc
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		position		ソースコード上の位置
 	tASTNode_ImportLoc(risse_size position) :
-		tASTNode_List(position, antImportLoc) {;}
+		tASTNode_List(position, antImportLoc), BackLocCount(0) {;}
+
+	//! @brief		相対位置指定の場合の . (ドット) の数を設定する
+	//! @param		count		相対位置指定の場合の . (ドット) の数
+	void SetBackLocCount(int count) { BackLocCount = count; }
+
+	//! @brief		相対位置指定の場合の . (ドット) の数を取得する
+	//! @return		相対位置指定の場合の . (ドット) の数
+	int GetBackLocCount() const { return BackLocCount; }
 
 	//! @brief		指定されたインデックスの子ノードの名前を得る
 	//! @param		index		インデックス
@@ -768,13 +779,18 @@ public:
 
 	//! @brief		ダンプ時のこのノードのコメントを得る
 	//! @return		ダンプ時のこのノードのコメント
-	tString GetDumpComment() const { return tString(); }
+	tString GetDumpComment() const;
 
 	//! @brief		SSA 形式の読み込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス
 	//! @param		param	PrepareSSA() の戻り値
 	//! @return		SSA 形式における変数 (このノードの結果が格納される)
 	tSSAVariable * DoReadSSA(tSSAForm *form, void * param) const { return NULL; }
+
+
+	//! @brief		配列のASTを生成して返す
+	//! @return		生成されたAST
+	tASTNode_Array * CreateArrayAST() const;
 };
 //---------------------------------------------------------------------------
 

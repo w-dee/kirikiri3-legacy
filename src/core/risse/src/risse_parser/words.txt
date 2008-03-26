@@ -58,7 +58,6 @@ $               T_DOLLAR                 - false false
 ||=             T_LOGICALOREQUAL         - false false
 ||              T_LOGICALOR              - false false
 |=              T_VERTLINEEQUAL          - false false
-...             T_OMIT                   - false false
 ++              T_INCREMENT              - false false
 +=              T_PLUSEQUAL              - false false
 -=              T_MINUSEQUAL             - false false

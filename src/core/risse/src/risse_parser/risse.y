@@ -179,6 +179,7 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	tASTNode * np;
 	tDeclAttribute * attr;
 	tASTArray * array;
+	int number;
 }
 
 /* トークン定義 */
@@ -289,7 +290,6 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	T_GETTER				"getter"
 	T_ELSE					"else"
 	T_CATCH					"catch"
-	T_OMIT					"..."
 	T_ASSERT				"assert"
 	T_SYNCHRONIZED			"synchronized"
 	T_WITH					"with"
@@ -387,6 +387,8 @@ static tDeclAttribute * OverwriteDeclAttribute(
 	embeddable_string_d embeddable_string_d_unit
 	embeddable_string_s embeddable_string_s_unit
 
+%type <number>
+	import_relative_loc import_relative_loc_list
 
 %type <array>
 	call_block_list_opt call_block_list
@@ -534,21 +536,29 @@ import_id_list_no_as_opt
 */
 
 import_id
-	: "*"								{ tASTNode_ImportLoc * loc = N(ImportLoc)(@1.first);
-										  loc->AddChild(NULL);
-										  $$ = N(ImportAs)(@1.first, loc, NULL); }
-	| import_id_loc_list import_as_opt	{ $$ = N(ImportAs)(@1.first, $1, $2); }
-	| import_id_loc_list "." onl "*"	{ C(ImportLoc, $1)->AddChild(NULL);
-										  $$ = N(ImportAs)(@1.first, $1, NULL); }
+	: import_relative_loc "*"			{ tASTNode_ImportLoc * loc = N(ImportLoc)(@2.first);
+										  loc->AddChild(NULL); loc->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, loc, NULL); }
+	| import_relative_loc
+	  import_id_loc_list import_as_opt	{ C(ImportLoc, $2)->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, $2, $3); }
+	| import_relative_loc
+	  import_id_loc_list "." onl "*"	{ C(ImportLoc, $2)->AddChild(NULL);
+										  C(ImportLoc, $2)->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, $2, NULL); }
 ;
 
 import_id_no_as_opt
-	: "*"								{ tASTNode_ImportLoc * loc = N(ImportLoc)(@1.first);
-										  loc->AddChild(NULL);
-										  $$ = N(ImportAs)(@1.first, loc, NULL); }
-	| import_id_loc_list				{ $$ = N(ImportAs)(@1.first, $1, NULL); }
-	| import_id_loc_list "." onl "*"	{ C(ImportLoc, $1)->AddChild(NULL);
-										  $$ = N(ImportAs)(@1.first, $1, NULL); }
+	: import_relative_loc "*"			{ tASTNode_ImportLoc * loc = N(ImportLoc)(@2.first);
+										  loc->AddChild(NULL); loc->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, loc, NULL); }
+	| import_relative_loc
+	  import_id_loc_list				{ C(ImportLoc, $2)->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, $2, NULL); }
+	| import_relative_loc
+	  import_id_loc_list "." onl "*"	{ C(ImportLoc, $2)->AddChild(NULL);
+										  C(ImportLoc, $2)->SetBackLocCount($1);
+										  $$ = N(ImportAs)(@2.first, $2, NULL); }
 ;
 
 import_as_opt
@@ -566,9 +576,19 @@ import_id_loc_list
 
 import_id_loc
 	: "(" {BI} onl expr onl
-	  ")" {EI}				{ $$ = $4; }
-	| embeddable_string		{ $$ = $1; }
-	| T_ID					{ $$ =  N(Factor)(@1.first, aftConstant, *$1); }
+	  ")" {EI}							{ $$ = $4; }
+	| embeddable_string					{ $$ = $1; }
+	| T_ID								{ $$ =  N(Factor)(@1.first, aftConstant, *$1); }
+;
+
+import_relative_loc
+	: /*empty*/							{ $$ = 0; }
+	| import_relative_loc_list			{ $$ = $1; }
+;
+
+import_relative_loc_list
+	: "." onl							{ $$ = 1; }
+	| import_relative_loc_list "." onl	{ $$ = $1 + 1; }
 ;
 
 
@@ -1414,7 +1434,7 @@ func_call_expr_body
 	: func_call_expr_head call_arg_list call_block_alt_list_opt ")" {EI}
 						/*%dprec 1*/	{ $$ = $2; C(FuncCall, $$)->SetExpression($1);
 										  C(FuncCall, $$)->AddBlocks($3); }
-	| func_call_expr_head onl "..." onl ")" {EI}
+	| func_call_expr_head onl "." "." "." onl ")" {EI}
 										{ $$ = N(FuncCall)(@2.first, true);
 										  C(FuncCall, $$)->SetExpression($1); }
 	| func_call_expr_head onl ")" {EI}

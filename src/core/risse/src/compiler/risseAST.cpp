@@ -148,6 +148,14 @@ tString tASTNode_ImportLoc::GetChildNameAt(risse_size index) const
 
 
 //---------------------------------------------------------------------------
+tString tASTNode_ImportLoc::GetDumpComment() const
+{
+	return RISSE_WS("BackLocCount=") + tString::AsString((risse_int64)BackLocCount);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 tString tASTNode_Factor::GetDumpComment() const
 {
 	tString ret = ASTFactorTypeNames[FactorType];
@@ -778,13 +786,17 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 
 		// 識別子リストにドットで名前をつなげて表すことはいまのところ
 		// できないのでチェック (as の方はドットで繋がる場合がある)
+		// また、相対指定を表す、先頭のドットも指定できない
 		bool id_wildcard_found = false; // '*' が見つかったかどうか
 		risse_size id_wildcard_pos = 0;
 		for(risse_size i = 0; i < IdList->GetChildCount(); i++)
 		{
 			tASTNode_ImportAs * import_as =
 				static_cast<tASTNode_ImportAs *>(IdList->GetChildAt(i));
-			if(import_as->GetName()->GetChildCount() != 1)
+			tASTNode_ImportLoc * import_loc =
+				static_cast<tASTNode_ImportLoc *>(import_as->GetName());
+			if(import_loc->GetChildCount() != 1 ||
+				import_loc->GetBackLocCount() != 0)
 				tCompileExceptionClass::Throw(
 					form->GetFunction()->GetFunctionGroup()->
 						GetCompiler()->GetScriptBlockInstance()->GetScriptEngine(),
@@ -792,7 +804,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 					RISSE_WS_TR("cannot use dotted location in import id")),
 						form->GetScriptBlockInstance(), import_as->GetPosition());
 
-			if(import_as->GetName()->GetChildAt(0) == NULL)
+			if(import_loc->GetChildAt(0) == NULL)
 			{
 				// ここに null が入っているのは '*' が指定されていた場合
 				RISSE_ASSERT(import_as->GetAs() == NULL); // as は指定できないはず
@@ -813,12 +825,13 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 		}
 
 		// パッケージリストは配列で渡す。
-		// [ ["sound"], ["graphic", "rina"] ]
+		// [ ["", "sound"], ["graphic", "rina"] ]
+		// パッケージリストの個々のパッケージ名のうち、先頭に付く "" は . を表す。
 		//
 		// 識別子リストは辞書配列で渡す。
 		// %[ "PLAY" => [["PLAY"]], "STOP" => [["STOP"]], "Layer" => ["rina", "L"] ]
 		//
-		// これは import PLAY, STOP, Layer as rina.L in sound, graphic.rina; を表す
+		// これは import PLAY, STOP, Layer as rina.L in .sound, graphic.rina; を表す
 		//
 		// 識別子リストに 辞書配列ではなくて true を渡すとすべての
 		// 識別子がインポートされる。import * in package; に相当。
@@ -835,15 +848,8 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 				static_cast<tASTNode_ImportLoc *>(import_as->GetName());
 			RISSE_ASSERT(import_loc != NULL);
 
-			tASTNode_Array * loc_array = new tASTNode_Array(import_loc->GetPosition());
-			for(risse_size j = 0; j < import_loc->GetChildCount(); j++)
-			{
-				tASTNode * child = import_loc->GetChildAt(j);
-				if(!child) child = new tASTNode_Factor(
-										import_loc->GetPosition(), aftConstant,
-										tVariant(tString(RISSE_WS("*"))));
-				loc_array->AddChild(child);
-			}
+			// パッケージリストを作成
+			tASTNode_Array * loc_array = import_loc->CreateArrayAST();
 
 			package_array->AddChild(loc_array);
 		}
@@ -874,13 +880,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 				if(as_loc)
 				{
 					// 配列に格納
-					tASTNode_Array * loc_array = new tASTNode_Array(as_loc->GetPosition());
-					for(risse_size j = 0; j < as_loc->GetChildCount(); j++)
-					{
-						tASTNode * child = as_loc->GetChildAt(j);
-						RISSE_ASSERT(child != NULL);
-						loc_array->AddChild(child);
-					}
+					tASTNode_Array * loc_array = as_loc->CreateArrayAST();
 					as_node = loc_array;
 				}
 				else
@@ -915,15 +915,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 			RISSE_ASSERT(import_loc != NULL);
 
 			// package 位置の処理
-			tASTNode_Array * loc_array = new tASTNode_Array(import_loc->GetPosition());
-			for(risse_size j = 0; j < import_loc->GetChildCount(); j++)
-			{
-				tASTNode * child = import_loc->GetChildAt(j);
-				if(!child) child = new tASTNode_Factor(
-										import_loc->GetPosition(), aftConstant,
-										tVariant(tString(RISSE_WS("*"))));
-				loc_array->AddChild(child);
-			}
+			tASTNode_Array * loc_array = import_loc->CreateArrayAST();
 
 			tASTNode_DictPair * loc_pair =
 				new tASTNode_DictPair(import_loc->GetPosition(),
@@ -938,13 +930,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 			if(import_loc_as)
 			{
 				// 配列に格納
-				tASTNode_Array * loc_array = new tASTNode_Array(import_loc_as->GetPosition());
-				for(risse_size j = 0; j < import_loc_as->GetChildCount(); j++)
-				{
-					tASTNode * child = import_loc_as->GetChildAt(j);
-					RISSE_ASSERT(child != NULL);
-					loc_array->AddChild(child);
-				}
+				tASTNode_Array * loc_array = import_loc_as->CreateArrayAST();
 				as_pair =
 					new tASTNode_DictPair(import_loc_as->GetPosition(),
 						new tASTNode_Factor(import_loc_as->GetPosition(), aftConstant,
@@ -988,6 +974,31 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 
 	// funccall_expr に SSA 形式を生成させる
 	return funccall_expr->DoReadSSA(form, param);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tASTNode_Array * tASTNode_ImportLoc::CreateArrayAST() const
+{
+	// package 位置の処理
+	tASTNode_Array * loc_array = new tASTNode_Array(GetPosition());
+	for(int j = 0; j < GetBackLocCount(); j++) // 先頭の .
+	{
+		tASTNode * child = new tASTNode_Factor(
+								GetPosition(), aftConstant,
+								tVariant(tString()));
+		loc_array->AddChild(child);
+	}
+	for(risse_size j = 0; j < GetChildCount(); j++) // のこり
+	{
+		tASTNode * child = GetChildAt(j);
+		if(!child) child = new tASTNode_Factor(
+								GetPosition(), aftConstant,
+								tVariant(tString(RISSE_WS("*"))));
+		loc_array->AddChild(child);
+	}
+	return loc_array;
 }
 //---------------------------------------------------------------------------
 

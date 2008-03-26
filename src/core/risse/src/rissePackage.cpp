@@ -260,17 +260,20 @@ tVariant tPackageManager::GetPackageGlobal(const tString & name)
 	// package に対応するパッケージのファイル名を得る
 	gc_vector<tString> filenames;
 	gc_vector<tString> locations;
-	SearchPackage(name, filenames, locations);
-
-	if(filenames.size() == 0)
+	tVariant package_global = SearchPackage(name, filenames, locations);
+	if(package_global.IsVoid())
 	{
-		// パッケージが見つからない
-		tImportExceptionClass::ThrowPackageNotFound(ScriptEngine, name);
+		// パッケージは少なくとも初期化済みではない
+		if(filenames.size() == 0)
+		{
+			// パッケージが見つからない
+			tImportExceptionClass::ThrowPackageNotFound(ScriptEngine, name);
+		}
+
+		RISSE_ASSERT(filenames.size() == 1);
+
+		package_global = InitPackage(filenames[0], locations[0]);
 	}
-
-	RISSE_ASSERT(filenames.size() == 1);
-
-	tVariant package_global = InitPackage(filenames[0], locations[0]);
 
 	return package_global;
 }
@@ -319,25 +322,40 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 		// package_loc に対応するパッケージのファイル名を得る
 		gc_vector<tString> filenames;
 		gc_vector<tString> locations;
-		SearchPackage(package_loc, filenames, locations);
-
-		if(filenames.size() == 0)
+		tVariant package_global = SearchPackage(package_loc, filenames, locations);
+		if(package_global.IsVoid())
 		{
-			// パッケージが見つからない
-			tImportExceptionClass::ThrowPackageNotFound(
-				ScriptEngine,
-				package_loc.Invoke(ScriptEngine,
-					tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+			// パッケージは少なくとも初期化済みではない
+
+			if(filenames.size() == 0)
+			{
+				// パッケージが見つからない
+				tImportExceptionClass::ThrowPackageNotFound(
+					ScriptEngine,
+					package_loc.Invoke(ScriptEngine,
+						tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+			}
+
+			// 対応するパッケージを順に読み込む
+			for(risse_size j = 0; j < locations.size(); j++)
+			{
+				package_global = InitPackage(filenames[j], locations[j]);
+				// もし as が指定されている場合はそれを as に、
+				// そうでない場合は locations[j] で指定された位置に dig して書き込む
+				if(as.IsVoid())
+					Dig(dest, locations[j], package_global); // as の指定無し
+				else
+					Dig(dest, as, package_global); // as の指定あり
+			}
 		}
-
-		// 対応するパッケージを順に読み込む
-		for(risse_size j = 0; j < locations.size(); j++)
+		else
 		{
-			tVariant package_global = InitPackage(filenames[j], locations[j]);
+			// パッケージは初期化済み
+
 			// もし as が指定されている場合はそれを as に、
-			// そうでない場合は locations[j] で指定された位置に dig して書き込む
+			// そうでない場合は package_loc で指定された位置に dig して書き込む
 			if(as.IsVoid())
-				Dig(dest, locations[j], package_global); // as の指定無し
+				Dig(dest, package_loc, package_global); // as の指定無し
 			else
 				Dig(dest, as, package_global); // as の指定あり
 		}
@@ -374,21 +392,30 @@ void tPackageManager::DoImport(tVariant & dest,
 		// package_loc に対応するパッケージのファイル名を得る
 		gc_vector<tString> filenames;
 		gc_vector<tString> locations;
-		SearchPackage(package_loc, filenames, locations);
-
-		if(filenames.size() == 0)
+		tVariant package_global = SearchPackage(package_loc, filenames, locations);
+		if(package_global.IsVoid())
 		{
-			// パッケージが見つからない
-			tImportExceptionClass::ThrowPackageNotFound(
-				ScriptEngine,
-				package_loc.Invoke(ScriptEngine,
-					tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+			// パッケージは少なくとも初期化済みではない
+
+			if(filenames.size() == 0)
+			{
+				// パッケージが見つからない
+				tImportExceptionClass::ThrowPackageNotFound(
+					ScriptEngine,
+					package_loc.Invoke(ScriptEngine,
+						tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+			}
+
+			// 対応するパッケージを順に読み込む
+			for(risse_size j = 0; j < locations.size(); j++)
+			{
+				package_global = InitPackage(filenames[j], locations[j]);
+				globals.push_back(package_global);
+			}
 		}
-
-		// 対応するパッケージを順に読み込む
-		for(risse_size j = 0; j < locations.size(); j++)
+		else
 		{
-			tVariant package_global = InitPackage(filenames[j], locations[j]);
+			// パッケージは初期化済み
 			globals.push_back(package_global);
 		}
 	}
@@ -556,7 +583,7 @@ void tPackageManager::ImportIds(const tVariant & from, const tVariant & to,
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::SearchPackage(const tVariant & name,
+tVariant tPackageManager::SearchPackage(const tVariant & name,
 				gc_vector<tString> & filenames,
 				gc_vector<tString> & packages)
 {
@@ -583,6 +610,20 @@ void tPackageManager::SearchPackage(const tVariant & name,
 		if(i != 0) package_fs_loc += tSS<'/'>(), package_loc += tSS<'.'>();
 		package_fs_loc += loc_component;
 		package_loc += loc_component;
+	}
+
+	// それが既に初期化済みか？
+	if(!wildcard_found)
+	{
+		tMap::iterator i = Map.find(package_loc);
+		if(i != Map.end())
+		{
+			// この時点で i->second はパッケージグローバルだが、
+			// void が入ってることもあるので注意。void とは
+			// 対象パッケージが現在初期化中であることを表すが、
+			// とりあえずその場合はハンドリングしない。
+			if(!i->second.IsVoid()) return i->second;
+		}
 	}
 
 	// パス変数を得る
@@ -698,16 +739,18 @@ void tPackageManager::SearchPackage(const tVariant & name,
 			if(filenames.size() > 0) break;
 		}
 	}
+
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::SearchPackage(const tString & name,
+tVariant tPackageManager::SearchPackage(const tString & name,
 				gc_vector<tString> & filenames,
 				gc_vector<tString> & packages)
 {
-	SearchPackage(SplitPackageName(name), filenames, packages);
+	return SearchPackage(SplitPackageName(name), filenames, packages);
 }
 //---------------------------------------------------------------------------
 

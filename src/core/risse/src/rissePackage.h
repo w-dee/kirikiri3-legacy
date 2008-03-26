@@ -98,7 +98,9 @@ private:
 	//! @param		packages	見つかったパッケージの完全そう職名が filenames
 	//!							と同じ順番で格納される配列
 	//!							(呼び出し側で clear() すること)
-	void SearchPackage(const tString & name,
+	//! @return		もしパッケージがすでに初期化済みであることを検出した場合は
+	//!				そのパッケージグローバルが帰る。そうでなければvoidが帰る。
+	tVariant SearchPackage(const tString & name,
 				gc_vector<tString> & filenames,
 				gc_vector<tString> & packages
 				);
@@ -110,7 +112,9 @@ private:
 	//! @param		packages	見つかったパッケージの完全そう職名が filenames
 	//!							と同じ順番で格納される配列
 	//!							(呼び出し側で clear() すること)
-	void SearchPackage(const tVariant & name,
+	//! @return		もしパッケージがすでに初期化済みであることを検出した場合は
+	//!				そのパッケージグローバルが帰る。そうでなければvoidが帰る。
+	tVariant SearchPackage(const tVariant & name,
 				gc_vector<tString> & filenames,
 				gc_vector<tString> & packages
 				);

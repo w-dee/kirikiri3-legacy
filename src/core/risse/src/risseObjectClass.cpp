@@ -86,19 +86,20 @@ void tObjectClass::initialize()
 
 
 //---------------------------------------------------------------------------
-void tObjectClass::import(const tVariant & packages, const tNativeCallInfo & info)
+void tObjectClass::import(const tVariant & global,
+	const tVariant & packages, const tNativeCallInfo & info)
 {
-	if(info.args.HasArgument(1))
+	if(info.args.HasArgument(2))
 	{
-		// 引数が2個あるぜ
+		// 引数が3個あるぜ
 		info.engine->GetPackageManager()->
-			DoImport(const_cast<tVariant&>(info.This), packages, info.args[1]);
+			DoImport(global, const_cast<tVariant&>(info.This), packages, info.args[2]);
 	}
 	else
 	{
 		// 引数はインポート先パッケージのみ
 		info.engine->GetPackageManager()->
-			DoImport(const_cast<tVariant&>(info.This), packages);
+			DoImport(global, const_cast<tVariant&>(info.This), packages);
 	}
 }
 //---------------------------------------------------------------------------

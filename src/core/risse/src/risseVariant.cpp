@@ -364,7 +364,7 @@ void tVariantBlock::DeletePropertyDirect_Object   (const tString & name, risse_u
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetAttributeDirect_Object  (const tVariantBlock & key, risse_uint32 attrib) const
+void tVariantBlock::SetAttributeDirect_Object  (const tString & key, risse_uint32 attrib) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();

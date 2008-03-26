@@ -35,7 +35,8 @@ public:
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize();
-	static void import(const tVariant & packages, const tNativeCallInfo & info);
+	static void import(const tVariant & global,
+		const tVariant & packages, const tNativeCallInfo & info);
 	static bool DiscEqual(const tNativeCallInfo & info, const tVariant &rhs); // === 演算子
 	static bool identify(const tNativeCallInfo & info, const tVariant &rhs); // Dictionary で hash とともに同定に用いる
 	static void get_hint(const tNativePropGetInfo & info); // hint プロパティ

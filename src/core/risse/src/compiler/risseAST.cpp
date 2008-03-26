@@ -962,14 +962,21 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 
 	tASTNode_FuncCallArg * arg;
 
+	// 第1引数 は global
+	arg = new tASTNode_FuncCallArg(GetPosition(),
+		new tASTNode_Factor(GetPosition(), aftGlobal), false);
+	funccall->AddChild(arg);
+	// 第2引数 は パッケージリスト
 	arg = new tASTNode_FuncCallArg(GetPosition(), packages, false);
 	funccall->AddChild(arg);
+	// 第3引数 は 識別子リスト(optional)
 	if(ids)
 	{
 		arg = new tASTNode_FuncCallArg(GetPosition(), ids, false);
 		funccall->AddChild(arg);
 	}
 
+	// 式
 	tASTNode_ExprStmt * funccall_expr = new tASTNode_ExprStmt(GetPosition(), funccall);
 
 	// funccall_expr に SSA 形式を生成させる

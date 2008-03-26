@@ -63,15 +63,19 @@ public:
 		tBuiltinPackageInitializerInterface * init);
 
 	//! @brief		インポートを行う
+	//! @param		global		パッケージグローバル
+	//!							(パッケージが相対指定された場合に、その基準となる)
 	//! @param		dest		インポート先オブジェクト
 	//! @param		packages	インポートするパッケージを表す辞書配列の配列
-	void DoImport(tVariant & dest, const tVariant & packages);
+	void DoImport(const tVariant & global, tVariant & dest, const tVariant & packages);
 
 	//! @brief		インポートを行う
+	//! @param		global		パッケージグローバル
+	//!							(パッケージが相対指定された場合に、その基準となる)
 	//! @param		dest		インポート先オブジェクト
 	//! @param		packages	インポートするパッケージを表す配列
 	//! @param		ids			インポートする識別子を表す辞書配列
-	void DoImport(tVariant & dest, const tVariant & packages, const tVariant & ids);
+	void DoImport(const tVariant & global, tVariant & dest, const tVariant & packages, const tVariant & ids);
 
 private:
 	//! @brief		パッケージを初期化する

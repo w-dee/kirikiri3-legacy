@@ -292,7 +292,7 @@ void tPackageManager::AddBuiltinPackage(const tString & package,
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
+void tPackageManager::DoImport(const tVariant & global, tVariant & dest, const tVariant & packages)
 {
 	tCriticalSection::tLocker lock(*CS); // sync
 
@@ -365,7 +365,7 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 
 
 //---------------------------------------------------------------------------
-void tPackageManager::DoImport(tVariant & dest,
+void tPackageManager::DoImport(const tVariant & global, tVariant & dest,
 	const tVariant & packages, const tVariant & ids)
 {
 	tCriticalSection::tLocker lock(*CS); // sync
@@ -475,7 +475,7 @@ tVariant tPackageManager::InitPackage(const tString & filename, const tString & 
 	{
 		// パッケージが見つからなかったよ
 		// 仮にそこには void をつっこんでおく
-		tMap::iterator f = Map.insert(tMap::value_type(name, tVariant())).first;
+		Map.insert(tMap::value_type(name, tVariant()));
 
 		// 新しくパッケージグローバルを作成
 		package_global = tVariant(ScriptEngine->ObjectClass).New();
@@ -486,13 +486,27 @@ tVariant tPackageManager::InitPackage(const tString & filename, const tString & 
 		if(!RissePackageGlobal.IsVoid())
 			ImportIds(RissePackageGlobal, package_global, NULL);
 
+		// パッケージ名を表す "package" 定数を package_global に追加する
+		package_global.SetPropertyDirect(ScriptEngine,
+			tSS<'p','a','c','k','a','g','e'>(),
+			tOperateFlags::ofMemberEnsure|
+				tOperateFlags::ofInstanceMemberOnly|
+				tOperateFlags::ofUseClassMembersRule,
+			tVariant(name));
+		package_global.SetAttributeDirect(ScriptEngine,
+			tSS<'p','a','c','k','a','g','e'>(),
+			(risse_uint32)tMemberAttribute::GetDefault().
+				Set(tMemberAttribute::mcConst).
+				Set(tMemberAttribute::acInternal)); // const internal
+
 		// パッケージを読み込んで初期化する
 		if(!filename.IsEmpty())
 			BuiltinPackageFileSystem->Initialize(
 				filename, name, package_global);
 
 		// Map のそこを上書きする
-		f->second = package_global;
+		Map.erase(name);
+		Map.insert(tMap::value_type(name, package_global));
 	}
 	else
 	{
@@ -833,10 +847,7 @@ tVariant tPackageManager::SplitPackageName(const tString & name)
 	tString::tSplitter spliter(name, RISSE_WC('.'));
 	tString component;
 	while(spliter(component))
-	{
-		if(component.IsEmpty()) continue;
 		array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
-	}
 
 	return array;
 }

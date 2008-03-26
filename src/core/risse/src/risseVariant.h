@@ -924,7 +924,7 @@ public: // 演算子
 	//! @param		key			キー
 	//! @param		attrib		設定する属性値
 	//-----------------------------------------------------------------------
-	void SetAttributeDirect(tScriptEngine * engine, const tVariantBlock & key, risse_uint32 attrib) const
+	void SetAttributeDirect(tScriptEngine * engine, const tString & key, risse_uint32 attrib) const
 	{
 		switch(GetType())
 		{
@@ -941,8 +941,8 @@ public: // 演算子
 		}
 	}
 
-	void SetAttributeDirect_Primitive(tScriptEngine * engine, const tVariantBlock & key, risse_uint32 attrib) const { return; /* incomplete */ }
-	void SetAttributeDirect_Object   (                        const tVariantBlock & key, risse_uint32 attrib) const;
+	void SetAttributeDirect_Primitive(tScriptEngine * engine, const tString & key, risse_uint32 attrib) const { return; /* incomplete */ }
+	void SetAttributeDirect_Object   (                        const tString & key, risse_uint32 attrib) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall

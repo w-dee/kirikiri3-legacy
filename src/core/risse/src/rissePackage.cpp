@@ -20,6 +20,7 @@
 #include "risseStaticStrings.h"
 #include "risseBindingInfo.h"
 #include "risseArrayClass.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -225,8 +226,15 @@ tPackageManager::tPackageManager(tScriptEngine * script_engine)
 	CS = new tCriticalSection();
 	BuiltinPackageFileSystem = new tBuiltinPackageFileSystem(script_engine);
 
+	// 組み込みパッケージ "risse" と デフォルトのパッケージ "main" を組み込み
+	// パッケージ用の仮想ファイルシステムに追加
+	BuiltinPackageFileSystem->AddPackage(tSS<'r','i','s','s','e'>(),
+		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
+	BuiltinPackageFileSystem->AddPackage(tSS<'m','a','i','n'>(),
+		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
+
 	// "risse" パッケージを作成する
-	AddPackageGlobal(tSS<'r','i','s','s','e'>(), RissePackageGlobal);
+	RissePackageGlobal = InitPackage(tString(), tSS<'r','i','s','s','e'>());
 
 	// "risse" パッケージに、パッケージ検索パスを表す "packagePath" を追加
 	tVariant packagePath = tVariant(ScriptEngine->ArrayClass).New();
@@ -240,12 +248,6 @@ tPackageManager::tPackageManager(tScriptEngine * script_engine)
 	// packagePath に組み込みパッケージ用の仮想ファイルシステムを追加
 	packagePath.Invoke_Object(tSS<'p','u','s','h'>(),
 		tString(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()));
-
-	// 組み込みパッケージ "risse" と デフォルトのパッケージ "main" を追加
-	BuiltinPackageFileSystem->AddPackage(tSS<'r','i','s','s','e'>(),
-		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
-	BuiltinPackageFileSystem->AddPackage(tSS<'m','a','i','n'>(),
-		BuiltinPackageFileSystem->GetDummyBuiltinPackageInitializer());
 }
 //---------------------------------------------------------------------------
 
@@ -255,9 +257,22 @@ tVariant tPackageManager::GetPackageGlobal(const tString & name)
 {
 	tCriticalSection::tLocker lock(*CS); // sync
 
-	tVariant ret;
-	AddPackageGlobal(name, ret);
-	return ret;
+	// package に対応するパッケージのファイル名を得る
+	gc_vector<tString> filenames;
+	gc_vector<tString> locations;
+	SearchPackage(name, filenames, locations);
+
+	if(filenames.size() == 0)
+	{
+		// パッケージが見つからない
+		tImportExceptionClass::ThrowPackageNotFound(ScriptEngine, name);
+	}
+
+	RISSE_ASSERT(filenames.size() == 1);
+
+	tVariant package_global = InitPackage(filenames[0], locations[0]);
+
+	return package_global;
 }
 //---------------------------------------------------------------------------
 
@@ -276,9 +291,11 @@ void tPackageManager::AddBuiltinPackage(const tString & package,
 //---------------------------------------------------------------------------
 void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 {
-	// TODO: dest が プリミティブ型の時は dest に新しくメンバを作成できないのでチェック
-
 	tCriticalSection::tLocker lock(*CS); // sync
+
+	// プリミティブ型インスタンスのコンテキストにはインポートできない
+	if(dest.GetType() != tVariant::vtObject)
+		tImportExceptionClass::ThrowCannotImportIntoPrimitiveInstanceContext(ScriptEngine);
 
 	// packages はインポートするパッケージを表す辞書配列の配列
 	tVariant::tSynchronizer sync_dest(dest); // sync
@@ -294,18 +311,24 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 		// package を得る
 		tVariant package_loc =
 			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'p','a','c','k','a','g','e'>()));
-		// TODO: package のインスタンスチェック
+
 		// as を得る
 		tVariant as =
 			dic.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant(tSS<'a','s'>()));
 
-		// package に対応するパッケージのファイル名を得る
+		// package_loc に対応するパッケージのファイル名を得る
 		gc_vector<tString> filenames;
 		gc_vector<tString> locations;
 		SearchPackage(package_loc, filenames, locations);
 
-		// TODO: as がある場合は filenames や locations は要素数が 1 のみのはず
-		// なのでチェック
+		if(filenames.size() == 0)
+		{
+			// パッケージが見つからない
+			tImportExceptionClass::ThrowPackageNotFound(
+				ScriptEngine,
+				package_loc.Invoke(ScriptEngine,
+					tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+		}
 
 		// 対応するパッケージを順に読み込む
 		for(risse_size j = 0; j < locations.size(); j++)
@@ -327,9 +350,11 @@ void tPackageManager::DoImport(tVariant & dest, const tVariant & packages)
 void tPackageManager::DoImport(tVariant & dest,
 	const tVariant & packages, const tVariant & ids)
 {
-	// TODO: dest が プリミティブ型の時は dest に新しくメンバを作成できないのでチェック
-
 	tCriticalSection::tLocker lock(*CS); // sync
+
+	// プリミティブ型インスタンスのコンテキストにはインポートできない
+	if(dest.GetType() != tVariant::vtObject)
+		tImportExceptionClass::ThrowCannotImportIntoPrimitiveInstanceContext(ScriptEngine);
 
 	// packages はインポートするパッケージを表す配列の配列
 	tVariant::tSynchronizer sync_dest(dest); // sync
@@ -346,10 +371,19 @@ void tPackageManager::DoImport(tVariant & dest,
 		tVariant package_loc =
 			packages.Invoke(ScriptEngine, tSS<'[',']'>(), tVariant((risse_int64)i));
 
-		// package に対応するパッケージのファイル名を得る
+		// package_loc に対応するパッケージのファイル名を得る
 		gc_vector<tString> filenames;
 		gc_vector<tString> locations;
 		SearchPackage(package_loc, filenames, locations);
+
+		if(filenames.size() == 0)
+		{
+			// パッケージが見つからない
+			tImportExceptionClass::ThrowPackageNotFound(
+				ScriptEngine,
+				package_loc.Invoke(ScriptEngine,
+					tSS<'j','o','i','n'>(), tVariant(tSS<'.'>())));
+		}
 
 		// 対応するパッケージを順に読み込む
 		for(risse_size j = 0; j < locations.size(); j++)
@@ -365,32 +399,41 @@ void tPackageManager::DoImport(tVariant & dest,
 	for(gc_vector<tVariant>::iterator i = globals.begin(); i != globals.end(); i++)
 		ImportIds(*i, dest, import_all ? NULL : &ids);
 
-	// TODO: インポートできなかったものは ids に残っているはずなのでそれをチェック
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tPackageManager::AddPackageGlobal(const tString & name, tVariant & global)
-{
-	tMap::iterator i = Map.find(name);
-	if(i == Map.end())
+	// インポートできなかったものは ids に残っているはずなのでそれをチェック
+	if(!import_all)
 	{
-		// 見つからなかったのでパッケージグローバルを作成する
-		tVariant new_global = tVariant(ScriptEngine->ObjectClass).New();
-		Map.insert(tMap::value_type(name, new_global));
+		gc_vector<tString> not_imported;
 
-		// 新しい global には "risse" パッケージの中身をすべて import する
-		// "risse" パッケージを作るときだけはさすがにこれはできない。
-		// 初回は RissePackageGlobal は void のはず………
-		if(!RissePackageGlobal.IsVoid())
-			ImportIds(RissePackageGlobal, new_global, NULL);
+		// 辞書配列の eachPair() のコールバックを受けるためのインターフェース
+		class tCallback : public tObjectInterface
+		{
+			gc_vector<tString> & List;
+		public:
+			tCallback(gc_vector<tString> & list) : List(list) {}
+			tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
+			{
+				if(code == ocFuncCall && name.IsEmpty())
+				{
+					// このオブジェクトに対する関数呼び出し
+					args.ExpectArgumentCount(2);
 
-		global = new_global;
-		return false;
+					List.push_back(args[0].operator tString());
+				}
+				return rvNoError;
+			}
+		} cb(not_imported);
+
+		// メタデータを作成するため dict の eachPair を呼び出す
+		tMethodArgument & args = tMethodArgument::Allocate(0, 1);
+		tVariant block_arg0(&cb);
+		args.SetBlockArgument(0, &block_arg0);
+		tVariant(ids).Do(ScriptEngine, ocFuncCall, NULL,
+			tSS<'e','a','c','h','P','a','i','r'>(), 0, args);
+
+		// もし残りがあるようならば例外を送出
+		if(not_imported.size() > 0)
+			tImportExceptionClass::ThrowCannotImportIds(ScriptEngine, not_imported);
 	}
-	global = i->second;
-	return true;
 }
 //---------------------------------------------------------------------------
 
@@ -398,15 +441,43 @@ bool tPackageManager::AddPackageGlobal(const tString & name, tVariant & global)
 //---------------------------------------------------------------------------
 tVariant tPackageManager::InitPackage(const tString & filename, const tString & name)
 {
-	bool is_existing_package;
+	// パッケージを探す
 	tVariant package_global;
-	is_existing_package = AddPackageGlobal(name, package_global);
-	if(!is_existing_package)
+	tMap::iterator i = Map.find(name);
+	if(i == Map.end())
 	{
-		// パッケージの初回の初期化の場合はパッケージを読み込んで初期化する
-		BuiltinPackageFileSystem->Initialize(
-			filename, name, package_global);
+		// パッケージが見つからなかったよ
+		// 仮にそこには void をつっこんでおく
+		tMap::iterator f = Map.insert(tMap::value_type(name, tVariant())).first;
+
+		// 新しくパッケージグローバルを作成
+		package_global = tVariant(ScriptEngine->ObjectClass).New();
+
+		// 新しい global には "risse" パッケージの中身をすべて import する
+		// "risse" パッケージを作るときだけはさすがにこれはできない。
+		// 初回は RissePackageGlobal は void のはず………
+		if(!RissePackageGlobal.IsVoid())
+			ImportIds(RissePackageGlobal, package_global, NULL);
+
+		// パッケージを読み込んで初期化する
+		if(!filename.IsEmpty())
+			BuiltinPackageFileSystem->Initialize(
+				filename, name, package_global);
+
+		// Map のそこを上書きする
+		f->second = package_global;
 	}
+	else
+	{
+		package_global = i->second;
+		if(package_global.IsVoid())
+		{
+			// パッケージはいま初期化中
+			tImportExceptionClass::ThrowPackageIsBeingInitialized(
+				ScriptEngine, name);
+		}
+	}
+
 	return package_global;
 }
 //---------------------------------------------------------------------------
@@ -632,6 +703,16 @@ void tPackageManager::SearchPackage(const tVariant & name,
 
 
 //---------------------------------------------------------------------------
+void tPackageManager::SearchPackage(const tString & name,
+				gc_vector<tString> & filenames,
+				gc_vector<tString> & packages)
+{
+	SearchPackage(SplitPackageName(name), filenames, packages);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tPackageManager::Dig(tVariant & dest, const tVariant & id,
 	const tVariant & deepest, tMemberAttribute attrib)
 {
@@ -696,10 +777,17 @@ void tPackageManager::Dig(tVariant & dest, const tVariant & id,
 void tPackageManager::Dig(tVariant & dest, const tString & id,
 	const tVariant & deepest, tMemberAttribute attrib)
 {
-	// id を . (ドット) で split する
+	Dig(dest, SplitPackageName(id), deepest, attrib);
+}
+//---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+tVariant tPackageManager::SplitPackageName(const tString & name)
+{
+	// name を . (ドット) で split する
 	tVariant array = tVariant(ScriptEngine->ArrayClass).New();
-	tString::tSplitter spliter(id, RISSE_WC('.'));
+	tString::tSplitter spliter(name, RISSE_WC('.'));
 	tString component;
 	while(spliter(component))
 	{
@@ -707,8 +795,7 @@ void tPackageManager::Dig(tVariant & dest, const tString & id,
 		array.Invoke_Object(tSS<'p','u','s','h'>(), tVariant(component));
 	}
 
-	// Dig の tVariant 配列版を呼び出す
-	Dig(dest, array, deepest, attrib);
+	return array;
 }
 //---------------------------------------------------------------------------
 

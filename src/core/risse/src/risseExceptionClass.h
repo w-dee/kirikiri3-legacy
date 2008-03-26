@@ -575,6 +575,73 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		"ImportException" クラス
+//---------------------------------------------------------------------------
+class tImportExceptionClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tImportExceptionClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+public: // Risse用メソッドなど
+	static void construct();
+	static void initialize(const tNativeCallInfo & info);
+
+public:
+	//! @brief		「プリミティブ型インスタンスのコンテキストにはインポートできない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	static void ThrowCannotImportIntoPrimitiveInstanceContext(tScriptEngine * engine);
+	//! @brief		「プリミティブ型クラスのコンテキストにはインポートできない」例外を発生
+	static void ThrowCannotImportIntoPrimitiveInstanceContext()
+		{ ThrowCannotImportIntoPrimitiveInstanceContext(NULL); }
+
+	//! @brief		「パッケージが見つからない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		package_name	パッケージ名
+	static void ThrowPackageNotFound(tScriptEngine * engine, const tString & package_name);
+	//! @brief		「パッケージが見つからない」例外を発生
+	//! @param		package_name	パッケージ名
+	static void ThrowPackageNotFound(const tString & package_name)
+		{ ThrowPackageNotFound(NULL, package_name); }
+
+	//! @brief		「パッケージは現在初期化中なのでインポートできない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		package_name	パッケージ名
+	static void ThrowPackageIsBeingInitialized(tScriptEngine * engine, const tString & package_name);
+	//! @brief		「パッケージは現在初期化中なのでインポートできない」例外を発生
+	//! @param		package_name	パッケージ名
+	static void ThrowPackageIsBeingInitialized(const tString & package_name)
+		{ ThrowPackageIsBeingInitialized(NULL, package_name); }
+
+	//! @brief		「識別子をインポートできない」例外を発生
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		ids			インポートできなかった識別子名
+	static void ThrowCannotImportIds(tScriptEngine * engine,
+			const gc_vector<tString> & ids);
+	//! @brief		「識別子をインポートできない」例外を発生
+	//! @param		ids			インポートできなかった識別子名
+	static void ThrowCannotImportIds(const gc_vector<tString> & ids)
+		{ ThrowCannotImportIds(NULL, ids); }
+
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		"ClassDefinitionException" クラス
 //---------------------------------------------------------------------------
 class tClassDefinitionExceptionClass : public tClassBase

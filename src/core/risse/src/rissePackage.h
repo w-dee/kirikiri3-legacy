@@ -47,9 +47,12 @@ public:
 	//! @return		"risse" パッケージ
 	const tVariant & GetRissePackageGlobal() const { return RissePackageGlobal; }
 
-	//! @brief		パッケージグローバルを取得する
+	//! @brief		パッケージを(必要ならば)初期化してそのパッケージグローバルを返す
 	//! @param		name		パッケージの完全装飾名
 	//! @return		そのパッケージのグローバルオブジェクト
+	//! @note		必要ならばそのパッケージが初期化される。
+	//!				初期化済みならば何もせずにそのパッケージを返す。
+	//! @note		ワイルドカードは指定しないこと。
 	tVariant GetPackageGlobal(const tString & name);
 
 	//! @brief		組み込みパッケージの情報を追加する
@@ -71,17 +74,12 @@ public:
 	void DoImport(tVariant & dest, const tVariant & packages, const tVariant & ids);
 
 private:
-	//! @brief		パッケージグローバルを作成する
-	//! @param		name		パッケージグローバルの完全装飾名
-	//! @param		global		パッケージグローバルを格納する先
-	//! @return		見つかった場合は真、見つからずに新しくパッケージグローバルが作成された場合は偽
-	//! @note		既にそのパッケージが作成済みの場合は単にそのパッケージグローバルを返す
-	bool AddPackageGlobal(const tString & name, tVariant & global);
-
 	//! @brief		パッケージを初期化する
 	//! @param		filename	パッケージが入ったファイル名
 	//! @param		name		パッケージグローバルの完全装飾名
 	//! @return		パッケージグローバル
+	//! @note		初期化しようとしたパッケージが既に初期化中だった場合は ImportException
+	//!				例外が発生する
 	tVariant InitPackage(const tString & filename, const tString & name);
 
 	//! @brief		パッケージから識別子をインポートする
@@ -92,6 +90,18 @@ private:
 	//! @note		ids の中の辞書配列アイテムは、見つかれば削除される。
 	void ImportIds(const tVariant & from, const tVariant & to,
 		const tVariant * ids);
+
+	//! @brief		パッケージをパスから検索する
+	//! @param		name		パッケージの完全装飾名
+	//! @param		filenames	見つかったパッケージのファイルパスが格納される配列
+	//!							(呼び出し側で clear() すること)
+	//! @param		packages	見つかったパッケージの完全そう職名が filenames
+	//!							と同じ順番で格納される配列
+	//!							(呼び出し側で clear() すること)
+	void SearchPackage(const tString & name,
+				gc_vector<tString> & filenames,
+				gc_vector<tString> & packages
+				);
 
 	//! @brief		パッケージをパスから検索する
 	//! @param		name		パッケージの完全装飾名が入っている配列
@@ -123,6 +133,12 @@ private:
 	//! @param		attrib		deepest を書き込むときのそのメンバの属性
 	void Dig(tVariant & dest, const tString & id, const tVariant & deepest,
 		tMemberAttribute attrib = tMemberAttribute::GetDefault());
+
+	//! @brief		パッケージ名をドットでsplitし、配列オブジェクトにして返す
+	//! @param		name		パッケージ名
+	//! @return		配列オブジェクト
+	tVariant SplitPackageName(const tString & name);
+
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

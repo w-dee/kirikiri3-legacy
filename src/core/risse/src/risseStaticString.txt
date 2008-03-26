@@ -86,6 +86,7 @@ ss_expression						expression						#!< "expression" インスタンス変数/プ
 ss_NullObjectException				NullObjectException				#!< "NullObjectException" クラス名
 ss_IllegalArgumentClassException	IllegalArgumentClassException	#!< "IllegalArgumentClassException" クラス名
 ss_CompileException					CompileException				#!< "CompileException" クラス名
+ss_ImportException					ImportException					#!< "ImportException" クラス名
 ss_ArithmeticException				ArithmeticException				#!< "ArithmeticException" クラス名
 ss_IllegalStateException			IllegalStateException			#!< "IllegalStateException" クラス名
 ss_InaccessibleResourceException	InaccessibleResourceException	#!< "InaccessibleResourceException" クラス名

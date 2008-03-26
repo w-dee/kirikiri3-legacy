@@ -20,6 +20,7 @@
 #include "risseClassClass.h"
 #include "risseScriptBlockClass.h"
 #include "risseScriptEngine.h"
+#include "risseStringTemplate.h"
 
 namespace Risse
 {
@@ -38,6 +39,7 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
        CharConversionException
      RuntimeException
        CompileException
+       ImportException
        ClassDefinitionException
        InstantiationException
        BadContextException
@@ -1095,6 +1097,112 @@ void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * 
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tImportExceptionClass::tImportExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_ImportException, engine->RuntimeExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tImportExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tImportExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::ThrowCannotImportIntoPrimitiveInstanceContext(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_ImportException,
+			tString(RISSE_WS_TR("cannot import into primitive instance context")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::ThrowPackageNotFound(tScriptEngine * engine, const tString & package_name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_ImportException,
+			tString(RISSE_WS_TR("package \"%1\" not found"), package_name));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::ThrowPackageIsBeingInitialized(
+	tScriptEngine * engine, const tString & package_name)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_ImportException,
+			tString(RISSE_WS_TR("package \"%1\" is being initialized, cannot be imported"), package_name));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImportExceptionClass::ThrowCannotImportIds(
+	tScriptEngine * engine, const gc_vector<tString> & ids)
+{
+	// ids をつなげる
+	static const risse_size max_list = 3;
+	risse_size count = ids.size();
+	if(count > max_list) count = max_list;
+	tString id_list;
+	for(risse_size i = 0; i < count; i++)
+	{
+		if(i != 0) id_list += tSS<',',' '>();
+		id_list += tSS<'"'>().operator const tString &() + ids[i] + tSS<'"'>();
+	}
+	if(ids.size() > count) id_list += tSS<',',' ','.','.','.'>();
+
+	// 例外送出
+	tTemporaryException * e =
+		new tTemporaryException(ss_ImportException,
+			tString(RISSE_WS_TR("one or more identifiers could not be imported: %1"), id_list));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
 
 
 

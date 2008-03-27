@@ -17,8 +17,6 @@
 #include "rissePackage.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
-#include "risseStreamClass.h" // for StreamConsts
-
 
 // 各クラスの new に必要なインクルードファイルをインクルードする
 #define RISSE_BUILTINCLASSES_INCLUDE
@@ -106,13 +104,6 @@ tScriptEngine::tScriptEngine()
 	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer->RegisterInstance(PackageManager);
 	#include "risseBuiltinPackages.inc"
 	#undef RISSE_BUILTINPACKAGES_PACKAGE
-
-	// いくつかのモジュールの作成と include
-	tModuleBase * module;
-	module = new tStreamConstsModule(this);
-	module->RegisterInstance(RissePackageGlobal);
-	StreamClass->Do(ocFuncCall, NULL, ss_include, 0, tMethodArgument::New(tVariant(module->GetInstance())));
-
 }
 //---------------------------------------------------------------------------
 

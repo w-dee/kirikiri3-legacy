@@ -120,6 +120,7 @@ ss_Boolean							Boolean							#!< "Boolean" クラス名
 ss_Octet							Octet							#!< "Octet" クラス名
 ss_Null								Null							#!< "Null" クラス名
 ss_Stream							Stream							#!< "Stream" クラス名
+ss_stream							stream							#!< "stream" パッケージ名
 ss_seek								seek							#!< "seek" メソッド名
 ss_tell								tell							#!< "tell" メソッド名
 ss_read								read							#!< "read" メソッド名
@@ -131,7 +132,6 @@ ss_get								get								#!< "get" メソッド名
 ss_put								put								#!< "put" メソッド名
 ss_readBuffer						readBuffer						#!< "readBuffer" メソッド名
 ss_writeBuffer						writeBuffer						#!< "writeBuffer" メソッド名
-ss_StreamConsts						StreamConsts					#!< "StreamConsts" モジュール名
 ss_print							print							#!< "print" メソッド名
 ss_soSet							soSet							#!< "soSet" 定数名
 ss_soCur							soCur							#!< "soCur" 定数名

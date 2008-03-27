@@ -11,6 +11,7 @@
 #include "builtin/date/risseDateClass.h"
 #include "builtin/thread/risseThreadClass.h"
 #include "builtin/coroutine/risseCoroutineClass.h"
+#include "builtin/stream/risseStreamClass.h"
 
 #else
 
@@ -21,6 +22,7 @@
 RISSE_BUILTINPACKAGES_PACKAGE(Date                            )
 RISSE_BUILTINPACKAGES_PACKAGE(Thread                          )
 RISSE_BUILTINPACKAGES_PACKAGE(Coroutine                       )
+RISSE_BUILTINPACKAGES_PACKAGE(Stream                          )
 
 
 #endif

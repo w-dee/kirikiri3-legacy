@@ -10,14 +10,14 @@
 //! @file
 //! @brief Risse用 "Stream" クラスの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../../prec.h"
 
-#include "risseStream.h"
+#include "../../risseStream.h"
 #include "risseStreamClass.h"
-#include "risseExceptionClass.h"
-#include "risseStaticStrings.h"
-#include "risseScriptEngine.h"
-#include "risseObjectClass.h"
+#include "../../risseExceptionClass.h"
+#include "../../risseStaticStrings.h"
+#include "../../risseScriptEngine.h"
+#include "../../risseObjectClass.h"
 
 RISSE_DEFINE_SOURCE_ID(42888,25529,18022,19240,53128,12574,40093,31909);
 
@@ -25,34 +25,6 @@ RISSE_DEFINE_SOURCE_ID(42888,25529,18022,19240,53128,12574,40093,31909);
 namespace Risse
 {
 //---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-tStreamConstsModule::tStreamConstsModule(tScriptEngine * engine) :
-	tModuleBase(ss_StreamConsts, engine)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tStreamConstsModule::RegisterMembers()
-{
-	GetInstance()->RegisterFinalConstMember(ss_soSet, tVariant((risse_int64)tStreamInstance::soSet), true);
-	GetInstance()->RegisterFinalConstMember(ss_soCur, tVariant((risse_int64)tStreamInstance::soCur), true);
-	GetInstance()->RegisterFinalConstMember(ss_soEnd, tVariant((risse_int64)tStreamInstance::soEnd), true);
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
 
 
 
@@ -245,6 +217,67 @@ tVariant tStreamClass::ovulate()
 	return tVariant();
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tStreamPackageInitializer::tStreamPackageInitializer() :
+	tBuiltinPackageInitializer(ss_stream)
+{
+	StreamClass = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tStreamPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+{
+	StreamClass = new tStreamClass(engine);
+	StreamClass->RegisterInstance(global);
+
+	global.SetPropertyDirect(engine,
+				ss_soSet,
+				tOperateFlags::ofMemberEnsure|
+					tOperateFlags::ofInstanceMemberOnly|
+					tOperateFlags::ofUseClassMembersRule,
+				tVariant((risse_int64)tStreamInstance::soSet));
+	global.SetAttributeDirect(engine,
+				ss_soSet,
+				tMemberAttribute::GetDefault().Set(tMemberAttribute::mcConst));
+
+	global.SetPropertyDirect(engine,
+				ss_soCur,
+				tOperateFlags::ofMemberEnsure|
+					tOperateFlags::ofInstanceMemberOnly|
+					tOperateFlags::ofUseClassMembersRule,
+				tVariant((risse_int64)tStreamInstance::soCur));
+	global.SetAttributeDirect(engine,
+				ss_soCur,
+				tMemberAttribute::GetDefault().Set(tMemberAttribute::mcConst));
+
+	global.SetPropertyDirect(engine,
+				ss_soEnd,
+				tOperateFlags::ofMemberEnsure|
+					tOperateFlags::ofInstanceMemberOnly|
+					tOperateFlags::ofUseClassMembersRule,
+				tVariant((risse_int64)tStreamInstance::soEnd));
+	global.SetAttributeDirect(engine,
+				ss_soEnd,
+				tMemberAttribute::GetDefault().Set(tMemberAttribute::mcConst));
+}
+//---------------------------------------------------------------------------
+
 
 
 

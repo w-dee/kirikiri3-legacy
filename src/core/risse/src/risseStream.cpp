@@ -14,7 +14,7 @@
 
 #include "risseStream.h"
 #include "risseExceptionClass.h"
-#include "risseStreamClass.h"
+#include "builtin/stream/risseStreamClass.h"
 #include "risseStaticStrings.h"
 #include "risseExceptionClass.h"
 #include "risseScriptEngine.h"
@@ -33,7 +33,7 @@ tStreamAdapter::tStreamAdapter(const tVariant & stream)
 	if(stream.GetType() != tVariant::vtObject)
 		tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(ss_Stream);
 	tScriptEngine * engine = stream.GetObjectInterface()->GetRTTI()->GetScriptEngine();
-	stream.AssertClass(engine->StreamClass);
+	stream.AssertClass(engine->StreamPackageInitializer->StreamClass);
 
 	Stream = static_cast<tStreamInstance *>(stream.GetObjectInterface());
 }

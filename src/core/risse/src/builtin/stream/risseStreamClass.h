@@ -14,12 +14,13 @@
 #ifndef risseStreamClassH
 #define risseStreamClassH
 
-#include "risseTypes.h"
-#include "risseGC.h"
-#include "risseString.h"
-#include "risseStream.h"
-#include "risseClass.h"
-#include "risseNativeBinder.h"
+#include "../../risseTypes.h"
+#include "../../risseGC.h"
+#include "../../risseString.h"
+#include "../../risseStream.h"
+#include "../../risseClass.h"
+#include "../../risseNativeBinder.h"
+#include "../risseBuiltinPackageInitializer.h"
 
 namespace Risse
 {
@@ -33,27 +34,6 @@ inline tStreamConstants::tOrigin FromVariant<tStreamConstants::tOrigin>(const tV
 	return (tStreamConstants::tOrigin)(int)(risse_int64)v;
 }
 //---------------------------------------------------------------------------
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		ストリームに関連する定数などを保持するモジュール
-//---------------------------------------------------------------------------
-class tStreamConstsModule : public tModuleBase, public tStreamConstants
-{
-public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tStreamConstsModule(tScriptEngine * engine);
-
-	//! @brief		各メンバをインスタンスに追加する
-	void RegisterMembers();
-};
-//---------------------------------------------------------------------------
-
 
 
 
@@ -202,6 +182,28 @@ public:
 	static tVariant ovulate();
 
 public:
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"stream" パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tStreamPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tStreamClass * StreamClass;
+
+	//! @brief		コンストラクタ
+	tStreamPackageInitializer();
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
 };
 //---------------------------------------------------------------------------
 

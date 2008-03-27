@@ -13,7 +13,6 @@
 
 #include "prec.h"
 #include "risseScriptEngine.h"
-#include "risseCoroutine.h"
 #include "risseStaticStrings.h"
 #include "rissePackage.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
@@ -58,7 +57,6 @@ tScriptEngine::tScriptEngine()
 		CommonObjectsInitialized = true;
 		// 共通初期化
 		GC_init();
-		InitCoroutine();
 	}
 
 	// 各クラスのインスタンスを作成する

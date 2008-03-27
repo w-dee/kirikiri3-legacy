@@ -20,6 +20,6 @@ try
 catch(e if e instanceof CoroutineException)
 {
 	return e.message + " at " + e.trace[0].toString();
-		//=> /^"coroutine is not running at .*?:16"$/
+		//=> /^"coroutine is not running at .*?:18"$/
 }
 

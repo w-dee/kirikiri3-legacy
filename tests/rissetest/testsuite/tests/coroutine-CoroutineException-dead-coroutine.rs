@@ -14,6 +14,6 @@ try
 catch(e if e instanceof CoroutineException)
 {
 	return e.message + " at " + e.trace[0].toString();
-		//=> /^"coroutine has already exited at .*?:10"$/
+		//=> /^"coroutine has already exited at .*?:12"$/
 }
 

@@ -197,6 +197,7 @@ tCoroutinePackageInitializer::tCoroutinePackageInitializer() :
 void tCoroutinePackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 {
+	InitCoroutine();
 	CoroutineClass = new tCoroutineClass(engine);
 	CoroutineClass->RegisterInstance(global);
 }

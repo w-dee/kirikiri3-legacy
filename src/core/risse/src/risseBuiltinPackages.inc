@@ -10,7 +10,7 @@
 
 #include "builtin/date/risseDateClass.h"
 #include "builtin/thread/risseThreadClass.h"
-#include "builtin/thread/risseCoroutineClass.h"
+#include "builtin/coroutine/risseCoroutineClass.h"
 
 #else
 

@@ -182,6 +182,100 @@ tVariant tCoroutineClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+tCoroutineExceptionClass::tCoroutineExceptionClass(tScriptEngine * engine) :
+	tClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_construct, &tCoroutineExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tCoroutineExceptionClass::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::construct()
+{
+	// 特にやることはない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::initialize(const tNativeCallInfo & info)
+{
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_coroutine, ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine has already exited")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_coroutine, ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine has not started yet")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_coroutine, ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine is not running")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutineExceptionClass::ThrowCoroutineIsRunning(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_coroutine, ss_CoroutineException,
+					tString(RISSE_WS_TR("coroutine is currently running")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -189,6 +283,7 @@ tCoroutinePackageInitializer::tCoroutinePackageInitializer() :
 	tBuiltinPackageInitializer(ss_coroutine)
 {
 	CoroutineClass = NULL;
+	CoroutineExceptionClass = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -200,6 +295,8 @@ void tCoroutinePackageInitializer::Initialize(tScriptEngine * engine, const tStr
 	InitCoroutine();
 	CoroutineClass = new tCoroutineClass(engine);
 	CoroutineClass->RegisterInstance(global);
+	CoroutineExceptionClass = new tCoroutineExceptionClass(engine);
+	CoroutineExceptionClass->RegisterInstance(global);
 }
 //---------------------------------------------------------------------------
 } /* namespace Risse */

@@ -1232,65 +1232,6 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"CoroutineException" クラス
-//---------------------------------------------------------------------------
-class tCoroutineExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tCoroutineExceptionClass(tScriptEngine * engine);
-
-	//! @brief		各メンバをインスタンスに追加する
-	void RegisterMembers();
-
-public: // Risse用メソッドなど
-	static void construct();
-	static void initialize(const tNativeCallInfo & info);
-
-public:
-	//! @brief		「コルーチンは既に終了している」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasAlreadyExited(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは既に終了している」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasAlreadyExited() RISSE_NORETURN
-		{ ThrowCoroutineHasAlreadyExited(NULL); }
-
-	//! @brief		「コルーチンはまだ開始していない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasNotStartedYet(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンはまだ開始していない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineHasNotStartedYet() RISSE_NORETURN
-		{ ThrowCoroutineHasNotStartedYet(NULL); }
-
-	//! @brief		「コルーチンは実行中でない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsNotRunning(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは実行中でない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsNotRunning() RISSE_NORETURN
-		{ ThrowCoroutineIsNotRunning(NULL); }
-
-	//! @brief		「コルーチンは実行中」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsRunning(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは実行中」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
-	static void ThrowCoroutineIsRunning() RISSE_NORETURN
-		{ ThrowCoroutineIsRunning(NULL); }
-
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-//---------------------------------------------------------------------------
 //! @brief		"IllegalStateException" クラス
 //---------------------------------------------------------------------------
 class tIllegalStateExceptionClass : public tClassBase

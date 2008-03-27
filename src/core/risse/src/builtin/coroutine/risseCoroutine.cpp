@@ -15,6 +15,7 @@
 #include "../../risseCharUtils.h"
 #include "../../risseAssert.h"
 #include "risseCoroutine.h"
+#include "risseCoroutineClass.h"
 #include "../../risseExceptionClass.h"
 
 

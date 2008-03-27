@@ -10,14 +10,14 @@
 //! @file
 //! @brief Risse用 "Date" クラスの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "risseTypes.h"
+#include "../../prec.h"
+#include "../../risseTypes.h"
 #include "risseDateClass.h"
-#include "risseStaticStrings.h"
-#include "risseObjectClass.h"
-#include "risseScriptEngine.h"
+#include "../../risseStaticStrings.h"
+#include "../../risseObjectClass.h"
+#include "../../risseScriptEngine.h"
 #include "risseDateParser.h"
-#include "risseExceptionClass.h"
+#include "../../risseExceptionClass.h"
 
 #include <wx/longlong.h>
 
@@ -268,7 +268,8 @@ void tDateInstance::initialize(const tNativeCallInfo &info)
 		else if(info.args[0].GetType() == tVariant::vtObject)
 		{
 			tDateInstance * instance =
-				info.args[0].AssertAndGetObjectInterafce<tDateInstance>(info.engine->DateClass);
+				info.args[0].AssertAndGetObjectInterafce<tDateInstance>(
+					info.engine->DatePackageInitializer->DateClass);
 			DateTime = instance->DateTime;
 		}
 		else
@@ -505,7 +506,8 @@ tString tDateInstance::toLocaleString() const
 bool tDateInstance::equal(const tVariant & rhs)
 {
 	tDateInstance *instance =
-		rhs.CheckAndGetObjectInterafce<tDateInstance>(GetRTTI()->GetScriptEngine()->DateClass);
+		rhs.CheckAndGetObjectInterafce<tDateInstance>(
+			GetRTTI()->GetScriptEngine()->DatePackageInitializer->DateClass);
 
 	volatile tSynchronizer sync1(this); // sync
 	volatile tSynchronizer sync2(instance); // sync
@@ -590,6 +592,39 @@ tVariant tDateClass::ovulate()
 	return tVariant(new tDateInstance());
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tDatePackageInitializer::tDatePackageInitializer() :
+	tBuiltinPackageInitializer(ss_date)
+{
+	DateClass = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tDatePackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+{
+	DateClass = new tDateClass(engine);
+	DateClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
+
+
+
 
 } /* namespace Risse */
 

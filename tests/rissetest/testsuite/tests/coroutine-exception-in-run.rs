@@ -1,3 +1,5 @@
+import * in coroutine;
+
 var res = '';
 
 class TestException extends RuntimeException {}

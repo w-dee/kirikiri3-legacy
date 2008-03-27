@@ -67,10 +67,6 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                   \
 			src/risseCodeExecutor.cpp                \
 			src/risseConfig.cpp                      \
-			src/risseCoroutine.cpp                   \
-			src/risseCoroutineClass.cpp              \
-			src/risseDateClass.cpp                   \
-			src/risseDateParser.cpp                  \
 			src/risseDictionaryClass.cpp             \
 			src/risseExceptionClass.cpp              \
 			src/risseFunctionClass.cpp               \
@@ -104,7 +100,6 @@ CPPFILES =  \
 			src/risseString.cpp                      \
 			src/risseStringClass.cpp                 \
 			src/risseThread.cpp                      \
-			src/risseThreadClass.cpp                 \
 			src/risseTypes.cpp                       \
 			src/risseVariant.cpp                     \
 			src/risseVoidClass.cpp                   \
@@ -120,7 +115,12 @@ CPPFILES =  \
 			src/compiler/risseSSABlock.cpp           \
 			src/compiler/risseSSAForm.cpp            \
 			src/compiler/risseSSAStatement.cpp       \
-			src/compiler/risseSSAVariable.cpp        
+			src/compiler/risseSSAVariable.cpp        \
+			src/builtin/date/risseDateClass.cpp      \
+			src/builtin/date/risseDateParser.cpp     \
+			src/builtin/thread/risseThreadClass.cpp  \
+			src/builtin/coroutine/risseCoroutine.cpp \
+			src/builtin/coroutine/risseCoroutineClass.cpp              
 
 OBJS = $(CPPFILES:.cpp=.o)
 
@@ -136,13 +136,14 @@ src/risse_parser/risseLexerMap.def: \
 		src/risse_parser/risseLexerMap.def
 
 # risseDateLexerMap.def のコンパイル
-BIN_DEPS += src/risseDateLexerMap.def
+BIN_DEPS += src/builtin/date/risseDateLexerMap.def
 
-src/risseDateLexerMap.def: \
-		src/risseDateLexerWords.txt \
+src/builtin/date/risseDateLexerMap.def: \
+		src/builtin/date/risseDateLexerWords.txt \
 		tools/create_word_map.rb Makefile
-	ruby tools/create_word_map.rb src/risseDateLexerWords.txt MapToken long ::Risse::iswalpha_nc > \
-		src/risseDateLexerMap.def
+	ruby tools/create_word_map.rb src/builtin/date/risseDateLexerWords.txt \
+		MapToken long ::Risse::iswalpha_nc > \
+		src/builtin/date/risseDateLexerMap.def
 
 # risseOpCodesEnum.inc と risseOpCodesDefs.def のコンパイル
 BIN_DEPS += src/risseOpCodesEnum.inc src/risseOpCodesDefs.def
@@ -207,20 +208,20 @@ src/risse_parser/risseParser.cpp src/risse_parser/risseParser.inc: \
 	)
 
 # risseDateParser.cpp と risseDateParser.inc のコンパイル
-BIN_DEPS += src/risseDateParser.inc
+BIN_DEPS += src/builtin/date/risseDateParser.inc
 
-src/risseDateParser.cpp src/risseDateParser.inc: \
-		src/risseDateParser.y Makefile
-	@echo Compiling src/risseDateParser.y
+src/builtin/date/risseDateParser.cpp src/builtin/date/risseDateParser.inc: \
+		src/builtin/date/risseDateParser.y Makefile
+	@echo Compiling src/builtin/date/risseDateParser.y
 	@(set -e ;\
-		cd src ;\
+		cd src/builtin/date ;\
 		bison -v --name-prefix=rissedp risseDateParser.y ;\
 		cat risseDateParser.tab.c | \
-			sed -e "s|risseDateParser.tab.h|src/risseDateParser.inc|" \
-				-e "s|risseDateParser.tab.c|src/risseDateParser.cpp|" \
-				-e "s|risseDateParser\.y|src/risseDateParser.y|" \
+			sed -e "s|risseDateParser.tab.h|src/builtin/date/risseDateParser.inc|" \
+				-e "s|risseDateParser.tab.c|src/builtin/date/risseDateParser.cpp|" \
+				-e "s|risseDateParser\.y|src/builtin/date/risseDateParser.y|" \
 				>  risseDateParser.cpp ;\
-		ruby ../tools/extract_yytokentype.rb risseDateParser.tab.c > risseDateParser.inc; \
+		ruby ../../../tools/extract_yytokentype.rb risseDateParser.tab.c > risseDateParser.inc; \
 		rm risseDateParser.tab.c ;\
 		(grep -i "As a special exception" risseDateParser.cpp > /dev/null) || (\
 			echo "**********************************************************"; \

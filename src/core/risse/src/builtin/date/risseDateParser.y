@@ -12,12 +12,12 @@
 /* rissDateParsere.y */
 /* Risse date parser bison input file */
 
-#include "prec.h"
+#include "../../prec.h"
 
 #include <stdio.h>
 #include <string.h>
-#include "risseTypes.h"
-#include "risseGC.h"
+#include "../../risseTypes.h"
+#include "../../risseGC.h"
 #include "risseDateParser.h"
 
 /* 名前空間を Risse に */

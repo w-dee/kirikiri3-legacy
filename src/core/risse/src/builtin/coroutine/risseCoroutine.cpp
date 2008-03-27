@@ -10,12 +10,12 @@
 //! @file
 //! @brief コルーチンの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "../../prec.h"
 
-#include "risseCharUtils.h"
-#include "risseAssert.h"
+#include "../../risseCharUtils.h"
+#include "../../risseAssert.h"
 #include "risseCoroutine.h"
-#include "risseExceptionClass.h"
+#include "../../risseExceptionClass.h"
 
 
 namespace Risse

@@ -1,3 +1,5 @@
+import * in coroutine;
+
 class A extends Coroutine
 {
 	function run(arg)

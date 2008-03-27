@@ -1,3 +1,5 @@
+import * in coroutine;
+
 var c1 = Coroutine.new() static function(arg, co) {
 	while(true) co.yield();
 }

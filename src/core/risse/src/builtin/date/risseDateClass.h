@@ -14,10 +14,12 @@
 #ifndef risseDateClassH
 #define risseDateClassH
 
-#include "risseObject.h"
-#include "risseClass.h"
-#include "risseGC.h"
-#include "risseNativeBinder.h"
+#include "../../risseObject.h"
+#include "../../risseClass.h"
+#include "../../risseGC.h"
+#include "../../risseNativeBinder.h"
+#include "../../risseScriptEngine.h"
+#include "../risseBuiltinPackageInitializer.h"
 
 
 #ifndef RISSE_SUPPORT_WX
@@ -105,6 +107,31 @@ public:
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"date" パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tDatePackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tDateClass * DateClass;
+
+	//! @brief		コンストラクタ
+	tDatePackageInitializer();
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
+};
+//---------------------------------------------------------------------------
+
+
+
+
 } // namespace Risse
 
 

@@ -20,10 +20,14 @@
 
 #include "risseStreamClass.h" // for StreamConsts
 
+
 // 各クラスの new に必要なインクルードファイルをインクルードする
-#define RISSE_INTERNALCLASSES_INCLUDE
-#include "risseInternalClasses.inc"
-#undef RISSE_INTERNALCLASSES_INCLUDE
+#define RISSE_BUILTINCLASSES_INCLUDE
+#include "risseBuiltinClasses.inc"
+#undef RISSE_BUILTINCLASSES_INCLUDE
+#define RISSE_BUILTINPACKAGES_INCLUDE
+#include "risseBuiltinPackages.inc"
+#undef RISSE_BUILTINPACKAGES_INCLUDE
 
 namespace Risse
 {
@@ -58,9 +62,9 @@ tScriptEngine::tScriptEngine()
 	}
 
 	// 各クラスのインスタンスを作成する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class = new t##X##Class(this);
-	#include "risseInternalClasses.inc"
-	#undef RISSE_INTERNALCLASSES_CLASS
+	#define RISSE_BUILTINCLASSES_CLASS(X) X##Class = new t##X##Class(this);
+	#include "risseBuiltinClasses.inc"
+	#undef RISSE_BUILTINCLASSES_CLASS
 
 
 	// Object, Module, Class の各クラスは Class の作成以前に
@@ -77,9 +81,9 @@ tScriptEngine::tScriptEngine()
 	RissePackageGlobal = PackageManager->GetRissePackageGlobal();
 
 	// 各クラスをグローバルオブジェクトに登録する
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterInstance(RissePackageGlobal);
-	#include "risseInternalClasses.inc"
-	#undef RISSE_INTERNALCLASSES_CLASS
+	#define RISSE_BUILTINCLASSES_CLASS(X) X##Class->RegisterInstance(RissePackageGlobal);
+	#include "risseBuiltinClasses.inc"
+	#undef RISSE_BUILTINCLASSES_CLASS
 
 
 	// 各クラスのメンバを正式な物に登録し直すためにもう一度RegisterMembersを呼ぶ
@@ -90,10 +94,20 @@ tScriptEngine::tScriptEngine()
 	// このため、各クラスの RegisterMembers メソッドをもう一度呼び、メンバを
 	// 登録し治す。上記ですべてクラスの初期化は終了しているため、
 	// もう一度このメソッドを呼べば、正しくメソッドが登録されるはずである。
-	#define RISSE_INTERNALCLASSES_CLASS(X) X##Class->RegisterMembers();
-	#include "risseInternalClasses.inc"
-	#undef RISSE_INTERNALCLASSES_CLASS
+	#define RISSE_BUILTINCLASSES_CLASS(X) X##Class->RegisterMembers();
+	#include "risseBuiltinClasses.inc"
+	#undef RISSE_BUILTINCLASSES_CLASS
 
+	// 組み込みパッケージイニシャライザのインスタンスを作成
+	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer = new t##X##PackageInitializer();
+	#include "risseBuiltinPackages.inc"
+	#undef RISSE_BUILTINPACKAGES_PACKAGE
+
+	// 組み込みパッケージイニシャライザをパッケージマネージャの
+	// 仮想ファイルシステムに登録
+	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer->RegisterInstance(PackageManager);
+	#include "risseBuiltinPackages.inc"
+	#undef RISSE_BUILTINPACKAGES_PACKAGE
 
 	// いくつかのモジュールの作成と include
 	tModuleBase * module;

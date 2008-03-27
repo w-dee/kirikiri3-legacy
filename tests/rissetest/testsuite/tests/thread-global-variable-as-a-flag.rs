@@ -1,3 +1,4 @@
+import * in thread;
 
 class T2 extends Thread
 {

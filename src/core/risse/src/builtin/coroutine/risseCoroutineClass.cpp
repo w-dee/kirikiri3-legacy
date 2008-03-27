@@ -10,13 +10,13 @@
 //! @file
 //! @brief Risse用 "Coroutine" クラスの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "risseTypes.h"
+#include "../../prec.h"
+#include "../../risseTypes.h"
 #include "risseCoroutineClass.h"
 #include "risseCoroutine.h"
-#include "risseStaticStrings.h"
-#include "risseObjectClass.h"
-#include "risseScriptEngine.h"
+#include "../../risseStaticStrings.h"
+#include "../../risseObjectClass.h"
+#include "../../risseScriptEngine.h"
 
 /*
 	Risseスクリプトから見える"Coroutine" クラスの実装
@@ -174,5 +174,32 @@ tVariant tCoroutineClass::ovulate()
 }
 //---------------------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tCoroutinePackageInitializer::tCoroutinePackageInitializer() :
+	tBuiltinPackageInitializer(ss_coroutine)
+{
+	CoroutineClass = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tCoroutinePackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+{
+	CoroutineClass = new tCoroutineClass(engine);
+	CoroutineClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
 } /* namespace Risse */
 

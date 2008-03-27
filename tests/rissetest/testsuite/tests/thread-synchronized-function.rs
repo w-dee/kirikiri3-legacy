@@ -1,3 +1,5 @@
+import * in thread;
+
 var result = "ok";
 
 class S extends Object

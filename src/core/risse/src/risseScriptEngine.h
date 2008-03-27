@@ -95,9 +95,12 @@ public:
 
 
 // クラスの前方定義を行う
-#define RISSE_INTERNALCLASSES_CLASS(X) class t##X##Class;
-#include "risseInternalClasses.inc"
-#undef RISSE_INTERNALCLASSES_CLASS
+#define RISSE_BUILTINCLASSES_CLASS(X) class t##X##Class;
+#include "risseBuiltinClasses.inc"
+#undef RISSE_BUILTINCLASSES_CLASS
+#define RISSE_BUILTINPACKAGES_PACKAGE(X) class t##X##PackageInitializer;
+#include "risseBuiltinPackages.inc"
+#undef RISSE_BUILTINPACKAGES_PACKAGE
 
 //---------------------------------------------------------------------------
 //! @brief		スクリプトエンジンクラス
@@ -105,14 +108,18 @@ public:
 class tScriptEngine : public tCollectee
 {
 public:
-	void * StartSentinel; //!< クラスインスタンスの開始位置
+	void * StartSentinel; //!< クラスインスタンス・パッケージイニシャライザの開始位置
 
 	// 各クラスインスタンスへのポインタを定義する
-	#define RISSE_INTERNALCLASSES_CLASS(X) t##X##Class * X##Class;
-	#include "risseInternalClasses.inc"
-	#undef RISSE_INTERNALCLASSES_CLASS
+	#define RISSE_BUILTINCLASSES_CLASS(X) t##X##Class * X##Class;
+	#include "risseBuiltinClasses.inc"
+	#undef RISSE_BUILTINCLASSES_CLASS
+	// 各パッケージイニシャライザへのポインタを定義する
+	#define RISSE_BUILTINPACKAGES_PACKAGE(X) t##X##PackageInitializer * X##PackageInitializer;
+	#include "risseBuiltinPackages.inc"
+	#undef RISSE_BUILTINPACKAGES_PACKAGE
 
-	void * EndSentinel; //!< クラスインスタンスの開始位置
+	void * EndSentinel; //!< クラスインスタンス・パッケージイニシャライザの開始位置
 
 private:
 	static bool CommonObjectsInitialized;

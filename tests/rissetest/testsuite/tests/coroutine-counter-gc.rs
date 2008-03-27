@@ -1,3 +1,5 @@
+import * in coroutine;
+
 
 function test_one()
 {

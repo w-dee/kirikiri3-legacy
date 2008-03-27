@@ -1,3 +1,5 @@
+import * in coroutine;
+
 function make_coro(n) {
 	var c = Coroutine.new() static function(arg, co) {
 		while(n--) co.yield();

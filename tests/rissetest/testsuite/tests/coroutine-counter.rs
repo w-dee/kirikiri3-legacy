@@ -1,3 +1,5 @@
+import * in coroutine;
+
 
 var a = Coroutine.new() static function(arg, co) {
 	var count = arg;

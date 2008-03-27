@@ -14,8 +14,8 @@
 #ifndef risseDateParserH
 #define risseDateParserH
 
-#include "risseGC.h"
-#include "risseLexerUtils.h"
+#include "../../risseGC.h"
+#include "../../risseLexerUtils.h"
 
 namespace Risse
 {

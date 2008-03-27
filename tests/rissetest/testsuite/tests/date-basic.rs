@@ -1,3 +1,5 @@
+import Date in date;
+
 var d = new Date();
 var d2 = new Date(d); // 複製
 

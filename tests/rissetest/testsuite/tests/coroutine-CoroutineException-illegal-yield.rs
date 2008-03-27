@@ -1,3 +1,5 @@
+import * in coroutine;
+
 var c = Coroutine.new() static function(arg, co) {
 	// immediately return
 }

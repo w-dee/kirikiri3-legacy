@@ -10,14 +10,14 @@
 //! @file
 //! @brief Risse用 "Thread" クラスの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "risseTypes.h"
+#include "../../prec.h"
+#include "../../risseTypes.h"
 #include "risseThreadClass.h"
-#include "risseThread.h"
-#include "risseStaticStrings.h"
-#include "risseObjectClass.h"
-#include "risseScriptEngine.h"
-#include "risseExceptionClass.h"
+#include "../../risseThread.h"
+#include "../../risseStaticStrings.h"
+#include "../../risseObjectClass.h"
+#include "../../risseScriptEngine.h"
+#include "../../risseExceptionClass.h"
 
 /*
 	Risseスクリプトから見える"Thread" クラスの実装
@@ -287,6 +287,37 @@ tVariant tThreadClass::ovulate()
 	return tVariant(new tThreadInstance());
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tThreadPackageInitializer::tThreadPackageInitializer() :
+	tBuiltinPackageInitializer(ss_thread)
+{
+	ThreadClass = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tThreadPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+{
+	ThreadClass = new tThreadClass(engine);
+	ThreadClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
+
+
 
 } /* namespace Risse */
 

@@ -8,65 +8,58 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief Risse用 "Thread" クラスの実装
+//! @brief Risse用 "Coroutine" クラスの実装
 //---------------------------------------------------------------------------
 
-#ifndef risseThreadClassH
-#define risseThreadClassH
+#ifndef risseCoroutineClassH
+#define risseCoroutineClassH
 
-#include "risseObject.h"
-#include "risseClass.h"
-#include "risseGC.h"
+#include "../../risseObject.h"
+#include "../../risseClass.h"
+#include "../../risseGC.h"
+#include "../risseBuiltinPackageInitializer.h"
 
 namespace Risse
 {
-class tScriptThread;
+class tCoroutine;
 //---------------------------------------------------------------------------
-//! @brief		"Thread" クラスのインスタンス用 C++クラス
+//! @brief		"Coroutine" クラスのインスタンス用 C++クラス
 //---------------------------------------------------------------------------
-class tThreadInstance : public tObjectBase
+class tCoroutineInstance : public tObjectBase
 {
 private:
-	tScriptThread * Thread; //!< スレッドの実装
-
-	tVariant Method; //!< 実行するメソッド
-	tVariant Context; //!< 実行するメソッドのコンテキスト
-	tVariant Ret; //!< Execute メソッドの戻り値
-	const tVariant *Exception; //!< 例外が発生した場合の例外オブジェクト
+	tCoroutine * Coroutine; //!< コルーチンの実装
 
 public:
 	//! @brief		コンストラクタ
-	tThreadInstance();
+	tCoroutineInstance();
 
 	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
-	virtual ~tThreadInstance() {;}
+	virtual ~tCoroutineInstance() {;}
 
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo & info);
 	void run() const;
-	void start();
-	tVariant join() const;
-	bool sleep(risse_int64 timeout);
-	void wakeup();
-
-	// friend 指定
-	friend class tScriptThread;
+	tVariant resume(const tMethodArgument & args) const;
+	tVariant yield(const tMethodArgument & args) const;
+	void dispose() const;
+	bool get_alive() const;
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Thread" クラス
+//! @brief		"Coroutine" クラス
 //---------------------------------------------------------------------------
-class tThreadClass : public tClassBase
+class tCoroutineClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tThreadClass(tScriptEngine * engine);
+	tCoroutineClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -77,6 +70,29 @@ public:
 public:
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"coroutine" パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tCoroutinePackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tCoroutineClass * CoroutineClass;
+
+	//! @brief		コンストラクタ
+	tCoroutinePackageInitializer();
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
+};
+//---------------------------------------------------------------------------
+
+
 } // namespace Risse
 
 

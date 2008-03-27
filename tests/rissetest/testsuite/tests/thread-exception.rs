@@ -1,3 +1,4 @@
+import * in thread;
 
 var t = Thread.new() function() {
 	throw "Exception!";

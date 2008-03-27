@@ -13,10 +13,10 @@
 #ifndef risseCoroutineH
 #define risseCoroutineH
 
-#include "risseConfig.h"
-#include "risseThread.h"
-#include "risseGC.h"
-#include "risseVariant.h"
+#include "../../risseConfig.h"
+#include "../../risseThread.h"
+#include "../../risseGC.h"
+#include "../../risseVariant.h"
 
 // #define RISSE_CORO_DEBUG
 // #define RISSE_TRACK_FIBERS

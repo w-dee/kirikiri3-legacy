@@ -37,31 +37,37 @@ namespace Risse
 class tTemporaryException : public tCollectee
 {
 	tString ExceptionClassName; //!< 例外クラス名
+	tString PackageName; //!< パッケージ名
 	gc_vector<tVariant> Arguments; //!< 例外クラスのコンストラクタに渡すための引数
 public:
 	//! @brief		コンストラクタ
+	//! @param		package			パッケージ名
 	//! @param		classname		クラス名
-	tTemporaryException(const tString classname);
+	tTemporaryException(const tString & package, const tString & classname);
 
 	//! @brief		コンストラクタ
+	//! @param		package			パッケージ名
 	//! @param		classname		クラス名
 	//! @param		arg1			引数1
-	tTemporaryException(const tString classname, const tVariant & arg1);
+	tTemporaryException(const tString & package, const tString & classname,
+		const tVariant & arg1);
 
 	//! @brief		コンストラクタ
+	//! @param		package			パッケージ名
 	//! @param		classname		クラス名
 	//! @param		arg1			引数1
 	//! @param		arg2			引数2
-	tTemporaryException(const tString classname, const tVariant & arg1,
-								const tVariant & arg2);
+	tTemporaryException(const tString & package, const tString & classname,
+		const tVariant & arg1, const tVariant & arg2);
 
 	//! @brief		コンストラクタ
+	//! @param		package			パッケージ名
 	//! @param		classname		クラス名
 	//! @param		arg1			引数1
 	//! @param		arg2			引数2
 	//! @param		arg3			引数3
-	tTemporaryException(const tString classname, const tVariant & arg1,
-								const tVariant & arg2, const tVariant & arg3);
+	tTemporaryException(const tString & package, const tString & classname,
+		const tVariant & arg1, const tVariant & arg2, const tVariant & arg3);
 
 
 	//! @brief		例外を本来の例外に変換する

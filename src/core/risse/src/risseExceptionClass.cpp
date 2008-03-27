@@ -62,17 +62,19 @@ RISSE_DEFINE_SOURCE_ID(64113,30630,41963,17808,15295,58919,39993,4429);
 
 
 //---------------------------------------------------------------------------
-tTemporaryException::tTemporaryException(const tString classname)
+tTemporaryException::tTemporaryException(const tString & package, const tString & classname)
 {
+	PackageName = package;
 	ExceptionClassName = classname;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tTemporaryException::tTemporaryException(const tString classname,
+tTemporaryException::tTemporaryException(const tString & package, const tString & classname,
 		const tVariant & arg1)
 {
+	PackageName = package;
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
 }
@@ -80,9 +82,10 @@ tTemporaryException::tTemporaryException(const tString classname,
 
 
 //---------------------------------------------------------------------------
-tTemporaryException::tTemporaryException(const tString classname,
+tTemporaryException::tTemporaryException(const tString & package, const tString & classname,
 		const tVariant & arg1, const tVariant & arg2)
 {
+	PackageName = package;
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
 	Arguments.push_back(arg2);
@@ -91,9 +94,10 @@ tTemporaryException::tTemporaryException(const tString classname,
 
 
 //---------------------------------------------------------------------------
-tTemporaryException::tTemporaryException(const tString classname,
+tTemporaryException::tTemporaryException(const tString & package, const tString & classname,
 		const tVariant & arg1, const tVariant & arg2, const tVariant & arg3)
 {
+	PackageName = package;
 	ExceptionClassName = classname;
 	Arguments.push_back(arg1);
 	Arguments.push_back(arg2);
@@ -105,12 +109,13 @@ tTemporaryException::tTemporaryException(const tString classname,
 //---------------------------------------------------------------------------
 tVariant * tTemporaryException::Convert(tScriptEngine * engine) const
 {
-	// まず、例外クラスを取得する
+	// パッケージグローバルを取得
+	tVariant package_global = engine->GetPackageGlobal(PackageName);
 
-	// TODO: パッケージ対応
+	// 例外クラスを取得する
 	tVariant cls;
 	tObjectInterface::tRetValue ret =
-		const_cast<tVariant&>(engine->GetRissePackageGlobal()).Operate(engine, ocDGet, &cls, ExceptionClassName);
+		const_cast<tVariant&>(package_global).Operate(engine, ocDGet, &cls, ExceptionClassName);
 	if(ret != tObjectInterface::rvNoError)
 	{
 		// ExceptionClassNameを取得できなかった。
@@ -137,6 +142,8 @@ void tTemporaryException::Dump() const
 	fflush(stdout);
 
 	FPrint(stderr, RISSE_WS("tTemporaryException: type "));
+	FPrint(stderr, PackageName.c_str());
+	FPrint(stderr, RISSE_WS("."));
 	FPrint(stderr, ExceptionClassName.c_str());
 	FPrint(stderr, RISSE_WS("\n"));
 
@@ -518,7 +525,7 @@ void tAssertionErrorClass::initialize(const tNativeCallInfo & info)
 //---------------------------------------------------------------------------
 void tAssertionErrorClass::Throw(tScriptEngine * engine, const tString & expression)
 {
-	tTemporaryException * e = new tTemporaryException(ss_AssertionError, expression);
+	tTemporaryException * e = new tTemporaryException(ss_risse, ss_AssertionError, expression);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -703,7 +710,7 @@ void tInsufficientResourceExceptionClass::initialize(const tNativeCallInfo & inf
 void tInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_InsufficientResourceException,
+		new tTemporaryException(ss_risse, ss_InsufficientResourceException,
 			tString(RISSE_WS_TR("could not create coroutine")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -765,7 +772,7 @@ void tIOExceptionClass::Throw(tScriptEngine * engine,
 							const tString & message)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException, message);
+		new tTemporaryException(ss_risse, ss_IOException, message);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -776,7 +783,7 @@ void tIOExceptionClass::ThrowReadError(tScriptEngine * engine,
 							const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException,
+		new tTemporaryException(ss_risse, ss_IOException,
 			name.IsEmpty() ? tString(RISSE_WS_TR("could not read")) :
 							 tString(RISSE_WS_TR("could not read at %1"), name)
 			);
@@ -790,7 +797,7 @@ void tIOExceptionClass::ThrowWriteError(tScriptEngine * engine,
 							const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException,
+		new tTemporaryException(ss_risse, ss_IOException,
 			name.IsEmpty() ? tString(RISSE_WS_TR("could not write")) :
 							 tString(RISSE_WS_TR("could not write at %1"), name)
 			);
@@ -804,7 +811,7 @@ void tIOExceptionClass::ThrowSeekError(tScriptEngine * engine,
 							const tString & name, risse_size pos)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException,
+		new tTemporaryException(ss_risse, ss_IOException,
 			pos != risse_size_max ?
 				(name.IsEmpty() ? tString(RISSE_WS_TR("could not seek to position %1"), tString::AsString((risse_int64)pos)) :
 								  tString(RISSE_WS_TR("could not seek to position %1 of %2"), tString::AsString((risse_int64)pos) , name) ) :
@@ -821,7 +828,7 @@ void tIOExceptionClass::ThrowTruncateError(tScriptEngine * engine,
 							const tString & name, risse_size pos)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException,
+		new tTemporaryException(ss_risse, ss_IOException,
 			pos != risse_size_max ?
 				(name.IsEmpty() ? tString(RISSE_WS_TR("could not truncate at position %1"), tString::AsString((risse_int64)pos)) :
 								  tString(RISSE_WS_TR("could not truncate at position %1 of %2"), tString::AsString((risse_int64)pos) , name) ) :
@@ -838,7 +845,7 @@ see tInaccessibleResourceExceptionClass::Throw
 void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IOException,
+		new tTemporaryException(ss_risse, ss_IOException,
 			name.IsEmpty() ? tString(RISSE_WS_TR("stream is closed")) :
 							 tString(RISSE_WS_TR("stream %1 is closed"), name)
 			);
@@ -900,7 +907,7 @@ void tCharConversionExceptionClass::initialize(const tNativeCallInfo & info)
 void tCharConversionExceptionClass::ThrowInvalidUTF8String(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_CharConversionException,
+		new tTemporaryException(ss_risse, ss_CharConversionException,
 			tString(RISSE_WS_TR("invalid UTF-8 string")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1009,7 +1016,7 @@ void tCompileExceptionClass::Throw(tScriptEngine * engine,
 {
 	// 例外インスタンスを生成
 	tTemporaryException * et =
-		new tTemporaryException(ss_CompileException,
+		new tTemporaryException(ss_risse, ss_CompileException,
 			tString(RISSE_WS_TR("compile error: %1"), reason));
 	if(engine)
 	{
@@ -1080,7 +1087,7 @@ void tClassDefinitionExceptionClass::initialize(const tNativeCallInfo & info)
 void tClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ClassDefinitionException,
+		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
 			tString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1091,7 +1098,7 @@ void tClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleCla
 void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ClassDefinitionException,
+		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
 			tString(RISSE_WS_TR("the superclass is not a class")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1150,7 +1157,7 @@ void tImportExceptionClass::initialize(const tNativeCallInfo & info)
 void tImportExceptionClass::ThrowCannotImportIntoPrimitiveInstanceContext(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ImportException,
+		new tTemporaryException(ss_risse, ss_ImportException,
 			tString(RISSE_WS_TR("cannot import into primitive instance context")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1161,7 +1168,7 @@ void tImportExceptionClass::ThrowCannotImportIntoPrimitiveInstanceContext(tScrip
 void tImportExceptionClass::ThrowPackageNotFound(tScriptEngine * engine, const tString & package_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ImportException,
+		new tTemporaryException(ss_risse, ss_ImportException,
 			tString(RISSE_WS_TR("package \"%1\" not found"), package_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1173,7 +1180,7 @@ void tImportExceptionClass::ThrowPackageIsBeingInitialized(
 	tScriptEngine * engine, const tString & package_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ImportException,
+		new tTemporaryException(ss_risse, ss_ImportException,
 			tString(RISSE_WS_TR("package \"%1\" is being initialized, cannot be imported"), package_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1198,7 +1205,7 @@ void tImportExceptionClass::ThrowCannotImportIds(
 
 	// 例外送出
 	tTemporaryException * e =
-		new tTemporaryException(ss_ImportException,
+		new tTemporaryException(ss_risse, ss_ImportException,
 			tString(RISSE_WS_TR("one or more identifiers could not be imported: %1"), id_list));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1210,7 +1217,7 @@ void tImportExceptionClass::ThrowInvalidRelativePckageName(tScriptEngine * engin
 			const tString & package_name, const tString & ref)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ImportException,
+		new tTemporaryException(ss_risse, ss_ImportException,
 			tString(RISSE_WS_TR("invalid relative package name \"%1\" against \"%2\""), package_name, ref));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1267,7 +1274,7 @@ void tInstantiationExceptionClass::initialize(const tNativeCallInfo & info)
 void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_InstantiationException,
+		new tTemporaryException(ss_risse, ss_InstantiationException,
 			tString(RISSE_WS_TR("cannot create instance from non-class object")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1278,7 +1285,7 @@ void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject(t
 void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_InstantiationException,
+		new tTemporaryException(ss_risse, ss_InstantiationException,
 			tString(RISSE_WS_TR("cannot create instance from this class")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1336,7 +1343,7 @@ void tBadContextExceptionClass::initialize(const tNativeCallInfo & info)
 void tBadContextExceptionClass::Throw(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_BadContextException,
+		new tTemporaryException(ss_risse, ss_BadContextException,
 			tString(RISSE_WS_TR("given context is not compatible with this method/property")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1395,7 +1402,7 @@ void tUnsupportedOperationExceptionClass::initialize(const tNativeCallInfo & inf
 void tUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectException(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_UnsupportedOperationException,
+		new tTemporaryException(ss_risse, ss_UnsupportedOperationException,
 			tString(RISSE_WS_TR("cannot call non-function object")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1406,7 +1413,7 @@ void tUnsupportedOperationExceptionClass::ThrowCannotCallNonFunctionObjectExcept
 void tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_UnsupportedOperationException,
+		new tTemporaryException(ss_risse, ss_UnsupportedOperationException,
 			tString(RISSE_WS_TR("operation is not implemented")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1465,7 +1472,7 @@ void tArithmeticExceptionClass::initialize(const tNativeCallInfo & info)
 void tArithmeticExceptionClass::ThrowDivideByZeroException(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_ArithmeticException,
+		new tTemporaryException(ss_risse, ss_ArithmeticException,
 			tString(RISSE_WS_TR("attempt to divide by zero")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1576,7 +1583,7 @@ void tNullObjectExceptionClass::initialize(const tNativeCallInfo & info)
 void tNullObjectExceptionClass::Throw(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_NullObjectException,
+		new tTemporaryException(ss_risse, ss_NullObjectException,
 			tString(RISSE_WS_TR("null object was given")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1636,7 +1643,7 @@ void tIllegalArgumentClassExceptionClass::ThrowNonAcceptableClass(tScriptEngine 
 		const tString & method_name, const tString & class_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentClassException,
+		new tTemporaryException(ss_risse, ss_IllegalArgumentClassException,
 			tString(RISSE_WS_TR("cannot accept instance of class %2 as argument for method %1()"),
 				method_name, class_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
@@ -1649,7 +1656,7 @@ void tIllegalArgumentClassExceptionClass::ThrowIllegalOperationMethod(tScriptEng
 		const tString & method_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentClassException,
+		new tTemporaryException(ss_risse, ss_IllegalArgumentClassException,
 			tString(RISSE_WS_TR("method %1 is illegal operation"),
 				method_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
@@ -1662,7 +1669,7 @@ void tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(tScriptEng
 	const tString & class_name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentClassException,
+		new tTemporaryException(ss_risse, ss_IllegalArgumentClassException,
 			tString(RISSE_WS_TR("specify instance of class %1"),
 				class_name));
 	if(engine) e->ThrowConverted(engine); else throw e;
@@ -1721,7 +1728,7 @@ void tIllegalArgumentExceptionClass::initialize(const tNativeCallInfo & info)
 void tIllegalArgumentExceptionClass::Throw(tScriptEngine * engine, const tString & message)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentException, message);
+		new tTemporaryException(ss_risse, ss_IllegalArgumentException, message);
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------
@@ -1731,7 +1738,7 @@ void tIllegalArgumentExceptionClass::Throw(tScriptEngine * engine, const tString
 void tIllegalArgumentExceptionClass::ThrowInvalidDateString(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalArgumentException,
+		new tTemporaryException(ss_risse, ss_IllegalArgumentException,
 			tString(RISSE_WS_TR("can not parse the string; invalid date string")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -1793,7 +1800,7 @@ void tBadArgumentCountExceptionClass::initialize(const tNativeCallInfo & info)
 void tBadArgumentCountExceptionClass::ThrowNormal(tScriptEngine * engine, risse_size passed, risse_size expected)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_BadArgumentCountException,
+		new tTemporaryException(ss_risse, ss_BadArgumentCountException,
 			tString(RISSE_WS_TR("bad argument count (%1 given, but %2 expected)"),
 					tString::AsString((risse_int64)passed),
 					tString::AsString((risse_int64)expected)));
@@ -1806,7 +1813,7 @@ void tBadArgumentCountExceptionClass::ThrowNormal(tScriptEngine * engine, risse_
 void tBadArgumentCountExceptionClass::ThrowBlock(tScriptEngine * engine, risse_size passed, risse_size expected)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_BadArgumentCountException,
+		new tTemporaryException(ss_risse, ss_BadArgumentCountException,
 			tString(RISSE_WS_TR("bad block argument count (%1 given, but %2 expected)"),
 					tString::AsString((risse_int64)passed),
 					tString::AsString((risse_int64)expected)));
@@ -1927,7 +1934,7 @@ void tNoSuchMemberExceptionClass::initialize(const tNativeCallInfo & info)
 void tNoSuchMemberExceptionClass::Throw(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_NoSuchMemberException,
+		new tTemporaryException(ss_risse, ss_NoSuchMemberException,
 			name.IsEmpty() ?
 					tString(RISSE_WS_TR("member not found"), name):
 					tString(RISSE_WS_TR("member \"%1\" not found"), name),
@@ -1992,7 +1999,7 @@ void tIllegalMemberAccessExceptionClass::initialize(const tNativeCallInfo & info
 void tIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalMemberAccessException,
+		new tTemporaryException(ss_risse, ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
 					tString(RISSE_WS_TR("member is read-only"), name):
 					tString(RISSE_WS_TR("member \"%1\" is read-only"), name),
@@ -2006,7 +2013,7 @@ void tIllegalMemberAccessExceptionClass::ThrowMemberIsReadOnly(tScriptEngine * e
 void tIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalMemberAccessException,
+		new tTemporaryException(ss_risse, ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
 					tString(RISSE_WS_TR("member is final, cannot be overridden"), name):
 					tString(RISSE_WS_TR("member \"%1\" is final, cannot be overridden"), name),
@@ -2020,7 +2027,7 @@ void tIllegalMemberAccessExceptionClass::ThrowMemberIsFinal(tScriptEngine * engi
 void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalMemberAccessException,
+		new tTemporaryException(ss_risse, ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
 					tString(RISSE_WS_TR("property cannot be read"), name):
 					tString(RISSE_WS_TR("property \"%1\" cannot be read"), name),
@@ -2034,7 +2041,7 @@ void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeRead(tScriptEngine
 void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tScriptEngine * engine, const tString & name)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_IllegalMemberAccessException,
+		new tTemporaryException(ss_risse, ss_IllegalMemberAccessException,
 			name.IsEmpty() ?
 					tString(RISSE_WS_TR("property cannot be written"), name):
 					tString(RISSE_WS_TR("property \"%1\" cannot be written"), name),
@@ -2098,7 +2105,7 @@ void tCoroutineExceptionClass::initialize(const tNativeCallInfo & info)
 void tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_CoroutineException,
+		new tTemporaryException(ss_risse, ss_CoroutineException,
 					tString(RISSE_WS_TR("coroutine has already exited")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -2109,7 +2116,7 @@ void tCoroutineExceptionClass::ThrowCoroutineHasAlreadyExited(tScriptEngine * en
 void tCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_CoroutineException,
+		new tTemporaryException(ss_risse, ss_CoroutineException,
 					tString(RISSE_WS_TR("coroutine has not started yet")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -2120,7 +2127,7 @@ void tCoroutineExceptionClass::ThrowCoroutineHasNotStartedYet(tScriptEngine * en
 void tCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_CoroutineException,
+		new tTemporaryException(ss_risse, ss_CoroutineException,
 					tString(RISSE_WS_TR("coroutine is not running")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -2131,7 +2138,7 @@ void tCoroutineExceptionClass::ThrowCoroutineIsNotRunning(tScriptEngine * engine
 void tCoroutineExceptionClass::ThrowCoroutineIsRunning(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_CoroutineException,
+		new tTemporaryException(ss_risse, ss_CoroutineException,
 					tString(RISSE_WS_TR("coroutine is currently running")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
@@ -2251,7 +2258,7 @@ void tInaccessibleResourceExceptionClass::initialize(const tNativeCallInfo & inf
 void tInaccessibleResourceExceptionClass::Throw(tScriptEngine * engine)
 {
 	tTemporaryException * e =
-		new tTemporaryException(ss_InaccessibleResourceException,
+		new tTemporaryException(ss_risse, ss_InaccessibleResourceException,
 					tString(RISSE_WS_TR("the resource is not accessible")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }

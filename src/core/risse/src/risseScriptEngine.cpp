@@ -158,6 +158,14 @@ void tScriptEngine::Evaluate(
 
 
 //---------------------------------------------------------------------------
+tVariant tScriptEngine::GetPackageGlobal(const tString & name)
+{
+	return PackageManager->GetPackageGlobal(name);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 } // namespace Risse
 
 

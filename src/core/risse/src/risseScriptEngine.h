@@ -212,6 +212,12 @@ public:
 	//! @brief		パッケージマネージャを得る
 	//! @return		パッケージマネージャ
 	tPackageManager * GetPackageManager() const { return PackageManager; }
+
+	//! @brief		指定されたパッケージのパッケージグローバルを得る
+	//! @return		パッケージグローバル
+	//! @note		もしパッケージが初期化されていない場合は初期化される。
+	//!				tPackageManager::GetPackageGlobal() へのショートカット。
+	tVariant GetPackageGlobal(const tString & name);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

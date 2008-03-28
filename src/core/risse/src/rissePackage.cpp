@@ -151,13 +151,14 @@ public:
 	}
 
 	//! @brief		組み込みパッケージを登録する
-	//! @param		name	スラッシュ区切りのディレクトリ/ファイル名
-	//!						(最初の '/' や重複する '/' は含めないこと; 例: 'k3/graphics/rina' )
+	//! @param		name	パッケージ名
 	//! @param		init	パッケージ初期化用インターフェース
 	void AddPackage(const tString & name, tBuiltinPackageInitializerInterface * init)
 	{
-		// name をスラッシュごとに split し、tNode に登録していく
-		tString::tSplitter splitter(name + tSS<'.','r','s'>(), RISSE_WC('/'));
+		// name のなかの '.' を '/' に変換する
+		tString given_dir = name.Replace(tSS<'.'>(), tSS<'/'>(), true);
+		// name を '/' ごとに split し、tNode に登録していく
+		tString::tSplitter splitter(given_dir + tSS<'.','r','s'>(), RISSE_WC('/'));
 		tNode * current = &Root;
 		tString token;
 		while(splitter(token))

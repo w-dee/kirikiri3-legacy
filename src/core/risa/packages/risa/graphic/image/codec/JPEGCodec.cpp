@@ -11,7 +11,7 @@
 //! @brief JPEG形式コーデック
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/codec/JPEGCodec.h"
+#include "risa/packages/risa/graphic/image/codec/JPEGCodec.h"
 #include "base/exception/RisaException.h"
 
 

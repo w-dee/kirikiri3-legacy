@@ -11,7 +11,7 @@
 //! @brief TLGデコーダ
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/codec/TLGDecoder.h"
+#include "risa/packages/risa/graphic/image/codec/TLGDecoder.h"
 #include "base/exception/RisaException.h"
 #include <limits.h>
 

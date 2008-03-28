@@ -5161,4 +5161,31 @@ void tVariantBlock::DebugDump() const
 
 
 //---------------------------------------------------------------------------
+void tVariantBlock::RegisterMember(const tString & name, const tVariantBlock & value,
+	tMemberAttribute attrib, risse_uint32 flags) const
+{
+	RISSE_ASSERT(GetType() == vtObject);
+	SetPropertyDirect_Object(name,
+		flags|tOperateFlags::ofMemberEnsure|
+			(risse_uint32)(tMemberAttribute::GetDefault()), 
+		value);
+	SetAttributeDirect_Object(name, (risse_uint32)attrib);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tVariantBlock::RegisterFinalConstMember(const tString & name,
+	const tVariantBlock & value, risse_uint32 flags) const
+{
+	RegisterMember(name, value,
+		tMemberAttribute::GetDefault()
+			.Set(tMemberAttribute::mcConst)
+			.Set(tMemberAttribute::ocFinal),
+		flags);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 } // namespace Risse

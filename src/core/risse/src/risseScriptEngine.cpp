@@ -160,6 +160,15 @@ tVariant tScriptEngine::GetPackageGlobal(const tString & name)
 
 
 //---------------------------------------------------------------------------
+void tScriptEngine::AddBuiltinPackage(const tString & package,
+		tBuiltinPackageInitializerInterface * init)
+{
+	PackageManager->AddBuiltinPackage(package, init);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 } // namespace Risse
 
 

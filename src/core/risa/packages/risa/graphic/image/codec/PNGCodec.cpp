@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include <png.h>
-#include "visual/image/codec/PNGCodec.h"
+#include "risa/packages/risa/graphic/image/codec/PNGCodec.h"
 #include "base/exception/RisaException.h"
 
 

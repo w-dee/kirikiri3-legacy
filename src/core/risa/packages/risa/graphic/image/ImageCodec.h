@@ -13,7 +13,7 @@
 #ifndef ImageCodecH
 #define ImageCodecH
 
-#include "visual/image/Image.h"
+#include "risa/packages/risa/graphic/image/Image.h"
 #include "risse/include/risseDictionaryClass.h"
 #include "risse/include/risseStreamClass.h"
 #include "base/utils/ProgressCallback.h"

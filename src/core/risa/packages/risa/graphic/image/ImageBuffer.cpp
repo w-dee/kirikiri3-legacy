@@ -11,7 +11,7 @@
 //! @brief イメージバッファクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/ImageBuffer.h"
+#include "risa/packages/risa/graphic/image/ImageBuffer.h"
 #include "base/log/Log.h"
 
 

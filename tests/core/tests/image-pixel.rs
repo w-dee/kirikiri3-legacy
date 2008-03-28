@@ -1,3 +1,5 @@
+import * in risa.graphic.image;
+
 // /boot がマウントされているディレクトリを得る
 
 var boot_script_source = File::getFileSystemAt('/boot/').source;

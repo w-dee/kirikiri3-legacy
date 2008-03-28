@@ -6,7 +6,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/config        \
-	$(CORE_DIR)/visual/image       \
+	$(CORE_DIR)/risa/packages/risa/graphic/image       \
 	$(CORE_DIR)/visual/rina        \
 	$(ADDITONAL_SUBSYS_DIRS)       \
 	$(CORE_DIR)/visual/window      \

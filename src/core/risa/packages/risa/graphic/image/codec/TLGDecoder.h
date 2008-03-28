@@ -8,12 +8,12 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief PNGコーデック
+//! @brief TLGデコーダ
 //---------------------------------------------------------------------------
-#ifndef PNGCodecH
-#define PNGCodecH
+#ifndef TLGDecoderH
+#define TLGDecoderH
 
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 
 
 
@@ -21,13 +21,35 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+#define TLG6_GOLOMB_N_COUNT  4
+extern "C" {
+extern char TLG6GolombBitLengthTable
+	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT];
+}
+//---------------------------------------------------------------------------
+
+
 
 //---------------------------------------------------------------------------
-//! @brief		PNGイメージデコーダ
+//! @brief		TLGイメージデコーダ
 //---------------------------------------------------------------------------
-class tPNGImageDecoder : public tImageDecoder
+class tTLGImageDecoder : public tImageDecoder
 {
-	tDictionaryInstance * Dictionary; //!< メタデータ用辞書配列
+
+private:
+	//! @brief		(内部関数)TLG5 のデコードを行う
+	void ProcessTLG5(tStreamAdapter & src,
+						tPixel::tFormat pixel_format, tProgressCallback * callback,
+						tDictionaryInstance * dict);
+	//! @brief		(内部関数)TLG6 のデコードを行う
+	void ProcessTLG6(tStreamAdapter & src,
+						tPixel::tFormat pixel_format, tProgressCallback * callback,
+						tDictionaryInstance * dict);
+	//! @brief		(内部関数)TLG5/TLG6 のデコードを行う
+	void ProcessTLG(tStreamAdapter & src,
+						tPixel::tFormat pixel_format, tProgressCallback * callback,
+						tDictionaryInstance * dict);
 
 public:
 	//! @brief		デコードを行う
@@ -38,33 +60,6 @@ public:
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
-
-	//! @brief		メタデータ用辞書配列が存在するかどうかを得る
-	//! @return		メタデータ用辞書配列
-	bool HasDictionary() const { return Dictionary != NULL; }
-
-	//! @brief		メタデータ用辞書配列に値をpushする
-	//! @param		key		キー(文字列)
-	//! @param		value	値
-	void PushMetadata(const tString & key, const tVariant & value);
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		PNGイメージエンコーダ
-//---------------------------------------------------------------------------
-class tPNGImageEncoder : public tImageEncoder
-{
-public:
-	//! @brief		エンコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream,
-					tProgressCallback * callback,
-					tDictionaryInstance * dict);
 };
 //---------------------------------------------------------------------------
 

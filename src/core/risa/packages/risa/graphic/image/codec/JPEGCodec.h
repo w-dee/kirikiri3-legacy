@@ -8,12 +8,12 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief BMPコーデック
+//! @brief JPEGコーデック
 //---------------------------------------------------------------------------
-#ifndef BMPCodecH
-#define BMPCodecH
+#ifndef JPEGCodecH
+#define JPEGCodecH
 
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 
 
 
@@ -22,11 +22,10 @@ namespace Risa {
 
 
 
-struct RISSE_WIN_BITMAPINFOHEADER;
 //---------------------------------------------------------------------------
-//! @brief		BMPイメージデコーダ
+//! @brief		JPEGイメージデコーダ
 //---------------------------------------------------------------------------
-class tBMPImageDecoder : public tImageDecoder
+class tJPEGImageDecoder : public tImageDecoder
 {
 public:
 	//! @brief		デコードを行う
@@ -37,23 +36,14 @@ public:
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
-
-private:
-	//! @brief		内部関数
-	void InternalLoadBMP(tStreamAdapter src,
-						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi,
-						risse_uint8 * palsrc);
-
-
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		BMPイメージエンコーダ
+//! @brief		JPEGイメージエンコーダ
 //---------------------------------------------------------------------------
-class tBMPImageEncoder : public tImageEncoder
+class tJPEGImageEncoder : public tImageEncoder
 {
 public:
 	//! @brief		エンコードを行う

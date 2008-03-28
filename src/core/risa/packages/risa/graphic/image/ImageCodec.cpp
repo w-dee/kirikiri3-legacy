@@ -11,7 +11,7 @@
 //! @brief イメージコーデッククラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 #include "base/fs/common/FSManager.h"
 
 

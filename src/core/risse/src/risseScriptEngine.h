@@ -222,6 +222,14 @@ public:
 	//! @note		もしパッケージが初期化されていない場合は初期化される。
 	//!				tPackageManager::GetPackageGlobal() へのショートカット。
 	tVariant GetPackageGlobal(const tString & name);
+
+	//! @brief		組み込みパッケージの情報を追加する
+	//! @param		package		パッケージ名
+	//! @param		init		イニシャライザ
+	//!							(パッケージが初めて初期化される際に呼ばれる)
+	//! @note		tPackageManager::AddBuiltinPackage() へのショートカット。
+	void AddBuiltinPackage(const tString & package,
+		tBuiltinPackageInitializerInterface * init);
 };
 //---------------------------------------------------------------------------
 } // namespace Risse

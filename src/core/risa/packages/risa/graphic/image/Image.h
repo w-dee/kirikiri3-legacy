@@ -14,7 +14,7 @@
 #define ImageH
 
 #include "base/gc/RisaGC.h"
-#include "visual/image/ImageBuffer.h"
+#include "risa/packages/risa/graphic/image/ImageBuffer.h"
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseDictionaryClass.h"
 

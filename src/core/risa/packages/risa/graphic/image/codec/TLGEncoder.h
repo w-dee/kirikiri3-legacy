@@ -8,12 +8,12 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief JPEGコーデック
+//! @brief TLGエンコーダ
 //---------------------------------------------------------------------------
-#ifndef JPEGCodecH
-#define JPEGCodecH
+#ifndef TLGEncoderH
+#define TLGEncoderH
 
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 
 
 
@@ -23,29 +23,33 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		JPEGイメージデコーダ
+//! @brief		TLGイメージエンコーダ
 //---------------------------------------------------------------------------
-class tJPEGImageDecoder : public tImageDecoder
+class tTLGImageEncoder : public tImageEncoder
 {
-public:
-	//! @brief		デコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
-	virtual void Process(tStreamInstance * stream,
-						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict);
-};
-//---------------------------------------------------------------------------
+	gc_vector<char> MetaData; //!< メタデータ
+private:
+	void EncodeTLG5(tStreamInstance * stream,
+					tProgressCallback * callback,
+					int compos);
+	void EncodeTLG6(tStreamInstance * stream,
+					tProgressCallback * callback,
+					int compos);
 
+	//! @brief		辞書配列からのコールバックを受け取るためのRisseメソッド
+	class tCallback : public tObjectInterface
+	{
+		tTLGImageEncoder & Encoder; //!< TLGイメージエンコーダインスタンス
+	public:
+		tCallback(tTLGImageEncoder & encoder) : Encoder(encoder) {}
+		virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
+	};
+	tCallback DictCallback; //!< 辞書配列からのコールバックを受け取るための Risse メソッド
 
-//---------------------------------------------------------------------------
-//! @brief		JPEGイメージエンコーダ
-//---------------------------------------------------------------------------
-class tJPEGImageEncoder : public tImageEncoder
-{
 public:
+	//! @brief		コンストラクタ
+	tTLGImageEncoder();
+
 	//! @brief		エンコードを行う
 	//! @param		stream		入力ストリーム
 	//! @param		pixel_format	要求するピクセル形式

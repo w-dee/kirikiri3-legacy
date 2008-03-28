@@ -18,6 +18,7 @@
 #include "risseOperateRetValue.h"
 #include "risseObjectInterfaceArg.h"
 #include "risseOpCodes.h"
+#include "risseMemberAttribute.h"
 
 namespace Risse
 {
@@ -3310,6 +3311,24 @@ public: // ユーティリティ
 
 	//! @brief		デバッグ用ダンプ(標準出力に出力する)
 	void DebugDump() const;
+
+	//! @brief		メンバを新規作成する
+	//! @param		name	メンバ名
+	//! @param		value	値
+	//! @param		attrib	属性
+	//! @note		メンバを新規作成するのは非プリミティブクラスだけ。
+	//!				プリミティブクラスに対してはこれは使用しないこと。
+	//!				メンバは強制的に上書きされる(属性チェックなどはスルー)
+	void RegisterMember(const tString & name, const tVariantBlock & value,
+		tMemberAttribute attrib = tMemberAttribute::GetDefault(),
+		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
+
+	//! @brief		final const なメンバを新規作成する
+	//! @param		name	メンバ名
+	//! @param		value	値
+	//! @note		RegisterMember へのショートカット
+	void RegisterFinalConstMember(const tString & name, const tVariantBlock & value,
+		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
 
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes() const

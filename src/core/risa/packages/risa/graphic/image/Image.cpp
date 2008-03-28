@@ -11,8 +11,8 @@
 //! @brief イメージクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/image/Image.h"
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/Image.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 #include "risse/include/risseNativeBinder.h"
 #include "risse/include/risseScriptEngine.h"
 #include "risse/include/risseStaticStrings.h"
@@ -285,11 +285,6 @@ tImageClass::tImageClass(tScriptEngine * engine) :
 	tClassBase(tSS<'I','m','a','g','e'>(), engine->ObjectClass)
 {
 	RegisterMembers();
-
-	// PixelConsts を include する
-	Do(ocFuncCall, NULL, ss_include, 0,
-		tMethodArgument::New(
-			tRisseModuleRegisterer<tPixelConstsModule>::instance()->GetModuleInstance()));
 }
 //---------------------------------------------------------------------------
 
@@ -331,9 +326,58 @@ tVariant tImageClass::ovulate()
 
 
 
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		Image クラスレジストラ
-template class tRisseClassRegisterer<tImageClass>;
+//! @brief		risa.graphic.image パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tRisaGraphicImagePackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tImageClass * ImageClass;
+
+	//! @brief		コンストラクタ
+	tRisaGraphicImagePackageInitializer() :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'>())
+	{
+		ImageClass = NULL;
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		ImageClass = new tImageClass(engine);
+		ImageClass->RegisterInstance(global);
+		global.RegisterFinalConstMember(
+			tSS<'p','f','G','r','a','y','8'>(),
+			tVariant((risse_int64)tPixel::pfGray8));
+		global.RegisterFinalConstMember(
+			tSS<'p','f','A','R','G','B','3','2'>(),
+			tVariant((risse_int64)tPixel::pfARGB32));
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Image パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaGraphicImagePackageInitializer>;
 //---------------------------------------------------------------------------
 
 

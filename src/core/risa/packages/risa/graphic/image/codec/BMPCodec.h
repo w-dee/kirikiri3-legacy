@@ -8,12 +8,12 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief TLGデコーダ
+//! @brief BMPコーデック
 //---------------------------------------------------------------------------
-#ifndef TLGDecoderH
-#define TLGDecoderH
+#ifndef BMPCodecH
+#define BMPCodecH
 
-#include "visual/image/ImageCodec.h"
+#include "risa/packages/risa/graphic/image/ImageCodec.h"
 
 
 
@@ -21,36 +21,13 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-#define TLG6_GOLOMB_N_COUNT  4
-extern "C" {
-extern char TLG6GolombBitLengthTable
-	[TLG6_GOLOMB_N_COUNT*2*128][TLG6_GOLOMB_N_COUNT];
-}
-//---------------------------------------------------------------------------
 
-
-
+struct RISSE_WIN_BITMAPINFOHEADER;
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージデコーダ
+//! @brief		BMPイメージデコーダ
 //---------------------------------------------------------------------------
-class tTLGImageDecoder : public tImageDecoder
+class tBMPImageDecoder : public tImageDecoder
 {
-
-private:
-	//! @brief		(内部関数)TLG5 のデコードを行う
-	void ProcessTLG5(tStreamAdapter & src,
-						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict);
-	//! @brief		(内部関数)TLG6 のデコードを行う
-	void ProcessTLG6(tStreamAdapter & src,
-						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict);
-	//! @brief		(内部関数)TLG5/TLG6 のデコードを行う
-	void ProcessTLG(tStreamAdapter & src,
-						tPixel::tFormat pixel_format, tProgressCallback * callback,
-						tDictionaryInstance * dict);
-
 public:
 	//! @brief		デコードを行う
 	//! @param		stream		入力ストリーム
@@ -60,6 +37,33 @@ public:
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
+
+private:
+	//! @brief		内部関数
+	void InternalLoadBMP(tStreamAdapter src,
+						tPixel::tFormat pixel_format, tProgressCallback * callback,
+						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi,
+						risse_uint8 * palsrc);
+
+
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		BMPイメージエンコーダ
+//---------------------------------------------------------------------------
+class tBMPImageEncoder : public tImageEncoder
+{
+public:
+	//! @brief		エンコードを行う
+	//! @param		stream		入力ストリーム
+	//! @param		pixel_format	要求するピクセル形式
+	//! @param		callback	進捗コールバック(NULL=イラナイ)
+	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	virtual void Process(tStreamInstance * stream,
+					tProgressCallback * callback,
+					tDictionaryInstance * dict);
 };
 //---------------------------------------------------------------------------
 

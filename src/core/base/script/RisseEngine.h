@@ -94,8 +94,54 @@ public:
 
 
 //---------------------------------------------------------------------------
+//! @brief		Risaで使うパッケージイニシャライザの基本クラス
+//---------------------------------------------------------------------------
+class tBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
+{
+	tString PackageName; //!< パッケージ名
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		name		パッケージ名
+	tBuiltinPackageInitializer(const tString & name) : PackageName(name) {;}
+
+	//! @brief		パッケージ名を得る @return パッケージ名
+	const tString & GetPackageName() const { return PackageName; }
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		パッケージイニシャライザを
+//!				スクリプトエンジンに登録するためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename InitializerT>
+class tPackageInitializerRegisterer :
+	public singleton_base<tPackageInitializerRegisterer<InitializerT> >,
+	depends_on<tRisseScriptEngine>
+{
+	InitializerT * Initializer; //!< パッケージイニシャライザ
+public:
+	//! @brief		コンストラクタ
+	tPackageInitializerRegisterer()
+	{
+		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
+		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
+		Initializer = new InitializerT();
+		RISSE_ASSERT(dynamic_cast<tBuiltinPackageInitializer *>(Initializer));
+		engine->AddBuiltinPackage(Initializer->GetPackageName(), Initializer);
+	}
+
+	InitializerT * GetInitializer() const { return Initializer; } //!< パッケージイニシャライザを得る
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
 //! @brief		クラスインスタンスを
 //!				スクリプトエンジンに登録するためのテンプレートクラス
+//! @deprecated
 //---------------------------------------------------------------------------
 template <typename ClassT>
 class tRisseClassRegisterer :
@@ -122,6 +168,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		モジュールインスタンスを
 //!				スクリプトエンジンに登録するためのテンプレートクラス
+//! @deprecated
 //---------------------------------------------------------------------------
 template <typename ModuleT>
 class tRisseModuleRegisterer :

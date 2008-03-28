@@ -193,7 +193,9 @@ void tOSNativeStreamInstance::flush()
 
 //---------------------------------------------------------------------------
 tOSNativeStreamClass::tOSNativeStreamClass(tScriptEngine * engine) :
-	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(), engine->StreamClass)
+	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),
+		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+			GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
 {
 	RegisterMembers();
 }

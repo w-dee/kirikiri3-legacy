@@ -498,7 +498,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
 		ClassInstance = class_instance;
-		tVariant FileSystem = engine->GetGlobalObject().
+		tVariant FileSystem = engine->GetMainPackageGlobal().
 			GetPropertyDirect_Object(tSS<'F','i','l','e','S','y','s','t','e','m'>());
 		class_instance->RegisterInstance(FileSystem);
 	}

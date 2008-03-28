@@ -26,6 +26,7 @@ RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 //! @brief	イベントキュー用例外クラス
 //---------------------------------------------------------------------------
 RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
+	(tSS<'m','a','i','n'>()),
 	(tSS<'E','v','e','n','t','Q','u','e','u','e','E','x','c','e','p','t','i','o','n'>()),
 	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
 //---------------------------------------------------------------------------
@@ -463,7 +464,7 @@ tMainEventQueue::tMainEventQueue()
 	// スクリプトエンジンの取得、グローバルオブジェクトの取得、イベントキュークラスの
 	// 取得、イベントキューインスタンスの作成を順に行う
 	tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
-	tVariant global_object = engine->GetGlobalObject();
+	tVariant global_object = engine->GetMainPackageGlobal();
 	tVariant eventqueue_class = global_object.GetPropertyDirect(engine,
 						tSS<'E','v','e','n','t','Q','u','e','u','e'>());
 	tVariant instance_v = eventqueue_class.New();

@@ -127,6 +127,7 @@ private:
 protected:
 	tPackageManager * PackageManager; //!< パッケージマネージャオブジェクト
 	tVariant RissePackageGlobal; //!< "risse" パッケージのグローバルオブジェクト
+	tVariant MainPackageGlobal; //!< "main" パッケージのグローバルオブジェクト
 	tLineOutputInterface *WarningOutput; //!< 警告情報の出力先
 	tPackageFileSystemInterface * PackageFileSystem; //!< パッケージ読み込み用のファイルシステムインターフェース
 
@@ -158,6 +159,9 @@ public:
 
 	//! @brief		"risse" パッケージのグローバルオブジェクトを得る
 	const tVariant & GetRissePackageGlobal() const { return RissePackageGlobal; }
+
+	//! @brief		"main" パッケージのグローバルオブジェクトを得る
+	const tVariant & GetMainPackageGlobal() const { return MainPackageGlobal; }
 
 	//! @brief		スクリプトを評価する
 	//! @param		script			スクリプトの内容

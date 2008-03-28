@@ -166,7 +166,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
 		ClassInstance = class_instance;
-		tVariant WaveFilter = engine->GetGlobalObject().
+		tVariant WaveFilter = engine->GetMainPackageGlobal().
 			GetPropertyDirect_Object(tSS<'W','a','v','e','F','i','l','t','e','r'>());
 		class_instance->RegisterInstance(WaveFilter);
 	}

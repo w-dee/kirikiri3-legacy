@@ -35,6 +35,7 @@ namespace Risa {
 */
 //---------------------------------------------------------------------------
 RISA_DEFINE_EXCEPTION_SUBCLASS(tSoundExceptionClass,
+	(tSS<'m','a','i','n'>()),
 	(tSS<'S','o','u','n','d','E','x','c','e','p','t','i','o','n'>()),
 	tRisseScriptEngine::instance()->GetScriptEngine()->ExceptionClass)
 //---------------------------------------------------------------------------

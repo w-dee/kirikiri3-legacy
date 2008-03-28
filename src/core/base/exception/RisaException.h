@@ -140,7 +140,7 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		既存の例外クラスから新しい例外クラスを派生させるためのマクロ
 //---------------------------------------------------------------------------
-#define RISA_DEFINE_EXCEPTION_SUBCLASS(CPP_CLASSNAME, RISSE_CLASSNAME_STRING, PARENT_CLASS) \
+#define RISA_DEFINE_EXCEPTION_SUBCLASS(CPP_CLASSNAME, RISSE_PACKAGENAME_STRING, RISSE_CLASSNAME_STRING, PARENT_CLASS) \
 class CPP_CLASSNAME : public tClassBase       {                                   \
 	typedef tClassBase inherited;                                                 \
 public:                                                                           \
@@ -158,7 +158,8 @@ public:                                                                         
 public:                                                                           \
 	static void Throw(tScriptEngine * engine, const tString &msg) {               \
 		tTemporaryException * e =                                                 \
-			new tTemporaryException(RISSE_CLASSNAME_STRING, msg);                 \
+			new tTemporaryException(                                              \
+				RISSE_PACKAGENAME_STRING, RISSE_CLASSNAME_STRING, msg);           \
 		if(engine) e->ThrowConverted(engine); else throw e;                       \
 	}                                                                             \
 	static void Throw(const tString &msg) { Throw(NULL, msg); }                   \

@@ -56,7 +56,7 @@ public:
 		// construct メソッドはある (finalであることを表す)
 
 		BindFunction(this, ss_construct, &tScriptClass::construct,
-			tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+			tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 									tMemberAttribute(tMemberAttribute::ocFinal)) );
 		BindFunction(this, tSS<'r','e','q','u','i','r','e'>(), &tScriptClass::require);
 	}
@@ -129,8 +129,8 @@ void tRisseScriptEngine::RegisterGlobalObject(const tString & name, const tVaria
 {
 	if(!ScriptEngine) return;
 	// グローバルオブジェクトは tObjectBase のはず・・・
-	RISSE_ASSERT(dynamic_cast<tObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface()) != NULL);
-	static_cast<tObjectBase *>(ScriptEngine->GetGlobalObject().GetObjectInterface())->RegisterNormalMember(name, object);
+	RISSE_ASSERT(dynamic_cast<tObjectBase *>(ScriptEngine->GetMainPackageGlobal().GetObjectInterface()) != NULL);
+	static_cast<tObjectBase *>(ScriptEngine->GetMainPackageGlobal().GetObjectInterface())->RegisterNormalMember(name, object);
 }
 //---------------------------------------------------------------------------
 

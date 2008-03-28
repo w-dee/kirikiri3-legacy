@@ -50,8 +50,8 @@ public:
 
 	const tVariant & GetGlobalObject()
 		{ if(!ScriptEngine) return tVariant::GetNullObject();
-		  return ScriptEngine->GetGlobalObject(); }
-		//!< グローバルオブジェクトを返す
+		  return ScriptEngine->GetMainPackageGlobal(); }
+		//!< グローバルオブジェクトを返す(仮)
 
 	const tRTTI * GetDefaultRTTI() const { return DefaultRTTI; }
 		//!< デフォルトの RTTI を帰す
@@ -111,7 +111,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ClassT *class_instance = new ClassT(engine);
 		ClassInstance = class_instance;
-		class_instance->RegisterInstance(engine->GetGlobalObject());
+		class_instance->RegisterInstance(engine->GetMainPackageGlobal());
 	}
 
 	tClassBase * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
@@ -137,7 +137,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		ModuleT *module_instance = new ModuleT(engine);
 		ModuleInstance = module_instance->GetInstance();
-		module_instance->RegisterInstance(engine->GetGlobalObject());
+		module_instance->RegisterInstance(const_cast<tVariant &>(engine->GetMainPackageGlobal()));
 	}
 
 	tObjectBase * GetModuleInstance() const { return ModuleInstance; } //!< モジュールインスタンスを得る

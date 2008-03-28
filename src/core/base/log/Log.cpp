@@ -322,7 +322,7 @@ public:
 		// construct メソッドはある (finalであることを表す)
 
 		BindFunction(this, ss_construct, &tLogClass::construct,
-			tMemberAttribute(	tMemberAttribute(tMemberAttribute::vcConst)|
+			tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 									tMemberAttribute(tMemberAttribute::ocFinal)) );
 		BindFunction(this, tSS<'d','e','b','u','g'>(), &tLogClass::debug);
 		BindFunction(this, tSS<'i','n','f','o'>(), &tLogClass::info);

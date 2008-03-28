@@ -104,6 +104,9 @@ tScriptEngine::tScriptEngine()
 	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer->RegisterInstance(PackageManager);
 	#include "risseBuiltinPackages.inc"
 	#undef RISSE_BUILTINPACKAGES_PACKAGE
+
+	// "main" パッケージのグローバルオブジェクトを取得する
+	MainPackageGlobal = PackageManager->GetPackageGlobal(ss_main);
 }
 //---------------------------------------------------------------------------
 

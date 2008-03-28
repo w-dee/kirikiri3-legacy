@@ -103,7 +103,9 @@ void tStandardIOStreamInstance::flush()
 
 //---------------------------------------------------------------------------
 tStandardIOStreamClass::tStandardIOStreamClass(tScriptEngine * engine) :
-	tClassBase(tSS<'S','t','a','n','d','a','r','d','I','O','S','t','r','e','a','m'>(), engine->StreamClass)
+	tClassBase(tSS<'S','t','a','n','d','a','r','d','I','O','S','t','r','e','a','m'>(),
+	static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+		GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
 {
 	RegisterMembers();
 }

@@ -32,6 +32,7 @@ RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);
 */
 //---------------------------------------------------------------------------
 RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
+	(tSS<'m','a','i','n'>()),
 	(tSS<'F','i','l','e','S','y','s','t','e','m','E','x','c','e','p','t','i','o','n'>()),
 	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
 //---------------------------------------------------------------------------
@@ -578,7 +579,8 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
 			tString(RISSE_WS_TR("failed to open '%1': "), fullpath))
 
-	val.AssertClass(tRisseScriptEngine::instance()->GetScriptEngine()->StreamClass);
+	val.AssertClass(static_cast<tClassBase*>(tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+		GetPropertyDirect(tRisseScriptEngine::instance()->GetScriptEngine(), tSS<'S','t','r','e','a','m'>()).GetObjectInterface()));
 	return static_cast<tStreamInstance*>(val.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
@@ -588,7 +590,8 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 tStreamInstance * tFileSystemManager::Open(const tVariant & filename, risse_uint32 flags)
 {
 	if(filename.InstanceOf(tRisseScriptEngine::instance()->GetScriptEngine(),
-		tVariant(tRisseScriptEngine::instance()->GetScriptEngine()->StreamClass)))
+		tVariant(static_cast<tClassBase*>(tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+		GetPropertyDirect(tRisseScriptEngine::instance()->GetScriptEngine(), tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))))
 	{
 		// filename は Stream クラスのインスタンス
 		// そのまま帰す
@@ -1092,7 +1095,7 @@ void tFileClass::RegisterMembers()
 	BindFunction(this, ss_construct, &tFileClass::construct);
 	BindFunction(this, ss_initialize, &tFileClass::initialize);
 
-	tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::vcConst)|
+	tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal));
 	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount, final_const);
 	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount, final_const);

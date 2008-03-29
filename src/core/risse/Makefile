@@ -237,7 +237,7 @@ src/builtin/date/risseDateParser.cpp src/builtin/date/risseDateParser.inc: \
 
 # 設定ファイルを書き出す
 
-Risse_INCLUDE_DIR := $(shell pwd)/include
+Risse_INCLUDE_DIR := $(shell pwd)/src
 
 # risse-config を作成する。
 
@@ -254,18 +254,6 @@ $(Risse_BIN_OUTPUT_DIR)/risse-config: Makefile risse-config.in
 	chmod +x $(Risse_BIN_OUTPUT_DIR)/risse-config
 
 BIN_DEPS += $(Risse_BIN_OUTPUT_DIR)/risse-config
-
-#----------------------------#
-
-# ヘッダファイルを集めてコピーする
-RISSE_HEADER_FILES := $(wildcard src/risse*.h) $(wildcard src/risse*.inc)
-RISSE_HEADER_DESTS := $(addprefix include/,$(notdir $(RISSE_HEADER_FILES)))
-
-include/% :: src/%
-	mkdir -p include
-	cp $< $@
-
-BIN_DEPS += $(Risse_BIN_OUTPUT_DIR)/risse-config $(RISSE_HEADER_DESTS)
 
 #----------------------------#
 include $(TOP_DIR)/Makefile_common

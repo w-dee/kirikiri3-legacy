@@ -14,7 +14,6 @@
 #define risseBuiltinPackageInitializer
 
 
-#include "../rissePackage.h"
 #include "../risseScriptEngine.h"
 
 namespace Risse {
@@ -23,18 +22,18 @@ namespace Risse {
 //---------------------------------------------------------------------------
 class tBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
 {
-	tString Name; //!< パッケージ名
+	tString PackageName; //!< パッケージ名
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		name		パッケージ名
-	tBuiltinPackageInitializer(const tString & name) : Name(name) {;}
+	tBuiltinPackageInitializer(const tString & name) : PackageName(name) {;}
 
 	//! @brief		インスタンスをパッケージマネージャに登録する
-	//! @param		manager		パッケージマネージャインスタンス
-	void RegisterInstance(tPackageManager * manager)
+	//! @param		engine		スクリプトエンジンインスタンス
+	void RegisterInstance(tScriptEngine * engine)
 	{
-		manager->AddBuiltinPackage(Name, this);
+		engine->AddBuiltinPackage(PackageName, this);
 	}
 
 	//! @brief		パッケージを初期化する

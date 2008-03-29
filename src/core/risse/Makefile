@@ -259,7 +259,7 @@ BIN_DEPS += $(Risse_BIN_OUTPUT_DIR)/risse-config
 #----------------------------#
 
 # ヘッダファイルを集めてコピーする
-RISSE_HEADER_FILES := $(shell sh -c "cd src; find . -name '*.h'") $(shell sh -c "cd src; find . -name '*.inc'")
+RISSE_HEADER_FILES := $(filter-out ./prec.h,$(shell sh -c "cd src; find . -name '*.h'") $(shell sh -c "cd src; find . -name '*.inc'"))
 RISSE_HEADER_DESTS := $(subst ./,include/,$(RISSE_HEADER_FILES))
 
 include/% :: src/%

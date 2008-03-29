@@ -101,7 +101,7 @@ tScriptEngine::tScriptEngine()
 
 	// 組み込みパッケージイニシャライザをパッケージマネージャの
 	// 仮想ファイルシステムに登録
-	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer->RegisterInstance(PackageManager);
+	#define RISSE_BUILTINPACKAGES_PACKAGE(X) X##PackageInitializer->RegisterInstance(this);
 	#include "risseBuiltinPackages.inc"
 	#undef RISSE_BUILTINPACKAGES_PACKAGE
 

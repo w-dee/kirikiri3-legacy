@@ -12,9 +12,8 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/exception/RisaException.h"
-#include "risse/include/risseStreamClass.h"
 #include "risse/include/risseExceptionClass.h"
-#include "base/system/StandardIO.h"
+#include "risa/packages/risa/stdio/StandardIO.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(36650,50749,64532,16674,7599,41607,50003,48070);
@@ -143,10 +142,64 @@ tVariant tStandardIOStreamClass::ovulate()
 
 
 
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		System クラスレジストラ
-template class tRisseClassRegisterer<tStandardIOStreamClass>;
+//! @brief		risa.stdio パッケージイニシャライザ
 //---------------------------------------------------------------------------
+class tRisaStdioPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	//! @brief		コンストラクタ
+	tRisaStdioPackageInitializer() :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','s','t','d','i','o'>())
+	{
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		// stdin, stdout, stderr を作成して登録する
+		tClassBase * stdio_cls =
+			tRisseClassRegisterer<tStandardIOStreamClass>::instance()->GetClassInstance();
+		tVariant stdin_v  = stdio_cls->Invoke(ss_new, (risse_int64)0);
+		tVariant stdout_v = stdio_cls->Invoke(ss_new, (risse_int64)1);
+		tVariant stderr_v = stdio_cls->Invoke(ss_new, (risse_int64)2);
+
+		global.RegisterFinalConstMember(tSS<'s','t','d','i','n'>(),     stdin_v );
+		global.RegisterFinalConstMember(tSS<'s','t','d','o','u','t'>(), stdout_v);
+		global.RegisterFinalConstMember(tSS<'s','t','d','e','r','r'>(), stderr_v);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.stdio パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaStdioPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

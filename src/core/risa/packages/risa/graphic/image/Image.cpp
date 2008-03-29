@@ -376,7 +376,7 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		Image パッケージイニシャライザレジストラ
+//! @brief		risa.graphic.image パッケージイニシャライザレジストラ
 template class tPackageInitializerRegisterer<tRisaGraphicImagePackageInitializer>;
 //---------------------------------------------------------------------------
 

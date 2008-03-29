@@ -14,7 +14,7 @@
 #include "base/fs/common/FSManager.h"
 #include "base/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
-#include "risse/include/risseStreamClass.h"
+#include "risse/include/builtin/stream/risseStreamClass.h"
 
 
 namespace Risa {

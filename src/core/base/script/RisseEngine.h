@@ -23,6 +23,7 @@
 #include "risse/include/risseModule.h"
 #include "risse/include/risseObjectClass.h"
 #include "risse/include/risseExceptionClass.h"
+#include "risse/include/builtin/risseBuiltinPackageInitializer.h"
 
 
 namespace Risa {
@@ -94,24 +95,6 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risaで使うパッケージイニシャライザの基本クラス
-//---------------------------------------------------------------------------
-class tBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
-{
-	tString PackageName; //!< パッケージ名
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		name		パッケージ名
-	tBuiltinPackageInitializer(const tString & name) : PackageName(name) {;}
-
-	//! @brief		パッケージ名を得る @return パッケージ名
-	const tString & GetPackageName() const { return PackageName; }
-};
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
 //! @brief		パッケージイニシャライザを
 //!				スクリプトエンジンに登録するためのテンプレートクラス
 //---------------------------------------------------------------------------
@@ -129,7 +112,7 @@ public:
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
 		Initializer = new InitializerT();
 		RISSE_ASSERT(dynamic_cast<tBuiltinPackageInitializer *>(Initializer));
-		engine->AddBuiltinPackage(Initializer->GetPackageName(), Initializer);
+		Initializer->RegisterInstance(engine);
 	}
 
 	InitializerT * GetInitializer() const { return Initializer; } //!< パッケージイニシャライザを得る

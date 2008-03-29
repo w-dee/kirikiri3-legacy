@@ -21,7 +21,7 @@
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseString.h"
 #include "risse/include/risseStream.h"
-#include "risse/include/risseStreamClass.h"
+#include "risse/include/builtin/stream/risseStreamClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

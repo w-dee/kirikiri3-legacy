@@ -11,6 +11,7 @@
 //! @brief ピクセル形式関連
 //---------------------------------------------------------------------------
 #include "prec.h"
+#include "risse/include/risseTypes.h"
 #include "risa/packages/risa/graphic/image/PixelType.h"
 
 
@@ -41,6 +42,7 @@ tPixel::tDescriptor tPixel::Descriptors[tPixel::NumFormats] = {
 
 } // namespace Risa
 namespace risa_gl {
+using namespace ::Risse;
 //---------------------------------------------------------------------------
 //	(暫定) ピクセル形式の変換(risa_glのpixel_convertの特殊化)
 //---------------------------------------------------------------------------

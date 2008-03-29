@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "risa/packages/risa/graphic/image/ImageBuffer.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 
 
 namespace Risa {

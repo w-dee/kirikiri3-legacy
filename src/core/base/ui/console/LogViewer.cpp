@@ -11,7 +11,7 @@
 //! @brief ログビューア
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 #include "base/ui/console/LogViewer.h"
 #include "base/ui/console/Console.h"
 #include <stdlib.h>

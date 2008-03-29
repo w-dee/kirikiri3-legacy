@@ -11,8 +11,8 @@
 //! @brief ログファイル
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/log/Log.h"
-#include "base/log/LogFile.h"
+#include "risa/packages/risa/log/Log.h"
+#include "risa/packages/risa/log/LogFile.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(21694,41961,63193,16833,55703,53629,46747,60830);

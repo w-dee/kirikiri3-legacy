@@ -16,7 +16,7 @@
 #include "base/exception/RisaException.h"
 #include "base/exception/UnhandledException.h"
 #include "base/event/Event.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 #include "base/ui/editor/ScriptEditor.h"
 #include "risse/include/risseStaticStrings.h"
 

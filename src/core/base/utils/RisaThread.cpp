@@ -14,7 +14,7 @@
 #include "base/utils/RisaThread.h"
 #include "base/script/RisseEngine.h"
 #include "risse/include/risseExceptionClass.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(24795,6838,687,16805,21894,40786,6545,48673);

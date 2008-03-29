@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "base/script/RisseEngine.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 #include "risse/include/risseObjectBase.h"
 #include "base/fs/common/FSManager.h"
 #include "risse/include/risseExceptionClass.h"

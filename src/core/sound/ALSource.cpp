@@ -19,7 +19,7 @@
 #include "base/event/IdleEvent.h"
 #include "base/utils/PointerList.h"
 #include "sound/Sound.h"
-#include "base/log/Log.h"
+#include "risa/packages/risa/log/Log.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(51552,26074,48813,19041,30653,39645,11297,33602);

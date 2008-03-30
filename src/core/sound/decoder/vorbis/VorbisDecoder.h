@@ -15,7 +15,7 @@
 #define OGGVORBISDECODERH
 
 #include "sound/WaveDecoder.h"
-#include "base/fs/common/FSManager.h"
+#include "risa/packages/risa/file/FSManager.h"
 #include <ogg/ogg.h>
 #include <vorbis/vorbisfile.h>
 

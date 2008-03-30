@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/decoder/vorbis/VorbisDecoder.h"
-#include "base/fs/common/FSManager.h"
+#include "risa/packages/risa/file/FSManager.h"
 #include <vorbis/vorbisfile.h>
 #include "sound/Sound.h"
 

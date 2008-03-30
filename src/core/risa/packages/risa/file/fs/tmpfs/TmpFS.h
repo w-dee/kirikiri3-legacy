@@ -13,8 +13,9 @@
 #ifndef TmpFSH
 #define TmpFSH
 
-#include "base/fs/common/FSManager.h"
-#include "base/fs/tmpfs/MemoryStream.h"
+#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/file/fs/tmpfs/MemoryStream.h"
+#include "risa/packages/risa/file/fs/FileSystem.h"
 #include "base/utils/RisaThread.h"
 
 namespace Risa {

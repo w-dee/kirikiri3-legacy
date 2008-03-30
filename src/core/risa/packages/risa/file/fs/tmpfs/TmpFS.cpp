@@ -11,7 +11,7 @@
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/fs/tmpfs/TmpFS.h"
+#include "risa/packages/risa/file/fs/tmpfs/TmpFS.h"
 #include "base/exception/RisaException.h"
 
 

@@ -13,7 +13,7 @@
 #include "prec.h"
 #include "base/exception/RisaException.h"
 #include "base/script/RisseEngine.h"
-#include "base/fs/common/FSManager.h"
+#include "risa/packages/risa/file/FSManager.h"
 #include "base/script/TextStream.h"
 
 namespace Risa {

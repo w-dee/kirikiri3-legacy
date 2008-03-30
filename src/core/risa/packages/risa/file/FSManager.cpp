@@ -11,30 +11,14 @@
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/fs/common/FSManager.h"
-#include "base/fs/osfs/OSFS.h"
-#include "base/exception/RisaException.h"
+#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/file/fs/osfs/OSFS.h"
+#include "risa/packages/risa/file/fs/FileSystem.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 
 
 namespace Risa {
-RISSE_DEFINE_SOURCE_ID(57835,14019,1274,20023,25994,43742,64617,60148);
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief	ファイルシステム用例外クラス
-/*! @note
-	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
-	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
-*/
-//---------------------------------------------------------------------------
-RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
-	(tSS<'m','a','i','n'>()),
-	(tSS<'F','i','l','e','S','y','s','t','e','m','E','x','c','e','p','t','i','o','n'>()),
-	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
+RISSE_DEFINE_SOURCE_ID(54267,15059,65338,18354,34733,17665,1145,27805);
 //---------------------------------------------------------------------------
 
 
@@ -71,55 +55,6 @@ tFileSystemIterationCallback::tRetValue
 
 
 
-
-
-
-//---------------------------------------------------------------------------
-tFileOpenModeConstsModule::tFileOpenModeConstsModule(tScriptEngine * engine) :
-	tModuleBase(tSS<'F','i','l','e','O','p','e','n','M','o','d','e','C','o','n','s','t','s'>(), engine)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileOpenModeConstsModule::RegisterMembers()
-{
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','R','e','a','d'>(),
-			tVariant((risse_int64)omRead), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','W','r','i','t','e'>(),
-			tVariant((risse_int64)omWrite), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','U','p','d','a','t','e'>(),
-			tVariant((risse_int64)omUpdate), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','A','c','c','e','s','s','M','a','s','k'>(),
-			tVariant((risse_int64)omAccessMask), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','A','p','p','e','n','d'>(),
-			tVariant((risse_int64)omAppend), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','R','e','a','d','B','i','t'>(),
-			tVariant((risse_int64)omReadBit), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','W','r','i','t','e','B','i','t'>(),
-			tVariant((risse_int64)omWriteBit), true);
-	GetInstance()->RegisterFinalConstMember(
-			tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
-			tVariant((risse_int64)omAppendBit), true);
-}
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		FileOpenModeConsts モジュールレジストラ
-template class tRisseModuleRegisterer<tFileOpenModeConstsModule>;
-//---------------------------------------------------------------------------
 
 
 
@@ -867,368 +802,237 @@ void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 
 
 
-
-
-
-
-
-
-
 //---------------------------------------------------------------------------
-void tFileSystemInstance::construct()
+//! @brief		risa.file パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tRisaFilePackageInitializer : public tBuiltinPackageInitializer
 {
-	// デフォルトではなにもしない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemInstance::initialize(const tNativeCallInfo &info)
-{
-	volatile tSynchronizer sync(this); // sync
-
-	// 親クラスの同名メソッドを呼び出す
-	info.InitializeSuperClass();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-size_t tFileSystemInstance::walkAt(const tString & dirname,
-	const tMethodArgument &args)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-	return 0;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tFileSystemInstance::isFile(const tString & filename)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-	return false;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-bool tFileSystemInstance::isDirectory(const tString & dirname)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-	return false;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemInstance::removeFile(const tString & filename)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemInstance::removeDirectory(const tString & dirname,
-	const tMethodArgument &args)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemInstance::createDirectory(const tString & dirname)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tObjectInterface * tFileSystemInstance::stat(const tString & filename)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tStreamInstance * tFileSystemInstance::open(const tString & filename,
-	risse_uint32 flags)
-{
-	// 実装されていない; 下位の Risse クラスで実装すること
-	tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented();
-	return NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemInstance::flush()
-{
-	// 標準の flush メソッドは何もしない
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tFileSystemClass::tFileSystemClass(tScriptEngine * engine) :
-	tClassBase(tSS<'F','i','l','e','S','y','s','t','e','m'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-
-	// FileOpenModeConsts を include する
-	Do(ocFuncCall, NULL, ss_include, 0,
-		tMethodArgument::New(
-			tRisseModuleRegisterer<tFileOpenModeConstsModule>::instance()->GetModuleInstance()));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	BindFunction(this, ss_ovulate, &tFileSystemClass::ovulate);
-	BindFunction(this, ss_construct, &tFileSystemInstance::construct);
-	BindFunction(this, ss_initialize, &tFileSystemInstance::initialize);
-
-	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileSystemInstance::walkAt);
-	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileSystemInstance::isFile);
-	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileSystemInstance::isDirectory);
-	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileSystemInstance::removeFile);
-	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileSystemInstance::removeDirectory);
-	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileSystemInstance::createDirectory);
-	BindFunction(this, tSS<'s','t','a','t'>(), &tFileSystemInstance::stat);
-	BindFunction(this, tSS<'o','p','e','n'>(), &tFileSystemInstance::open);
-	BindFunction(this, tSS<'f','l','u','s','h'>(), &tFileSystemInstance::flush);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFileSystemClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-//! @brief		FileSystem クラスレジストラ
-template class tRisseClassRegisterer<tFileSystemClass>;
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tFileClass::tFileClass(tScriptEngine * engine) :
-	tClassBase(tSS<'F','i','l','e'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-
-	// FileOpenModeConsts を include する
-	Do(ocFuncCall, NULL, ss_include, 0,
-		tMethodArgument::New(
-			tRisseModuleRegisterer<tFileOpenModeConstsModule>::instance()->GetModuleInstance()));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	BindFunction(this, ss_ovulate, &tFileClass::ovulate);
-	BindFunction(this, ss_construct, &tFileClass::construct);
-	BindFunction(this, ss_initialize, &tFileClass::initialize);
-
-	tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal));
-	BindFunction(this, tSS<'m','o','u','n','t'>(), &tFileClass::mount, final_const);
-	BindFunction(this, tSS<'u','n','m','o','u','n','t'>(), &tFileClass::unmount, final_const);
-	BindFunction(this, tSS<'n','o','r','m','a','l','i','z','e'>(), &tFileClass::normalize, final_const);
-	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileClass::walkAt, final_const);
-	BindFunction(this, tSS<'e','x','i','s','t','s'>(), &tFileClass::exists, final_const);
-	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileClass::isFile, final_const);
-	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileClass::isDirectory, final_const);
-	BindFunction(this, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tFileClass::removeFile, final_const);
-	BindFunction(this, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::removeDirectory, final_const);
-	BindFunction(this, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tFileClass::createDirectory, final_const);
-	BindFunction(this, tSS<'s','t','a','t'>(), &tFileClass::stat, final_const);
-	BindFunction(this, tSS<'o','p','e','n'>(), &tFileClass::open, final_const);
-	BindFunction(this, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tFileClass::getFileSystemAt, final_const);
-	BindFunction(this, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tFileClass::chopExtension, final_const);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tFileClass::extractExtension, final_const);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tFileClass::extractName, final_const);
-	BindFunction(this, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tFileClass::extractPath, final_const);
-	BindProperty(this, tSS<'c','w','d'>(), &tFileClass::get_cwd, &tFileClass::set_cwd/*, final_const*/);
-		// TODO: final_const なプロパティってちゃんと動作してる？
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFileClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileClass::mount(const tString & point, const tVariant & fs)
-{
-	fs.AssertClass(tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance());
-	tFileSystemManager::instance()->Mount(point, static_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-size_t tFileClass::walkAt(const tString & dirname,
-	const tMethodArgument &args, tScriptEngine * engine)
-{
-	// オプションをとってくる
-	args.ExpectBlockArgumentCount(1);
-	tVariant callback = args.GetBlockArgument(0);
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
-
-	// tFileSystemManager::WalkAt が受け取るのは tFileSystemIterationCallback *
-	// なので、そのままでは tVariant callback を渡せないので、変換させる
-	class tCallbackGW : public tFileSystemIterationCallback
+public:
+	//! @brief		コンストラクタ
+	tRisaFilePackageInitializer() :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','f','i','l','e'>())
 	{
-		tScriptEngine * engine;
-		tVariant & callback;
-	public:
-		tCallbackGW(tScriptEngine * eng, tVariant & cb) : engine(eng), callback(cb) {;}
-	protected:
-		void OnFile(const tString & filename)
-		{
-			callback.Do(engine,
-				ocFuncCall, NULL, tString::GetEmptyString(), 0,
-				tMethodArgument::New(tString(filename), false));
-		}
-		void OnDirectory(const tString & dirname)
-		{
-			callback.Do(engine,
-				ocFuncCall, NULL, tString::GetEmptyString(), 0,
-				tMethodArgument::New(tString(dirname), true));
-		}
-	};
+	}
 
-	tCallbackGW gw(engine, callback);
-
-	// tFileSystemManager::WalkAt を呼ぶ
-	return tFileSystemManager::instance()->WalkAt(dirname, &gw, recursive);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileClass::removeDirectory(const tString & dirname, const tMethodArgument &args)
-{
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
-	tFileSystemManager::instance()->RemoveDirectory(dirname, recursive);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileClass::createDirectory(const tString & dirname,
-			const tMethodArgument &args)
-{
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
-	tFileSystemManager::instance()->CreateDirectory(dirname, recursive);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFileClass::open(const tString & filename, const tNativeCallInfo &info)
-{
-	risse_uint32 flags = info.args.HasArgument(1) ?
-		(risse_uint32)(risse_int64)info.args[1] : tFileOpenModes::omRead;
-	tVariant stream_v(tFileSystemManager::instance()->Open(filename, flags));
-	if(info.args.HasBlockArgument(0))
+	static void mount(const tString & point, const tVariant & fs)
 	{
-		// ブロック付き呼び出しの場合は、ブロックを呼び出し、呼んだら
-		// stream_v の dispose メソッドを呼ぶ
-		try
+		fs.AssertClass(tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance());
+		tFileSystemManager::instance()->Mount(point, static_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
+	}
+
+	static void unmount(const tString & point)
+	{
+		tFileSystemManager::instance()->Unmount(point);
+	}
+
+	static tString normalize(const tString & path)
+	{
+		return tFileSystemManager::instance()->NormalizePath(path);
+	}
+
+	static size_t walkAt(const tString & dirname,
+		const tMethodArgument &args, tScriptEngine * engine)
+	{
+		// オプションをとってくる
+		args.ExpectBlockArgumentCount(1);
+		tVariant callback = args.GetBlockArgument(0);
+		bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+
+		// tFileSystemManager::WalkAt が受け取るのは tFileSystemIterationCallback *
+		// なので、そのままでは tVariant callback を渡せないので、変換させる
+		class tCallbackGW : public tFileSystemIterationCallback
 		{
-			tVariant block(info.args.GetBlockArgument(0));
-			block.Do(info.engine,
+			tScriptEngine * engine;
+			tVariant & callback;
+		public:
+			tCallbackGW(tScriptEngine * eng, tVariant & cb) : engine(eng), callback(cb) {;}
+		protected:
+			void OnFile(const tString & filename)
+			{
+				callback.Do(engine,
 					ocFuncCall, NULL, tString::GetEmptyString(), 0,
-					tMethodArgument::New(stream_v));
-		}
-		catch(...)
-		{
-			stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
-			throw;
-		}
-		stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
-		return info.This; // this を帰す
+					tMethodArgument::New(tString(filename), false));
+			}
+			void OnDirectory(const tString & dirname)
+			{
+				callback.Do(engine,
+					ocFuncCall, NULL, tString::GetEmptyString(), 0,
+					tMethodArgument::New(tString(dirname), true));
+			}
+		};
+
+		tCallbackGW gw(engine, callback);
+
+		// tFileSystemManager::WalkAt を呼ぶ
+		return tFileSystemManager::instance()->WalkAt(dirname, &gw, recursive);
 	}
-	else
+
+	static bool exists(const tString & filename)
 	{
-		// ブロック無し呼び出しの場合は、オープンしたオブジェクトをそのまま帰す
-		return stream_v;
+		return tFileSystemManager::instance()->IsFile(filename) ||
+			tFileSystemManager::instance()->IsDirectory(filename);
 	}
-}
+
+	static bool isFile(const tString & filename)
+	{
+		return tFileSystemManager::instance()->IsFile(filename);
+	}
+
+	static bool isDirectory(const tString & dirname)
+	{
+		return tFileSystemManager::instance()->IsDirectory(dirname);
+	}
+
+	static void removeFile(const tString & filename)
+	{
+		return tFileSystemManager::instance()->RemoveFile(filename);
+	}
+
+	static void removeDirectory(const tString & dirname, const tMethodArgument &args)
+	{
+		bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+		tFileSystemManager::instance()->RemoveDirectory(dirname, recursive);
+	}
+
+	static void createDirectory(const tString & dirname,
+			const tMethodArgument &args)
+	{
+		bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+		tFileSystemManager::instance()->CreateDirectory(dirname, recursive);
+	}
+
+	static tObjectInterface * stat(const tString & filename)
+	{
+		return tFileSystemManager::instance()->Stat(filename);
+	}
+
+	static tVariant open(const tString & filename, const tNativeCallInfo &info)
+	{
+		risse_uint32 flags = info.args.HasArgument(1) ?
+			(risse_uint32)(risse_int64)info.args[1] : tFileOpenModes::omRead;
+		tVariant stream_v(tFileSystemManager::instance()->Open(filename, flags));
+		if(info.args.HasBlockArgument(0))
+		{
+			// ブロック付き呼び出しの場合は、ブロックを呼び出し、呼んだら
+			// stream_v の dispose メソッドを呼ぶ
+			try
+			{
+				tVariant block(info.args.GetBlockArgument(0));
+				block.Do(info.engine,
+						ocFuncCall, NULL, tString::GetEmptyString(), 0,
+						tMethodArgument::New(stream_v));
+			}
+			catch(...)
+			{
+				stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
+				throw;
+			}
+			stream_v.Do(info.engine, ocFuncCall, NULL, ss_dispose);
+			return info.This; // this を帰す
+		}
+		else
+		{
+			// ブロック無し呼び出しの場合は、オープンしたオブジェクトをそのまま帰す
+			return stream_v;
+		}
+	}
+
+	static tFileSystemInstance * getFileSystemAt(const tString & path)
+	{
+		return tFileSystemManager::instance()->GetFileSystemAt(path);
+	}
+
+	static tString chopExtension(const tString & filename)
+	{
+		return tFileSystemManager::instance()->ChopExtension(filename);
+	}
+
+	static tString extractExtension(const tString & filename)
+	{
+		return tFileSystemManager::instance()->ExtractExtension(filename);
+	}
+
+	static tString extractName(const tString & filename)
+	{
+		return tFileSystemManager::instance()->ExtractName(filename);
+	}
+
+	static tString extractPath(const tString & filename)
+	{
+		return tFileSystemManager::instance()->ExtractPath(filename);
+	}
+
+	static tString get_cwd()
+	{
+		return tFileSystemManager::instance()->GetCurrentDirectory();
+	}
+
+	static void set_cwd(const tString & dirname)
+	{
+		tFileSystemManager::instance()->SetCurrentDirectory(dirname);
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		tLogger::ensure();
+
+		tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
+
+		tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
+									tMemberAttribute(tMemberAttribute::ocFinal));
+
+		BindFunction(g, tSS<'m','o','u','n','t'>(), &tRisaFilePackageInitializer::mount, final_const);
+		BindFunction(g, tSS<'u','n','m','o','u','n','t'>(), &tRisaFilePackageInitializer::unmount, final_const);
+		BindFunction(g, tSS<'n','o','r','m','a','l','i','z','e'>(), &tRisaFilePackageInitializer::normalize, final_const);
+		BindFunction(g, tSS<'w','a','l','k','A','t'>(), &tRisaFilePackageInitializer::walkAt, final_const);
+		BindFunction(g, tSS<'e','x','i','s','t','s'>(), &tRisaFilePackageInitializer::exists, final_const);
+		BindFunction(g, tSS<'i','s','F','i','l','e'>(), &tRisaFilePackageInitializer::isFile, final_const);
+		BindFunction(g, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::isDirectory, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tRisaFilePackageInitializer::removeFile, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::removeDirectory, final_const);
+		BindFunction(g, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::createDirectory, final_const);
+		BindFunction(g, tSS<'s','t','a','t'>(), &tRisaFilePackageInitializer::stat, final_const);
+		BindFunction(g, tSS<'o','p','e','n'>(), &tRisaFilePackageInitializer::open, final_const);
+		BindFunction(g, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tRisaFilePackageInitializer::getFileSystemAt, final_const);
+		BindFunction(g, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tRisaFilePackageInitializer::chopExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tRisaFilePackageInitializer::extractExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tRisaFilePackageInitializer::extractName, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tRisaFilePackageInitializer::extractPath, final_const);
+		BindProperty(g, tSS<'c','w','d'>(), &tRisaFilePackageInitializer::get_cwd, &tRisaFilePackageInitializer::set_cwd/*, final_const*/);
+		// TODO: property の final_const なプロパティってちゃんと動作してる？
+
+		global.RegisterFinalConstMember(
+				tSS<'o','m','R','e','a','d'>(),
+				tVariant((risse_int64)omRead));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','W','r','i','t','e'>(),
+				tVariant((risse_int64)omWrite));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','U','p','d','a','t','e'>(),
+				tVariant((risse_int64)omUpdate));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','c','c','e','s','s','M','a','s','k'>(),
+				tVariant((risse_int64)omAccessMask));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','p','p','e','n','d'>(),
+				tVariant((risse_int64)omAppend));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','R','e','a','d','B','i','t'>(),
+				tVariant((risse_int64)omReadBit));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','W','r','i','t','e','B','i','t'>(),
+				tVariant((risse_int64)omWriteBit));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
+				tVariant((risse_int64)omAppendBit));
+	}
+};
 //---------------------------------------------------------------------------
 
 
@@ -1236,10 +1040,15 @@ tVariant tFileClass::open(const tString & filename, const tNativeCallInfo &info)
 
 
 
+
+
 //---------------------------------------------------------------------------
-//! @brief		File クラスレジストラ
-template class tRisseClassRegisterer<tFileClass>;
+//! @brief		risa.log パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaLogPackageInitializer>;
 //---------------------------------------------------------------------------
+
+
+
 
 
 

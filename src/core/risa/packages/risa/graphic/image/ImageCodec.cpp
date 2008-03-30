@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "risa/packages/risa/graphic/image/ImageCodec.h"
-#include "base/fs/common/FSManager.h"
+#include "risa/packages/risa/file/FSManager.h"
 
 
 namespace Risa {

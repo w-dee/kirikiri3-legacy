@@ -353,13 +353,13 @@ public:
 
 		tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
 
-		BindFunction(g, tSS<'d','e','b','u','g'>(), &tLogClass::debug);
-		BindFunction(g, tSS<'i','n','f','o'>(), &tLogClass::info);
-		BindFunction(g, tSS<'n','o','t','i','c','e'>(), &tLogClass::notice);
-		BindFunction(g, tSS<'w','a','r','n','i','n','g'>(), &tLogClass::warning);
-		BindFunction(g, tSS<'e','r','r','o','r'>(), &tLogClass::error);
-		BindFunction(g, tSS<'r','e','c','o','r','d'>(), &tLogClass::record);
-		BindFunction(g, tSS<'c','r','i','t','i','c','a','l'>(), &tLogClass::critical);
+		BindFunction(g, tSS<'d','e','b','u','g'>(), &tRisaLogPackageInitializer::debug);
+		BindFunction(g, tSS<'i','n','f','o'>(), &tRisaLogPackageInitializer::info);
+		BindFunction(g, tSS<'n','o','t','i','c','e'>(), &tRisaLogPackageInitializer::notice);
+		BindFunction(g, tSS<'w','a','r','n','i','n','g'>(), &tRisaLogPackageInitializer::warning);
+		BindFunction(g, tSS<'e','r','r','o','r'>(), &tRisaLogPackageInitializer::error);
+		BindFunction(g, tSS<'r','e','c','o','r','d'>(), &tRisaLogPackageInitializer::record);
+		BindFunction(g, tSS<'c','r','i','t','i','c','a','l'>(), &tRisaLogPackageInitializer::critical);
 	}
 };
 //---------------------------------------------------------------------------

@@ -20,10 +20,10 @@
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
-#include "base/log/Log.h"
-#include "base/fs/common/FSManager.h"
-#include "base/fs/osfs/OSFS.h"
-#include "base/fs/tmpfs/TmpFS.h"
+#include "risa/packages/risa/log/Log.h"
+#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/file/fs/osfs/OSFS.h"
+#include "risa/packages/risa/file/fs/tmpfs/TmpFS.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);

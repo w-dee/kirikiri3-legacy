@@ -14,7 +14,7 @@
 #include "base/script/RisseEngine.h"
 #include "risa/packages/risa/log/Log.h"
 #include "risse/include/risseObjectBase.h"
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 #include "risse/include/risseExceptionClass.h"
 
 namespace Risa {

@@ -13,7 +13,7 @@
 #ifndef _OSNativeStreamH_
 #define _OSNativeStreamH_
 
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 #include "base/utils/RisaThread.h"
 #include "risse/include/risseWCString.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"

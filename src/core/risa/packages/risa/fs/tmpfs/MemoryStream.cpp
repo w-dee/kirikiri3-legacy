@@ -11,7 +11,7 @@
 //! @brief オンメモリストリームの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/fs/tmpfs/MemoryStream.h"
+#include "risa/packages/risa/fs/tmpfs/MemoryStream.h"
 #include "base/exception/RisaException.h"
 
 

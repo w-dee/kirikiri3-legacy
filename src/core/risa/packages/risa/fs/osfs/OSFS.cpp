@@ -11,7 +11,7 @@
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/fs/osfs/OSFS.h"
+#include "risa/packages/risa/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
 #include "risse/include/risseExceptionClass.h"
 #include "risse/include/risseStaticStrings.h"
@@ -261,10 +261,10 @@ tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 fla
 
 	// OSNativeStreamClass からインスタンスを生成して返す
 	tVariant obj =
-		tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
-			GetOSNativeStreamClass()->Invoke(ss_new, tString(native_name.c_str()), (risse_int64)flags);
-	obj.AssertClass(tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()->
-									GetOSNativeStreamClass());
+		tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->
+			OSNativeStreamClass->Invoke(ss_new, tString(native_name.c_str()), (risse_int64)flags);
+	obj.AssertClass(tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->
+		GetInitializer()->OSNativeStreamClass);
 	return static_cast<tStreamInstance *>(obj.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
@@ -391,10 +391,6 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tOSFSInstance::flush);
 
 	BindProperty(this, tSS<'s','o','u','r','c','e'>(), &tOSFSInstance::get_source);
-
-	// OSNativeStream を登録する
-	RegisterNormalMember(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),
-			tVariant(OSNativeStreamClass), tMemberAttribute(), true);
 }
 //---------------------------------------------------------------------------
 
@@ -413,10 +409,49 @@ tVariant tOSFSClass::ovulate()
 
 
 
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		OSFS クラスレジストラ
-template class tRisseFSClassRegisterer<tOSFSClass>;
+tRisaOsfsPackageInitializer::tRisaOsfsPackageInitializer() :
+	tBuiltinPackageInitializer(
+		tSS<'r','i','s','a','.','f','s','.','o','s','f','s'>())
+{
+	OSFSClass = NULL;
+	OSNativeStreamClass = NULL;
+}
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaOsfsPackageInitializer::Initialize(
+	tScriptEngine * engine, const tString & name, const tVariant & global)
+{
+	OSFSClass = new tOSFSClass(engine);
+	OSFSClass->RegisterInstance(global);
+	OSNativeStreamClass = new tOSNativeStreamClass(engine);
+	OSNativeStreamClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.fs.osfs パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

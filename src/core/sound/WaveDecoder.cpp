@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "prec.h"
 #include "sound/WaveDecoder.h"
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 #include "sound/Sound.h"
 
 

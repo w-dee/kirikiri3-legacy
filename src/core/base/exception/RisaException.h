@@ -163,8 +163,7 @@ public:                                                                         
 		if(engine) e->ThrowConverted(engine); else throw e;                       \
 	}                                                                             \
 	static void Throw(const tString &msg) { Throw(NULL, msg); }                   \
-};                                                                                \
-template class tRisseClassRegisterer<CPP_CLASSNAME>;
+};
 //---------------------------------------------------------------------------
 
 

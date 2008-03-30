@@ -14,11 +14,11 @@ include $(CORE_DIR)/Makefile_core_subsys_pre
 #-----------------------------------------
 CPPFILES = \
 		FSManager.cpp                            \
-		fs/FileSystem.cpp                        \
-		fs/osfs/OSFS.cpp                         \
-		fs/osfs/OSNativeStream.cpp               \
-		fs/tmpfs/TmpFS.cpp                       \
-		fs/tmpfs/MemoryStream.cpp                
+		FileSystem.cpp                           \
+		osfs/OSFS.cpp                            \
+		osfs/OSNativeStream.cpp                  \
+		tmpfs/TmpFS.cpp                          \
+		tmpfs/MemoryStream.cpp                   
 
 
 #-----------------------------------------

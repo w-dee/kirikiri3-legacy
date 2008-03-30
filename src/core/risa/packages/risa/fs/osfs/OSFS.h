@@ -13,12 +13,12 @@
 #ifndef _OSFSH_
 #define _OSFSH_
 
-#include "risa/packages/risa/file/FSManager.h"
-#include "risa/packages/risa/file/fs/FileSystem.h"
+#include "risa/packages/risa/fs/FSManager.h"
+#include "risa/packages/risa/fs/FileSystem.h"
 #include "base/utils/RisaThread.h"
 #include "risse/include/risseWCString.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
-#include "risa/packages/risa/file/fs/osfs/OSNativeStream.h"
+#include "risa/packages/risa/fs/osfs/OSNativeStream.h"
 #include <wx/file.h>
 
 namespace Risa {
@@ -156,6 +156,31 @@ public:
 
 	//! @brief OSNativeStreamClass クラスインスタンスを得る
 	tOSNativeStreamClass * GetOSNativeStreamClass() const { return OSNativeStreamClass; }
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.fs.osfs パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tRisaOsfsPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tOSFSClass * OSFSClass;
+	tOSNativeStreamClass * OSNativeStreamClass;
+
+	//! @brief		コンストラクタ
+	tRisaOsfsPackageInitializer();
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
 };
 //---------------------------------------------------------------------------
 

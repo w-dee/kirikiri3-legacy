@@ -11,7 +11,7 @@
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/fs/osfs/OSFS.h"
+#include "risa/packages/risa/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
 #include "risse/include/risseExceptionClass.h"
 #include "risse/include/risseStaticStrings.h"

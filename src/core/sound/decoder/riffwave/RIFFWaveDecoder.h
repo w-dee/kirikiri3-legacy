@@ -15,7 +15,7 @@
 #define RIFFWAVEDECODERH
 
 #include "sound/WaveDecoder.h"
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

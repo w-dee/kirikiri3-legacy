@@ -11,8 +11,8 @@
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/FSManager.h"
-#include "risa/packages/risa/file/fs/osfs/OSFS.h"
+#include "risa/packages/risa/fs/FSManager.h"
+#include "risa/packages/risa/fs/osfs/OSFS.h"
 #include "base/exception/RisaException.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 
@@ -151,11 +151,6 @@ tFileSystemClass::tFileSystemClass(tScriptEngine * engine) :
 	tClassBase(tSS<'F','i','l','e','S','y','s','t','e','m'>(), engine->ObjectClass)
 {
 	RegisterMembers();
-
-	// FileOpenModeConsts を include する
-	Do(ocFuncCall, NULL, ss_include, 0,
-		tMethodArgument::New(
-			tRisseModuleRegisterer<tFileOpenModeConstsModule>::instance()->GetModuleInstance()));
 }
 //---------------------------------------------------------------------------
 
@@ -198,10 +193,6 @@ tVariant tFileSystemClass::ovulate()
 //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-//! @brief		FileSystem クラスレジストラ
-template class tRisseClassRegisterer<tFileSystemClass>;
-//---------------------------------------------------------------------------
 
 
 

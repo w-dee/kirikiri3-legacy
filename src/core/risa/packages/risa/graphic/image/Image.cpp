@@ -16,7 +16,7 @@
 #include "risse/include/risseNativeBinder.h"
 #include "risse/include/risseScriptEngine.h"
 #include "risse/include/risseStaticStrings.h"
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(59719,27864,5820,19638,31923,42718,35156,64208);

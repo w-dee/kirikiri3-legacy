@@ -1,54 +1,60 @@
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import stream;
+import risa.stdio as stdio;
+
+
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../tmp を /tmp にマウントする
 
-File::mount('/tmp', new FileSystem::OSFS("\{boot_script_source}/../tmp", true));
+fs.mount('/tmp', new osfs.OSFS("\{boot_script_source}/../tmp", true));
 
 // ファイルを作成して書き込んでみる
-File::open('/tmp/test.txt', File::omWrite).print("Hello world!").dispose();
+fs.open('/tmp/test.txt', fs.omWrite).print("Hello world!").dispose();
 
 // そのファイルを読んでみる
-var stream = File::open('/tmp/test.txt');
-var data = stream.read();
-stream.dispose();
+var st = fs.open('/tmp/test.txt');
+var data = st.read();
+st.dispose();
 assert(data == (octet)"Hello world!");
 
 // ファイルの最後に追加してみる
-File::open('/tmp/test.txt', File::omAppend) { |st|
+fs.open('/tmp/test.txt', fs.omAppend) { |st|
 	assert(st.position == 12);
 	st.print("----");
 }
 
 // そのファイルを読んでみる
-var stream = File::open('/tmp/test.txt');
-var data = stream.read();
-stream.dispose();
+var st = fs.open('/tmp/test.txt');
+var data = st.read();
+st.dispose();
 assert(data == (octet)"Hello world!----");
 
 // ファイルをアップデートしてみる
-File::open('/tmp/test.txt', File::omUpdate) { |st|
+fs.open('/tmp/test.txt', fs.omUpdate) { |st|
 	st.position = 12;
 	st.print("AB");
-	st.seek(0, Stream::soSet);
+	st.seek(0, stream.soSet);
 	st.print("'");
-	st.seek(2, Stream::soCur);
+	st.seek(2, stream.soCur);
 	st.print("i");
-	st.seek(-2, Stream::soEnd);
+	st.seek(-2, stream.soEnd);
 	st.print("CD");
 }
 
 // そのファイルを読んでみる
-var stream = File::open('/tmp/test.txt');
-var data = stream.read();
-stream.dispose();
+var st = fs.open('/tmp/test.txt');
+var data = st.read();
+st.dispose();
 assert(data == (octet)"'elio world!ABCD");
 
 // 大文字と小文字が違うファイルを開こうとしてみる
 var raised = false;
 try {
-	stream = File::open('/tmp/Test.txt');
+	st = fs.open('/tmp/Test.txt');
 } catch(e) {
 	assert(e.class === IOException);
 	raised = true;
@@ -56,48 +62,48 @@ try {
 assert(raised);
 
 // サブディレクトリを作る
-File::createDirectory('/tmp/subdir');
+fs.createDirectory('/tmp/subdir');
 
 // ディレクトリは作られたか？
-assert(File::isDirectory('/tmp/subdir'));
-assert(File::isDirectory('/tmp/subdir/'));
-assert(File::isDirectory('/tmp/subdir//')); // 一応legal
-assert(File::isDirectory('/tmp//subdir//')); // 一応legal
-assert(!File::isFile('/tmp/subdir'));
+assert(fs.isDirectory('/tmp/subdir'));
+assert(fs.isDirectory('/tmp/subdir/'));
+assert(fs.isDirectory('/tmp/subdir//')); // 一応legal
+assert(fs.isDirectory('/tmp//subdir//')); // 一応legal
+assert(!fs.isFile('/tmp/subdir'));
 
 // そこにファイルを作ってみる
-File::open('/tmp/subdir/test2.txt', File::omWrite).print("Hello world?\n").dispose();
+fs.open('/tmp/subdir/test2.txt', fs.omWrite).print("Hello world?\n").dispose();
 
 // ファイルは作られたか？
-assert(File::isFile('/tmp/subdir/test2.txt'));
-assert(!File::isDirectory('/tmp/subdir/test2.txt'));
-assert(File::isFile('/tmp/subdir//test2.txt')); // 一応 legal
+assert(fs.isFile('/tmp/subdir/test2.txt'));
+assert(!fs.isDirectory('/tmp/subdir/test2.txt'));
+assert(fs.isFile('/tmp/subdir//test2.txt')); // 一応 legal
 
 // もう一個ファイルを作ってみる(今度はブロック付きで)
-File::open('/tmp/subdir/test3.txt', File::omWrite) { |stream| stream.print("Hello world!?\n") };
+fs.open('/tmp/subdir/test3.txt', fs.omWrite) { |st| st.print("Hello world!?\n") };
 
 
 
 // サブディレクトリを作る
-File::createDirectory('/tmp/subdir/subfolder');
+fs.createDirectory('/tmp/subdir/subfolder');
 
 // ディレクトリは作られたか？
-assert(File::isDirectory('/tmp/subdir/subfolder'));
-assert(File::isDirectory('/tmp/subdir//subfolder'));
+assert(fs.isDirectory('/tmp/subdir/subfolder'));
+assert(fs.isDirectory('/tmp/subdir//subfolder'));
 
 // もう一個ファイルを作ってみる
-File::open('/tmp/subdir/subfolder/test4.txt', File::omWrite) { |stream| stream.print("Hello world!!?\n") };
+fs.open('/tmp/subdir/subfolder/test4.txt', fs.omWrite) { |st| st.print("Hello world!!?\n") };
 
 // もう一個サブディレクトリを作る
-File::createDirectory('/tmp/subdir/subfolder/subtree');
+fs.createDirectory('/tmp/subdir/subfolder/subtree');
 
 // もう一個ファイルを作ってみる
-File::open('/tmp/subdir/subfolder/subtree/test5.txt', File::omWrite) { |stream| stream.print("Hello world!!!?\n") };
+fs.open('/tmp/subdir/subfolder/subtree/test5.txt', fs.omWrite) { |st| st.print("Hello world!!!?\n") };
 
 
 // トラバースしてみる
 var file_expected = 3;
-var count = File::walkAt('/tmp/subdir') { |name, is_dir|
+var count = fs.walkAt('/tmp/subdir') { |name, is_dir|
 	if     (name == 'test2.txt' && !is_dir) file_expected--;
 	else if(name == 'test3.txt' && !is_dir) file_expected--;
 	else if(name == 'subfolder' &&  is_dir) file_expected--;
@@ -109,7 +115,7 @@ assert(count == 3);
 
 // 再帰的にトラバースしてみる
 var file_expected = 6;
-var count = File::walkAt('/tmp/subdir', true) { |name, is_dir|
+var count = fs.walkAt('/tmp/subdir', true) { |name, is_dir|
 	if     (name == 'test2.txt' && !is_dir) file_expected--;
 	else if(name == 'test3.txt' && !is_dir) file_expected--;
 	else if(name == 'subfolder' &&  is_dir) file_expected--;
@@ -122,19 +128,19 @@ assert(file_expected == 0);
 assert(count == 6);
 
 // ファイルの削除
-File::removeFile('/tmp/subdir/test2.txt');
-File::removeFile('/tmp/subdir/subfolder/subtree/test5.txt');
-assert(!File::isFile('/tmp/subdir/test2.txt'));
-assert(!File::isFile('/tmp/subdir/subfolder/subtree/test5.txt'));
+fs.removeFile('/tmp/subdir/test2.txt');
+fs.removeFile('/tmp/subdir/subfolder/subtree/test5.txt');
+assert(!fs.isFile('/tmp/subdir/test2.txt'));
+assert(!fs.isFile('/tmp/subdir/subfolder/subtree/test5.txt'));
 
 // ディレクトリの削除
-File::removeDirectory('/tmp/subdir/subfolder/subtree');
-assert(!File::isDirectory('/tmp/subdir/subfolder/subtree'));
+fs.removeDirectory('/tmp/subdir/subfolder/subtree');
+assert(!fs.isDirectory('/tmp/subdir/subfolder/subtree'));
 
 // 空でないディレクトリを削除しようとしてみる
 var raised = false;
 try {
-	File::removeDirectory('/tmp/subdir/subfolder/subtree');
+	fs.removeDirectory('/tmp/subdir/subfolder/subtree');
 } catch(e) {
 	assert(e.class === IOException);
 	raised = true;
@@ -143,13 +149,13 @@ assert(raised);
 
 
 // ファイルの削除とディレクトリの削除
-File::removeFile('/tmp/subdir/subfolder/test4.txt');
-File::removeDirectory('/tmp/subdir/subfolder/');
-assert(!File::isDirectory('/tmp/subdir/subfolder/'));
+fs.removeFile('/tmp/subdir/subfolder/test4.txt');
+fs.removeDirectory('/tmp/subdir/subfolder/');
+assert(!fs.isDirectory('/tmp/subdir/subfolder/'));
 
 // クリーンナップ。
 // OSFS は安全のため、ファイルの再帰的な削除はサポートされていない。
-File::removeFile('/tmp/subdir/test3.txt');
-File::removeDirectory('/tmp/subdir');
+fs.removeFile('/tmp/subdir/test3.txt');
+fs.removeDirectory('/tmp/subdir');
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok

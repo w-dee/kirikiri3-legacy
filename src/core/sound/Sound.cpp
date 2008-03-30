@@ -15,7 +15,7 @@
 #include "sound/filter/BasicWaveFilter.h"
 #include "risse/include/risseStaticStrings.h"
 #include "risse/include/risseArrayClass.h"
-#include "risa/packages/risa/file/FSManager.h"
+#include "risa/packages/risa/fs/FSManager.h"
 
 
 namespace Risa {

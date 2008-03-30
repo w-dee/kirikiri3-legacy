@@ -21,9 +21,9 @@
 #include "base/ui/console/Console.h"
 #include "base/ui/editor/ScriptEditor.h"
 #include "risa/packages/risa/log/Log.h"
-#include "risa/packages/risa/file/FSManager.h"
-#include "risa/packages/risa/file/fs/osfs/OSFS.h"
-#include "risa/packages/risa/file/fs/tmpfs/TmpFS.h"
+#include "risa/packages/risa/fs/FSManager.h"
+#include "risa/packages/risa/fs/osfs/OSFS.h"
+#include "risa/packages/risa/fs/tmpfs/TmpFS.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(17420,39507,42749,18842,4255,44341,64162,32476);
@@ -153,12 +153,20 @@ bool tApplication::OnInit()
 			// 残り全てのシングルトンインスタンスを初期化
 			singleton_manager::init_all();
 
+			// ファイルシステム関連のパッケージのうち、必要な物を初期化しておく
+			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
+				tSS<'r','i','s','a','.','f','s'>());
+			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
+				tSS<'r','i','s','a','.','f','s','.','t','m','p','f','s'>());
+			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
+				tSS<'r','i','s','a','.','f','s','.','o','s','f','s'>());
+
 			// / に TmpFS をマウント
 			tFileSystemManager::instance()->Mount(tSS<'/'>(),
-				tRisseFSClassRegisterer<tTmpFSClass>::instance()->
-					GetClassInstance()->Invoke(ss_new).
+				tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->
+					TmpFSClass->Invoke(ss_new).
 						ExpectAndGetObjectInterafce<tFileSystemInstance>(
-							tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()
+							tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->TmpFSClass
 						)
 			);
 
@@ -168,10 +176,10 @@ bool tApplication::OnInit()
 
 				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
-					tRisseFSClassRegisterer<tOSFSClass>::instance()->
-						GetClassInstance()->Invoke(ss_new, tString(script_dir), true).
+					tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->
+						OSFSClass->Invoke(ss_new, tString(script_dir), true).
 							ExpectAndGetObjectInterafce<tFileSystemInstance>(
-								tRisseFSClassRegisterer<tOSFSClass>::instance()->GetClassInstance()
+								tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->OSFSClass
 							)
 				);
 			}

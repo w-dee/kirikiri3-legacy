@@ -11,7 +11,7 @@
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/fs/tmpfs/TmpFS.h"
+#include "risa/packages/risa/fs/tmpfs/TmpFS.h"
 #include "base/exception/RisaException.h"
 
 
@@ -576,12 +576,12 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 
 	// MemoryStreamClass からインスタンスを生成して返す
 	tVariant obj =
-		tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()->
-			GetMemoryStreamClass()->Invoke(ss_new, (risse_int64)flags, true);
+		tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->
+			MemoryStreamClass->Invoke(ss_new, (risse_int64)flags, true);
 				// 第２引数の true は、ストリームになんらメモリブロックがアタッチ
 				// されずにストリームが作成されることを表す(下でアタッチする)
-	obj.AssertClass(tRisseFSClassRegisterer<tTmpFSClass>::instance()->GetClassInstance()->
-									GetMemoryStreamClass());
+	obj.AssertClass(tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->
+		GetInitializer()->MemoryStreamClass);
 	tMemoryStreamInstance *memstream = 
 		static_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
 
@@ -687,12 +687,47 @@ tVariant tTmpFSClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+tRisaTmpfsPackageInitializer::tRisaTmpfsPackageInitializer() :
+	tBuiltinPackageInitializer(
+		tSS<'r','i','s','a','.','f','s','.','t','m','p','f','s'>())
+{
+	TmpFSClass = NULL;
+	MemoryStreamClass = NULL;
+}
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		TmpFS クラスレジストラ
-template class tRisseFSClassRegisterer<tTmpFSClass>;
+void tRisaTmpfsPackageInitializer::Initialize(
+	tScriptEngine * engine, const tString & name, const tVariant & global)
+{
+	TmpFSClass = new tTmpFSClass(engine);
+	TmpFSClass->RegisterInstance(global);
+	MemoryStreamClass = new tMemoryStreamClass(engine);
+	MemoryStreamClass->RegisterInstance(global);
+}
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.fs.tmpfs パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------

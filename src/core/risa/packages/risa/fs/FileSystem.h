@@ -31,21 +31,6 @@ namespace Risa {
 class tFileSystemInstance;
 
 
-//---------------------------------------------------------------------------
-//! @brief	ファイルシステム用例外クラス
-/*! @note
-	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
-	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
-*/
-//---------------------------------------------------------------------------
-RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
-	(tSS<'r','i','s','a','.','f','i','l','e','.','f','s'>()),
-	(tSS<'F','i','l','e','S','y','s','t','e','m','E','x','c','e','p','t','i','o','n'>()),
-	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
-//---------------------------------------------------------------------------
-
-
-
 
 
 //---------------------------------------------------------------------------
@@ -151,35 +136,6 @@ public: // Risse 用メソッドなど
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		ファイルシステムクラスインスタンスをFileSystem以下に登録するためのテンプレートクラス
-//---------------------------------------------------------------------------
-template <typename ClassT>
-class tRisseFSClassRegisterer :
-	public singleton_base<tRisseFSClassRegisterer<ClassT> >,
-	depends_on<tRisseClassRegisterer<tFileSystemClass> >
-{
-	ClassT * ClassInstance;
-public:
-	//! @brief		コンストラクタ
-	tRisseFSClassRegisterer()
-	{
-		// ここらへんのプロセスについては tRisseClassRegisterer のコンストラクタも参照のこと
-		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
-		ClassT *class_instance = new ClassT(engine);
-		ClassInstance = class_instance;
-		tVariant FileSystem = engine->GetMainPackageGlobal().
-			GetPropertyDirect_Object(tSS<'F','i','l','e','S','y','s','t','e','m'>());
-		class_instance->RegisterInstance(FileSystem);
-	}
-
-	ClassT * GetClassInstance() const { return ClassInstance; } //!< クラスインスタンスを得る
-};
-//---------------------------------------------------------------------------
 
 
 

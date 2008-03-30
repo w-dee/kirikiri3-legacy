@@ -11,15 +11,33 @@
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "risa/packages/risa/file/FSManager.h"
-#include "risa/packages/risa/file/fs/osfs/OSFS.h"
-#include "risa/packages/risa/file/fs/FileSystem.h"
+#include "risa/packages/risa/fs/FSManager.h"
+#include "risa/packages/risa/fs/osfs/OSFS.h"
+#include "risa/packages/risa/fs/FileSystem.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(54267,15059,65338,18354,34733,17665,1145,27805);
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief	ファイルシステム用例外クラス
+/*! @note
+	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
+	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
+*/
+//---------------------------------------------------------------------------
+RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
+	(tSS<'r','i','s','a','.','f','s'>()),
+	(tSS<'F','i','l','e','S','y','s','t','e','m','E','x','c','e','p','t','i','o','n'>()),
+	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
+//---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -803,16 +821,21 @@ void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.file パッケージイニシャライザ
+//! @brief		risa.fs パッケージイニシャライザ
 //---------------------------------------------------------------------------
-class tRisaFilePackageInitializer : public tBuiltinPackageInitializer
+class tRisaFsPackageInitializer : public tBuiltinPackageInitializer, private tFileOpenModes
 {
 public:
+	tFileSystemClass * FileSystemClass;
+	tFileSystemExceptionClass * FileSystemExceptionClass;
+
 	//! @brief		コンストラクタ
-	tRisaFilePackageInitializer() :
+	tRisaFsPackageInitializer() :
 		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','f','i','l','e'>())
+			tSS<'r','i','s','a','.','f','s'>())
 	{
+		FileSystemClass = NULL;
+		FileSystemExceptionClass = NULL;
 	}
 
 	static void mount(const tString & point, const tVariant & fs)
@@ -980,31 +1003,29 @@ public:
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{
-		tLogger::ensure();
-
 		tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
 
 		tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
 									tMemberAttribute(tMemberAttribute::ocFinal));
 
-		BindFunction(g, tSS<'m','o','u','n','t'>(), &tRisaFilePackageInitializer::mount, final_const);
-		BindFunction(g, tSS<'u','n','m','o','u','n','t'>(), &tRisaFilePackageInitializer::unmount, final_const);
-		BindFunction(g, tSS<'n','o','r','m','a','l','i','z','e'>(), &tRisaFilePackageInitializer::normalize, final_const);
-		BindFunction(g, tSS<'w','a','l','k','A','t'>(), &tRisaFilePackageInitializer::walkAt, final_const);
-		BindFunction(g, tSS<'e','x','i','s','t','s'>(), &tRisaFilePackageInitializer::exists, final_const);
-		BindFunction(g, tSS<'i','s','F','i','l','e'>(), &tRisaFilePackageInitializer::isFile, final_const);
-		BindFunction(g, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::isDirectory, final_const);
-		BindFunction(g, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tRisaFilePackageInitializer::removeFile, final_const);
-		BindFunction(g, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::removeDirectory, final_const);
-		BindFunction(g, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFilePackageInitializer::createDirectory, final_const);
-		BindFunction(g, tSS<'s','t','a','t'>(), &tRisaFilePackageInitializer::stat, final_const);
-		BindFunction(g, tSS<'o','p','e','n'>(), &tRisaFilePackageInitializer::open, final_const);
-		BindFunction(g, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tRisaFilePackageInitializer::getFileSystemAt, final_const);
-		BindFunction(g, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tRisaFilePackageInitializer::chopExtension, final_const);
-		BindFunction(g, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tRisaFilePackageInitializer::extractExtension, final_const);
-		BindFunction(g, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tRisaFilePackageInitializer::extractName, final_const);
-		BindFunction(g, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tRisaFilePackageInitializer::extractPath, final_const);
-		BindProperty(g, tSS<'c','w','d'>(), &tRisaFilePackageInitializer::get_cwd, &tRisaFilePackageInitializer::set_cwd/*, final_const*/);
+		BindFunction(g, tSS<'m','o','u','n','t'>(), &tRisaFsPackageInitializer::mount, final_const);
+		BindFunction(g, tSS<'u','n','m','o','u','n','t'>(), &tRisaFsPackageInitializer::unmount, final_const);
+		BindFunction(g, tSS<'n','o','r','m','a','l','i','z','e'>(), &tRisaFsPackageInitializer::normalize, final_const);
+		BindFunction(g, tSS<'w','a','l','k','A','t'>(), &tRisaFsPackageInitializer::walkAt, final_const);
+		BindFunction(g, tSS<'e','x','i','s','t','s'>(), &tRisaFsPackageInitializer::exists, final_const);
+		BindFunction(g, tSS<'i','s','F','i','l','e'>(), &tRisaFsPackageInitializer::isFile, final_const);
+		BindFunction(g, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tRisaFsPackageInitializer::isDirectory, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tRisaFsPackageInitializer::removeFile, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsPackageInitializer::removeDirectory, final_const);
+		BindFunction(g, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsPackageInitializer::createDirectory, final_const);
+		BindFunction(g, tSS<'s','t','a','t'>(), &tRisaFsPackageInitializer::stat, final_const);
+		BindFunction(g, tSS<'o','p','e','n'>(), &tRisaFsPackageInitializer::open, final_const);
+		BindFunction(g, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tRisaFsPackageInitializer::getFileSystemAt, final_const);
+		BindFunction(g, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tRisaFsPackageInitializer::chopExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tRisaFsPackageInitializer::extractExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tRisaFsPackageInitializer::extractName, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tRisaFsPackageInitializer::extractPath, final_const);
+		BindProperty(g, tSS<'c','w','d'>(), &tRisaFsPackageInitializer::get_cwd, &tRisaFsPackageInitializer::set_cwd/*, final_const*/);
 		// TODO: property の final_const なプロパティってちゃんと動作してる？
 
 		global.RegisterFinalConstMember(
@@ -1031,6 +1052,12 @@ public:
 		global.RegisterFinalConstMember(
 				tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
 				tVariant((risse_int64)omAppendBit));
+
+		FileSystemClass = new tFileSystemClass(engine);
+		FileSystemClass->RegisterInstance(global);
+
+		FileSystemExceptionClass = new tFileSystemExceptionClass(engine);
+		FileSystemExceptionClass->RegisterInstance(global);
 	}
 };
 //---------------------------------------------------------------------------
@@ -1043,8 +1070,8 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.log パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaLogPackageInitializer>;
+//! @brief		risa.fs パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaFsPackageInitializer>;
 //---------------------------------------------------------------------------
 
 

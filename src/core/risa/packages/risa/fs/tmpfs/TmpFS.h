@@ -13,9 +13,9 @@
 #ifndef TmpFSH
 #define TmpFSH
 
-#include "risa/packages/risa/file/FSManager.h"
-#include "risa/packages/risa/file/fs/tmpfs/MemoryStream.h"
-#include "risa/packages/risa/file/fs/FileSystem.h"
+#include "risa/packages/risa/fs/FSManager.h"
+#include "risa/packages/risa/fs/tmpfs/MemoryStream.h"
+#include "risa/packages/risa/fs/FileSystem.h"
 #include "base/utils/RisaThread.h"
 
 namespace Risa {
@@ -232,6 +232,38 @@ public:
 	tMemoryStreamClass * GetMemoryStreamClass() const { return MemoryStreamClass; }
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.fs.tmpfs パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tRisaTmpfsPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tTmpFSClass * TmpFSClass;
+	tMemoryStreamClass * MemoryStreamClass;
+
+	//! @brief		コンストラクタ
+	tRisaTmpfsPackageInitializer();
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 } // namespace Risa

@@ -11,7 +11,7 @@
 //! @brief ウィンドウクラス
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "visual/window/Window.h"
+#include "risa/packages/risa/widget/Window.h"
 
 
 namespace Risa {
@@ -344,10 +344,53 @@ tVariant tWindowClass::ovulate()
 
 
 
+
+
 //---------------------------------------------------------------------------
-//! @brief		Window クラスレジストラ
-template class tRisseClassRegisterer<tWindowClass>;
+//! @brief		risa.widget パッケージイニシャライザ
 //---------------------------------------------------------------------------
+class tRisaWidgetPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tWindowClass * WindowClass;
+
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaWidgetPackageInitializer(tScriptEngine * engine) :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','w','i','d','g','e','t'>())
+	{
+		WindowClass = new tWindowClass(engine);
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		WindowClass->RegisterInstance(global);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.widget パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaWidgetPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 
 

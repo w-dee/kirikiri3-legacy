@@ -1,10 +1,17 @@
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import Sound in risa.sound;
+import risa.stdio as stdio;
+import Thread in thread;
+import * in risa.event;
+
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../media を /media にマウントする
 
-File::mount('/media', new FileSystem::OSFS("\{boot_script_source}/../media", true));
+fs.mount('/media', new osfs.OSFS("\{boot_script_source}/../media", true));
 
 // muted_conga_hi.ogg をならす。
 // このサウンドは4つのラベルをもっていて、それぞれ 1～4 という名前である
@@ -18,7 +25,7 @@ class MySound extends Sound
 
 	function onLabel(name)
 	{
-		System::stderr.print("\{name}\n");
+		stdio.stderr.print("\{name}\n");
 		label_sum = label_sum * 10 + (+name);
 	}
 }
@@ -48,4 +55,4 @@ th.join();
 
 assert(c.label_sum == 1234);
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok

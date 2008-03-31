@@ -1,13 +1,20 @@
 import * in risa.graphic.image;
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import risa.stdio as stdio;
 
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../ を /root にマウントする
 
-File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
+fs.mount('/root', new osfs.OSFS("\{boot_script_source}/..", true));
 
+function compareFile(a, b)
+{
+	return fs.open(a) { |st| break st.read() } == fs.open(b) { |st| break st.read() };
+}
 
 // JPEGファイルのファイル名
 var filenames = [
@@ -19,17 +26,17 @@ var filenames = [
 for(var i = 0; i < filenames.length; i++)
 {
 	var filename = filenames[i];
-	System::stderr.print("file \{filename}\n");
+	stdio.stderr.print("file \{filename}\n");
 
 	var image = new Image();
 	image.load("/root/media/\{filename}");
 
-	var output_filename = File::chopExtension(filename) + ".bmp";
+	var output_filename = fs.chopExtension(filename) + ".bmp";
 	var dic = new Dictionary();
 	dic['_type'] = 'A8R8G8B8'; // ビットマップサブタイプ
 	image.save("/root/tmp/\{output_filename}", dic);
 
-	var output_filename = File::chopExtension(filename) + ".jpg";
+	var output_filename = fs.chopExtension(filename) + ".jpg";
 	image.save("/root/tmp/\{output_filename}"); // jpeg でも保存してみる
 
 	// 現状、画像の比較メソッドを実装してないので……
@@ -41,5 +48,5 @@ for(var i = 0; i < filenames.length; i++)
 
 
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok
 

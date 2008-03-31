@@ -157,11 +157,15 @@ tVariant tStandardIOStreamClass::ovulate()
 class tRisaStdioPackageInitializer : public tBuiltinPackageInitializer
 {
 public:
+	tStandardIOStreamClass * StandardIOStreamClass;
+
 	//! @brief		コンストラクタ
-	tRisaStdioPackageInitializer() :
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaStdioPackageInitializer(tScriptEngine * engine) :
 		tBuiltinPackageInitializer(
 			tSS<'r','i','s','a','.','s','t','d','i','o'>())
 	{
+		StandardIOStreamClass = new tStandardIOStreamClass(engine);
 	}
 
 	//! @brief		パッケージを初期化する
@@ -172,15 +176,16 @@ public:
 		const tVariant & global)
 	{
 		// stdin, stdout, stderr を作成して登録する
-		tClassBase * stdio_cls =
-			tRisseClassRegisterer<tStandardIOStreamClass>::instance()->GetClassInstance();
-		tVariant stdin_v  = stdio_cls->Invoke(ss_new, (risse_int64)0);
-		tVariant stdout_v = stdio_cls->Invoke(ss_new, (risse_int64)1);
-		tVariant stderr_v = stdio_cls->Invoke(ss_new, (risse_int64)2);
+		tVariant stdin_v  = StandardIOStreamClass->Invoke(ss_new, (risse_int64)0);
+		tVariant stdout_v = StandardIOStreamClass->Invoke(ss_new, (risse_int64)1);
+		tVariant stderr_v = StandardIOStreamClass->Invoke(ss_new, (risse_int64)2);
 
 		global.RegisterFinalConstMember(tSS<'s','t','d','i','n'>(),     stdin_v );
 		global.RegisterFinalConstMember(tSS<'s','t','d','o','u','t'>(), stdout_v);
 		global.RegisterFinalConstMember(tSS<'s','t','d','e','r','r'>(), stderr_v);
+
+		// StandardIOStream クラスを登録
+		StandardIOStreamClass->RegisterInstance(global);
 	}
 };
 //---------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 #define _CONSOLE_H
 
 #include "base/ui/UIUtils.h"
-#include "base/event/Event.h"
+#include "risa/packages/risa/event/Event.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

@@ -13,9 +13,9 @@
 #include "prec.h"
 #include <wx/filename.h>
 #include <wx/app.h>
-#include "base/event/Event.h"
-#include "base/event/IdleEvent.h"
-#include "base/event/TickCount.h"
+#include "risa/packages/risa/event/Event.h"
+#include "risa/packages/risa/event/IdleEvent.h"
+#include "risa/packages/risa/event/TickCount.h"
 #include "base/gc/RisaGC.h"
 #include "base/script/RisseEngine.h"
 #include "base/ui/console/Console.h"

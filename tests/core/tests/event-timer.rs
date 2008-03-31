@@ -1,3 +1,8 @@
+import * in risa.event;
+import * in thread;
+import * in risa.stdio;
+import Timer in risa.event.timer;
+
 // イベントキューと、それを回すためのスレッドを作成する
 
 var queue = new EventQueue();
@@ -55,11 +60,11 @@ for(var i = 1; i < ticks.length; i++)
 if(jitter <= 4000)
 {
 	// たぶん 4000 以内だったら大丈夫
-	System::stdout.print("ok");
+	stdout.print("ok");
 }
 else
 {
-	System::stdout.print("too large jitter : \{jitter}\n");
+	stdout.print("too large jitter : \{jitter}\n");
 }
 
 //=> ok

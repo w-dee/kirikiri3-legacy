@@ -11,8 +11,8 @@
 //! @brief 高精度タイマーの実装
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/event/Timer.h"
-#include "base/event/TickCount.h"
+#include "risa/packages/risa/event/timer/Timer.h"
+#include "risa/packages/risa/event/TickCount.h"
 
 
 namespace Risa {
@@ -591,10 +591,51 @@ tVariant tTimerClass::ovulate()
 
 
 
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		Timer クラスレジストラ
-template class tRisseClassRegisterer<tTimerClass>;
+//! @brief		risa.event.timer パッケージイニシャライザ
 //---------------------------------------------------------------------------
+class tRisaGraphicEventTimerPackageInitializer : public tBuiltinPackageInitializer
+{
+public:
+	tTimerClass * TimerClass; //!< Timer クラス
+
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaGraphicEventTimerPackageInitializer(tScriptEngine * engine) :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','e','v','e','n','t','.','t','i','m','e','r'>())
+	{
+		TimerClass = new tTimerClass(engine);
+	}
+
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		TimerClass->RegisterInstance(global);
+	}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.event.timer パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaGraphicEventTimerPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
 
 
 

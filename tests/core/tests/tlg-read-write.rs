@@ -1,16 +1,19 @@
 import * in risa.graphic.image;
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import risa.stdio as stdio;
 
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../ を /root にマウントする
 
-File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
+fs.mount('/root', new osfs.OSFS("\{boot_script_source}/..", true));
 
 function compareFile(a, b)
 {
-	return File::open(a) { |st| break st.read() } == File::open(b) { |st| break st.read() };
+	return fs.open(a) { |st| break st.read() } == fs.open(b) { |st| break st.read() };
 }
 
 // PNGファイルのファイル名
@@ -25,41 +28,41 @@ var filenames = [
 for(var i = 0; i < filenames.length; i++)
 {
 	var filename = filenames[i];
-	System::stderr.print("file \{filename}\n");
+	stdio.stderr.print("file \{filename}\n");
 
 	var image = new Image();
 	image.load("/root/media/\{filename}");
 
-	var output_filename = File::chopExtension(filename) + ".bmp";
+	var output_filename = fs.chopExtension(filename) + ".bmp";
 	var dic = new Dictionary();
 	dic['_type'] = 'A8R8G8B8'; // ビットマップサブタイプ
 	image.save("/root/tmp/\{output_filename}", dic);
 
 	assert(compareFile("/root/media/expected/\{output_filename}", "/root/tmp/\{output_filename}"));
 
-	var output_filename = File::chopExtension(filename) + "_A8R8G8B8.tlg5";
-	System::stderr.print("writing file \{output_filename}\n");
+	var output_filename = fs.chopExtension(filename) + "_A8R8G8B8.tlg5";
+	stdio.stderr.print("writing file \{output_filename}\n");
 	var dic = new Dictionary();
 	dic['_type'] = 'A8R8G8B8'; // サブタイプ
 	dic['_version'] = 'tlg5'; // バージョン
 	image.save("/root/tmp/\{output_filename}", dic);
 
-	var output_filename = File::chopExtension(filename) + "_A8R8G8B8.tlg6";
-	System::stderr.print("writing file \{output_filename}\n");
+	var output_filename = fs.chopExtension(filename) + "_A8R8G8B8.tlg6";
+	stdio.stderr.print("writing file \{output_filename}\n");
 	var dic = new Dictionary();
 	dic['_type'] = 'A8R8G8B8'; // サブタイプ
 	dic['_version'] = 'tlg6'; // バージョン
 	image.save("/root/tmp/\{output_filename}", dic);
 
-	var output_filename = File::chopExtension(filename) + "_R8G8B8.tlg5";
-	System::stderr.print("writing file \{output_filename}\n");
+	var output_filename = fs.chopExtension(filename) + "_R8G8B8.tlg5";
+	stdio.stderr.print("writing file \{output_filename}\n");
 	var dic = new Dictionary();
 	dic['_type'] = 'R8G8B8'; // サブタイプ
 	dic['_version'] = 'tlg5'; // バージョン
 	image.save("/root/tmp/\{output_filename}", dic);
 
-	var output_filename = File::chopExtension(filename) + "_R8G8B8.tlg6";
-	System::stderr.print("writing file \{output_filename}\n");
+	var output_filename = fs.chopExtension(filename) + "_R8G8B8.tlg6";
+	stdio.stderr.print("writing file \{output_filename}\n");
 	var dic = new Dictionary();
 	dic['_type'] = 'R8G8B8'; // サブタイプ
 	dic['_version'] = 'tlg6'; // バージョン
@@ -68,5 +71,5 @@ for(var i = 0; i < filenames.length; i++)
 }
 
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok
 

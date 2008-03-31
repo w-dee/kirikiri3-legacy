@@ -6,6 +6,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/base/config                       \
+	$(CORE_DIR)/risa/packages/risa/event          \
 	$(CORE_DIR)/risa/packages/risa/fs             \
 	$(CORE_DIR)/risa/packages/risa/log            \
 	$(CORE_DIR)/risa/packages/risa/graphic/image  \
@@ -18,7 +19,6 @@ SUBSYS_DIRS=\
 	$(CORE_DIR)/base/mathlib                      \
 	$(CORE_DIR)/base/ui                           \
 	$(CORE_DIR)/base/utils                        \
-	$(CORE_DIR)/base/event                        \
 	$(CORE_DIR)/base/script                       \
 	$(CORE_DIR)/base/gc                           
 

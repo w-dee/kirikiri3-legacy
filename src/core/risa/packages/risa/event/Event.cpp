@@ -11,8 +11,8 @@
 //! @brief イベントシステム
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/event/Event.h"
-#include "base/event/TickCount.h"
+#include "risa/packages/risa/event/Event.h"
+#include "risa/packages/risa/event/TickCount.h"
 #include "base/exception/RisaException.h"
 #include <wx/app.h>
 
@@ -26,7 +26,7 @@ RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 //! @brief	イベントキュー用例外クラス
 //---------------------------------------------------------------------------
 RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
-	(tSS<'m','a','i','n'>()),
+	(tSS<'r','i','s','a','.','e','v','e','n','t'>()),
 	(tSS<'E','v','e','n','t','Q','u','e','u','e','E','x','c','e','p','t','i','o','n'>()),
 	tRisseScriptEngine::instance()->GetScriptEngine()->RuntimeExceptionClass)
 //---------------------------------------------------------------------------
@@ -447,11 +447,6 @@ tVariant tEventQueueClass::ovulate()
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		EventQueue クラスレジストラ
-template class tRisseClassRegisterer<tEventQueueClass>;
-//---------------------------------------------------------------------------
-
 
 
 
@@ -463,8 +458,9 @@ tMainEventQueue::tMainEventQueue()
 	// イベントキューインスタンスを作成する
 	// スクリプトエンジンの取得、グローバルオブジェクトの取得、イベントキュークラスの
 	// 取得、イベントキューインスタンスの作成を順に行う
+	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::ensure();
 	tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
-	tVariant global_object = engine->GetMainPackageGlobal();
+	tVariant global_object = engine->GetPackageGlobal(tSS<'r','i','s','a','.','e','v','e','n','t'>());
 	tVariant eventqueue_class = global_object.GetPropertyDirect(engine,
 						tSS<'E','v','e','n','t','Q','u','e','u','e'>());
 	tVariant instance_v = eventqueue_class.New();
@@ -520,7 +516,9 @@ void tEventSourceInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 void tEventSourceInstance::SetDestEventQueue(const tVariant & queue)
 {
-	DestEventQueue.AssertClass(tRisseClassRegisterer<tEventQueueClass>::instance()->GetClassInstance());
+	DestEventQueue.AssertClass(
+		tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
+			GetInitializer()->EventQueueClass);
 	DestEventQueue = queue;
 }
 //---------------------------------------------------------------------------
@@ -573,10 +571,48 @@ tVariant tEventSourceClass::ovulate()
 
 
 
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		EventSource クラスレジストラ
-template class tRisseClassRegisterer<tEventSourceClass>;
+tRisaEventPackageInitializer::tRisaEventPackageInitializer(tScriptEngine * engine) :
+	tBuiltinPackageInitializer(
+		tSS<'r','i','s','a','.','e','v','e','n','t'>())
+{
+	EventQueueClass = new tEventQueueClass(engine);
+	EventSourceClass = new tEventSourceClass(engine);
+	EventQueueExceptionClass = new tEventQueueExceptionClass(engine);
+}
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaEventPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+	const tVariant & global)
+{
+	EventQueueClass->RegisterInstance(global);
+	EventSourceClass->RegisterInstance(global);
+	EventQueueExceptionClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		risa.event パッケージイニシャライザレジストラ
+template class tPackageInitializerRegisterer<tRisaEventPackageInitializer>;
+//---------------------------------------------------------------------------
+
+
+
 
 
 

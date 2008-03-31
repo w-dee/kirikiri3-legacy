@@ -688,12 +688,12 @@ tVariant tTmpFSClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-tRisaTmpfsPackageInitializer::tRisaTmpfsPackageInitializer() :
+tRisaTmpfsPackageInitializer::tRisaTmpfsPackageInitializer(tScriptEngine * engine) :
 	tBuiltinPackageInitializer(
 		tSS<'r','i','s','a','.','f','s','.','t','m','p','f','s'>())
 {
-	TmpFSClass = NULL;
-	MemoryStreamClass = NULL;
+	TmpFSClass = new tTmpFSClass(engine);
+	MemoryStreamClass = new tMemoryStreamClass(engine);
 }
 //---------------------------------------------------------------------------
 
@@ -702,9 +702,7 @@ tRisaTmpfsPackageInitializer::tRisaTmpfsPackageInitializer() :
 void tRisaTmpfsPackageInitializer::Initialize(
 	tScriptEngine * engine, const tString & name, const tVariant & global)
 {
-	TmpFSClass = new tTmpFSClass(engine);
 	TmpFSClass->RegisterInstance(global);
-	MemoryStreamClass = new tMemoryStreamClass(engine);
 	MemoryStreamClass->RegisterInstance(global);
 }
 //---------------------------------------------------------------------------

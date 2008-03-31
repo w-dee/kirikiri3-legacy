@@ -11,7 +11,7 @@
 //! @brief アイドル時に発生するイベントを提供するモジュール
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/event/IdleEvent.h"
+#include "risa/packages/risa/event/IdleEvent.h"
 
 
 /*

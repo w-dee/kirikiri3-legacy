@@ -1,18 +1,21 @@
 import * in risa.graphic.image;
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import risa.stdio as stdio;
 
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../ を /root にマウントする
 
-File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
-
+fs.mount('/root', new osfs.OSFS("\{boot_script_source}/..", true));
 
 function compareFile(a, b)
 {
-	return File::open(a) { |st| break st.read() } == File::open(b) { |st| break st.read() };
+	return fs.open(a) { |st| break st.read() } == fs.open(b) { |st| break st.read() };
 }
+
 
 var pixels = [
 	[ 0xff000000, 0xff0000ff, 0xff00ff00 ],
@@ -53,5 +56,5 @@ image.save("/root/tmp/pixelsA8R8G8B8.bmp", dic);
 assert(compareFile("/root/tmp/pixelsR8G8B8.bmp", "/root/media/expected/pixelsR8G8B8.bmp"));
 assert(compareFile("/root/tmp/pixelsA8R8G8B8.bmp", "/root/media/expected/pixelsA8R8G8B8.bmp"));
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok
 

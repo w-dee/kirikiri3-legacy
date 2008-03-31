@@ -248,7 +248,8 @@ public:
 	tMemoryStreamClass * MemoryStreamClass;
 
 	//! @brief		コンストラクタ
-	tRisaTmpfsPackageInitializer();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaTmpfsPackageInitializer(tScriptEngine * engine);
 
 	//! @brief		パッケージを初期化する
 	//! @param		engine		スクリプトエンジンインスタンス

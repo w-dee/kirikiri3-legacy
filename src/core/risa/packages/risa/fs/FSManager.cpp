@@ -829,15 +829,6 @@ public:
 	tFileSystemClass * FileSystemClass;
 	tFileSystemExceptionClass * FileSystemExceptionClass;
 
-	//! @brief		コンストラクタ
-	tRisaFsPackageInitializer() :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','f','s'>())
-	{
-		FileSystemClass = NULL;
-		FileSystemExceptionClass = NULL;
-	}
-
 	static void mount(const tString & point, const tVariant & fs)
 	{
 		fs.AssertClass(tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance());
@@ -996,6 +987,17 @@ public:
 		tFileSystemManager::instance()->SetCurrentDirectory(dirname);
 	}
 
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaFsPackageInitializer(tScriptEngine * engine) :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','f','s'>())
+	{
+		FileSystemClass = new tFileSystemClass(engine);
+		FileSystemExceptionClass = new tFileSystemExceptionClass(engine);
+	}
+
 	//! @brief		パッケージを初期化する
 	//! @param		engine		スクリプトエンジンインスタンス
 	//! @param		name		パッケージ名
@@ -1053,10 +1055,7 @@ public:
 				tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
 				tVariant((risse_int64)omAppendBit));
 
-		FileSystemClass = new tFileSystemClass(engine);
 		FileSystemClass->RegisterInstance(global);
-
-		FileSystemExceptionClass = new tFileSystemExceptionClass(engine);
 		FileSystemExceptionClass->RegisterInstance(global);
 	}
 };

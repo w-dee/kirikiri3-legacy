@@ -20,7 +20,7 @@
 #include "sound/WaveLoopManager.h"
 #include "sound/WaveFilter.h"
 #include "base/exception/RisaException.h"
-#include "base/event/Event.h"
+#include "risa/packages/risa/event/Event.h"
 
 
 namespace Risa {

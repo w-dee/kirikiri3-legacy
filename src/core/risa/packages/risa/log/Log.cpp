@@ -300,13 +300,6 @@ void tWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 class tRisaLogPackageInitializer : public tBuiltinPackageInitializer
 {
 public:
-	//! @brief		コンストラクタ
-	tRisaLogPackageInitializer() :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','l','o','g'>())
-	{
-	}
-
 	static void debug(const tString & content) //!< debug メッセージ出力
 	{
 		tLogger::instance()->Log(content, tLogger::llDebug);
@@ -340,6 +333,14 @@ public:
 	static void critical(const tString & content) //!< critical メッセージ出力
 	{
 		tLogger::instance()->Log(content, tLogger::llCritical);
+	}
+
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaLogPackageInitializer(tScriptEngine * engine) :
+		tBuiltinPackageInitializer(
+			tSS<'r','i','s','a','.','l','o','g'>())
+	{
 	}
 
 	//! @brief		パッケージを初期化する

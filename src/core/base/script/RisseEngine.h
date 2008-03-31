@@ -110,7 +110,7 @@ public:
 	{
 		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
-		Initializer = new InitializerT();
+		Initializer = new InitializerT(engine);
 		RISSE_ASSERT(dynamic_cast<tBuiltinPackageInitializer *>(Initializer));
 		Initializer->RegisterInstance(engine);
 	}

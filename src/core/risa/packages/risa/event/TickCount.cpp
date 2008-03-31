@@ -11,7 +11,7 @@
 //! @brief TickCount を提供するモジュール
 //---------------------------------------------------------------------------
 #include "prec.h"
-#include "base/event/TickCount.h"
+#include "risa/packages/risa/event/TickCount.h"
 
 
 namespace Risa {

@@ -413,12 +413,12 @@ tVariant tOSFSClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-tRisaOsfsPackageInitializer::tRisaOsfsPackageInitializer() :
+tRisaOsfsPackageInitializer::tRisaOsfsPackageInitializer(tScriptEngine * engine) :
 	tBuiltinPackageInitializer(
 		tSS<'r','i','s','a','.','f','s','.','o','s','f','s'>())
 {
-	OSFSClass = NULL;
-	OSNativeStreamClass = NULL;
+	OSFSClass = new tOSFSClass(engine);
+	OSNativeStreamClass = new tOSNativeStreamClass(engine);
 }
 //---------------------------------------------------------------------------
 
@@ -427,9 +427,7 @@ tRisaOsfsPackageInitializer::tRisaOsfsPackageInitializer() :
 void tRisaOsfsPackageInitializer::Initialize(
 	tScriptEngine * engine, const tString & name, const tVariant & global)
 {
-	OSFSClass = new tOSFSClass(engine);
 	OSFSClass->RegisterInstance(global);
-	OSNativeStreamClass = new tOSNativeStreamClass(engine);
 	OSNativeStreamClass->RegisterInstance(global);
 }
 //---------------------------------------------------------------------------

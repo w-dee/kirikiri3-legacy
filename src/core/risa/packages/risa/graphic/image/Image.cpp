@@ -342,11 +342,12 @@ public:
 	tImageClass * ImageClass;
 
 	//! @brief		コンストラクタ
-	tRisaGraphicImagePackageInitializer() :
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaGraphicImagePackageInitializer(tScriptEngine * engine) :
 		tBuiltinPackageInitializer(
 			tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'>())
 	{
-		ImageClass = NULL;
+		ImageClass = new tImageClass(engine);
 	}
 
 	//! @brief		パッケージを初期化する
@@ -356,7 +357,6 @@ public:
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{
-		ImageClass = new tImageClass(engine);
 		ImageClass->RegisterInstance(global);
 		global.RegisterFinalConstMember(
 			tSS<'p','f','G','r','a','y','8'>(),

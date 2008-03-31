@@ -1,7 +1,8 @@
 #!/usr/bin/ruby
 
 BASE_DIR = File.dirname(__FILE__)
-EXECUTABLE = BASE_DIR + '/../../build_output/bin/risa.exe -a'
+EXECUTABLE = BASE_DIR + '/../../build_output/bin/risa.exe'
+EXECUTABLE_OPT = '-a'
 TESTS_DIR = BASE_DIR + '/tests/'
 TEMP_DIR = BASE_DIR
 
@@ -24,7 +25,7 @@ files.each do |file|
 		else
 			pattern = match[1]
 			print "testing #{File.basename file} ... "
-			system("\"#{File.expand_path(EXECUTABLE)}\" " +
+			system("\"#{File.expand_path(EXECUTABLE)}\" #{EXECUTABLE_OPT} " +
 						" #{file} 1>#{TEMP_DIR}/stdout.log 2>#{TEMP_DIR}/stderr.log");
 			result = IO.read("#{TEMP_DIR}/stdout.log")
 			matched = false

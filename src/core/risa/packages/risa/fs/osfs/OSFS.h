@@ -173,7 +173,8 @@ public:
 	tOSNativeStreamClass * OSNativeStreamClass;
 
 	//! @brief		コンストラクタ
-	tRisaOsfsPackageInitializer();
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaOsfsPackageInitializer(tScriptEngine * engine);
 
 	//! @brief		パッケージを初期化する
 	//! @param		engine		スクリプトエンジンインスタンス

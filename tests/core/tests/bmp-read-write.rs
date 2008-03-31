@@ -1,16 +1,19 @@
 import * in risa.graphic.image;
+import risa.fs as fs;
+import risa.fs.osfs as osfs;
+import risa.stdio as stdio;
 
 // /boot がマウントされているディレクトリを得る
 
-var boot_script_source = File::getFileSystemAt('/boot/').source;
+var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../ を /root にマウントする
 
-File::mount('/root', new FileSystem::OSFS("\{boot_script_source}/..", true));
+fs.mount('/root', new osfs.OSFS("\{boot_script_source}/..", true));
 
 function compareFile(a, b)
 {
-	return File::open(a) { |st| break st.read() } == File::open(b) { |st| break st.read() };
+	return fs.open(a) { |st| break st.read() } == fs.open(b) { |st| break st.read() };
 }
 
 // ビットマップファイルのファイル名
@@ -30,7 +33,7 @@ var filenames = [
 for(var i = 0; i < filenames.length; i++)
 {
 	var filename = filenames[i];
-	System::stderr.print("file \{filename}\n");
+	stdio.stderr.print("file \{filename}\n");
 
 	var image = new Image();
 	image.load("/root/media/\{filename}");
@@ -41,5 +44,5 @@ for(var i = 0; i < filenames.length; i++)
 	assert(compareFile("/root/media/expected/\{filename}", "/root/tmp/\{filename}"));
 }
 
-System::stdout.print("ok"); //=> ok
+stdio.stdout.print("ok"); //=> ok
 

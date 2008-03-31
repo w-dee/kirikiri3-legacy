@@ -21,7 +21,7 @@
 #include "sound/WaveLoopManager.h"
 #include "base/utils/RisaThread.h"
 #include "base/utils/Singleton.h"
-#include "base/event/Event.h"
+#include "risa/packages/risa/event/Event.h"
 #include "risse/include/risseNativeBinder.h"
 
 namespace Risa {

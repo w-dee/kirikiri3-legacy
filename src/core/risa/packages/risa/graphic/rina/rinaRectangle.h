@@ -15,7 +15,7 @@
 #ifndef RINARECTANGLE_H
 #define RINARECTANGLE_H
 
-#include "visual/rina/rinaTypes.h"
+#include "risa/packages/risa/graphic/rina/rinaTypes.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

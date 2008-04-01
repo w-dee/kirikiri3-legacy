@@ -13,8 +13,8 @@
 //! @brief RINA ノード管理
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "visual/rina/rinaNode.h"
-#include "visual/rina/rinaPin.h"
+#include "risa/packages/risa/graphic/rina/rinaNode.h"
+#include "risa/packages/risa/graphic/rina/rinaPin.h"
 
 
 namespace Rina {

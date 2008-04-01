@@ -15,7 +15,7 @@
 #ifndef RINAUPDATEREGION_H
 #define RINAUPDATEREGION_H
 
-#include "visual/rina/rinaRectangle.h"
+#include "risa/packages/risa/graphic/rina/rinaRectangle.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

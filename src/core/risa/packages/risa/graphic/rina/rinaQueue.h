@@ -15,8 +15,8 @@
 #ifndef RINAQUEUE_H
 #define RINAQUEUE_H
 
-#include "visual/rina/rinaNode.h"
-#include "visual/rina/rinaIdRegistry.h"
+#include "risa/packages/risa/graphic/rina/rinaNode.h"
+#include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

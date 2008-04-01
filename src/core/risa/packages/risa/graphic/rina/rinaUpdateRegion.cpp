@@ -13,7 +13,7 @@
 //! @brief RINA 更新矩形領域管理の実装 
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "visual/rina/rinaUpdateRegion.h"
+#include "risa/packages/risa/graphic/rina/rinaUpdateRegion.h"
 
 
 namespace Rina {

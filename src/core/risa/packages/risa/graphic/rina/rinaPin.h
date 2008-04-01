@@ -15,8 +15,8 @@
 #ifndef RINAPIN_H
 #define RINAPIN_H
 
-#include "visual/rina/rinaNode.h"
-#include "visual/rina/rinaGraph.h"
+#include "risa/packages/risa/graphic/rina/rinaNode.h"
+#include "risa/packages/risa/graphic/rina/rinaGraph.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

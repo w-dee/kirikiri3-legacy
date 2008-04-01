@@ -13,7 +13,7 @@
 //! @brief RINA 接続グラフ管理
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "visual/rina/rinaGraph.h"
+#include "risa/packages/risa/graphic/rina/rinaGraph.h"
 #include "risa/common/RisaThread.h"
 
 

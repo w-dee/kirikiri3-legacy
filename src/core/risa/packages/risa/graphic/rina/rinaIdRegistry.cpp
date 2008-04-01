@@ -13,7 +13,7 @@
 //! @brief RINA ID管理
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "visual/rina/rinaIdRegistry.h"
+#include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
 
 
 namespace Rina {

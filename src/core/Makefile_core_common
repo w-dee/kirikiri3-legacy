@@ -6,6 +6,7 @@ include $(TOP_DIR)/Makefile_filenames
 
 SUBSYS_DIRS=\
 	$(CORE_DIR)/risa/common                       \
+	$(CORE_DIR)/risa/packages/risa/graphic/rina   \
 	$(CORE_DIR)/risa/packages/risa/sound          \
 	$(CORE_DIR)/risa/packages/risa/widget         \
 	$(CORE_DIR)/risa/packages/risa/event          \

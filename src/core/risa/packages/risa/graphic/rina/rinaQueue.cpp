@@ -13,9 +13,9 @@
 //! @brief RINA コマンドキュー管理
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "visual/rina/rinaQueue.h"
-#include "visual/rina/rinaPin.h"
-#include "visual/rina/rinaGraph.h"
+#include "risa/packages/risa/graphic/rina/rinaQueue.h"
+#include "risa/packages/risa/graphic/rina/rinaPin.h"
+#include "risa/packages/risa/graphic/rina/rinaGraph.h"
 
 namespace Rina {
 RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);

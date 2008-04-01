@@ -15,8 +15,8 @@
 #ifndef RINANODE_H
 #define RINANODE_H
 
-#include "visual/rina/rinaIdRegistry.h"
-#include "visual/rina/rinaGraph.h"
+#include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
+#include "risa/packages/risa/graphic/rina/rinaGraph.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

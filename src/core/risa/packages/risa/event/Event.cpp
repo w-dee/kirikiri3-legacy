@@ -10,10 +10,10 @@
 //! @file
 //! @brief イベントシステム
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/event/Event.h"
 #include "risa/packages/risa/event/TickCount.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include <wx/app.h>
 
 namespace Risa {

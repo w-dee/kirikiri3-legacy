@@ -10,7 +10,7 @@
 //! @file
 //! @brief OggVorbis デコーダ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/decoder/vorbis/VorbisDecoder.h"
 #include "risa/packages/risa/fs/FSManager.h"
 #include <vorbis/vorbisfile.h>

@@ -10,9 +10,9 @@
 //! @file
 //! @brief OSFSの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/fs/osfs/OSFS.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include "risse/include/risseExceptionClass.h"
 #include "risse/include/risseStaticStrings.h"
 #include <wx/filename.h>
@@ -356,7 +356,8 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 //---------------------------------------------------------------------------
 tOSFSClass::tOSFSClass(tScriptEngine * engine) :
 	tClassBase(tSS<'O','S','F','S'>(),
-		tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
+		tPackageInitializerRegisterer<tRisaFsPackageInitializer>::instance()->
+			GetInitializer()->FileSystemClass)
 {
 	OSNativeStreamClass = new tOSNativeStreamClass(engine);
 

@@ -15,7 +15,7 @@
 #ifndef RINAGRAPH_H
 #define RINAGRAPH_H
 
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 
 
 namespace Rina {

@@ -10,7 +10,7 @@
 //! @file
 //! @brief OpenAL バッファ管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/ALCommon.h"
 #include "risa/packages/risa/sound/ALBuffer.h"
 #include "risa/packages/risa/sound/WaveFormatConverter.h"

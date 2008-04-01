@@ -10,7 +10,7 @@
 //! @file
 //! @brief XP4 アーカイブの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include <zlib.h>
 #include "base/exception/RisaException.h"
 #include "base/fs/common/FSManager.h"

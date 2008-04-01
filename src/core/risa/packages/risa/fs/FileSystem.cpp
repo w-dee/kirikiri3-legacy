@@ -10,10 +10,10 @@
 //! @file
 //! @brief ファイルシステムマネージャ(ファイルシステムの根幹部分)
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/fs/osfs/OSFS.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 
 

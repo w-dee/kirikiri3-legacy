@@ -15,7 +15,7 @@
 
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/fs/FileSystem.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 #include "risse/include/risseWCString.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 #include "risa/packages/risa/fs/osfs/OSNativeStream.h"

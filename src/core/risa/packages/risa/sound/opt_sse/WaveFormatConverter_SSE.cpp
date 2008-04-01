@@ -13,8 +13,8 @@
 
 #include "risse/include/risseTypes.h"
 using namespace Risse;
-#include "base/cpu/opt_sse/xmmlib.h"
-#include "base/mathlib/opt_sse/MathAlgorithms_SSE.h"
+#include "risa/common/opt_sse/xmmlib.h"
+#include "risa/common/opt_sse/MathAlgorithms_SSE.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

@@ -13,9 +13,9 @@
 #ifndef ImageH
 #define ImageH
 
-#include "base/gc/RisaGC.h"
+#include "risa/common/RisaGC.h"
 #include "risa/packages/risa/graphic/image/ImageBuffer.h"
-#include "base/script/RisseEngine.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/risseDictionaryClass.h"
 
 namespace Risa {

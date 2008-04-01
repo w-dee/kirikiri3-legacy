@@ -10,7 +10,7 @@
 //! @file
 //! @brief Waveデコーダインターフェースの定義
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/WaveDecoder.h"
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/sound/Sound.h"

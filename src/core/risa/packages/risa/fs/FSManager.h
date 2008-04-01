@@ -16,9 +16,9 @@
 #include <wx/file.h>
 #include <wx/datetime.h>
 #include "risse/include/risseHashTable.h"
-#include "base/utils/Singleton.h"
-#include "base/utils/RisaThread.h"
-#include "base/script/RisseEngine.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/RisaThread.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/risseString.h"
 #include "risse/include/risseStream.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
@@ -287,7 +287,29 @@ public:
 
 
 
+class tFileSystemClass;
+class tFileSystemExceptionClass;
+//---------------------------------------------------------------------------
+//! @brief		risa.fs パッケージイニシャライザ
+//---------------------------------------------------------------------------
+class tRisaFsPackageInitializer : public tBuiltinPackageInitializer, private tFileOpenModes
+{
+public:
+	tFileSystemClass * FileSystemClass;
+	tFileSystemExceptionClass * FileSystemExceptionClass;
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRisaFsPackageInitializer(tScriptEngine * engine);
 
+	//! @brief		パッケージを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global);
+};
+//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

@@ -15,9 +15,9 @@
 	Loop Tuner 2 (a GUI loop-point editor)
 */
 
-#include "prec.h"
+#include "risa/prec.h"
 #include <algorithm>
-#include "base/gc/RisaGC.h"
+#include "risa/common/RisaGC.h"
 #include "risa/packages/risa/sound/WaveLoopManager.h"
 
 

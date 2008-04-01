@@ -11,7 +11,7 @@
 //! @brief Waveフォーマットコンバータ
 //---------------------------------------------------------------------------
 
-#include "prec.h"
+#include "risa/prec.h"
 #include <algorithm>
 #include "risa/packages/risa/sound/Sound.h"
 #include "risa/packages/risa/sound/WaveFormatConverter.h"

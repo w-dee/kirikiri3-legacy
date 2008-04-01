@@ -13,7 +13,7 @@
 #ifndef PhaseVocoderDSPH
 #define PhaseVocoderDSPH
 
-#include "base/utils/RingBuffer.h"
+#include "risa/common/RingBuffer.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

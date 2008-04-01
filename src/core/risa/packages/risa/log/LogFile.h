@@ -23,9 +23,9 @@
 
 
 
-#include "base/utils/Singleton.h"
+#include "risa/common/Singleton.h"
 #include "risa/packages/risa/log/Log.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 #include <deque>
 #include <wx/datetime.h>
 #include <wx/file.h>

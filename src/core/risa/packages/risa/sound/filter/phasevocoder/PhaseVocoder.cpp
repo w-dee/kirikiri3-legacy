@@ -10,7 +10,7 @@
 //! @file
 //! @brief フェーズボコーダフィルタ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/filter/phasevocoder/Phasevocoder.h"
 #include "risa/packages/risa/sound/Sound.h"
 
@@ -284,7 +284,8 @@ void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tPhaseVocoderClass::tPhaseVocoderClass(tScriptEngine * engine) :
 	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(),
-		tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance())
+		tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
+			GetInitializer()->WaveFilterClass)
 {
 	RegisterMembers();
 }

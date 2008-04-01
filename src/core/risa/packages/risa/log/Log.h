@@ -13,9 +13,9 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-#include "base/utils/Singleton.h"
-#include "base/utils/RingBuffer.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/RingBuffer.h"
+#include "risa/common/RisaThread.h"
 #include <deque>
 #include <wx/datetime.h>
 

@@ -19,7 +19,7 @@
 #include "risa/packages/risa/sound/WaveDecoder.h"
 #include "risa/packages/risa/sound/WaveLoopManager.h"
 #include "risa/packages/risa/sound/WaveFilter.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include "risa/packages/risa/event/Event.h"
 
 

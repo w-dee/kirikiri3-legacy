@@ -10,10 +10,10 @@
 //! @file
 //! @brief Pathファイルシステムの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "base/fs/common/FSManager.h"
-#include "base/fs/pathfs/PathFS.h"
-#include "base/exception/RisaException.h"
+#include "risa/prec.h"
+#include "risa/common/FSManager.h"
+#include "risa/common/PathFS.h"
+#include "risa/common/RisaException.h"
 #include <algorithm>
 
 

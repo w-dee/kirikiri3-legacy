@@ -10,9 +10,9 @@
 //! @file
 //! @brief tmpfs の実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/fs/tmpfs/TmpFS.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 
 
 namespace Risa {
@@ -631,7 +631,8 @@ void tTmpFSInstance::load(const tVariant & filename)
 //---------------------------------------------------------------------------
 tTmpFSClass::tTmpFSClass(tScriptEngine * engine) :
 	tClassBase(tSS<'T','m','p','F','S'>(),
-		tRisseClassRegisterer<tFileSystemClass>::instance()->GetClassInstance())
+		tPackageInitializerRegisterer<tRisaFsPackageInitializer>::instance()->
+			GetInitializer()->FileSystemClass)
 {
 	MemoryStreamClass = new tMemoryStreamClass(engine);
 
@@ -681,6 +682,12 @@ tVariant tTmpFSClass::ovulate()
 	return tVariant(new tTmpFSInstance());
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

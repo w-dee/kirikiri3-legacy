@@ -19,8 +19,8 @@
 #include "risa/packages/risa/sound/ALBuffer.h"
 #include "risa/packages/risa/sound/WaveSegmentQueue.h"
 #include "risa/packages/risa/sound/WaveLoopManager.h"
-#include "base/utils/RisaThread.h"
-#include "base/utils/Singleton.h"
+#include "risa/common/RisaThread.h"
+#include "risa/common/Singleton.h"
 #include "risa/packages/risa/event/Event.h"
 #include "risse/include/risseNativeBinder.h"
 

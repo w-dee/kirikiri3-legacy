@@ -10,7 +10,7 @@
 //! @file
 //! @brief XP4FSのRisseバインディング
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4FSBind.h"
 #include "base/exception/RisaException.h"

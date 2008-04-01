@@ -15,11 +15,11 @@
 
 #include <deque>
 #include <boost/array.hpp>
-#include "base/utils/RisaThread.h"
-#include "base/utils/Singleton.h"
-#include "base/utils/PointerList.h"
-#include "base/script/RisseEngine.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaThread.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/PointerList.h"
+#include "risa/common/RisseEngine.h"
+#include "risa/common/RisaException.h"
 
 
 /* @note

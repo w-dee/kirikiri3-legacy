@@ -10,7 +10,7 @@
 //! @file
 //! @brief 基本的なWaveFilterの各機能の実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/filter/BasicWaveFilter.h"
 #include "risa/packages/risa/sound/WaveFormatConverter.h"
 #include "risa/packages/risa/sound/Sound.h"
@@ -400,34 +400,28 @@ tVariant tWaveFilterClass::ovulate()
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		risa.sound.filter パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaSoundFilterPackageInitializer : public tBuiltinPackageInitializer
+tRisaSoundFilterPackageInitializer::tRisaSoundFilterPackageInitializer(tScriptEngine * engine) :
+	tBuiltinPackageInitializer(
+		tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>())
 {
-public:
-	tWaveFilterClass * WaveFilterClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaSoundFilterPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>())
-	{
-		WaveFilterClass = new tWaveFilterClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		WaveFilterClass->RegisterInstance(global);
-	}
-};
+	WaveFilterClass = new tWaveFilterClass(engine);
+}
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRisaSoundFilterPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
+	const tVariant & global)
+{
+	WaveFilterClass->RegisterInstance(global);
+}
+//---------------------------------------------------------------------------
+
 
 
 

@@ -16,7 +16,7 @@
 #include <risa_gl/pixel_store.hpp>
 #include <risa_gl/pixel.hpp>
 #include "risa/packages/risa/graphic/image/PixelType.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

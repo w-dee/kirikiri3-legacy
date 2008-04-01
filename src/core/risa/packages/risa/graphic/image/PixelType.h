@@ -15,7 +15,7 @@
 
 #include <risa_gl/pixel_store.hpp>
 #include <risa_gl/pixel.hpp>
-#include "base/script/RisseEngine.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/risseModule.h"
 
 

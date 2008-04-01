@@ -10,9 +10,9 @@
 //! @file
 //! @brief BMP形式コーデック
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/codec/BMPcodec.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 
 
 namespace Risa {

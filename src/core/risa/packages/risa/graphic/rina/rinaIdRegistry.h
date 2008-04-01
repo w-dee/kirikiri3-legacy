@@ -15,8 +15,8 @@
 #ifndef RINAIDREGISTRY_H
 #define RINAIDREGISTRY_H
 
-#include "base/utils/Singleton.h"
-#include "base/utils/TypeCast.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/TypeCast.h"
 
 namespace Rina {
 //---------------------------------------------------------------------------

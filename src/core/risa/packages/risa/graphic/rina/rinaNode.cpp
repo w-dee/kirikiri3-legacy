@@ -12,7 +12,7 @@
 //! @file
 //! @brief RINA ノード管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "visual/rina/rinaNode.h"
 #include "visual/rina/rinaPin.h"
 

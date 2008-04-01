@@ -15,7 +15,7 @@
 
 
 #include "risa/packages/risa/sound/Wave.h"
-#include "base/utils/Singleton.h"
+#include "risa/common/Singleton.h"
 #include <map>
 
 namespace Risa {

@@ -10,7 +10,7 @@
 //! @file
 //! @brief XP4ファイルシステムで用いられるストリームクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4Archive.h"
 #include "base/fs/xp4fs/XP4Stream.h"

@@ -10,10 +10,10 @@
 //! @file
 //! @brief TLGエンコーダ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/codec/TLGEncoder.h"
 #include "risa/packages/risa/graphic/image/codec/TLGDecoder.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 
 
 

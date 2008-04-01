@@ -10,7 +10,7 @@
 //! @file
 //! @brief イメージコーデッククラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/ImageCodec.h"
 #include "risa/packages/risa/fs/FSManager.h"
 

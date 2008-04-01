@@ -12,9 +12,9 @@
 //! @file
 //! @brief RINA 接続グラフ管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "visual/rina/rinaGraph.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 
 
 namespace Rina {

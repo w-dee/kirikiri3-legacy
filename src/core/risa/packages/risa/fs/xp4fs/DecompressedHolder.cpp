@@ -10,7 +10,7 @@
 //! @file
 //! @brief 圧縮ブロックを展開された状態でメモリ上に保持するクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "base/fs/xp4fs/DecompressedHolder.h"
 #include "base/exception/RisaException.h"
 #include <zlib.h>

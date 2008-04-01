@@ -10,7 +10,7 @@
 //! @file
 //! @brief ピクセル形式関連
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risse/include/risseTypes.h"
 #include "risa/packages/risa/graphic/image/PixelType.h"
 

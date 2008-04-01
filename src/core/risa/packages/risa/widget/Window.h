@@ -13,9 +13,9 @@
 #ifndef WindowH
 #define WindowH
 
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include "risa/packages/risa/event/Event.h"
-#include "base/gc/RisaGC.h"
+#include "risa/common/RisaGC.h"
 
 
 namespace Risa {

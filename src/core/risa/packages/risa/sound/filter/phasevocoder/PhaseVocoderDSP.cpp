@@ -30,10 +30,10 @@
 			ソースあり。
 */
 
-#include "prec.h"
+#include "risa/prec.h"
 #include <math.h>
 #include "risa/packages/risa/sound/filter/phasevocoder/PhaseVocoderDSP.h"
-#include "base/mathlib/MathAlgorithms.h"
+#include "risa/common/MathAlgorithms.h"
 #include <string.h>
 
 namespace Risa {

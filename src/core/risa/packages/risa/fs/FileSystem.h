@@ -16,13 +16,13 @@
 #include <wx/file.h>
 #include <wx/datetime.h>
 #include "risse/include/risseHashTable.h"
-#include "base/utils/Singleton.h"
-#include "base/utils/RisaThread.h"
-#include "base/script/RisseEngine.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/RisaThread.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/risseString.h"
 #include "risse/include/risseStream.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

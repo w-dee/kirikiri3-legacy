@@ -10,7 +10,7 @@
 //! @file
 //! @brief ウィンドウクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/widget/Window.h"
 
 
@@ -306,7 +306,8 @@ public:
 //---------------------------------------------------------------------------
 tWindowClass::tWindowClass(tScriptEngine * engine) :
 	tClassBase(tSS<'W','i','n','d','o','w'>(),
-	tRisseClassRegisterer<tEventSourceClass>::instance()->GetClassInstance())
+	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
+		GetInitializer()->EventSourceClass)
 {
 	RegisterMembers();
 }

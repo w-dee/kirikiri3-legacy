@@ -10,7 +10,7 @@
 //! @file
 //! @brief Waveセグメント/イベントキュー管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/WaveSegmentQueue.h"
 
 

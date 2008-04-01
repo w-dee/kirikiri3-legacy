@@ -10,8 +10,8 @@
 //! @file
 //! @brief スタンダードIOとの入出力を行うクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "base/exception/RisaException.h"
+#include "risa/prec.h"
+#include "risa/common/RisaException.h"
 #include "risse/include/risseExceptionClass.h"
 #include "risa/packages/risa/stdio/StandardIO.h"
 

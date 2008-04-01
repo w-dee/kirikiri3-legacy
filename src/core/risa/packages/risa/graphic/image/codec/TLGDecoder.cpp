@@ -10,14 +10,14 @@
 //! @file
 //! @brief TLGデコーダ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/codec/TLGDecoder.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 #include <limits.h>
 
 
 #if defined(RISA_USE_MMX) || defined(RISA_USE_SSE)
-	#include "base/cpu/opt_sse/xmmlib.h"
+	#include "risa/common/opt_sse/xmmlib.h"
 #endif
 
 namespace Risa {

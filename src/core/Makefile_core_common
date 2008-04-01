@@ -5,7 +5,7 @@ include $(TOP_DIR)/Makefile_filenames
 # subsys.o のある(subsys.oが作成される)サブディレクトリの定義
 
 SUBSYS_DIRS=\
-	$(CORE_DIR)/base/config                       \
+	$(CORE_DIR)/risa/common                       \
 	$(CORE_DIR)/risa/packages/risa/sound          \
 	$(CORE_DIR)/risa/packages/risa/widget         \
 	$(CORE_DIR)/risa/packages/risa/event          \
@@ -13,14 +13,7 @@ SUBSYS_DIRS=\
 	$(CORE_DIR)/risa/packages/risa/log            \
 	$(CORE_DIR)/risa/packages/risa/graphic/image  \
 	$(CORE_DIR)/risa/packages/risa/stdio          \
-	$(ADDITONAL_SUBSYS_DIRS)                      \
-	$(CORE_DIR)/base/cpu                          \
-	$(CORE_DIR)/base/exception                    \
-	$(CORE_DIR)/base/mathlib                      \
-	$(CORE_DIR)/base/ui                           \
-	$(CORE_DIR)/base/utils                        \
-	$(CORE_DIR)/base/script                       \
-	$(CORE_DIR)/base/gc                           
+	$(ADDITONAL_SUBSYS_DIRS)                      
 
 # makefile のあるサブディレクトリの定義
 # (順番に注意)
@@ -28,7 +21,7 @@ SUBSYS_DIRS=\
 SUB_DIRS+=\
 	$(CORE_DIR)/risse              \
 	$(SUBSYS_DIRS)                 \
-	$(CORE_DIR)/main
+	$(CORE_DIR)/risa/main
 
 
 # このバイナリが依存しているライブラリ
@@ -38,7 +31,7 @@ DEP_LIBS=BOOST BOOST_THREAD ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON GC RISAGL LIB
 CXXFLAGS += -DBOOST_ENABLE_ASSERT_HANDLER
 
 # pre-compiled header 用ファイル
-PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/prec.h
+PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/risa/prec.h
 
 # risse を使うための設定
 include $(TOP_DIR)/src/core/risse/Makefile_for_user

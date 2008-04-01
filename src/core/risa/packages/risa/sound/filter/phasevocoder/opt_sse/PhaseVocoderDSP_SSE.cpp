@@ -14,9 +14,9 @@
 #include "risse/include/risseTypes.h"
 using namespace Risse;
 #include <math.h>
-#include "base/mathlib/MathAlgorithms.h"
+#include "risa/common/MathAlgorithms.h"
 #include "risa/packages/risa/sound/filter/phasevocoder/PhaseVocoderDSP.h"
-#include "base/mathlib/RealFFT.h"
+#include "risa/common/RealFFT.h"
 #include <string.h>
 
 

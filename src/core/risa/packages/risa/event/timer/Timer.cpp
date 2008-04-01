@@ -10,7 +10,7 @@
 //! @file
 //! @brief 高精度タイマーの実装
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/event/timer/Timer.h"
 #include "risa/packages/risa/event/TickCount.h"
 
@@ -549,7 +549,8 @@ public: // Risse 用メソッドとか
 //---------------------------------------------------------------------------
 tTimerClass::tTimerClass(tScriptEngine * engine) :
 	tClassBase(tSS<'T','i','m','e','r'>(),
-	tRisseClassRegisterer<tEventSourceClass>::instance()->GetClassInstance())
+	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
+		GetInitializer()->EventSourceClass)
 {
 	RegisterMembers();
 }

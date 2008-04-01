@@ -10,7 +10,7 @@
 //! @file
 //! @brief サウンドクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/Sound.h"
 #include "risa/packages/risa/sound/filter/BasicWaveFilter.h"
 #include "risse/include/risseStaticStrings.h"
@@ -178,7 +178,8 @@ void tSoundInstance::Open(const tString & filename)
 				{
 					tWaveFilterInstance * filter =
 							item.ExpectAndGetObjectInterafce<tWaveFilterInstance>(
-								tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance());
+							tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
+								GetInitializer()->WaveFilterClass);
 						filter->SetInput(last_filter);
 						last_filter = filter;
 				}
@@ -502,7 +503,8 @@ public:
 //---------------------------------------------------------------------------
 tSoundClass::tSoundClass(tScriptEngine * engine) :
 	tClassBase(tSS<'S','o','u','n','d'>(),
-	tRisseClassRegisterer<tEventSourceClass>::instance()->GetClassInstance())
+	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
+		GetInitializer()->EventSourceClass)
 {
 	RegisterMembers();
 }

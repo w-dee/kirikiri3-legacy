@@ -16,7 +16,7 @@
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/fs/tmpfs/MemoryStream.h"
 #include "risa/packages/risa/fs/FileSystem.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

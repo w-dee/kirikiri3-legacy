@@ -13,9 +13,9 @@
 #ifndef MemoryStreamH
 #define MemoryStreamH
 
-#include "base/utils/RisaThread.h"
+#include "risa/common/RisaThread.h"
 #include "risa/packages/risa/fs/FSManager.h"
-#include "base/gc/RisaGC.h"
+#include "risa/common/RisaGC.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

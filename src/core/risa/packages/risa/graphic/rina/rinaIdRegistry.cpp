@@ -12,7 +12,7 @@
 //! @file
 //! @brief RINA ID管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "visual/rina/rinaIdRegistry.h"
 
 

@@ -10,7 +10,7 @@
 //! @file
 //! @brief イメージクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/Image.h"
 #include "risa/packages/risa/graphic/image/ImageCodec.h"
 #include "risse/include/risseNativeBinder.h"

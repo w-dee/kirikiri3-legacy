@@ -10,7 +10,7 @@
 //! @file
 //! @brief リバーブフィルタの実装 (Freeverb)
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/filter/reverb/Reverb.h"
 
 
@@ -98,7 +98,8 @@ void tReverbInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tReverbClass::tReverbClass(tScriptEngine * engine) :
 	tClassBase(tSS<'R','e','v','e','r','b'>(),
-		tRisseClassRegisterer<tWaveFilterClass>::instance()->GetClassInstance())
+		tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
+			GetInitializer()->WaveFilterClass)
 {
 	RegisterMembers();
 }

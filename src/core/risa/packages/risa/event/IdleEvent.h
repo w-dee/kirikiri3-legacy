@@ -31,8 +31,8 @@
 
 
 #include "risa/packages/risa/event/Event.h"
-#include "base/utils/Singleton.h"
-#include "base/utils/PointerList.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/PointerList.h"
 #include <wx/timer.h>
 
 namespace Risa {

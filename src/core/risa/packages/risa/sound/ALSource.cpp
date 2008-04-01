@@ -10,14 +10,14 @@
 //! @file
 //! @brief OpenAL ソース管理
 //---------------------------------------------------------------------------
-#include "prec.h"
-#include "base/utils/Singleton.h"
+#include "risa/prec.h"
+#include "risa/common/Singleton.h"
 #include "risa/packages/risa/sound/ALSource.h"
-#include "base/utils/Singleton.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/RisaThread.h"
 #include "risa/packages/risa/event/TickCount.h"
 #include "risa/packages/risa/event/IdleEvent.h"
-#include "base/utils/PointerList.h"
+#include "risa/common/PointerList.h"
 #include "risa/packages/risa/sound/Sound.h"
 #include "risa/packages/risa/log/Log.h"
 

@@ -13,9 +13,9 @@
 #ifndef StandardIOH
 #define StandardIOH
 
-#include "base/utils/RisaThread.h"
-#include "base/gc/RisaGC.h"
-#include "base/script/RisseEngine.h"
+#include "risa/common/RisaThread.h"
+#include "risa/common/RisaGC.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
 #include "risse/include/risseClass.h"
 #include "risse/include/risseObjectClass.h"

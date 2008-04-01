@@ -10,7 +10,7 @@
 //! @file
 //! @brief TickCount を提供するモジュール
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/event/TickCount.h"
 
 

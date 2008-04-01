@@ -67,8 +67,8 @@
 */
 
 
-#include "base/utils/Singleton.h"
-#include "base/utils/RisaThread.h"
+#include "risa/common/Singleton.h"
+#include "risa/common/RisaThread.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

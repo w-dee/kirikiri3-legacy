@@ -10,7 +10,7 @@
 //! @file
 //! @brief PathFSのRisseバインディング
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "base/fs/pathfs/PathFS.h"
 #include "base/fs/pathfs/PathFSBind.h"
 #include "base/exception/RisaException.h"

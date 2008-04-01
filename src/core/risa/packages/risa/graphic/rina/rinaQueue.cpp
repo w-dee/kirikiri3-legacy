@@ -12,7 +12,7 @@
 //! @file
 //! @brief RINA コマンドキュー管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "visual/rina/rinaQueue.h"
 #include "visual/rina/rinaPin.h"
 #include "visual/rina/rinaGraph.h"

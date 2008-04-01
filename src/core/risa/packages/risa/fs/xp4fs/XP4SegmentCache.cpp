@@ -15,7 +15,7 @@
 	機構によりメモリ上にキャッシュされる
 */
 
-#include "prec.h"
+#include "risa/prec.h"
 #include "risse/include/risseUtils.h"
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4Archive.h"

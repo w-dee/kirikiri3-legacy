@@ -10,7 +10,7 @@
 //! @file
 //! @brief イメージバッファクラス
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/graphic/image/ImageBuffer.h"
 #include "risa/packages/risa/log/Log.h"
 

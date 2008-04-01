@@ -10,7 +10,7 @@
 //! @file
 //! @brief ログファイル
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/log/Log.h"
 #include "risa/packages/risa/log/LogFile.h"
 

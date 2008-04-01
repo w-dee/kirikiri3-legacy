@@ -10,9 +10,9 @@
 //! @file
 //! @brief ログ管理
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/log/Log.h"
-#include "base/script/RisseEngine.h"
+#include "risa/common/RisseEngine.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(53503,8125,25269,17586,20367,40881,26023,16793);

@@ -10,10 +10,10 @@
 //! @file
 //! @brief PNG形式コーデック
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include <png.h>
 #include "risa/packages/risa/graphic/image/codec/PNGCodec.h"
-#include "base/exception/RisaException.h"
+#include "risa/common/RisaException.h"
 
 
 namespace Risa {

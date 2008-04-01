@@ -10,7 +10,7 @@
 //! @file
 //! @brief RIFF Wave デコーダ
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/decoder/riffwave/RIFFWaveDecoder.h"
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/sound/Sound.h"

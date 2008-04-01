@@ -16,7 +16,7 @@
 #include "risa/packages/risa/graphic/image/Image.h"
 #include "risse/include/risseDictionaryClass.h"
 #include "risse/include/builtin/stream/risseStreamClass.h"
-#include "base/utils/ProgressCallback.h"
+#include "risa/common/ProgressCallback.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

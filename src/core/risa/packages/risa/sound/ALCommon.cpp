@@ -10,7 +10,7 @@
 //! @file
 //! @brief OpenAL 共通
 //---------------------------------------------------------------------------
-#include "prec.h"
+#include "risa/prec.h"
 #include "risa/packages/risa/sound/WaveDecoder.h"
 #include "risa/packages/risa/sound/ALCommon.h"
 #include "risa/packages/risa/sound/Sound.h"

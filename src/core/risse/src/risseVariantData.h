@@ -43,12 +43,12 @@ tString, tObject, tOctetとして扱われるが、データメンバのレイ
 んでいることになる。また、0x100 未満のような極端に低い番地にこれらのポインタ
 が配置されることはあり得ない。
 
-そのため、tVariant::GetType() を見ればわかるとおり、Type が 4 以上
-ならば下位2ビット+4を Type とし、4 未満ならばそれをそのまま Type として返
-している。ここら辺は ruby の実装からヒントを得た物。
+そのため、tVariant::GetType() を見ればわかるとおり、ポインタの値が 9 未満な
+らばそそれをそのまま Type として扱い、そうでなければ下位2ビットを Type とし
+て扱っている。ここら辺は ruby の実装からヒントを得た物。
 
-tString, tVariantBlock::tObject, tOctet 内にある各の「本当
-の」ポインタを選るには、~0x03 との bit and をとればよい。
+tString, tVariantBlock::tObject, tOctet 内にある各の「本当の」ポインタを選る
+には、~0x03 との bit and をとればよい。
 
 tString の内部ポインタが指し示している場所は、文字列を保持しているバッ
 ファである。RisseではUTF-32文字列を対象とするため、このポインタが 32bit境界

@@ -91,14 +91,14 @@ tClassBase::tClassBase(tScriptEngine * engine)
 
 	// members に members 用オブジェクトを作成して登録する
 	tVariant members = tModuleClass::CreateMembersObject(
-					engine, tVariant((tClassBase*)NULL));
+					engine, tVariant::GetNullObject());
 	RegisterNormalMember(ss_members, members);
 
 	// クラスに必要なメソッドを登録する
 	RegisterMembers();
 
 	// super を登録
-	RegisterNormalMember(ss_super, tVariant((tClassBase*)NULL));
+	RegisterNormalMember(ss_super, tVariant::GetNullObject());
 
 	// this の prototype に members を設定
 	RegisterNormalMember(ss_prototype, members);

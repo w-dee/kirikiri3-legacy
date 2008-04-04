@@ -70,7 +70,7 @@ tVariant tModuleClass::ovulate(const tNativeCallInfo &info)
 
 	// new_base_object に members を登録する
 	tVariant members = tModuleClass::CreateMembersObject(
-					info.engine, tVariant((tClassBase*)NULL));
+					info.engine, tVariant::GetNullObject());
 	new_base_object->RegisterNormalMember(ss_members, members);
 
 	return tVariant((tObjectInterface*)new_base_object);

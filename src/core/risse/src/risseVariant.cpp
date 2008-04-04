@@ -123,18 +123,43 @@ tVariantBlock::tStaticObject tVariantBlock::DynamicContext = {
 
 
 //---------------------------------------------------------------------------
+// SetTypeTag で用いる vtData 用の tIdentifyObject インスタンス
+static tIdentifyObject DummyDataClass;
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tScriptEngine * tVariantBlock::GetScriptEngine_Data() const
+{
+	RISSE_ASSERT(GetType() == vtData);
+	return GetDataClassInstance()->GetRTTI()->GetScriptEngine();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tScriptEngine * tVariantBlock::GetScriptEngine_Object() const
+{
+	RISSE_ASSERT(GetType() == vtObject);
+	return GetObjectInterface()->GetRTTI()->GetScriptEngine();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 const risse_char * tVariantBlock::GetTypeString(tType type)
 {
 	switch(type)
 	{
-	case vtVoid:		return RISSE_WS("void");
-	case vtInteger:		return RISSE_WS("integer");
-	case vtReal:		return RISSE_WS("real");
-	case vtNull:		return RISSE_WS("null");
-	case vtString:		return RISSE_WS("string");
-	case vtObject:		return RISSE_WS("object");
-	case vtBoolean:		return RISSE_WS("boolean");
-	case vtOctet:		return RISSE_WS("octet");
+	case vtVoid:		return ss_void.c_str();
+	case vtInteger:		return ss_integer.c_str();
+	case vtReal:		return ss_real.c_str();
+	case vtNull:		return ss_null.c_str();
+	case vtBoolean:		return ss_boolean.c_str();
+	case vtString:		return ss_string.c_str();
+	case vtObject:		return ss_object.c_str();
+	case vtData:		return ss_data.c_str();
+	case vtOctet:		return ss_octet.c_str();
 	}
 	return NULL;
 }
@@ -150,10 +175,13 @@ void tVariantBlock::SetTypeTag(tType type)
 	case vtInteger:		*this = (risse_int64)0;				RISSE_ASSERT(GetType()==vtInteger); return;
 	case vtReal:		*this = (risse_real)0.0;			RISSE_ASSERT(GetType()==vtReal);    return;
 	case vtNull:		Nullize();							RISSE_ASSERT(GetType()==vtNull);    return;
-	case vtString:		*this = tString::GetEmptyString();	RISSE_ASSERT(GetType()==vtString);  return;
-	case vtObject:		*this = *GetDynamicContext();		RISSE_ASSERT(GetType()==vtObject);  return;
 	case vtBoolean:		*this = false;						RISSE_ASSERT(GetType()==vtBoolean); return;
+	case vtString:		*this = tString::GetEmptyString();	RISSE_ASSERT(GetType()==vtString);  return;
 	case vtOctet:		*this = tOctet();					RISSE_ASSERT(GetType()==vtOctet);   return;
+	case vtData:		*this =
+		tVariant(static_cast<tPrimitiveClassBase*>(static_cast<void*>(&DummyDataClass)), (void*)NULL);
+															RISSE_ASSERT(GetType()==vtData);    return;
+	case vtObject:		*this = *GetDynamicContext();		RISSE_ASSERT(GetType()==vtObject);  return;
 	}
 	return;
 }
@@ -165,14 +193,15 @@ const risse_char * tVariantBlock::GetGuessTypeString(tGuessType type)
 {
 	switch(type)
 	{
-	case gtVoid:		return RISSE_WS("Void");
-	case gtInteger: 	return RISSE_WS("Integer");
-	case gtReal:		return RISSE_WS("Real");
-	case gtNull:		return RISSE_WS("Null");
-	case gtString:		return RISSE_WS("String");
-	case gtOctet:		return RISSE_WS("Object");
-	case gtBoolean:		return RISSE_WS("Boolean");
-	case gtObject:		return RISSE_WS("Octet");
+	case gtVoid:		return ss_Void.c_str();
+	case gtInteger: 	return ss_Integer.c_str();
+	case gtReal:		return ss_Real.c_str();
+	case gtNull:		return ss_Null.c_str();
+	case gtBoolean:		return ss_Boolean.c_str();
+	case gtString:		return ss_String.c_str();
+	case gtOctet:		return ss_Object.c_str();
+	case gtData:		return ss_Data.c_str();
+	case gtObject:		return ss_Octet.c_str();
 
 	case gtAny:
 		return RISSE_WS("any");
@@ -197,6 +226,7 @@ inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * en
 	case vtBoolean:	Class = engine->BooleanClass; break;
 	case vtString:	Class = engine->StringClass; break;
 	case vtOctet:	Class = engine->OctetClass; break;
+	case vtData:	Class = GetDataClassInstance(); break;
 	default:		break;
 	}
 	RISSE_ASSERT(Class != NULL);
@@ -235,9 +265,10 @@ tVariantBlock::tRetValue
 	case vtInteger:
 	case vtReal:
 	case vtNull:
+	case vtBoolean:
 	case vtString:
 	case vtOctet:
-	case vtBoolean:
+	case vtData:
 		// プリミティブ型に対する処理
 		{
 			tRetValue rv = GetPrimitiveClass(engine)->GetGateway().
@@ -250,13 +281,15 @@ tVariantBlock::tRetValue
 			{
 				// コンテキストを設定する
 				// コンテキストはこの操作が実行された時の状態を保っていなければ
-				// ならない。プリミティブ型は immutable とはいえ、内部実装は
+				// ならない。たいていのプリミティブ型は immutable とはいえ、内部実装は
 				// 完全に mutable なので、この時点での実行結果を保存しておくために
 				// new でオブジェクトを再確保し、固定する。
 				// TODO: 返りのオブジェクトがコンテキストを持ってないと、毎回newが行われて
 				// しまう。関数やプロパティ以外はコンテキストを伴う必要はないので
 				// 努めて関数やプロパティ以外はダミーでもよいからコンテキストを
 				// 設定するようにするべき。
+				// TODO: Data 型の場合ってこれ必要？Data型の場合は Object と同じく mutable
+				// だけれども………
 				if(!result->HasContext() && !(flags & tOperateFlags::ofUseClassMembersRule))
 					result->SetContext(new tVariantBlock(*this));
 			}
@@ -387,9 +420,10 @@ void tVariantBlock::FuncCall(tScriptEngine * engine, tVariantBlock * ret, risse_
 	case vtInteger:
 	case vtReal:
 	case vtNull:
+	case vtBoolean:
 	case vtString:
 	case vtOctet:
-	case vtBoolean:
+	case vtData:
 		FuncCall_Primitive(engine, ret, tString::GetEmptyString(), flags, args, This); return;
 	case vtObject:
 		FuncCall_Object   (        ret, tString::GetEmptyString(), flags, args, This); return;
@@ -567,9 +601,10 @@ tVariantBlock tVariantBlock::BitOr_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return rhs.CastToInteger_Integer(); // void | integer
 	case vtReal:	return rhs.CastToInteger_Real(); // void | real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
 	return tVariantBlock();
@@ -586,9 +621,10 @@ int tVariantBlock::GuessTypeBitOr_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -607,9 +643,10 @@ tVariantBlock tVariantBlock::BitOr_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() | rhs.CastToInteger_Integer(); // integer | integer
 	case vtReal:	return AsInteger() | rhs.CastToInteger_Real(); // integer | real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
 	return tVariantBlock();
@@ -626,9 +663,10 @@ int tVariantBlock::GuessTypeBitOr_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -647,9 +685,10 @@ tVariantBlock tVariantBlock::BitOr_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Real() | rhs.CastToInteger_Integer(); // real | integer
 	case vtReal:	return CastToInteger_Real() | rhs.CastToInteger_Real(); // real | real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
 	return tVariantBlock();
@@ -666,9 +705,10 @@ int tVariantBlock::GuessTypeBitOr_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -695,9 +735,10 @@ int tVariantBlock::GuessTypeBitOr_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -716,9 +757,10 @@ tVariantBlock tVariantBlock::BitOr_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
@@ -736,9 +778,10 @@ int tVariantBlock::GuessTypeBitOr_String     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -757,9 +800,10 @@ tVariantBlock tVariantBlock::BitOr_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
@@ -777,9 +821,10 @@ int tVariantBlock::GuessTypeBitOr_Octet     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -798,9 +843,10 @@ tVariantBlock tVariantBlock::BitOr_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
@@ -818,9 +864,10 @@ int tVariantBlock::GuessTypeBitOr_Boolean     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -839,9 +886,10 @@ tVariantBlock tVariantBlock::BitXor_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return rhs.CastToInteger_Integer(); // void ^ integer
 	case vtReal:	return rhs.CastToInteger_Real(); // void ^ real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
 	return tVariantBlock();
@@ -858,9 +906,10 @@ int tVariantBlock::GuessTypeBitXor_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -879,9 +928,10 @@ tVariantBlock tVariantBlock::BitXor_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() ^ rhs.CastToInteger_Integer(); // integer ^ integer
 	case vtReal:	return AsInteger() ^ rhs.CastToInteger_Real(); // integer ^ real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
 	return tVariantBlock();
@@ -898,9 +948,10 @@ int tVariantBlock::GuessTypeBitXor_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -919,9 +970,10 @@ tVariantBlock tVariantBlock::BitXor_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Real() ^ rhs.CastToInteger_Integer(); // real | integer
 	case vtReal:	return CastToInteger_Real() ^ rhs.CastToInteger_Real(); // real | real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
 	return tVariantBlock();
@@ -938,9 +990,10 @@ int tVariantBlock::GuessTypeBitXor_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -967,9 +1020,10 @@ int tVariantBlock::GuessTypeBitXor_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -988,9 +1042,10 @@ tVariantBlock tVariantBlock::BitXor_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
@@ -1008,9 +1063,10 @@ int tVariantBlock::GuessTypeBitXor_String     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1029,9 +1085,10 @@ tVariantBlock tVariantBlock::BitXor_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
@@ -1049,9 +1106,10 @@ int tVariantBlock::GuessTypeBitXor_Octet     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1070,9 +1128,10 @@ tVariantBlock tVariantBlock::BitXor_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
@@ -1090,9 +1149,10 @@ int tVariantBlock::GuessTypeBitXor_Boolean     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1111,9 +1171,10 @@ tVariantBlock tVariantBlock::BitAnd_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_int64)0; // void & integer
 	case vtReal:	return (risse_int64)0; // void & real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
 	return tVariantBlock();
@@ -1130,9 +1191,10 @@ int tVariantBlock::GuessTypeBitAnd_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -1151,9 +1213,10 @@ tVariantBlock tVariantBlock::BitAnd_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() & rhs.CastToInteger_Integer(); // integer & integer
 	case vtReal:	return AsInteger() & rhs.CastToInteger_Real(); // integer & real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
 	return tVariantBlock();
@@ -1170,9 +1233,10 @@ int tVariantBlock::GuessTypeBitAnd_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -1191,9 +1255,10 @@ tVariantBlock tVariantBlock::BitAnd_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Real() & rhs.CastToInteger_Integer(); // real & integer
 	case vtReal:	return CastToInteger_Real() & rhs.CastToInteger_Real(); // real & real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
 	return tVariantBlock();
@@ -1210,9 +1275,10 @@ int tVariantBlock::GuessTypeBitAnd_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -1239,9 +1305,10 @@ int tVariantBlock::GuessTypeBitAnd_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1260,9 +1327,10 @@ tVariantBlock tVariantBlock::BitAnd_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
@@ -1280,9 +1348,10 @@ int tVariantBlock::GuessTypeBitAnd_String     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1304,6 +1373,7 @@ tVariantBlock tVariantBlock::BitAnd_Octet    (const tVariantBlock & rhs) const
 	case vtString:
 	case vtBoolean:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
@@ -1321,9 +1391,10 @@ int tVariantBlock::GuessTypeBitAnd_Octet     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1342,9 +1413,10 @@ tVariantBlock tVariantBlock::BitAnd_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
@@ -1362,9 +1434,10 @@ int tVariantBlock::GuessTypeBitAnd_Boolean     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1383,9 +1456,10 @@ bool tVariantBlock::Equal_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Void() == rhs.AsInteger();
 	case vtReal:	return CastToReal_Void()    == rhs.AsReal();
 	case vtNull:	return false; // void == null
+	case vtBoolean:	return CastToBoolean_Void() == rhs.CastToBoolean_Boolean();
 	case vtString:	return rhs.AsString().IsEmpty();
 	case vtOctet:	return rhs.AsOctet().IsEmpty();
-	case vtBoolean:	return CastToBoolean_Void() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1402,9 +1476,10 @@ bool tVariantBlock::Equal_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() == rhs.AsInteger();
 	case vtReal:	return AsInteger() == rhs.AsReal();
 	case vtNull:	return false; // 数値とnullの比較は常に偽
+	case vtBoolean:	return CastToBoolean_Integer() == rhs.CastToBoolean_Boolean();
 	case vtString:	return AsInteger() == rhs.CastToInteger_String();
 	case vtOctet:	return false; // 数値とoctetの比較は常に偽
-	case vtBoolean:	return CastToBoolean_Integer() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1421,9 +1496,10 @@ bool tVariantBlock::Equal_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() == rhs.AsInteger();
 	case vtReal:	return AsReal() == rhs.AsReal();
 	case vtNull:	return false; // 数値とnullの比較は常に偽
+	case vtBoolean:	return CastToBoolean_Real() == rhs.CastToBoolean_Boolean();
 	case vtString:	return AsReal() == rhs.CastToReal_String();
 	case vtOctet:	return false; // 数値とoctetの比較は常に偽
-	case vtBoolean:	return CastToBoolean_Real() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1440,9 +1516,10 @@ bool tVariantBlock::Equal_Null     (const tVariantBlock & rhs) const
 	case vtInteger:	return false;
 	case vtReal:	return false;
 	case vtNull:	return true;
+	case vtBoolean:	return rhs.CastToBoolean_Boolean() == false; // 偽とnullの比較は真
 	case vtString:	return false;
 	case vtOctet:	return false;
-	case vtBoolean:	return rhs.CastToBoolean_Boolean() == false; // 偽とnullの比較は真
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1459,9 +1536,10 @@ bool tVariantBlock::Equal_String   (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_String() == rhs.AsInteger();
 	case vtReal:	return CastToReal_String() == rhs.AsReal();
 	case vtNull:	return false; // 文字列と null の比較は常に偽
+	case vtBoolean:	return CastToBoolean_String() == rhs.CastToBoolean_Boolean();
 	case vtString:	return AsString() == rhs.AsString();
 	case vtOctet:	return false; // 文字列とoctetの比較は常に偽
-	case vtBoolean:	return CastToBoolean_String() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1478,9 +1556,10 @@ bool tVariantBlock::Equal_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	return false; // オクテット列と integer の比較は常に偽
 	case vtReal:	return false; // オクテット列と real の比較は常に偽
 	case vtNull:	return false; // オクテット列と null の比較は常に偽
+	case vtBoolean:	return CastToBoolean_Octet() == rhs.CastToBoolean_Boolean();
 	case vtString:	return false; // オクテット列と string の比較は常に偽
 	case vtOctet:	return AsOctet() == rhs.AsOctet();
-	case vtBoolean:	return CastToBoolean_Octet() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1497,9 +1576,10 @@ bool tVariantBlock::Equal_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToBoolean_Boolean() == rhs.AsInteger();
 	case vtReal:	return CastToBoolean_Boolean() == rhs.AsReal();
 	case vtNull:	return CastToBoolean_Boolean() == false; // false と null の比較ならば真
+	case vtBoolean:	return CastToBoolean_Boolean() == rhs.CastToBoolean_Boolean();
 	case vtString:	return CastToBoolean_Boolean() == rhs.CastToBoolean_String();
 	case vtOctet:	return CastToBoolean_Boolean() == rhs.CastToBoolean_Octet();
-	case vtBoolean:	return CastToBoolean_Boolean() == rhs.CastToBoolean_Boolean();
+	case vtData:	return false; // incomplete; 交換法則を成り立たせるかも
 	case vtObject:	return false; // incomplete; 交換法則を成り立たせるかも
 	}
 	return false;
@@ -1534,6 +1614,14 @@ bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
+bool tVariantBlock::Identify_Data   (const tVariantBlock & rhs) const
+{
+	return Invoke_Primitive(GetScriptEngine_Data(), ss_identify, rhs).CastToBoolean();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 bool tVariantBlock::Identify_Object   (const tVariantBlock & rhs) const
 {
 	return Invoke_Object(ss_identify, rhs).CastToBoolean();
@@ -1550,9 +1638,10 @@ bool tVariantBlock::Lesser_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Void() < rhs.AsInteger();
 	case vtReal:	return CastToReal_Void()    < rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	return !rhs.AsString().IsEmpty();
 	case vtOctet:	return !rhs.AsOctet().IsEmpty();
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1569,9 +1658,10 @@ int tVariantBlock::GuessTypeLesser_Void     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtBoolean;
 	case gtOctet:		return gtBoolean;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1590,9 +1680,10 @@ bool tVariantBlock::Lesser_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() < rhs.AsInteger();
 	case vtReal:	return AsInteger() < rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1609,9 +1700,10 @@ int tVariantBlock::GuessTypeLesser_Integer     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1630,9 +1722,10 @@ bool tVariantBlock::Lesser_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() < rhs.AsInteger();
 	case vtReal:	return AsReal() < rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1649,9 +1742,10 @@ int tVariantBlock::GuessTypeLesser_Real     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1678,9 +1772,10 @@ int tVariantBlock::GuessTypeLesser_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1699,9 +1794,10 @@ bool tVariantBlock::Lesser_String   (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	return AsString() < rhs.AsString();
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1718,9 +1814,10 @@ int tVariantBlock::GuessTypeLesser_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtBoolean;
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1739,9 +1836,10 @@ bool tVariantBlock::Lesser_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtOctet:	return AsOctet() < rhs.AsOctet();
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1758,9 +1856,10 @@ int tVariantBlock::GuessTypeLesser_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtBoolean;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1779,9 +1878,10 @@ bool tVariantBlock::Lesser_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 	}
 	return false;
@@ -1798,9 +1898,10 @@ int tVariantBlock::GuessTypeLesser_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1819,9 +1920,10 @@ bool tVariantBlock::Greater_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Void() > rhs.AsInteger();
 	case vtReal:	return CastToReal_Void()    > rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	return false;
 	case vtOctet:	return false;
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -1838,9 +1940,10 @@ int tVariantBlock::GuessTypeGreater_Void     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtBoolean;
 	case gtOctet:		return gtBoolean;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1859,9 +1962,10 @@ bool tVariantBlock::Greater_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() > rhs.AsInteger();
 	case vtReal:	return AsInteger() > rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -1878,9 +1982,10 @@ int tVariantBlock::GuessTypeGreater_Integer     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1899,9 +2004,10 @@ bool tVariantBlock::Greater_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() > rhs.AsInteger();
 	case vtReal:	return AsReal() > rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -1918,9 +2024,10 @@ int tVariantBlock::GuessTypeGreater_Real     (tGuessType r)
 	case gtInteger:		return gtBoolean;
 	case gtReal:		return gtBoolean;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -1947,9 +2054,10 @@ int tVariantBlock::GuessTypeGreater_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -1968,9 +2076,10 @@ bool tVariantBlock::Greater_String   (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	return AsString() > rhs.AsString();
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -1987,9 +2096,10 @@ int tVariantBlock::GuessTypeGreater_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtBoolean;
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -2008,9 +2118,10 @@ bool tVariantBlock::Greater_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtOctet:	return AsOctet() > rhs.AsOctet();
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -2027,9 +2138,10 @@ int tVariantBlock::GuessTypeGreater_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtBoolean;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtBoolean|gtEffective;
 
@@ -2048,9 +2160,10 @@ bool tVariantBlock::Greater_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 	}
 	return false;
@@ -2067,9 +2180,10 @@ int tVariantBlock::GuessTypeGreater_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2088,9 +2202,10 @@ bool tVariantBlock::LesserOrEqual_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return !(CastToInteger_Void() > rhs.AsInteger());
 	case vtReal:	return !(CastToReal_Void()    > rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	return !false;
 	case vtOctet:	return !false;
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2107,9 +2222,10 @@ bool tVariantBlock::LesserOrEqual_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return !(AsInteger() > rhs.AsInteger());
 	case vtReal:	return !(AsInteger() > rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2126,9 +2242,10 @@ bool tVariantBlock::LesserOrEqual_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return !(AsReal() > rhs.AsInteger());
 	case vtReal:	return !(AsReal() > rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2153,9 +2270,10 @@ bool tVariantBlock::LesserOrEqual_String   (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	return !(AsString() > rhs.AsString());
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2172,9 +2290,10 @@ bool tVariantBlock::LesserOrEqual_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtOctet:	return !(AsOctet() > rhs.AsOctet());
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2191,9 +2310,10 @@ bool tVariantBlock::LesserOrEqual_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 	}
 	return false;
@@ -2210,9 +2330,10 @@ bool tVariantBlock::GreaterOrEqual_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return !(CastToInteger_Void() < rhs.AsInteger());
 	case vtReal:	return !(CastToReal_Void()    < rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	return !(!rhs.AsString().IsEmpty());
 	case vtOctet:	return !(!rhs.AsOctet().IsEmpty());
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2229,9 +2350,10 @@ bool tVariantBlock::GreaterOrEqual_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return !(AsInteger() < rhs.AsInteger());
 	case vtReal:	return !(AsInteger() < rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2248,9 +2370,10 @@ bool tVariantBlock::GreaterOrEqual_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return !(AsReal() < rhs.AsInteger());
 	case vtReal:	return !(AsReal() < rhs.AsReal());
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2275,9 +2398,10 @@ bool tVariantBlock::GreaterOrEqual_String   (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	return !(AsString() < rhs.AsString());
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2294,9 +2418,10 @@ bool tVariantBlock::GreaterOrEqual_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtOctet:	return !(AsOctet() < rhs.AsOctet());
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2313,9 +2438,10 @@ bool tVariantBlock::GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 	}
 	return false;
@@ -2332,9 +2458,10 @@ tVariantBlock tVariantBlock::RBitShift_Void     (const tVariantBlock & rhs) cons
 	case vtInteger:	return (risse_int64)0; // void >>> integer
 	case vtReal:	return (risse_int64)0; // void >>> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
 	return tVariantBlock();
@@ -2351,9 +2478,10 @@ int tVariantBlock::GuessTypeRBitShift_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2372,9 +2500,10 @@ tVariantBlock tVariantBlock::RBitShift_Integer  (const tVariantBlock & rhs) cons
 	case vtInteger:	return (risse_int64)((risse_uint64)AsInteger() >> rhs.CastToInteger_Integer()); // integer >>> integer
 	case vtReal:	return (risse_int64)((risse_uint64)AsInteger() >> rhs.CastToInteger_Real()); // integer >>> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
 	return tVariantBlock();
@@ -2391,9 +2520,10 @@ int tVariantBlock::GuessTypeRBitShift_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2412,9 +2542,10 @@ tVariantBlock tVariantBlock::RBitShift_Real     (const tVariantBlock & rhs) cons
 	case vtInteger:	return (risse_int64)((risse_uint64)CastToInteger_Real() >> rhs.CastToInteger_Integer()); // real >>> integer
 	case vtReal:	return (risse_int64)((risse_uint64)CastToInteger_Real() >> rhs.CastToInteger_Real()); // real >>> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
 	return tVariantBlock();
@@ -2431,9 +2562,10 @@ int tVariantBlock::GuessTypeRBitShift_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2460,9 +2592,10 @@ int tVariantBlock::GuessTypeRBitShift_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2481,9 +2614,10 @@ tVariantBlock tVariantBlock::RBitShift_String   (const tVariantBlock & rhs) cons
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
@@ -2501,9 +2635,10 @@ int tVariantBlock::GuessTypeRBitShift_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2522,9 +2657,10 @@ tVariantBlock tVariantBlock::RBitShift_Octet    (const tVariantBlock & rhs) cons
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
@@ -2542,9 +2678,10 @@ int tVariantBlock::GuessTypeRBitShift_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2563,9 +2700,10 @@ tVariantBlock tVariantBlock::RBitShift_Boolean  (const tVariantBlock & rhs) cons
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
@@ -2583,9 +2721,10 @@ int tVariantBlock::GuessTypeRBitShift_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2604,9 +2743,10 @@ tVariantBlock tVariantBlock::LShift_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_int64)0; // void << integer
 	case vtReal:	return (risse_int64)0; // void << real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
 	return tVariantBlock();
@@ -2623,9 +2763,10 @@ int tVariantBlock::GuessTypeLShift_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2644,9 +2785,10 @@ tVariantBlock tVariantBlock::LShift_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() << rhs.CastToInteger_Integer(); // integer << integer
 	case vtReal:	return AsInteger() << rhs.CastToInteger_Real(); // integer << real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
 	return tVariantBlock();
@@ -2663,9 +2805,10 @@ int tVariantBlock::GuessTypeLShift_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2684,9 +2827,10 @@ tVariantBlock tVariantBlock::LShift_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Real() << rhs.CastToInteger_Integer(); // real << integer
 	case vtReal:	return CastToInteger_Real() << rhs.CastToInteger_Real(); // real << real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
 	return tVariantBlock();
@@ -2703,9 +2847,10 @@ int tVariantBlock::GuessTypeLShift_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2732,9 +2877,10 @@ int tVariantBlock::GuessTypeLShift_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2753,9 +2899,10 @@ tVariantBlock tVariantBlock::LShift_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
@@ -2773,9 +2920,10 @@ int tVariantBlock::GuessTypeLShift_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2794,9 +2942,10 @@ tVariantBlock tVariantBlock::LShift_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
@@ -2814,9 +2963,10 @@ int tVariantBlock::GuessTypeLShift_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2835,9 +2985,10 @@ tVariantBlock tVariantBlock::LShift_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
@@ -2855,9 +3006,10 @@ int tVariantBlock::GuessTypeLShift_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -2876,9 +3028,10 @@ tVariantBlock tVariantBlock::RShift_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_int64)0; // void >> integer
 	case vtReal:	return (risse_int64)0; // void >> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
 	return tVariantBlock();
@@ -2895,9 +3048,10 @@ int tVariantBlock::GuessTypeRShift_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2916,9 +3070,10 @@ tVariantBlock tVariantBlock::RShift_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() >> rhs.CastToInteger_Integer(); // integer >> integer
 	case vtReal:	return AsInteger() >> rhs.CastToInteger_Real(); // integer >> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
 	return tVariantBlock();
@@ -2935,9 +3090,10 @@ int tVariantBlock::GuessTypeRShift_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -2956,9 +3112,10 @@ tVariantBlock tVariantBlock::RShift_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return CastToInteger_Real() >> rhs.CastToInteger_Integer(); // real >> integer
 	case vtReal:	return CastToInteger_Real() >> rhs.CastToInteger_Real(); // real >> real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
 	return tVariantBlock();
@@ -2975,9 +3132,10 @@ int tVariantBlock::GuessTypeRShift_Real     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3004,9 +3162,10 @@ int tVariantBlock::GuessTypeRShift_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3025,9 +3184,10 @@ tVariantBlock tVariantBlock::RShift_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
@@ -3045,9 +3205,10 @@ int tVariantBlock::GuessTypeRShift_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3066,9 +3227,10 @@ tVariantBlock tVariantBlock::RShift_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
@@ -3086,9 +3248,10 @@ int tVariantBlock::GuessTypeRShift_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3107,9 +3270,10 @@ tVariantBlock tVariantBlock::RShift_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
@@ -3127,9 +3291,10 @@ int tVariantBlock::GuessTypeRShift_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3149,9 +3314,10 @@ tVariantBlock tVariantBlock::Mod_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
 	return tVariantBlock();
@@ -3172,9 +3338,10 @@ int tVariantBlock::GuessTypeMod_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtInteger;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3194,9 +3361,10 @@ tVariantBlock tVariantBlock::Mod_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
 	return tVariantBlock();
@@ -3217,9 +3385,10 @@ int tVariantBlock::GuessTypeMod_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtReal:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3239,9 +3408,10 @@ tVariantBlock tVariantBlock::Mod_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();			goto do_div;
 	case vtReal:	rhs_value = (risse_int64)rhs.AsReal();	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
 	return tVariantBlock();
@@ -3262,9 +3432,10 @@ int tVariantBlock::GuessTypeMod_Real     (tGuessType r)
 	case gtInteger:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtReal:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3291,9 +3462,10 @@ int tVariantBlock::GuessTypeMod_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3312,9 +3484,10 @@ tVariantBlock tVariantBlock::Mod_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
@@ -3332,9 +3505,10 @@ int tVariantBlock::GuessTypeMod_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3353,9 +3527,10 @@ tVariantBlock tVariantBlock::Mod_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
@@ -3373,9 +3548,10 @@ int tVariantBlock::GuessTypeMod_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3394,9 +3570,10 @@ tVariantBlock tVariantBlock::Mod_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
@@ -3414,9 +3591,10 @@ int tVariantBlock::GuessTypeMod_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3435,9 +3613,10 @@ tVariantBlock tVariantBlock::Div_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_real)0.0 / rhs.AsInteger(); // void / integer
 	case vtReal:	return (risse_real)0.0 / rhs.AsReal(); // void / real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
 	return tVariantBlock();
@@ -3454,9 +3633,10 @@ int tVariantBlock::GuessTypeDiv_Void     (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtReal|gtEffective;
 
@@ -3475,9 +3655,10 @@ tVariantBlock tVariantBlock::Div_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_real)AsInteger() / rhs.AsInteger(); // integer / integer
 	case vtReal:	return (risse_real)AsInteger() / rhs.AsReal(); // integer / real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
 	return tVariantBlock();
@@ -3494,9 +3675,10 @@ int tVariantBlock::GuessTypeDiv_Integer     (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtReal	|gtEffective;
 
@@ -3515,9 +3697,10 @@ tVariantBlock tVariantBlock::Div_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() / rhs.AsInteger(); // real / integer
 	case vtReal:	return AsReal() / rhs.AsReal(); // real / real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
 	return tVariantBlock();
@@ -3534,9 +3717,10 @@ int tVariantBlock::GuessTypeDiv_Real     (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtReal	|gtEffective;
 
@@ -3563,9 +3747,10 @@ int tVariantBlock::GuessTypeDiv_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3584,9 +3769,10 @@ tVariantBlock tVariantBlock::Div_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
@@ -3604,9 +3790,10 @@ int tVariantBlock::GuessTypeDiv_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3625,9 +3812,10 @@ tVariantBlock tVariantBlock::Div_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
@@ -3645,9 +3833,10 @@ int tVariantBlock::GuessTypeDiv_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3666,9 +3855,10 @@ tVariantBlock tVariantBlock::Div_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
@@ -3686,9 +3876,10 @@ int tVariantBlock::GuessTypeDiv_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3708,9 +3899,10 @@ tVariantBlock tVariantBlock::Idiv_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
 	return tVariantBlock();
@@ -3731,10 +3923,11 @@ int tVariantBlock::GuessTypeIdiv_Void     (tGuessType r)
 	case gtInteger:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtReal:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
 	default:		return gtAny|gtEffective;
@@ -3753,9 +3946,10 @@ tVariantBlock tVariantBlock::Idiv_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
 	return tVariantBlock();
@@ -3776,9 +3970,10 @@ int tVariantBlock::GuessTypeIdiv_Integer     (tGuessType r)
 	case gtInteger:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtReal:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3798,9 +3993,10 @@ tVariantBlock tVariantBlock::Idiv_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	rhs_value = rhs.AsInteger();			goto do_div;
 	case vtReal:	rhs_value = (risse_int64)rhs.AsReal();	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
 	return tVariantBlock();
@@ -3821,9 +4017,10 @@ int tVariantBlock::GuessTypeIdiv_Real     (tGuessType r)
 	case gtInteger:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtReal:		return gtInteger|gtEffective;	// 例外が発生する可能性があるため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtInteger|gtEffective;
 
@@ -3850,9 +4047,10 @@ int tVariantBlock::GuessTypeIdiv_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3871,9 +4069,10 @@ tVariantBlock tVariantBlock::Idiv_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
@@ -3891,9 +4090,10 @@ int tVariantBlock::GuessTypeIdiv_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3912,9 +4112,10 @@ tVariantBlock tVariantBlock::Idiv_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
@@ -3932,9 +4133,10 @@ int tVariantBlock::GuessTypeIdiv_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3953,9 +4155,10 @@ tVariantBlock tVariantBlock::Idiv_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
@@ -3973,9 +4176,10 @@ int tVariantBlock::GuessTypeIdiv_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -3994,9 +4198,10 @@ tVariantBlock tVariantBlock::Mul_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return (risse_int64)0; // void * integer
 	case vtReal:	return (risse_real)0.0;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tVariantBlock();
@@ -4013,9 +4218,10 @@ int tVariantBlock::GuessTypeMul_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4034,9 +4240,10 @@ tVariantBlock tVariantBlock::Mul_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() * rhs.AsInteger(); // integer * integer
 	case vtReal:	return AsInteger() * rhs.AsReal(); // integer * real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tVariantBlock();
@@ -4053,9 +4260,10 @@ int tVariantBlock::GuessTypeMul_Integer   (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4074,9 +4282,10 @@ tVariantBlock tVariantBlock::Mul_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() * rhs.AsInteger(); // real * integer
 	case vtReal:	return AsReal() * rhs.AsReal(); // real * real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
 	return tVariantBlock();
@@ -4093,9 +4302,10 @@ int tVariantBlock::GuessTypeMul_Real   (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4122,9 +4332,10 @@ int tVariantBlock::GuessTypeMul_Null   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4143,9 +4354,10 @@ tVariantBlock tVariantBlock::Mul_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
@@ -4163,9 +4375,10 @@ int tVariantBlock::GuessTypeMul_String   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4184,9 +4397,10 @@ tVariantBlock tVariantBlock::Mul_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
@@ -4204,9 +4418,10 @@ int tVariantBlock::GuessTypeMul_Octet   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4225,9 +4440,10 @@ tVariantBlock tVariantBlock::Mul_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
+	case vtData:
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
@@ -4245,9 +4461,10 @@ int tVariantBlock::GuessTypeMul_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4266,9 +4483,10 @@ tVariantBlock tVariantBlock::Add_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return rhs; // void + integer
 	case vtReal:	return rhs;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	return rhs;
 	case vtOctet:	return rhs;
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tVariantBlock();
@@ -4285,9 +4503,10 @@ int tVariantBlock::GuessTypeAdd_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtString;
 	case gtOctet:		return gtOctet;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4306,9 +4525,10 @@ tVariantBlock tVariantBlock::Add_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() + rhs.AsInteger();
 	case vtReal:	return AsInteger() + rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tVariantBlock();
@@ -4325,9 +4545,10 @@ int tVariantBlock::GuessTypeAdd_Integer  (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4346,9 +4567,10 @@ tVariantBlock tVariantBlock::Add_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() + rhs.AsInteger();
 	case vtReal:	return AsReal() + rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tVariantBlock();
@@ -4365,9 +4587,10 @@ int tVariantBlock::GuessTypeAdd_Real     (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4394,9 +4617,10 @@ int tVariantBlock::GuessTypeAdd_Null     (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4415,9 +4639,10 @@ tVariantBlock tVariantBlock::Add_String   (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	return AsString() + rhs.AsString();
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tVariantBlock();
@@ -4434,9 +4659,10 @@ int tVariantBlock::GuessTypeAdd_String    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtString;
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4455,9 +4681,10 @@ tVariantBlock tVariantBlock::Add_Octet    (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtOctet:	return AsOctet() + rhs.AsOctet();
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
 	return tVariantBlock();
@@ -4474,9 +4701,10 @@ int tVariantBlock::GuessTypeAdd_Octet    (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtOctet;
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4503,9 +4731,10 @@ int tVariantBlock::GuessTypeAdd_Boolean  (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4524,9 +4753,10 @@ tVariantBlock tVariantBlock::Sub_Void     (const tVariantBlock & rhs) const
 	case vtInteger:	return - rhs.AsInteger(); // void - integer
 	case vtReal:	return - rhs.AsReal();
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tVariantBlock();
@@ -4543,9 +4773,10 @@ int tVariantBlock::GuessTypeSub_Void     (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4564,9 +4795,10 @@ tVariantBlock tVariantBlock::Sub_Integer  (const tVariantBlock & rhs) const
 	case vtInteger:	return AsInteger() - rhs.AsInteger(); // integer - integer
 	case vtReal:	return AsInteger() - rhs.AsReal(); // integer - real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tVariantBlock();
@@ -4583,9 +4815,10 @@ int tVariantBlock::GuessTypeSub_Integer   (tGuessType r)
 	case gtInteger:		return gtInteger;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4604,9 +4837,10 @@ tVariantBlock tVariantBlock::Sub_Real     (const tVariantBlock & rhs) const
 	case vtInteger:	return AsReal() - rhs.AsInteger(); // real - integer
 	case vtReal:	return AsReal() - rhs.AsReal(); // real - real
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tVariantBlock();
@@ -4623,9 +4857,10 @@ int tVariantBlock::GuessTypeSub_Real   (tGuessType r)
 	case gtInteger:		return gtReal;
 	case gtReal:		return gtReal;
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtAny	|gtEffective;
 
@@ -4652,9 +4887,10 @@ int tVariantBlock::GuessTypeSub_Null   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4681,9 +4917,10 @@ int tVariantBlock::GuessTypeSub_Octet   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4702,10 +4939,11 @@ tVariantBlock tVariantBlock::Sub_String   (const tVariantBlock & rhs) const
 	case vtInteger:
 	case vtReal:
 	case vtNull:
-	case vtString:
 	case vtBoolean:
+	case vtString:
 	case vtOctet:
 			RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tVariantBlock();
@@ -4722,9 +4960,10 @@ int tVariantBlock::GuessTypeSub_String   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4743,9 +4982,10 @@ tVariantBlock tVariantBlock::Sub_Boolean  (const tVariantBlock & rhs) const
 	case vtInteger:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtReal:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtString:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtOctet:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
-	case vtBoolean:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
+	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
 	return tVariantBlock();
@@ -4762,9 +5002,10 @@ int tVariantBlock::GuessTypeSub_Boolean   (tGuessType r)
 	case gtInteger:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtReal:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-	case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+	case gtData:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtObject:		return gtError	|gtEffective;	// 例外が発生するため
 	case gtAny:			return gtError	|gtEffective;	// 必ず例外が発生する
 
@@ -4914,9 +5155,26 @@ tVariantBlock::tSynchronizer::~tSynchronizer()
 
 
 //---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHint_Data     () const
+{
+	return static_cast<risse_uint32>(
+		GetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hint).CastToInteger());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint32 tVariantBlock::GetHint_Object   () const
 {
 	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hint).CastToInteger());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tVariantBlock::SetHint_Data     (risse_uint32 hint) const
+{
+	SetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hint, 0, (risse_int64)hint);
 }
 //---------------------------------------------------------------------------
 
@@ -4995,6 +5253,15 @@ risse_uint32 tVariantBlock::GetHash_Real     () const
 
 
 //---------------------------------------------------------------------------
+risse_uint32 tVariantBlock::GetHash_Data     () const
+{
+	return static_cast<risse_uint32>(
+		GetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hash).CastToInteger());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 risse_uint32 tVariantBlock::GetHash_Object   () const
 {
 	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hash).CastToInteger());
@@ -5067,7 +5334,8 @@ void tVariantBlock::AssertClass(tClassBase * cls) const
 tString tVariantBlock::GetClassName(bool * got) const
 {
 	// class.name を得る
-	switch(GetType())
+	tType type = GetType();
+	switch(type)
 	{
 	case vtVoid:		if(got) *got=true; return ss_Void;
 	case vtInteger:		if(got) *got=true; return ss_Integer;
@@ -5076,20 +5344,30 @@ tString tVariantBlock::GetClassName(bool * got) const
 	case vtString:		if(got) *got=true; return ss_String;
 	case vtBoolean:		if(got) *got=true; return ss_Boolean;
 	case vtOctet:		if(got) *got=true; return ss_Octet;
+	case vtData:
 	case vtObject:
 		{
 			tVariant name;
 			try
 			{
-				tObjectInterface * intf = GetObjectInterface();
-				// class を得る
 				tVariant Class;
-				if(intf->Operate(ocDGet, &Class, ss_class) !=
-					tOperateRetValue::rvNoError)
+				tObjectInterface * intf;
+				if(type == vtObject)
 				{
-					if(got) *got = false;
-					return tSS<'<','u','n','k','n','o','w','n','>'>();
+					intf = GetObjectInterface();
+					// class を得る
+					if(intf->Operate(ocDGet, &Class, ss_class) !=
+						tOperateRetValue::rvNoError)
+					{
+						if(got) *got = false;
+						return tSS<'<','u','n','k','n','o','w','n','>'>();
+					}
 				}
+				else if(type == vtData);
+				{
+					Class = GetDataClassInstance();
+				}
+
 				// class.name を得る
 				if(Class.GetType() != vtObject)
 				{

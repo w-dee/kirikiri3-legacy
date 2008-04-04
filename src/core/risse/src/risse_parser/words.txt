@@ -157,12 +157,12 @@ field               T_FIELD        - true false
 ##### 注意
 ##### これらを編集する際は、かならず risse.y の member_name_list も
 ##### 編集すること！！ (自動的には連携されない)
-void     T_CONSTVAL     tVariant()               true false
-null     T_CONSTVAL     (tObjectInterface*)NULL  true false
-true     T_CONSTVAL     true                     true false
-false    T_CONSTVAL     false                    true false
-NaN      T_CONSTVAL     GetNaN()                 true false
-Infinity T_CONSTVAL     GetInf()                 true false
+void     T_CONSTVAL     tVariant::GetVoidObject() true false
+null     T_CONSTVAL     tVariant::GetNullObject() true false
+true     T_CONSTVAL     true                      true false
+false    T_CONSTVAL     false                     true false
+NaN      T_CONSTVAL     GetNaN()                  true false
+Infinity T_CONSTVAL     GetInf()                  true false
 
 ##### 数値
 0                   T_BEGIN_NUMBER           - false false

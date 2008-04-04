@@ -25,6 +25,7 @@ namespace Risse
 class tScriptBlockInstance;
 class tScriptEngine;
 class tClassBase;
+class tPrimitiveClassBase;
 //---------------------------------------------------------------------------
 //! @brief	バリアント型
 //! @note	tVariantData よりも高度な動作をここで定義する
@@ -130,12 +131,13 @@ public: // GuessTypeXXXXX で使用されるもの
 		gtInteger	= vtInteger,
 		gtReal		= vtReal,
 		gtNull		= vtNull,
+		gtBoolean	= vtBoolean,
 		gtString	= vtString,
 		gtOctet		= vtOctet,
-		gtBoolean	= vtBoolean,
+		gtData		= vtData,
 		gtObject	= vtObject,
 
-		gtAny,		//!< 任意の型(GuessTypeXXXXX の入力として用いられた場合は
+		gtAny = 9,	//!< 任意の型(GuessTypeXXXXX の入力として用いられた場合は
 					//!< どのような型もあり得ることを表す。出力として得られた場合も
 					//!< どのような型もあり得ることを表す)
 
@@ -180,9 +182,10 @@ public: // コンストラクタ/代入演算子
 		case vtInteger:		*this = ref.AsInteger();	break;
 		case vtReal:		*this = ref.AsReal();		break;
 		case vtNull:		Nullize();					break;
+		case vtBoolean:		*this = ref.AsBoolean();	break;
 		case vtString:		*this = ref.AsString();		break;
 		case vtOctet:		*this = ref.AsOctet();		break;
-		case vtBoolean:		Type = ref.Type;			break;
+		case vtData:		*this = ref.AsData();		break;
 		case vtObject:		*this = ref.AsObject();		break;
 		}
 		return *this;
@@ -197,7 +200,7 @@ private:
 	//!				おそらく、
 	//!				 1. なにか関係のないポインタを tVariant に突っ込もうとした
 	//!				 2. 確かに tObjectInterface 派生クラスだが
-	//!				    必要な情報を include してないためにコンパイラがダウンキャスト
+	//!				    必要な情報を include してないためにコンパイラがアップキャスト
 	//!				    に失敗している
 	//!				 3. const な tObjectInterface へのポインタを渡そうとした
 	//!				    (非const な tObjectInterface * しか受け付けない)
@@ -255,8 +258,23 @@ public:
 	//! @param		ref		元となる真偽値
 	tVariantBlock & operator = (const bool ref)
 	{
-		Type = ref?BooleanTrue:BooleanFalse;
-		Ptr = 0;
+		Type = vtBoolean;
+		AsBoolean().Value = ref;
+		return *this;
+	}
+
+	//! @brief		コンストラクタ(boolean型を作成)
+	//! @param		ref		元となるtBoolean型オブジェクト
+	tVariantBlock(const tBoolean & ref)
+	{
+		* this = ref;
+	}
+
+	//! @brief		代入演算子(bool型を代入)
+	//! @param		ref		元となるtBoolean型オブジェクト
+	tVariantBlock & operator = (const tBoolean & ref)
+	{
+		AsBoolean() = ref;
 		return *this;
 	}
 
@@ -328,6 +346,17 @@ public:
 		AsObject().Context = context;
 	}
 
+	//! @brief		コンストラクタ(クラスを表すtPrimitiveClassBase*型とデータを表す void* 型より)
+	//! @param		Class		クラスインスタンス
+	//! @param		data		データ
+	tVariantBlock(tPrimitiveClassBase * Class, void * data)
+	{
+		Type = vtData;
+		RISSE_ASSERT(Class != NULL);
+		SetDataClassInstance(Class);
+		AsData().Data = data;
+	}
+
 	//! @brief		代入演算子(tObjectInterface*型を代入)
 	//! @param		ref		元となるオブジェクト
 	tVariantBlock & operator = (tObjectInterface * ref)
@@ -336,6 +365,22 @@ public:
 		Type = vtObject;
 		SetObjectIntf(ref);
 		AsObject().Context = GetDynamicContext(); // this は DynamicContext に設定
+		return *this;
+	}
+
+	//! @brief		コンストラクタ(tData型から)
+	//! @param		ref		元となるオブジェクト
+	tVariantBlock(const tData & ref)
+	{
+		* this = ref;
+	}
+
+	//! @brief		代入演算子(tData型を代入)
+	//! @param		ref		元となるオブジェクト
+	tVariantBlock & operator = (const tData & ref)
+	{
+		Type = vtData;
+		AsData() = ref;
 		return *this;
 	}
 
@@ -355,6 +400,26 @@ public: // デストラクタ
 		// 少なくとも、メンバとして持っているポインタが破壊できればよい
 		DestructPointer();
 	}
+
+public: // スクリプトエンジンインスタンス
+
+	//! @brief		スクリプトエンジンインスタンスを得る
+	//! @return		スクリプトエンジンインスタンス
+	//! @note		vtObject あるいは vtData 限定。
+	tScriptEngine * GetScriptEngine() const
+	{
+		RISSE_ASSERT(GetType() == vtObject || GetType() == vtData);
+		switch(GetType())
+		{
+		case vtData:		return GetScriptEngine_Data();
+		case vtObject:		return GetScriptEngine_Object();
+		default:
+			return NULL;
+		}
+	}
+
+	tScriptEngine * GetScriptEngine_Data() const;
+	tScriptEngine * GetScriptEngine_Object() const;
 
 public: // String関連
 	//! @brief		文字列が空文字列かどうかを得る
@@ -760,9 +825,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			return GetPropertyDirect_Primitive(engine, name, flags, This);
 		case vtObject:
 			return GetPropertyDirect_Object   (        name, flags, This);
@@ -771,7 +837,7 @@ public: // 演算子
 	}
 
 	tVariantBlock GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
-	tVariantBlock GetPropertyDirect_Object   (                             const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
+	tVariantBlock GetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
 
 	//-----------------------------------------------------------------------
 	//! @brief		直接プロパティ設定		SetPropertyDirect dset
@@ -790,9 +856,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			SetPropertyDirect_Primitive(engine, name, flags, value, This); return;
 		case vtObject:
 			SetPropertyDirect_Object   (        name, flags, value, This); return;
@@ -800,7 +867,7 @@ public: // 演算子
 	}
 
 	void SetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
-	void SetPropertyDirect_Object   (                             const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
+	void SetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		間接プロパティ取得		IGet iget
@@ -815,9 +882,10 @@ public: // 演算子
 		case vtInteger:	return IGet_Integer  (key);
 		case vtReal:	return IGet_Real     (key);
 		case vtNull:	return IGet_Null     (key);
+		case vtBoolean:	return IGet_Boolean  (key);
 		case vtString:	return IGet_String   (key);
 		case vtOctet:	return IGet_Octet    (key);
-		case vtBoolean:	return IGet_Boolean  (key);
+		case vtData:	return IGet_Data     (key);
 		case vtObject:	return IGet_Object   (key);
 		}
 		return tVariant();
@@ -827,9 +895,10 @@ public: // 演算子
 	tVariantBlock IGet_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IGet_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IGet_Data    (const tVariantBlock & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIGet, key); }
 	tVariantBlock IGet_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
 
 	//-----------------------------------------------------------------------
@@ -845,9 +914,10 @@ public: // 演算子
 		case vtInteger:	return IDelete_Integer  (key);
 		case vtReal:	return IDelete_Real     (key);
 		case vtNull:	return IDelete_Null     (key);
+		case vtBoolean:	return IDelete_Boolean  (key);
 		case vtString:	return IDelete_String   (key);
 		case vtOctet:	return IDelete_Octet    (key);
-		case vtBoolean:	return IDelete_Boolean  (key);
+		case vtData:	return IDelete_Data     (key);
 		case vtObject:	return IDelete_Object   (key);
 		}
 		return tVariant();
@@ -857,9 +927,10 @@ public: // 演算子
 	tVariantBlock IDelete_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IDelete_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IDelete_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IDelete_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
 	tVariantBlock IDelete_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
+	tVariantBlock IDelete_Data    (const tVariantBlock & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIDelete, key); }
 	tVariantBlock IDelete_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIDelete, key); }
 
 	//-----------------------------------------------------------------------
@@ -875,9 +946,10 @@ public: // 演算子
 		case vtInteger:	ISet_Integer  (key, value); return;
 		case vtReal:	ISet_Real     (key, value); return;
 		case vtNull:	ISet_Null     (key, value); return;
+		case vtBoolean:	ISet_Boolean  (key, value); return;
 		case vtString:	ISet_String   (key, value); return;
 		case vtOctet:	ISet_Octet    (key, value); return;
-		case vtBoolean:	ISet_Boolean  (key, value); return;
+		case vtData:	ISet_Data     (key, value); return;
 		case vtObject:	ISet_Object   (key, value); return;
 		}
 	}
@@ -886,9 +958,10 @@ public: // 演算子
 	void ISet_Integer (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Real    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Null    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Boolean (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_String  (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
 	void ISet_Octet   (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Boolean (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
+	void ISet_Data    (const tVariantBlock & key, const tVariantBlock & value) const { Invoke_Primitive(GetScriptEngine_Data(), mnISet, value, key); }
 	void ISet_Object  (const tVariantBlock & key, const tVariantBlock & value) const { Invoke_Object(mnISet, value, key);
 		/* 注意!!! ISet がメソッド呼び出しに変換される場合、value が先に来て key が後に来る。これは将来的に
 		複数の key を使用可能にする可能性があるためである */ }
@@ -907,9 +980,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			DeletePropertyDirect_Primitive(engine, name, flags); return;
 		case vtObject:
 			DeletePropertyDirect_Object   (        name, flags); return;
@@ -917,7 +991,7 @@ public: // 演算子
 	}
 
 	void DeletePropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags) const;
-	void DeletePropertyDirect_Object   (                             const tString & name, risse_uint32 flags) const;
+	void DeletePropertyDirect_Object   (                        const tString & name, risse_uint32 flags) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		属性の設定		DSetAttrib dseta
@@ -933,9 +1007,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			SetAttributeDirect_Primitive(engine, key, attrib); return;
 		case vtObject:
 			SetAttributeDirect_Object   (        key, attrib); return;
@@ -979,9 +1054,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			FuncCall_Primitive(engine,     ret, name, flags, args, This); return;
 
 		case vtObject:	FuncCall_Object   (ret, name, flags, args, This); return;
@@ -989,7 +1065,7 @@ public: // 演算子
 	}
 
 	void FuncCall_Primitive(tScriptEngine * engine, tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
-	void FuncCall_Object   (                             tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
+	void FuncCall_Object   (                        tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -1006,9 +1082,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			return Invoke_Primitive(engine, membername);
 		case vtObject:
 			return Invoke_Object   (        membername);
@@ -1017,7 +1094,7 @@ public: // 演算子
 	}
 
 	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername) const;
-	tVariantBlock Invoke_Object   (                             const tString & membername) const;
+	tVariantBlock Invoke_Object   (                        const tString & membername) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -1037,9 +1114,10 @@ public: // 演算子
 		case vtInteger:
 		case vtReal:
 		case vtNull:
+		case vtBoolean:
 		case vtString:
 		case vtOctet:
-		case vtBoolean:
+		case vtData:
 			return Invoke_Primitive(engine, membername, arg1);
 		case vtObject:
 			return Invoke_Object   (        membername,arg1);
@@ -1048,7 +1126,7 @@ public: // 演算子
 	}
 
 	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const;
-	tVariantBlock Invoke_Object   (                             const tString & membername,const tVariant & arg1) const;
+	tVariantBlock Invoke_Object   (                        const tString & membername,const tVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
 	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -1067,13 +1145,14 @@ public: // 演算子
 	{
 		switch(GetType())
 		{
-		case vtVoid:	
-		case vtInteger:	
-		case vtReal:	
-		case vtNull:	
-		case vtString:	
-		case vtOctet:	
+		case vtVoid:
+		case vtInteger:
+		case vtReal:
+		case vtNull:
 		case vtBoolean:
+		case vtString:
+		case vtOctet:
+		case vtData:
 			return Invoke_Primitive(engine, membername,arg1,arg2);
 		case vtObject:
 			return Invoke_Object   (        membername,arg1,arg2);
@@ -1082,7 +1161,7 @@ public: // 演算子
 	}
 
 	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
-	tVariantBlock Invoke_Object   (                             const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
+	tVariantBlock Invoke_Object   (                        const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
 
 public:
 	//-----------------------------------------------------------------------
@@ -1123,9 +1202,10 @@ public:
 		case vtInteger:	return New_Integer  (name, flags, args);
 		case vtReal:	return New_Real     (name, flags, args);
 		case vtNull:	return New_Null     (name, flags, args);
+		case vtBoolean:	return New_Boolean  (name, flags, args);
 		case vtString:	return New_String   (name, flags, args);
 		case vtOctet:	return New_Octet    (name, flags, args);
-		case vtBoolean:	return New_Boolean  (name, flags, args);
+		case vtData:	return New_Object   (name, flags, args);
 		case vtObject:	return New_Object   (name, flags, args);
 		}
 	}
@@ -1134,9 +1214,10 @@ public:
 	tVariantBlock New_Integer (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
 	tVariantBlock New_Real    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
 	tVariantBlock New_Null    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Boolean (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
 	tVariantBlock New_String  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
 	tVariantBlock New_Octet   (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Boolean (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
+	tVariantBlock New_Data    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
 	tVariantBlock New_Object  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const;
 
 
@@ -1156,9 +1237,10 @@ public:
 	bool LogNot_Integer  () const { return !CastToBoolean_Integer(); }
 	bool LogNot_Real     () const { return !CastToBoolean_Real(); }
 	bool LogNot_Null     () const { return !CastToBoolean_Null(); }
+	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
 	bool LogNot_String   () const { return !CastToBoolean_String(); }
 	bool LogNot_Octet    () const { return !CastToBoolean_Octet(); }
-	bool LogNot_Boolean  () const { return !CastToBoolean_Boolean(); }
+	bool LogNot_Data     () const { return !CastToBoolean_Data(); }
 	bool LogNot_Object   () const { return !CastToBoolean_Object(); }
 
 	static int GuessTypeLogNot(tGuessType l)
@@ -1180,9 +1262,10 @@ public:
 		case vtInteger:	return BitNot_Integer  ();
 		case vtReal:	return BitNot_Real     ();
 		case vtNull:	return BitNot_Null     ();
+		case vtBoolean:	return BitNot_Boolean  ();
 		case vtString:	return BitNot_String   ();
 		case vtOctet:	return BitNot_Octet    ();
-		case vtBoolean:	return BitNot_Boolean  ();
+		case vtData:	return BitNot_Data     ();
 		case vtObject:	return BitNot_Object   ();
 		}
 		return tVariantBlock();
@@ -1196,9 +1279,10 @@ public:
 	risse_int64   BitNot_Integer  () const { return ~CastToInteger_Integer(); }
 	risse_int64   BitNot_Real     () const { return ~CastToInteger_Real(); }
 	risse_int64   BitNot_Null     () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
+	risse_int64   BitNot_Boolean  () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	risse_int64   BitNot_String   () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	tOctet        BitNot_Octet    () const { return ~AsOctet(); }
-	risse_int64   BitNot_Boolean  () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
+	tVariantBlock BitNot_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitNot); }
 	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	static int GuessTypeBitNot(tGuessType l)
@@ -1209,9 +1293,10 @@ public:
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtInteger;
 		case gtNull:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
 		case gtString:		return gtError		|gtEffective;	// 例外が発生するため
 		case gtOctet:		return gtOctet;
-		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtData:		return gtAny		|gtEffective;	// 何が呼ばれるか分からない
 		case gtObject:		return gtAny		|gtEffective;	// 何が呼ばれるか分からない
 		case gtAny:			return gtAny		|gtEffective;
 
@@ -1231,9 +1316,10 @@ public:
 		case vtInteger:	return Inc_Integer  ();
 		case vtReal:	return Inc_Real     ();
 		case vtNull:	return Inc_Null     ();
+		case vtBoolean:	return Inc_Boolean  ();
 		case vtString:	return Inc_String   ();
 		case vtOctet:	return Inc_Octet    ();
-		case vtBoolean:	return Inc_Boolean  ();
+		case vtData:	return Inc_Data     ();
 		case vtObject:	return Inc_Object   ();
 		}
 		return *this;
@@ -1246,9 +1332,10 @@ public:
 	tVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
 	tVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
 	tVariantBlock & Inc_Null     () { AddAssign((risse_int64)1); return *this; }
+	tVariantBlock & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
 	tVariantBlock & Inc_String   () { AddAssign((risse_int64)1); return *this; }
 	tVariantBlock & Inc_Octet    () { AddAssign((risse_int64)1); return *this; }
-	tVariantBlock & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
+	tVariantBlock & Inc_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnAdd, tVariantBlock((risse_int64)1)); return *this; }
 	tVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariantBlock((risse_int64)1)); return *this; }
 
 	static int GuessTypeInc(tGuessType l)
@@ -1259,9 +1346,10 @@ public:
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtReal;
 		case gtNull:		return GuessTypeAdd(l, gtInteger);
+		case gtBoolean:		return GuessTypeAdd(l, gtInteger);
 		case gtString:		return GuessTypeAdd(l, gtInteger);
 		case gtOctet:		return GuessTypeAdd(l, gtInteger);
-		case gtBoolean:		return GuessTypeAdd(l, gtInteger);
+		case gtData:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtAny:			return gtAny	|gtEffective;
 
@@ -1281,9 +1369,10 @@ public:
 		case vtInteger:	return Dec_Integer  ();
 		case vtReal:	return Dec_Real     ();
 		case vtNull:	return Dec_Null     ();
+		case vtBoolean:	return Dec_Boolean  ();
 		case vtString:	return Dec_String   ();
 		case vtOctet:	return Dec_Octet    ();
-		case vtBoolean:	return Dec_Boolean  ();
+		case vtData:	return Dec_Data     ();
 		case vtObject:	return Dec_Object   ();
 		}
 		return *this;
@@ -1296,9 +1385,10 @@ public:
 	tVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
 	tVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
 	tVariantBlock & Dec_Null     () { SubAssign((risse_int64)1); return *this; }
+	tVariantBlock & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
 	tVariantBlock & Dec_String   () { SubAssign((risse_int64)1); return *this; }
 	tVariantBlock & Dec_Octet    () { SubAssign((risse_int64)1); return *this; }
-	tVariantBlock & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
+	tVariantBlock & Dec_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnSub, tVariantBlock((risse_int64)1)); return *this; }
 	tVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tVariantBlock((risse_int64)1)); return *this; }
 
 	static int GuessTypeDec(tGuessType l)
@@ -1309,9 +1399,10 @@ public:
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtReal;
 		case gtNull:		return GuessTypeSub(l, gtInteger);
+		case gtBoolean:		return GuessTypeSub(l, gtInteger);
 		case gtString:		return GuessTypeSub(l, gtInteger);
 		case gtOctet:		return GuessTypeSub(l, gtInteger);
-		case gtBoolean:		return GuessTypeSub(l, gtInteger);
+		case gtData:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtAny:			return gtAny	|gtEffective;
 
@@ -1331,9 +1422,10 @@ public:
 		case vtInteger:	return Plus_Integer  ();
 		case vtReal:	return Plus_Real     ();
 		case vtNull:	return Plus_Null     ();
+		case vtBoolean:	return Plus_Boolean  ();
 		case vtString:	return Plus_String   ();
 		case vtOctet:	return Plus_Octet    ();
-		case vtBoolean:	return Plus_Boolean  ();
+		case vtData:	return Plus_Object   ();
 		case vtObject:	return Plus_Object   ();
 		}
 		return tVariantBlock();
@@ -1345,10 +1437,11 @@ public:
 	tVariantBlock Plus_Integer  () const { return *this; }
 	tVariantBlock Plus_Real     () const { return *this; }
 	tVariantBlock Plus_Null     () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
-	tVariantBlock Plus_String   () const;
-	tVariantBlock Plus_Octet    () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
 	tVariantBlock Plus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean() != false);
 	                                       /* boolean は 0 か 1 かに変換される */ }
+	tVariantBlock Plus_String   () const;
+	tVariantBlock Plus_Octet    () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
+	tVariantBlock Plus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnPlus); }
 	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
 
 	static int GuessTypePlus(tGuessType l)
@@ -1359,9 +1452,10 @@ public:
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtReal;
 		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return GuessTypeCastToBoolean(l);
 		case gtString:		return gtAny;	// Integer にも Real にもなりうる
 		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-		case gtBoolean:		return GuessTypeCastToBoolean(l);
+		case gtData:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtAny:			return gtAny	|gtEffective;
 
@@ -1381,9 +1475,10 @@ public:
 		case vtInteger:	return Minus_Integer  ();
 		case vtReal:	return Minus_Real     ();
 		case vtNull:	return Minus_Null     ();
+		case vtBoolean:	return Minus_Boolean  ();
 		case vtString:	return Minus_String   ();
 		case vtOctet:	return Minus_Octet    ();
-		case vtBoolean:	return Minus_Boolean  ();
+		case vtData:	return Minus_Data     ();
 		case vtObject:	return Minus_Object   ();
 		}
 		return tVariantBlock();
@@ -1395,9 +1490,10 @@ public:
 	tVariantBlock Minus_Integer  () const { return -AsInteger(); }
 	tVariantBlock Minus_Real     () const { return -AsReal(); }
 	tVariantBlock Minus_Null     () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariantBlock Minus_Boolean  () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
 	tVariantBlock Minus_String   () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
 	tVariantBlock Minus_Octet    () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
-	tVariantBlock Minus_Boolean  () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariantBlock Minus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnMinus); }
 	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	static int GuessTypeMinus(tGuessType l)
@@ -1408,9 +1504,10 @@ public:
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtReal;
 		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
 		case gtString:		return gtError	|gtEffective;	// 例外が発生するため
 		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-		case gtBoolean:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtData:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtObject:		return gtAny	|gtEffective;	// 何が呼ばれるか分からない
 		case gtAny:			return gtAny	|gtEffective;
 
@@ -1436,9 +1533,10 @@ public:
 	bool LogOr_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
 	bool LogOr_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
 	bool LogOr_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
+	bool LogOr_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
 	bool LogOr_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
 	bool LogOr_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
-	bool LogOr_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
+	bool LogOr_Data     (const tVariantBlock & rhs) const { return CastToBoolean_Data   () || rhs.operator bool(); }
 	bool LogOr_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
@@ -1470,9 +1568,10 @@ public:
 	bool LogAnd_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
 	bool LogAnd_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
 	bool LogAnd_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
+	bool LogAnd_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
 	bool LogAnd_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
 	bool LogAnd_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
-	bool LogAnd_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
+	bool LogAnd_Data     (const tVariantBlock & rhs) const { return CastToBoolean_Data   () && rhs.operator bool(); }
 	bool LogAnd_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
@@ -1500,9 +1599,10 @@ public:
 		case vtInteger:	return BitOr_Integer  (rhs);
 		case vtReal:	return BitOr_Real     (rhs);
 		case vtNull:	return BitOr_Null     (rhs);
+		case vtBoolean:	return BitOr_Boolean  (rhs);
 		case vtString:	return BitOr_String   (rhs);
 		case vtOctet:	return BitOr_Octet    (rhs);
-		case vtBoolean:	return BitOr_Boolean  (rhs);
+		case vtData:	return BitOr_Data     (rhs);
 		case vtObject:	return BitOr_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1514,9 +1614,10 @@ public:
 	tVariantBlock BitOr_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock BitOr_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock BitOr_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitOr_String   (const tVariantBlock & rhs) const;
 	tVariantBlock BitOr_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitOr_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitOr, rhs); }
 	tVariantBlock BitOr_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
 	static int GuessTypeBitOr(tGuessType l, tGuessType r)
@@ -1527,9 +1628,10 @@ public:
 		case gtInteger:		return GuessTypeBitOr_Integer  (r);
 		case gtReal:		return GuessTypeBitOr_Real     (r);
 		case gtNull:		return GuessTypeBitOr_Null     (r);
+		case gtBoolean:		return GuessTypeBitOr_Boolean  (r);
 		case gtString:		return GuessTypeBitOr_String   (r);
 		case gtOctet:		return GuessTypeBitOr_Octet    (r);
-		case gtBoolean:		return GuessTypeBitOr_Boolean  (r);
+		case gtData:		return GuessTypeBitOr_Data     (r);
 		case gtObject:		return GuessTypeBitOr_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -1541,9 +1643,10 @@ public:
 	static int GuessTypeBitOr_Integer  (tGuessType r);
 	static int GuessTypeBitOr_Real     (tGuessType r);
 	static int GuessTypeBitOr_Null     (tGuessType r);
+	static int GuessTypeBitOr_Boolean  (tGuessType r);
 	static int GuessTypeBitOr_String   (tGuessType r);
 	static int GuessTypeBitOr_Octet    (tGuessType r);
-	static int GuessTypeBitOr_Boolean  (tGuessType r);
+	static int GuessTypeBitOr_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeBitOr_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -1573,9 +1676,10 @@ public:
 		case vtInteger:	return BitXor_Integer  (rhs);
 		case vtReal:	return BitXor_Real     (rhs);
 		case vtNull:	return BitXor_Null     (rhs);
+		case vtBoolean:	return BitXor_Boolean  (rhs);
 		case vtString:	return BitXor_String   (rhs);
 		case vtOctet:	return BitXor_Octet    (rhs);
-		case vtBoolean:	return BitXor_Boolean  (rhs);
+		case vtData:	return BitXor_Data     (rhs);
 		case vtObject:	return BitXor_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1587,9 +1691,10 @@ public:
 	tVariantBlock BitXor_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_String   (const tVariantBlock & rhs) const;
 	tVariantBlock BitXor_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitXor_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitXor, rhs); }
 	tVariantBlock BitXor_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
 
 	static int GuessTypeBitXor(tGuessType l, tGuessType r)
@@ -1600,9 +1705,10 @@ public:
 		case gtInteger:		return GuessTypeBitXor_Integer  (r);
 		case gtReal:		return GuessTypeBitXor_Real     (r);
 		case gtNull:		return GuessTypeBitXor_Null     (r);
+		case gtBoolean:		return GuessTypeBitXor_Boolean  (r);
 		case gtString:		return GuessTypeBitXor_String   (r);
 		case gtOctet:		return GuessTypeBitXor_Octet    (r);
-		case gtBoolean:		return GuessTypeBitXor_Boolean  (r);
+		case gtData:		return GuessTypeBitXor_Data     (r);
 		case gtObject:		return GuessTypeBitXor_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -1614,9 +1720,10 @@ public:
 	static int GuessTypeBitXor_Integer  (tGuessType r);
 	static int GuessTypeBitXor_Real     (tGuessType r);
 	static int GuessTypeBitXor_Null     (tGuessType r);
+	static int GuessTypeBitXor_Boolean  (tGuessType r);
 	static int GuessTypeBitXor_String   (tGuessType r);
 	static int GuessTypeBitXor_Octet    (tGuessType r);
-	static int GuessTypeBitXor_Boolean  (tGuessType r);
+	static int GuessTypeBitXor_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeBitXor_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -1646,9 +1753,10 @@ public:
 		case vtInteger:	return BitAnd_Integer  (rhs);
 		case vtReal:	return BitAnd_Real     (rhs);
 		case vtNull:	return BitAnd_Null     (rhs);
+		case vtBoolean:	return BitAnd_Boolean  (rhs);
 		case vtString:	return BitAnd_String   (rhs);
 		case vtOctet:	return BitAnd_Octet    (rhs);
-		case vtBoolean:	return BitAnd_Boolean  (rhs);
+		case vtData:	return BitAnd_Data     (rhs);
 		case vtObject:	return BitAnd_Object   (rhs);
 		}
 		return (risse_int64)0;
@@ -1660,9 +1768,10 @@ public:
 	tVariantBlock BitAnd_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock BitAnd_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock BitAnd_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock BitAnd_String   (const tVariantBlock & rhs) const;
 	tVariantBlock BitAnd_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock BitAnd_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitAnd, rhs); }
 	tVariantBlock BitAnd_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
 	static int GuessTypeBitAnd(tGuessType l, tGuessType r)
@@ -1673,9 +1782,10 @@ public:
 		case gtInteger:		return GuessTypeBitAnd_Integer  (r);
 		case gtReal:		return GuessTypeBitAnd_Real     (r);
 		case gtNull:		return GuessTypeBitAnd_Null     (r);
+		case gtBoolean:		return GuessTypeBitAnd_Boolean  (r);
 		case gtString:		return GuessTypeBitAnd_String   (r);
 		case gtOctet:		return GuessTypeBitAnd_Octet    (r);
-		case gtBoolean:		return GuessTypeBitAnd_Boolean  (r);
+		case gtData:		return GuessTypeBitAnd_Data     (r);
 		case gtObject:		return GuessTypeBitAnd_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -1687,9 +1797,10 @@ public:
 	static int GuessTypeBitAnd_Integer  (tGuessType r);
 	static int GuessTypeBitAnd_Real     (tGuessType r);
 	static int GuessTypeBitAnd_Null     (tGuessType r);
+	static int GuessTypeBitAnd_Boolean  (tGuessType r);
 	static int GuessTypeBitAnd_String   (tGuessType r);
 	static int GuessTypeBitAnd_Octet    (tGuessType r);
-	static int GuessTypeBitAnd_Boolean  (tGuessType r);
+	static int GuessTypeBitAnd_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeBitAnd_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -1728,9 +1839,10 @@ public:
 	bool NotEqual_Integer  (const tVariantBlock & rhs) const { return !Equal_Integer(rhs); }
 	bool NotEqual_Real     (const tVariantBlock & rhs) const { return !Equal_Real   (rhs); }
 	bool NotEqual_Null     (const tVariantBlock & rhs) const { return !Equal_Null   (rhs); }
+	bool NotEqual_Boolean  (const tVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
 	bool NotEqual_String   (const tVariantBlock & rhs) const { return !Equal_String (rhs); }
 	bool NotEqual_Octet    (const tVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
-	bool NotEqual_Boolean  (const tVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
+	bool NotEqual_Data     (const tVariantBlock & rhs) const { return !Equal_Data   (rhs); }
 	bool NotEqual_Object   (const tVariantBlock & rhs) const { return !Equal_Object (rhs); }
 
 	static int GuessTypeNotEqual(tGuessType l, tGuessType r)
@@ -1751,9 +1863,10 @@ public:
 		case vtInteger:	return Equal_Integer  (rhs);
 		case vtReal:	return Equal_Real     (rhs);
 		case vtNull:	return Equal_Null     (rhs);
+		case vtBoolean:	return Equal_Boolean  (rhs);
 		case vtString:	return Equal_String   (rhs);
 		case vtOctet:	return Equal_Octet    (rhs);
-		case vtBoolean:	return Equal_Boolean  (rhs);
+		case vtData:	return Equal_Data     (rhs);
 		case vtObject:	return Equal_Object   (rhs);
 		}
 		return false;
@@ -1765,9 +1878,10 @@ public:
 	bool Equal_Integer  (const tVariantBlock & rhs) const;
 	bool Equal_Real     (const tVariantBlock & rhs) const;
 	bool Equal_Null     (const tVariantBlock & rhs) const;
+	bool Equal_Boolean  (const tVariantBlock & rhs) const;
 	bool Equal_String   (const tVariantBlock & rhs) const;
 	bool Equal_Octet    (const tVariantBlock & rhs) const;
-	bool Equal_Boolean  (const tVariantBlock & rhs) const;
+	bool Equal_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnEqual, rhs).CastToBoolean(); }
 	bool Equal_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs).CastToBoolean(); }
 
 	static int GuessTypeEqual(tGuessType l, tGuessType r)
@@ -1801,9 +1915,10 @@ public:
 	bool DiscNotEqual_Integer  (const tVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
 	bool DiscNotEqual_Real     (const tVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
 	bool DiscNotEqual_Null     (const tVariantBlock & rhs) const { return !DiscEqual_Null   (rhs); }
+	bool DiscNotEqual_Boolean  (const tVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
 	bool DiscNotEqual_String   (const tVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
 	bool DiscNotEqual_Octet    (const tVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
-	bool DiscNotEqual_Boolean  (const tVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
+	bool DiscNotEqual_Data     (const tVariantBlock & rhs) const { return !DiscEqual_Data   (rhs); }
 	bool DiscNotEqual_Object   (const tVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
 
 	static int GuessTypeDiscNotEqual(tGuessType l, tGuessType r)
@@ -1824,9 +1939,10 @@ public:
 		case vtInteger:	return DiscEqual_Integer  (rhs);
 		case vtReal:	return DiscEqual_Real     (rhs);
 		case vtNull:	return DiscEqual_Null     (rhs);
+		case vtBoolean:	return DiscEqual_Boolean  (rhs);
 		case vtString:	return DiscEqual_String   (rhs);
 		case vtOctet:	return DiscEqual_Octet    (rhs);
-		case vtBoolean:	return DiscEqual_Boolean  (rhs);
+		case vtData:	return DiscEqual_Data     (rhs);
 		case vtObject:	return DiscEqual_Object   (rhs);
 		}
 		return false;
@@ -1840,12 +1956,14 @@ public:
 			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
 	bool DiscEqual_Null     (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtNull; }
+	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool DiscEqual_String   (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
 	bool DiscEqual_Octet    (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
-	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
-			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
+	bool DiscEqual_Data     (const tVariantBlock & rhs) const
+			{ return Invoke_Primitive(GetScriptEngine_Data(), mnDiscEqual, rhs).CastToBoolean(); }
 	bool DiscEqual_Object   (const tVariantBlock & rhs) const
 			{ return Invoke_Object(mnDiscEqual, rhs).CastToBoolean(); }
 
@@ -1875,9 +1993,10 @@ public:
 		case vtInteger:	return StrictEqual_Integer  (rhs);
 		case vtReal:	return StrictEqual_Real     (rhs);
 		case vtNull:	return StrictEqual_Null     (rhs);
+		case vtBoolean:	return StrictEqual_Boolean  (rhs);
 		case vtString:	return StrictEqual_String   (rhs);
 		case vtOctet:	return StrictEqual_Octet    (rhs);
-		case vtBoolean:	return StrictEqual_Boolean  (rhs);
+		case vtData:	return StrictEqual_Data     (rhs);
 		case vtObject:	return StrictEqual_Object   (rhs);
 		}
 		return false;
@@ -1890,12 +2009,14 @@ public:
 	bool StrictEqual_Real     (const tVariantBlock & rhs) const;
 	bool StrictEqual_Null     (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtNull; }
+	bool StrictEqual_Boolean  (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
 	bool StrictEqual_String   (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
 	bool StrictEqual_Octet    (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
-	bool StrictEqual_Boolean  (const tVariantBlock & rhs) const
-			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
+	bool StrictEqual_Data     (const tVariantBlock & rhs) const
+			{ return rhs.GetType() == vtData && rhs.AsData().StrictEqual(AsData()); }
 	bool StrictEqual_Object   (const tVariantBlock & rhs) const
 			{ return rhs.GetType() == vtObject && rhs.AsObject().StrictEqual(AsObject()); }
 
@@ -1913,9 +2034,10 @@ public:
 		case vtInteger:	return Identify_Integer  (rhs);
 		case vtReal:	return Identify_Real     (rhs);
 		case vtNull:	return Identify_Null     (rhs);
+		case vtBoolean:	return Identify_Boolean  (rhs);
 		case vtString:	return Identify_String   (rhs);
 		case vtOctet:	return Identify_Octet    (rhs);
-		case vtBoolean:	return Identify_Boolean  (rhs);
+		case vtData:	return Identify_Data     (rhs);
 		case vtObject:	return Identify_Object   (rhs);
 		}
 		return false;
@@ -1928,6 +2050,7 @@ public:
 	bool Identify_String   (const tVariantBlock & rhs) const { return StrictEqual_String   (rhs); }
 	bool Identify_Octet    (const tVariantBlock & rhs) const { return StrictEqual_Octet    (rhs); }
 	bool Identify_Boolean  (const tVariantBlock & rhs) const { return StrictEqual_Boolean  (rhs); }
+	bool Identify_Data     (const tVariantBlock & rhs) const;
 	bool Identify_Object   (const tVariantBlock & rhs) const;
 
 	//-----------------------------------------------------------------------
@@ -1943,9 +2066,10 @@ public:
 		case vtInteger:	return Lesser_Integer  (rhs);
 		case vtReal:	return Lesser_Real     (rhs);
 		case vtNull:	return Lesser_Null     (rhs);
+		case vtBoolean:	return Lesser_Boolean  (rhs);
 		case vtString:	return Lesser_String   (rhs);
 		case vtOctet:	return Lesser_Octet    (rhs);
-		case vtBoolean:	return Lesser_Boolean  (rhs);
+		case vtData:	return Lesser_Data     (rhs);
 		case vtObject:	return Lesser_Object   (rhs);
 		}
 		return false;
@@ -1957,9 +2081,10 @@ public:
 	bool Lesser_Integer  (const tVariantBlock & rhs) const;
 	bool Lesser_Real     (const tVariantBlock & rhs) const;
 	bool Lesser_Null     (const tVariantBlock & rhs) const;
+	bool Lesser_Boolean  (const tVariantBlock & rhs) const;
 	bool Lesser_String   (const tVariantBlock & rhs) const;
 	bool Lesser_Octet    (const tVariantBlock & rhs) const;
-	bool Lesser_Boolean  (const tVariantBlock & rhs) const;
+	bool Lesser_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesser, rhs); }
 	bool Lesser_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
 	static int GuessTypeLesser(tGuessType l, tGuessType r)
@@ -1970,9 +2095,10 @@ public:
 		case gtInteger:		return GuessTypeLesser_Integer  (r);
 		case gtReal:		return GuessTypeLesser_Real     (r);
 		case gtNull:		return GuessTypeLesser_Null     (r);
+		case gtBoolean:		return GuessTypeLesser_Boolean  (r);
 		case gtString:		return GuessTypeLesser_String   (r);
 		case gtOctet:		return GuessTypeLesser_Octet    (r);
-		case gtBoolean:		return GuessTypeLesser_Boolean  (r);
+		case gtData:		return GuessTypeLesser_Data     (r);
 		case gtObject:		return GuessTypeLesser_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -1984,9 +2110,10 @@ public:
 	static int GuessTypeLesser_Integer  (tGuessType r);
 	static int GuessTypeLesser_Real     (tGuessType r);
 	static int GuessTypeLesser_Null     (tGuessType r);
+	static int GuessTypeLesser_Boolean  (tGuessType r);
 	static int GuessTypeLesser_String   (tGuessType r);
 	static int GuessTypeLesser_Octet    (tGuessType r);
-	static int GuessTypeLesser_Boolean  (tGuessType r);
+	static int GuessTypeLesser_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeLesser_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2002,9 +2129,10 @@ public:
 		case vtInteger:	return Greater_Integer  (rhs);
 		case vtReal:	return Greater_Real     (rhs);
 		case vtNull:	return Greater_Null     (rhs);
+		case vtBoolean:	return Greater_Boolean  (rhs);
 		case vtString:	return Greater_String   (rhs);
 		case vtOctet:	return Greater_Octet    (rhs);
-		case vtBoolean:	return Greater_Boolean  (rhs);
+		case vtData:	return Greater_Data     (rhs);
 		case vtObject:	return Greater_Object   (rhs);
 		}
 		return false;
@@ -2016,9 +2144,10 @@ public:
 	bool Greater_Integer  (const tVariantBlock & rhs) const;
 	bool Greater_Real     (const tVariantBlock & rhs) const;
 	bool Greater_Null     (const tVariantBlock & rhs) const;
+	bool Greater_Boolean  (const tVariantBlock & rhs) const;
 	bool Greater_String   (const tVariantBlock & rhs) const;
 	bool Greater_Octet    (const tVariantBlock & rhs) const;
-	bool Greater_Boolean  (const tVariantBlock & rhs) const;
+	bool Greater_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreater, rhs); }
 	bool Greater_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
 
 	static int GuessTypeGreater(tGuessType l, tGuessType r)
@@ -2029,9 +2158,10 @@ public:
 		case gtInteger:		return GuessTypeGreater_Integer  (r);
 		case gtReal:		return GuessTypeGreater_Real     (r);
 		case gtNull:		return GuessTypeGreater_Null     (r);
+		case gtBoolean:		return GuessTypeGreater_Boolean  (r);
 		case gtString:		return GuessTypeGreater_String   (r);
 		case gtOctet:		return GuessTypeGreater_Octet    (r);
-		case gtBoolean:		return GuessTypeGreater_Boolean  (r);
+		case gtData:		return GuessTypeGreater_Data     (r);
 		case gtObject:		return GuessTypeGreater_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2046,6 +2176,7 @@ public:
 	static int GuessTypeGreater_String   (tGuessType r);
 	static int GuessTypeGreater_Octet    (tGuessType r);
 	static int GuessTypeGreater_Boolean  (tGuessType r);
+	static int GuessTypeGreater_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeGreater_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2061,9 +2192,10 @@ public:
 		case vtInteger:	return LesserOrEqual_Integer  (rhs);
 		case vtReal:	return LesserOrEqual_Real     (rhs);
 		case vtNull:	return LesserOrEqual_Null     (rhs);
+		case vtBoolean:	return LesserOrEqual_Boolean  (rhs);
 		case vtString:	return LesserOrEqual_String   (rhs);
 		case vtOctet:	return LesserOrEqual_Octet    (rhs);
-		case vtBoolean:	return LesserOrEqual_Boolean  (rhs);
+		case vtData:	return LesserOrEqual_Data     (rhs);
 		case vtObject:	return LesserOrEqual_Object   (rhs);
 		}
 		return false;
@@ -2075,9 +2207,10 @@ public:
 	bool LesserOrEqual_Integer  (const tVariantBlock & rhs) const;
 	bool LesserOrEqual_Real     (const tVariantBlock & rhs) const;
 	bool LesserOrEqual_Null     (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Boolean  (const tVariantBlock & rhs) const;
 	bool LesserOrEqual_String   (const tVariantBlock & rhs) const;
 	bool LesserOrEqual_Octet    (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Boolean  (const tVariantBlock & rhs) const;
+	bool LesserOrEqual_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesserOrEqual, rhs); }
 	bool LesserOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
 
@@ -2089,9 +2222,10 @@ public:
 		case gtInteger:		return GuessTypeLesserOrEqual_Integer  (r);
 		case gtReal:		return GuessTypeLesserOrEqual_Real     (r);
 		case gtNull:		return GuessTypeLesserOrEqual_Null     (r);
+		case gtBoolean:		return GuessTypeLesserOrEqual_Boolean  (r);
 		case gtString:		return GuessTypeLesserOrEqual_String   (r);
 		case gtOctet:		return GuessTypeLesserOrEqual_Octet    (r);
-		case gtBoolean:		return GuessTypeLesserOrEqual_Boolean  (r);
+		case gtData:		return GuessTypeLesserOrEqual_Data     (r);
 		case gtObject:		return GuessTypeLesserOrEqual_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2103,9 +2237,10 @@ public:
 	static int GuessTypeLesserOrEqual_Integer  (tGuessType r) { return GuessTypeGreater_Integer  (r); }
 	static int GuessTypeLesserOrEqual_Real     (tGuessType r) { return GuessTypeGreater_Real     (r); }
 	static int GuessTypeLesserOrEqual_Null     (tGuessType r) { return GuessTypeGreater_Null     (r); }
+	static int GuessTypeLesserOrEqual_Boolean  (tGuessType r) { return GuessTypeGreater_Boolean  (r); }
 	static int GuessTypeLesserOrEqual_String   (tGuessType r) { return GuessTypeGreater_String   (r); }
 	static int GuessTypeLesserOrEqual_Octet    (tGuessType r) { return GuessTypeGreater_Octet    (r); }
-	static int GuessTypeLesserOrEqual_Boolean  (tGuessType r) { return GuessTypeGreater_Boolean  (r); }
+	static int GuessTypeLesserOrEqual_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeLesserOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2121,9 +2256,10 @@ public:
 		case vtInteger:	return GreaterOrEqual_Integer  (rhs);
 		case vtReal:	return GreaterOrEqual_Real     (rhs);
 		case vtNull:	return GreaterOrEqual_Null     (rhs);
+		case vtBoolean:	return GreaterOrEqual_Boolean  (rhs);
 		case vtString:	return GreaterOrEqual_String   (rhs);
 		case vtOctet:	return GreaterOrEqual_Octet    (rhs);
-		case vtBoolean:	return GreaterOrEqual_Boolean  (rhs);
+		case vtData:	return GreaterOrEqual_Data     (rhs);
 		case vtObject:	return GreaterOrEqual_Object   (rhs);
 		}
 		return false;
@@ -2135,9 +2271,10 @@ public:
 	bool GreaterOrEqual_Integer  (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_Real     (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_Null     (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_String   (const tVariantBlock & rhs) const;
 	bool GreaterOrEqual_Octet    (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const;
+	bool GreaterOrEqual_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreaterOrEqual, rhs); }
 	bool GreaterOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
 
 	static int GuessTypeGreaterOrEqual(tGuessType l, tGuessType r)
@@ -2148,9 +2285,10 @@ public:
 		case gtInteger:		return GuessTypeGreaterOrEqual_Integer  (r);
 		case gtReal:		return GuessTypeGreaterOrEqual_Real     (r);
 		case gtNull:		return GuessTypeGreaterOrEqual_Null     (r);
+		case gtBoolean:		return GuessTypeGreaterOrEqual_Boolean  (r);
 		case gtString:		return GuessTypeGreaterOrEqual_String   (r);
 		case gtOctet:		return GuessTypeGreaterOrEqual_Octet    (r);
-		case gtBoolean:		return GuessTypeGreaterOrEqual_Boolean  (r);
+		case gtData:		return GuessTypeGreaterOrEqual_Data     (r);
 		case gtObject:		return GuessTypeGreaterOrEqual_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2162,9 +2300,10 @@ public:
 	static int GuessTypeGreaterOrEqual_Integer  (tGuessType r) { return GuessTypeLesser_Integer  (r); }
 	static int GuessTypeGreaterOrEqual_Real     (tGuessType r) { return GuessTypeLesser_Real     (r); }
 	static int GuessTypeGreaterOrEqual_Null     (tGuessType r) { return GuessTypeLesser_Null     (r); }
+	static int GuessTypeGreaterOrEqual_Boolean  (tGuessType r) { return GuessTypeLesser_Boolean  (r); }
 	static int GuessTypeGreaterOrEqual_String   (tGuessType r) { return GuessTypeLesser_String   (r); }
 	static int GuessTypeGreaterOrEqual_Octet    (tGuessType r) { return GuessTypeLesser_Octet    (r); }
-	static int GuessTypeGreaterOrEqual_Boolean  (tGuessType r) { return GuessTypeLesser_Boolean  (r); }
+	static int GuessTypeGreaterOrEqual_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeGreaterOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2182,9 +2321,10 @@ public:
 		case vtInteger:	return RBitShift_Integer  (rhs);
 		case vtReal:	return RBitShift_Real     (rhs);
 		case vtNull:	return RBitShift_Null     (rhs);
+		case vtBoolean:	return RBitShift_Boolean  (rhs);
 		case vtString:	return RBitShift_String   (rhs);
 		case vtOctet:	return RBitShift_Octet    (rhs);
-		case vtBoolean:	return RBitShift_Boolean  (rhs);
+		case vtData:	return RBitShift_Data     (rhs);
 		case vtObject:	return RBitShift_Object   (rhs);
 		}
 		return false;
@@ -2194,9 +2334,10 @@ public:
 	tVariantBlock RBitShift_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock RBitShift_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock RBitShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock RBitShift_String   (const tVariantBlock & rhs) const;
 	tVariantBlock RBitShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock RBitShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRBitShift, rhs); }
 	tVariantBlock RBitShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
 	static int GuessTypeRBitShift(tGuessType l, tGuessType r)
@@ -2207,9 +2348,10 @@ public:
 		case gtInteger:		return GuessTypeRBitShift_Integer  (r);
 		case gtReal:		return GuessTypeRBitShift_Real     (r);
 		case gtNull:		return GuessTypeRBitShift_Null     (r);
+		case gtBoolean:		return GuessTypeRBitShift_Boolean  (r);
 		case gtString:		return GuessTypeRBitShift_String   (r);
 		case gtOctet:		return GuessTypeRBitShift_Octet    (r);
-		case gtBoolean:		return GuessTypeRBitShift_Boolean  (r);
+		case gtData:		return GuessTypeRBitShift_Data     (r);
 		case gtObject:		return GuessTypeRBitShift_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2221,9 +2363,10 @@ public:
 	static int GuessTypeRBitShift_Integer  (tGuessType r);
 	static int GuessTypeRBitShift_Real     (tGuessType r);
 	static int GuessTypeRBitShift_Null     (tGuessType r);
+	static int GuessTypeRBitShift_Boolean  (tGuessType r);
 	static int GuessTypeRBitShift_String   (tGuessType r);
 	static int GuessTypeRBitShift_Octet    (tGuessType r);
-	static int GuessTypeRBitShift_Boolean  (tGuessType r);
+	static int GuessTypeRBitShift_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeRBitShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2254,9 +2397,10 @@ public:
 		case vtInteger:	return LShift_Integer  (rhs);
 		case vtReal:	return LShift_Real     (rhs);
 		case vtNull:	return LShift_Null     (rhs);
+		case vtBoolean:	return LShift_Boolean  (rhs);
 		case vtString:	return LShift_String   (rhs);
 		case vtOctet:	return LShift_Octet    (rhs);
-		case vtBoolean:	return LShift_Boolean  (rhs);
+		case vtData:	return LShift_Data     (rhs);
 		case vtObject:	return LShift_Object   (rhs);
 		}
 		return false;
@@ -2268,9 +2412,10 @@ public:
 	tVariantBlock LShift_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock LShift_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock LShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock LShift_String   (const tVariantBlock & rhs) const;
 	tVariantBlock LShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock LShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLShift, rhs); }
 	tVariantBlock LShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
 	static int GuessTypeLShift(tGuessType l, tGuessType r)
@@ -2281,9 +2426,10 @@ public:
 		case gtInteger:		return GuessTypeLShift_Integer  (r);
 		case gtReal:		return GuessTypeLShift_Real     (r);
 		case gtNull:		return GuessTypeLShift_Null     (r);
+		case gtBoolean:		return GuessTypeLShift_Boolean  (r);
 		case gtString:		return GuessTypeLShift_String   (r);
 		case gtOctet:		return GuessTypeLShift_Octet    (r);
-		case gtBoolean:		return GuessTypeLShift_Boolean  (r);
+		case gtData:		return GuessTypeLShift_Data     (r);
 		case gtObject:		return GuessTypeLShift_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2295,9 +2441,10 @@ public:
 	static int GuessTypeLShift_Integer  (tGuessType r);
 	static int GuessTypeLShift_Real     (tGuessType r);
 	static int GuessTypeLShift_Null     (tGuessType r);
+	static int GuessTypeLShift_Boolean  (tGuessType r);
 	static int GuessTypeLShift_String   (tGuessType r);
 	static int GuessTypeLShift_Octet    (tGuessType r);
-	static int GuessTypeLShift_Boolean  (tGuessType r);
+	static int GuessTypeLShift_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeLShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2328,9 +2475,10 @@ public:
 		case vtInteger:	return RShift_Integer  (rhs);
 		case vtReal:	return RShift_Real     (rhs);
 		case vtNull:	return RShift_Null     (rhs);
+		case vtBoolean:	return RShift_Boolean  (rhs);
 		case vtString:	return RShift_String   (rhs);
 		case vtOctet:	return RShift_Octet    (rhs);
-		case vtBoolean:	return RShift_Boolean  (rhs);
+		case vtData:	return RShift_Data     (rhs);
 		case vtObject:	return RShift_Object   (rhs);
 		}
 		return false;
@@ -2342,9 +2490,10 @@ public:
 	tVariantBlock RShift_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_String   (const tVariantBlock & rhs) const;
 	tVariantBlock RShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock RShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRShift, rhs); }
 	tVariantBlock RShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
 
 	static int GuessTypeRShift(tGuessType l, tGuessType r)
@@ -2355,9 +2504,10 @@ public:
 		case gtInteger:		return GuessTypeRShift_Integer  (r);
 		case gtReal:		return GuessTypeRShift_Real     (r);
 		case gtNull:		return GuessTypeRShift_Null     (r);
+		case gtBoolean:		return GuessTypeRShift_Boolean  (r);
 		case gtString:		return GuessTypeRShift_String   (r);
 		case gtOctet:		return GuessTypeRShift_Octet    (r);
-		case gtBoolean:		return GuessTypeRShift_Boolean  (r);
+		case gtData:		return GuessTypeRShift_Data     (r);
 		case gtObject:		return GuessTypeRShift_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2369,9 +2519,10 @@ public:
 	static int GuessTypeRShift_Integer  (tGuessType r);
 	static int GuessTypeRShift_Real     (tGuessType r);
 	static int GuessTypeRShift_Null     (tGuessType r);
+	static int GuessTypeRShift_Boolean  (tGuessType r);
 	static int GuessTypeRShift_String   (tGuessType r);
 	static int GuessTypeRShift_Octet    (tGuessType r);
-	static int GuessTypeRShift_Boolean  (tGuessType r);
+	static int GuessTypeRShift_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeRShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2402,9 +2553,10 @@ public:
 		case vtInteger:	return Mod_Integer  (rhs);
 		case vtReal:	return Mod_Real     (rhs);
 		case vtNull:	return Mod_Null     (rhs);
+		case vtBoolean:	return Mod_Boolean  (rhs);
 		case vtString:	return Mod_String   (rhs);
 		case vtOctet:	return Mod_Octet    (rhs);
-		case vtBoolean:	return Mod_Boolean  (rhs);
+		case vtData:	return Mod_Data     (rhs);
 		case vtObject:	return Mod_Object   (rhs);
 		}
 		return false;
@@ -2416,9 +2568,10 @@ public:
 	tVariantBlock Mod_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Mod_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Mod_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Mod_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Mod_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Mod_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMod, rhs); }
 	tVariantBlock Mod_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
 
 	static int GuessTypeMod(tGuessType l, tGuessType r)
@@ -2429,9 +2582,10 @@ public:
 		case gtInteger:		return GuessTypeMod_Integer  (r);
 		case gtReal:		return GuessTypeMod_Real     (r);
 		case gtNull:		return GuessTypeMod_Null     (r);
+		case gtBoolean:		return GuessTypeMod_Boolean  (r);
 		case gtString:		return GuessTypeMod_String   (r);
 		case gtOctet:		return GuessTypeMod_Octet    (r);
-		case gtBoolean:		return GuessTypeMod_Boolean  (r);
+		case gtData:		return GuessTypeMod_Data     (r);
 		case gtObject:		return GuessTypeMod_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2446,6 +2600,7 @@ public:
 	static int GuessTypeMod_String   (tGuessType r);
 	static int GuessTypeMod_Octet    (tGuessType r);
 	static int GuessTypeMod_Boolean  (tGuessType r);
+	static int GuessTypeMod_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeMod_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2476,9 +2631,10 @@ public:
 		case vtInteger:	return Div_Integer  (rhs);
 		case vtReal:	return Div_Real     (rhs);
 		case vtNull:	return Div_Null     (rhs);
+		case vtBoolean:	return Div_Boolean  (rhs);
 		case vtString:	return Div_String   (rhs);
 		case vtOctet:	return Div_Octet    (rhs);
-		case vtBoolean:	return Div_Boolean  (rhs);
+		case vtData:	return Div_Data     (rhs);
 		case vtObject:	return Div_Object   (rhs);
 		}
 		return false;
@@ -2490,9 +2646,10 @@ public:
 	tVariantBlock Div_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Div_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Div_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Div_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Div_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Div_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnDiv, rhs); }
 	tVariantBlock Div_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
 	static int GuessTypeDiv(tGuessType l, tGuessType r)
@@ -2503,9 +2660,10 @@ public:
 		case gtInteger:		return GuessTypeDiv_Integer  (r);
 		case gtReal:		return GuessTypeDiv_Real     (r);
 		case gtNull:		return GuessTypeDiv_Null     (r);
+		case gtBoolean:		return GuessTypeDiv_Boolean  (r);
 		case gtString:		return GuessTypeDiv_String   (r);
 		case gtOctet:		return GuessTypeDiv_Octet    (r);
-		case gtBoolean:		return GuessTypeDiv_Boolean  (r);
+		case gtData:		return GuessTypeDiv_Data     (r);
 		case gtObject:		return GuessTypeDiv_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2517,9 +2675,10 @@ public:
 	static int GuessTypeDiv_Integer  (tGuessType r);
 	static int GuessTypeDiv_Real     (tGuessType r);
 	static int GuessTypeDiv_Null     (tGuessType r);
+	static int GuessTypeDiv_Boolean  (tGuessType r);
 	static int GuessTypeDiv_String   (tGuessType r);
 	static int GuessTypeDiv_Octet    (tGuessType r);
-	static int GuessTypeDiv_Boolean  (tGuessType r);
+	static int GuessTypeDiv_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeDiv_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2550,9 +2709,10 @@ public:
 		case vtInteger:	return Idiv_Integer  (rhs);
 		case vtReal:	return Idiv_Real     (rhs);
 		case vtNull:	return Idiv_Null     (rhs);
+		case vtBoolean:	return Idiv_Boolean  (rhs);
 		case vtString:	return Idiv_String   (rhs);
 		case vtOctet:	return Idiv_Octet    (rhs);
-		case vtBoolean:	return Idiv_Boolean  (rhs);
+		case vtData:	return Idiv_Data     (rhs);
 		case vtObject:	return Idiv_Object   (rhs);
 		}
 		return false;
@@ -2562,9 +2722,10 @@ public:
 	tVariantBlock Idiv_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Idiv_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Idiv_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIdiv, rhs); }
 	tVariantBlock Idiv_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
 
 	static int GuessTypeIdiv(tGuessType l, tGuessType r)
@@ -2575,9 +2736,10 @@ public:
 		case gtInteger:		return GuessTypeIdiv_Integer  (r);
 		case gtReal:		return GuessTypeIdiv_Real     (r);
 		case gtNull:		return GuessTypeIdiv_Null     (r);
+		case gtBoolean:		return GuessTypeIdiv_Boolean  (r);
 		case gtString:		return GuessTypeIdiv_String   (r);
 		case gtOctet:		return GuessTypeIdiv_Octet    (r);
-		case gtBoolean:		return GuessTypeIdiv_Boolean  (r);
+		case gtData:		return GuessTypeIdiv_Data     (r);
 		case gtObject:		return GuessTypeIdiv_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2589,9 +2751,10 @@ public:
 	static int GuessTypeIdiv_Integer  (tGuessType r);
 	static int GuessTypeIdiv_Real     (tGuessType r);
 	static int GuessTypeIdiv_Null     (tGuessType r);
+	static int GuessTypeIdiv_Boolean  (tGuessType r);
 	static int GuessTypeIdiv_String   (tGuessType r);
 	static int GuessTypeIdiv_Octet    (tGuessType r);
-	static int GuessTypeIdiv_Boolean  (tGuessType r);
+	static int GuessTypeIdiv_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeIdiv_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2622,9 +2785,10 @@ public:
 		case vtInteger:	return Mul_Integer  (rhs);
 		case vtReal:	return Mul_Real     (rhs);
 		case vtNull:	return Mul_Null     (rhs);
+		case vtBoolean:	return Mul_Boolean  (rhs);
 		case vtString:	return Mul_String   (rhs);
 		case vtOctet:	return Mul_Octet    (rhs);
-		case vtBoolean:	return Mul_Boolean  (rhs);
+		case vtData:	return Mul_Data     (rhs);
 		case vtObject:	return Mul_Object   (rhs);
 		}
 		return false;
@@ -2636,9 +2800,10 @@ public:
 	tVariantBlock Mul_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Mul_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Mul_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMul, rhs); }
 	tVariantBlock Mul_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
 
 	static int GuessTypeMul(tGuessType l, tGuessType r)
@@ -2649,12 +2814,12 @@ public:
 		case gtInteger:		return GuessTypeMul_Integer  (r);
 		case gtReal:		return GuessTypeMul_Real     (r);
 		case gtNull:		return GuessTypeMul_Null     (r);
+		case gtBoolean:		return GuessTypeMul_Boolean  (r);
 		case gtString:		return GuessTypeMul_String   (r);
 		case gtOctet:		return GuessTypeMul_Octet    (r);
-		case gtBoolean:		return GuessTypeMul_Boolean  (r);
+		case gtData:		return GuessTypeMul_Data     (r);
 		case gtObject:		return GuessTypeMul_Object   (r);
 		case gtAny:			return gtAny;
-
 		default:		return gtAny|gtEffective;
 		}
 	}
@@ -2663,9 +2828,10 @@ public:
 	static int GuessTypeMul_Integer  (tGuessType r);
 	static int GuessTypeMul_Real     (tGuessType r);
 	static int GuessTypeMul_Null     (tGuessType r);
+	static int GuessTypeMul_Boolean  (tGuessType r);
 	static int GuessTypeMul_String   (tGuessType r);
 	static int GuessTypeMul_Octet    (tGuessType r);
-	static int GuessTypeMul_Boolean  (tGuessType r);
+	static int GuessTypeMul_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeMul_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2694,9 +2860,10 @@ public:
 		case vtInteger:	return Add_Integer  (rhs);
 		case vtReal:	return Add_Real     (rhs);
 		case vtNull:	return Add_Null     (rhs);
+		case vtBoolean:	return Add_Boolean  (rhs);
 		case vtString:	return Add_String   (rhs);
 		case vtOctet:	return Add_Octet    (rhs);
-		case vtBoolean:	return Add_Boolean  (rhs);
+		case vtData:	return Add_Data     (rhs);
 		case vtObject:	return Add_Object   (rhs);
 		}
 		return false;
@@ -2708,9 +2875,10 @@ public:
 	tVariantBlock Add_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Add_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Add_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Add_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Add_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Add_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnAdd, rhs); }
 	tVariantBlock Add_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
 	static int GuessTypeAdd(tGuessType l, tGuessType r)
@@ -2721,9 +2889,10 @@ public:
 		case gtInteger:		return GuessTypeAdd_Integer  (r);
 		case gtReal:		return GuessTypeAdd_Real     (r);
 		case gtNull:		return GuessTypeAdd_Null     (r);
+		case gtBoolean:		return GuessTypeAdd_Boolean  (r);
 		case gtString:		return GuessTypeAdd_String   (r);
 		case gtOctet:		return GuessTypeAdd_Octet    (r);
-		case gtBoolean:		return GuessTypeAdd_Boolean  (r);
+		case gtData:		return GuessTypeAdd_Data     (r);
 		case gtObject:		return GuessTypeAdd_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2735,9 +2904,10 @@ public:
 	static int GuessTypeAdd_Integer  (tGuessType r);
 	static int GuessTypeAdd_Real     (tGuessType r);
 	static int GuessTypeAdd_Null     (tGuessType r);
+	static int GuessTypeAdd_Boolean  (tGuessType r);
 	static int GuessTypeAdd_String   (tGuessType r);
 	static int GuessTypeAdd_Octet    (tGuessType r);
-	static int GuessTypeAdd_Boolean  (tGuessType r);
+	static int GuessTypeAdd_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeAdd_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2766,9 +2936,10 @@ public:
 		case vtInteger:	return Sub_Integer  (rhs);
 		case vtReal:	return Sub_Real     (rhs);
 		case vtNull:	return Sub_Null     (rhs);
+		case vtBoolean:	return Sub_Boolean  (rhs);
 		case vtString:	return Sub_String   (rhs);
 		case vtOctet:	return Sub_Octet    (rhs);
-		case vtBoolean:	return Sub_Boolean  (rhs);
+		case vtData:	return Sub_Data     (rhs);
 		case vtObject:	return Sub_Object   (rhs);
 		}
 		return false;
@@ -2780,9 +2951,10 @@ public:
 	tVariantBlock Sub_Integer  (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_Real     (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_Null     (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Boolean  (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_String   (const tVariantBlock & rhs) const;
 	tVariantBlock Sub_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Boolean  (const tVariantBlock & rhs) const;
+	tVariantBlock Sub_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnSub, rhs); }
 	tVariantBlock Sub_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
 
 	static int GuessTypeSub(tGuessType l, tGuessType r)
@@ -2793,9 +2965,10 @@ public:
 		case gtInteger:		return GuessTypeSub_Integer  (r);
 		case gtReal:		return GuessTypeSub_Real     (r);
 		case gtNull:		return GuessTypeSub_Null     (r);
+		case gtBoolean:		return GuessTypeSub_Boolean  (r);
 		case gtString:		return GuessTypeSub_String   (r);
 		case gtOctet:		return GuessTypeSub_Octet    (r);
-		case gtBoolean:		return GuessTypeSub_Boolean  (r);
+		case gtData:		return GuessTypeSub_Data     (r);
 		case gtObject:		return GuessTypeSub_Object   (r);
 		case gtAny:			return gtAny;
 
@@ -2807,9 +2980,10 @@ public:
 	static int GuessTypeSub_Integer  (tGuessType r);
 	static int GuessTypeSub_Real     (tGuessType r);
 	static int GuessTypeSub_Null     (tGuessType r);
+	static int GuessTypeSub_Boolean  (tGuessType r);
 	static int GuessTypeSub_String   (tGuessType r);
 	static int GuessTypeSub_Octet    (tGuessType r);
-	static int GuessTypeSub_Boolean  (tGuessType r);
+	static int GuessTypeSub_Data     (tGuessType r) { return gtAny|gtEffective; }
 	static int GuessTypeSub_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
@@ -2847,9 +3021,10 @@ public: // キャスト
 		case vtInteger:	return CastToInteger_Integer  ();
 		case vtReal:	return CastToInteger_Real     ();
 		case vtNull:	return CastToInteger_Null     ();
+		case vtBoolean:	return CastToInteger_Boolean  ();
 		case vtString:	return CastToInteger_String   ();
 		case vtOctet:	return CastToInteger_Octet    ();
-		case vtBoolean:	return CastToInteger_Boolean  ();
+		case vtData:	return CastToInteger_Data     ();
 		case vtObject:	return CastToInteger_Object   ();
 		}
 		return (risse_int64)0;
@@ -2861,9 +3036,10 @@ public: // キャスト
 	risse_int64 CastToInteger_Integer  () const { return AsInteger(); }
 	risse_int64 CastToInteger_Real     () const { return (risse_int64)AsReal(); }
 	risse_int64 CastToInteger_Null     () const { ThrowIllegalOperationMethod(mnInteger); return (risse_int64)0; }
+	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
 	risse_int64 CastToInteger_String   () const;
 	risse_int64 CastToInteger_Octet    () const { ThrowIllegalOperationMethod(mnInteger); return (risse_int64)0; }
-	risse_int64 CastToInteger_Boolean  () const { return (risse_int64)CastToBoolean_Boolean(); }
+	risse_int64 CastToInteger_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnInteger).CastToInteger(); }
 	risse_int64 CastToInteger_Object   () const { return Invoke_Object(mnInteger).CastToInteger(); }
 
 	static int GuessTypeCastToInteger(tGuessType l)
@@ -2874,10 +3050,11 @@ public: // キャスト
 		case gtInteger:		return gtInteger;
 		case gtReal:		return gtInteger;
 		case gtNull:		return gtError		|gtEffective;
+		case gtBoolean:		return gtInteger;
 		case gtString:		return gtInteger;
 		case gtOctet:		return gtError		|gtEffective;
-		case gtBoolean:		return gtInteger;
-		case gtObject:		return gtInteger	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtData:		return gtInteger	|gtEffective;	// 何が呼ばれるか分からないが強制的に Integer にキャストされる
+		case gtObject:		return gtInteger	|gtEffective;	// 何が呼ばれるか分からないが強制的に Integer にキャストされる
 		case gtAny:			return gtInteger	|gtEffective;
 
 		default:		return gtAny|gtEffective;
@@ -2896,9 +3073,10 @@ public: // キャスト
 		case vtInteger:	return CastToReal_Integer  ();
 		case vtReal:	return CastToReal_Real     ();
 		case vtNull:	return CastToReal_Null     ();
+		case vtBoolean:	return CastToReal_Boolean  ();
 		case vtString:	return CastToReal_String   ();
 		case vtOctet:	return CastToReal_Octet    ();
-		case vtBoolean:	return CastToReal_Boolean  ();
+		case vtData:	return CastToReal_Data     ();
 		case vtObject:	return CastToReal_Object   ();
 		}
 		return false;
@@ -2910,9 +3088,10 @@ public: // キャスト
 	risse_real CastToReal_Integer  () const { return AsInteger(); }
 	risse_real CastToReal_Real     () const { return AsReal(); }
 	risse_real CastToReal_Null     () const { ThrowIllegalOperationMethod(mnReal); return (risse_real)0.0; }
+	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
 	risse_real CastToReal_String   () const { return (risse_real)Plus_String(); /* Plus_String の戻りを risse_real に再キャスト */ }
 	risse_real CastToReal_Octet    () const { ThrowIllegalOperationMethod(mnReal); return (risse_real)0.0; }
-	risse_real CastToReal_Boolean  () const { return (risse_real)(int)CastToBoolean_Boolean(); }
+	risse_real CastToReal_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnReal).CastToReal(); }
 	risse_real CastToReal_Object   () const { return Invoke_Object(mnReal).CastToReal(); }
 
 	static int GuessTypeCastToReal(tGuessType l)
@@ -2923,10 +3102,11 @@ public: // キャスト
 		case gtInteger:		return gtReal;
 		case gtReal:		return gtReal;
 		case gtNull:		return gtError	|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtReal;
 		case gtString:		return gtReal;
 		case gtOctet:		return gtError	|gtEffective;	// 例外が発生するため
-		case gtBoolean:		return gtReal;
-		case gtObject:		return gtReal	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtData:		return gtReal	|gtEffective;	// 何が呼ばれるか分からないが強制的に Real にキャストされる
+		case gtObject:		return gtReal	|gtEffective;	// 何が呼ばれるか分からないが強制的に Real にキャストされる
 		case gtAny:			return gtReal	|gtEffective;
 
 		default:		return gtAny|gtEffective;
@@ -2945,9 +3125,10 @@ public: // キャスト
 		case vtInteger:	return CastToBoolean_Integer  ();
 		case vtReal:	return CastToBoolean_Real     ();
 		case vtNull:	return CastToBoolean_Null     ();
+		case vtBoolean:	return CastToBoolean_Boolean  ();
 		case vtString:	return CastToBoolean_String   ();
 		case vtOctet:	return CastToBoolean_Octet    ();
-		case vtBoolean:	return CastToBoolean_Boolean  ();
+		case vtData:	return CastToBoolean_Data     ();
 		case vtObject:	return CastToBoolean_Object   ();
 		}
 		return false;
@@ -2959,9 +3140,10 @@ public: // キャスト
 	bool CastToBoolean_Integer  () const { return AsInteger() != 0; }
 	bool CastToBoolean_Real     () const { return AsReal() != 0.0; }
 	bool CastToBoolean_Null     () const { return false; /* null は偽 */ }
+	bool CastToBoolean_Boolean  () const { return AsBoolean().Value; }
 	bool CastToBoolean_String   () const { return !AsString().IsEmpty(); }
 	bool CastToBoolean_Octet    () const { return !AsOctet().IsEmpty(); }
-	bool CastToBoolean_Boolean  () const { return Type == BooleanTrue; }
+	bool CastToBoolean_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnBoolean).CastToBoolean(); }
 	bool CastToBoolean_Object   () const { return Invoke_Object(mnBoolean).CastToBoolean(); }
 
 	static int GuessTypeCastToBoolean(tGuessType l)
@@ -2972,10 +3154,11 @@ public: // キャスト
 		case gtInteger:		return gtBoolean;
 		case gtReal:		return gtBoolean;
 		case gtNull:		return gtBoolean;
+		case gtBoolean:		return gtBoolean;
 		case gtString:		return gtBoolean;
 		case gtOctet:		return gtBoolean;
-		case gtBoolean:		return gtBoolean;
-		case gtObject:		return gtBoolean	|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
+		case gtData:		return gtBoolean	|gtEffective;	// 何が呼ばれるか分からないが強制的に Boolean にキャストされる
+		case gtObject:		return gtBoolean	|gtEffective;	// 何が呼ばれるか分からないが強制的に Boolean にキャストされる
 		case gtAny:			return gtBoolean	|gtEffective;
 
 		default:		return gtAny|gtEffective;
@@ -2994,9 +3177,10 @@ public: // キャスト
 		case vtInteger:	return CastToString_Integer  ();
 		case vtReal:	return CastToString_Real     ();
 		case vtNull:	return CastToString_Null     ();
+		case vtBoolean:	return CastToString_Boolean  ();
 		case vtString:	return CastToString_String   ();
 		case vtOctet:	return CastToString_Octet    ();
-		case vtBoolean:	return CastToString_Boolean  ();
+		case vtData:	return CastToString_Data     ();
 		case vtObject:	return CastToString_Object   ();
 		}
 		return tString();
@@ -3008,9 +3192,10 @@ public: // キャスト
 	tString CastToString_Integer  () const;
 	tString CastToString_Real     () const;
 	tString CastToString_Null     () const { ThrowIllegalOperationMethod(mnString); return tString();  }
+	tString CastToString_Boolean  () const;
 	tString CastToString_String   () const { return AsString(); }
 	tString CastToString_Octet    () const { ThrowIllegalOperationMethod(mnString); return tString();  }
-	tString CastToString_Boolean  () const;
+	tString CastToString_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnString).CastToString(); }
 	tString CastToString_Object   () const { return Invoke_Object(mnString).CastToString(); }
 
 	static int GuessTypeCastToString(tGuessType l)
@@ -3021,9 +3206,10 @@ public: // キャスト
 		case gtInteger:		return gtString;
 		case gtReal:		return gtString;
 		case gtNull:		return gtString;
+		case gtBoolean:		return gtString;
 		case gtString:		return gtString;
 		case gtOctet:		return gtError		|gtEffective;	// 例外が発生するため
-		case gtBoolean:		return gtString;
+		case gtData:		return gtString		|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
 		case gtObject:		return gtString		|gtEffective;	// 何が呼ばれるか分からないが強制的に String にキャストされる
 		case gtAny:			return gtString		|gtEffective;
 
@@ -3043,9 +3229,10 @@ public: // キャスト
 		case vtInteger:	return CastToOctet_Integer  ();
 		case vtReal:	return CastToOctet_Real     ();
 		case vtNull:	return CastToOctet_Null     ();
+		case vtBoolean:	return CastToOctet_Boolean  ();
 		case vtString:	return CastToOctet_String   ();
 		case vtOctet:	return CastToOctet_Octet    ();
-		case vtBoolean:	return CastToOctet_Boolean  ();
+		case vtData:	return CastToOctet_Data     ();
 		case vtObject:	return CastToOctet_Object   ();
 		}
 		return tOctet();
@@ -3057,9 +3244,10 @@ public: // キャスト
 	tOctet CastToOctet_Integer  () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
 	tOctet CastToOctet_Real     () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
 	tOctet CastToOctet_Null     () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Boolean  () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
 	tOctet CastToOctet_String   () const;
 	tOctet CastToOctet_Octet    () const { return AsOctet();  }
-	tOctet CastToOctet_Boolean  () const { ThrowIllegalOperationMethod(mnOctet); return tOctet(); }
+	tOctet CastToOctet_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnOctet).CastToOctet(); }
 	tOctet CastToOctet_Object   () const { return Invoke_Object(mnOctet).CastToOctet(); }
 
 	static int GuessTypeCastToOctet(tGuessType l)
@@ -3070,9 +3258,10 @@ public: // キャスト
 		case gtInteger:		return gtError		|gtEffective;	// 例外が発生するため
 		case gtReal:		return gtError		|gtEffective;	// 例外が発生するため
 		case gtNull:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
 		case gtString:		return gtOctet;
 		case gtOctet:		return gtOctet;
-		case gtBoolean:		return gtError		|gtEffective;	// 例外が発生するため
+		case gtData:		return gtOctet		|gtEffective;	// 何が呼ばれるか分からないが強制的に Octet にキャストされる
 		case gtObject:		return gtOctet		|gtEffective;	// 何が呼ばれるか分からないが強制的に Octet にキャストされる
 		case gtAny:			return gtOctet		|gtEffective;
 
@@ -3112,9 +3301,10 @@ public: // ハッシュ/ヒント
 		case vtInteger:	return GetHint_Integer  ();
 		case vtReal:	return GetHint_Real     ();
 		case vtNull:	return GetHint_Null     ();
+		case vtBoolean:	return GetHint_Boolean  ();
 		case vtString:	return GetHint_String   ();
 		case vtOctet:	return GetHint_Octet    ();
-		case vtBoolean:	return GetHint_Boolean  ();
+		case vtData:	return GetHint_Object   ();
 		case vtObject:	return GetHint_Object   ();
 		}
 		return 0;
@@ -3124,9 +3314,10 @@ public: // ハッシュ/ヒント
 	risse_uint32 GetHint_Integer  () const { return GetHash_Integer(); }
 	risse_uint32 GetHint_Real     () const { return GetHash_Real(); }
 	risse_uint32 GetHint_Null     () const { return GetHash_Null(); }
+	risse_uint32 GetHint_Boolean  () const { return GetHash_Boolean(); }
 	risse_uint32 GetHint_String   () const { return AsString().GetHint(); }
 	risse_uint32 GetHint_Octet    () const { return AsOctet().GetHint(); }
-	risse_uint32 GetHint_Boolean  () const { return GetHash_Boolean(); }
+	risse_uint32 GetHint_Data     () const;
 	risse_uint32 GetHint_Object   () const;
 
 	//-----------------------------------------------------------------------
@@ -3141,9 +3332,10 @@ public: // ハッシュ/ヒント
 		case vtInteger:	SetHint_Integer  (hint); return;
 		case vtReal:	SetHint_Real     (hint); return;
 		case vtNull:	SetHint_Null     (hint); return;
+		case vtBoolean:	SetHint_Boolean  (hint); return;
 		case vtString:	SetHint_String   (hint); return;
 		case vtOctet:	SetHint_Octet    (hint); return;
-		case vtBoolean:	SetHint_Boolean  (hint); return;
+		case vtData:	SetHint_Data     (hint); return;
 		case vtObject:	SetHint_Object   (hint); return;
 		}
 	}
@@ -3152,9 +3344,10 @@ public: // ハッシュ/ヒント
 	void SetHint_Integer  (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
 	void SetHint_Real     (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
 	void SetHint_Null     (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Boolean  (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
 	void SetHint_String   (risse_uint32 hint) const { AsString().SetHint(hint); }
 	void SetHint_Octet    (risse_uint32 hint) const { AsOctet().SetHint(hint); }
-	void SetHint_Boolean  (risse_uint32 hint) const { (void)hint; return; /* ヒントを格納する場所がない */ }
+	void SetHint_Data     (risse_uint32 hint) const;
 	void SetHint_Object   (risse_uint32 hint) const;
 
 	//-----------------------------------------------------------------------
@@ -3169,9 +3362,10 @@ public: // ハッシュ/ヒント
 		case vtInteger:	return GetHash_Integer  ();
 		case vtReal:	return GetHash_Real     ();
 		case vtNull:	return GetHash_Null     ();
+		case vtBoolean:	return GetHash_Boolean  ();
 		case vtString:	return GetHash_String   ();
 		case vtOctet:	return GetHash_Octet    ();
-		case vtBoolean:	return GetHash_Boolean  ();
+		case vtData:	return GetHash_Object   ();
 		case vtObject:	return GetHash_Object   ();
 		}
 		return ~static_cast<risse_uint32>(0);
@@ -3184,12 +3378,13 @@ public: // ハッシュ/ヒント
 	risse_uint32 GetHash_Integer  () const;
 	risse_uint32 GetHash_Real     () const;
 	risse_uint32 GetHash_Null     () const { return 0x9b371c72; /* 唯一のインスタンス */ }
+	risse_uint32 GetHash_Boolean  () const
+					{ return CastToBoolean_Boolean()?0xab2ed843:0xbd8b88c4; }
 	risse_uint32 GetHash_String   () const
 					{ return AsString().GetHash(); }
 	risse_uint32 GetHash_Octet    () const
 					{ return AsOctet().GetHash(); }
-	risse_uint32 GetHash_Boolean  () const
-					{ return CastToBoolean_Boolean()?0xab2ed843:0xbd8b88c4; }
+	risse_uint32 GetHash_Data     () const;
 	risse_uint32 GetHash_Object   () const;
 
 public: // ユーティリティ
@@ -3209,9 +3404,10 @@ public: // ユーティリティ
 		case vtInteger:	return AsHumanReadable_Integer  (maxlen);
 		case vtReal:	return AsHumanReadable_Real     (maxlen);
 		case vtNull:	return AsHumanReadable_Null     (maxlen);
+		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
 		case vtString:	return AsHumanReadable_String   (maxlen);
 		case vtOctet:	return AsHumanReadable_Octet    (maxlen);
-		case vtBoolean:	return AsHumanReadable_Boolean  (maxlen);
+		case vtData:	return AsHumanReadable_Data   (maxlen);
 		case vtObject:	return AsHumanReadable_Object   (maxlen);
 		}
 		return tString();
@@ -3223,12 +3419,14 @@ public: // ユーティリティ
 	tString AsHumanReadable_Real     (risse_size maxlen) const
 					{ return CastToString_Real(); }
 	tString AsHumanReadable_Null     (risse_size maxlen) const;
+	tString AsHumanReadable_Boolean  (risse_size maxlen) const
+					{ return CastToString_Boolean(); }
 	tString AsHumanReadable_String   (risse_size maxlen) const
 					{ return AsString().AsHumanReadable(maxlen); }
 	tString AsHumanReadable_Octet    (risse_size maxlen) const
 					{ return AsOctet().AsHumanReadable(maxlen); }
-	tString AsHumanReadable_Boolean  (risse_size maxlen) const
-					{ return CastToString_Boolean(); }
+	tString AsHumanReadable_Data     (risse_size maxlen) const
+					{ return tString(); /* incomplete */ }
 	tString AsHumanReadable_Object   (risse_size maxlen) const
 					{ return tString(); /* incomplete */ }
 
@@ -3339,11 +3537,12 @@ public: // ユーティリティ
 		fprintf(stderr, "tString: %d\n", sizeof(tString));
 		fprintf(stderr, "tOctet: %d\n", sizeof(tOctet));
 		fprintf(stderr, "tObject: %d\n", sizeof(tObject));
+		fprintf(stderr, "tBoolean: %d\n", sizeof(tBoolean));
 		fprintf(stderr, "tVoid: %d\n", sizeof(tVoid));
 		fprintf(stderr, "tInteger: %d\n", sizeof(tInteger));
 		fprintf(stderr, "tReal: %d\n", sizeof(tReal));
-		fprintf(stderr, "tBoolean: %d\n", sizeof(tBoolean));
 		fprintf(stderr, "tNull: %d\n", sizeof(tNull));
+		fprintf(stderr, "tData: %d\n", sizeof(tData));
 	}
 
 };

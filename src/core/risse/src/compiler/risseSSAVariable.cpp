@@ -308,9 +308,10 @@ void tSSAVariable::SuggestValue(tVariant::tType type)
 	case tVariant::vtNull:		if(ValueState <= vsConstant)
 								{ Value.SetTypeTag(tVariant::vtNull); ValueState = vsConstant; }
 								return;
+	case tVariant::vtBoolean:	break;
 	case tVariant::vtString:	break;
 	case tVariant::vtOctet:		break;
-	case tVariant::vtBoolean:	break;
+	case tVariant::vtData:		break;
 	case tVariant::vtObject:	break;
 	}
 

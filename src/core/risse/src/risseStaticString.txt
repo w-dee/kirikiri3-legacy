@@ -175,3 +175,5 @@ ss_Dictionary						Dictionary						#!< "Dictionary" クラス名
 ss_count							count							#!< "count" プロパティ名
 ss_clear							clear							#!< "clear" メソッド名
 ss_eachPair							eachPair						#!< "eachPair" メソッド名
+ss_data								data							#!< "data" 型名
+ss_Data								Data							#!< "Data" クラス名

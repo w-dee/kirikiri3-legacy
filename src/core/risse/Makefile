@@ -67,6 +67,7 @@ CPPFILES =  \
 			src/risseCodeBlock.cpp                             \
 			src/risseCodeExecutor.cpp                          \
 			src/risseConfig.cpp                                \
+			src/risseDataClass.cpp                             \
 			src/risseDictionaryClass.cpp                       \
 			src/risseExceptionClass.cpp                        \
 			src/risseFunctionClass.cpp                         \

@@ -27,6 +27,7 @@
 #include "risseExceptionClass.h"
 #include "risseBindingClass.h"
 #include "risseScriptBlockClass.h"
+#include "risseDataClass.h"
 #include "risse_parser/risseRisseScriptBlockClass.h"
 
 #else
@@ -53,6 +54,7 @@ RISSE_BUILTINCLASSES_CLASS(Octet                           )
 RISSE_BUILTINCLASSES_CLASS(Number                          )
 RISSE_BUILTINCLASSES_CLASS(Integer                         )
 RISSE_BUILTINCLASSES_CLASS(Real                            )
+RISSE_BUILTINCLASSES_CLASS(Data                            )
 RISSE_BUILTINCLASSES_CLASS(Dictionary                      )
 RISSE_BUILTINCLASSES_CLASS(SourcePoint                     )
 RISSE_BUILTINCLASSES_CLASS(Throwable                       )

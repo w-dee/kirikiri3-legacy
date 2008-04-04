@@ -435,6 +435,10 @@ public: // Primitive関連
 	//! @param		engine		スクリプトエンジンインスタンス
 	tPrimitiveClassBase * GetPrimitiveClass(tScriptEngine * engine) const;
 
+public: // Data関連
+	//! @brief		データオブジェクトを得る
+	void * GetData() const { return AsData().Data; }
+
 public: // Object関連
 	//! @brief		オブジェクトインターフェースがマッチするかどうかを調べる
 	//! @param		rhs			右辺値

@@ -266,7 +266,12 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 			break;
 
 		case tMemberAttribute::mcConst: // 定数
-			return rvMemberIsReadOnly; // 書き込めません
+			// プロパティの場合は書き込みが成功する可能性があるので注意。
+			// もっとも、もちろん、プロパティの場合はメンバそのものに書き込みが
+			// 行われるわけではなく、プロパティハンドラが起動される。
+			if(attrib.GetProperty() != tMemberAttribute::pcProperty)
+				return rvMemberIsReadOnly; // 書き込めません
+			break; // 下で処理
 		}
 
 		switch(attrib.GetProperty())
@@ -319,7 +324,7 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 			(
 				flags.Has(tOperateFlags::ofMemberEnsure) ?
 						(tOperateFlags::ofFinalOnly|tOperateFlags::ofUseClassMembersRule) :
-						(                                tOperateFlags::ofUseClassMembersRule) 
+						(                           tOperateFlags::ofUseClassMembersRule) 
 			);
 
 	// モジュールを探す

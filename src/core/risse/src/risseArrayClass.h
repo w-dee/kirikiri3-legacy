@@ -53,6 +53,9 @@ public: // Risse用メソッドなど
 	size_t get_length() const;
 	void set_length(size_t new_size);
 	tString join(const tMethodArgument & args);
+	tVariant remove(const tVariant & value, const tMethodArgument & args);
+	tVariant erase(risse_offset ofs_index);
+	bool has(const tVariant & value);
 };
 //---------------------------------------------------------------------------
 
@@ -78,6 +81,46 @@ public:
 public:
 };
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Enumerable" クラス状の物を簡単にイテレートするためのクラス
+// TODO: Array ではなくて enumerable への対応？
+//---------------------------------------------------------------------------
+class tEnumerableIterator : public tCollectee
+{
+	const tVariant & Array; //!< 配列
+	risse_size Count; //!< 配列の値
+	tVariant Value; //!< 現在の値
+	risse_size Index; //!< 現在のイテレーションのインデックス
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		array		Enumerable なオブジェクト(vtObjectあるいはvtDataであること)
+	tEnumerableIterator(const tVariant & array);
+
+	//! @brief		配列から次の要素を取り出す
+	//! @return		配列にすでに要素がない場合は false
+	//! @note		Index と Value にそれぞれインデックスとそれに対応した値が格納されるので
+	//!				GetIndex() や GetValue() で取得すること
+	bool Next();
+
+	//! @brief		配列の要素数を取り出す
+	//! @return		配列の要素数
+	risse_size GetCount() const { return Count; }
+
+	//! @brief		現在のインデックスを取得する
+	//! @return		現在のインデックス
+	risse_size GetIndex() const { return Index; }
+
+	//! @brief		現在の値を取得する
+	//! @return		現在の値
+	const tVariant & GetValue() const { return Value; }
+
+
+};
+//---------------------------------------------------------------------------
+
 } // namespace Risse
 
 

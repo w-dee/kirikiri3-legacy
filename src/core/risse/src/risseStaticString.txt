@@ -41,6 +41,9 @@ ss_push								push							#!< "push" メソッド名
 ss_pop								pop								#!< "pop" メソッド名
 ss_unshift							unshift							#!< "unshift" メソッド名
 ss_shift							shift							#!< "shift" メソッド名
+ss_has								has								#!< "has" メソッド名
+ss_remove							remove							#!< "remove" メソッド名
+ss_erase							erase							#!< "erase" メソッド名
 ss_charAt							charAt							#!< "charAt" メソッド名
 ss_length							length							#!< "length" プロパティ名
 ss_substr							substr							#!< "substr" メソッド名

@@ -227,7 +227,77 @@ tString tArrayInstance::join(const tMethodArgument & args)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tVariant tArrayInstance::remove(const tVariant & value, const tMethodArgument & args)
+{
+	// 配列中から value を === 演算子で探し、見つかれば削除し、valueを返す
+	// 見つからなければ default の値を返す
+	// 第２引数 = すべて削除するか (デフォルト = true)
+	bool remove_all = args.HasArgument(1) ? args[1].operator bool() : true;
+	bool any_removed = false;
 
+	volatile tSynchronizer sync(this); // sync
+
+	for(tArray::iterator i = Array.begin(); i != Array.end(); /**/)
+	{
+		if(i->DiscEqual(value))
+		{
+			i = Array.erase(i);
+			any_removed = true;
+			if(!remove_all) break;
+		}
+		else
+		{
+			i++;
+		}
+	}
+
+	return any_removed ? value : GetPropertyDirect(ss_default);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tArrayInstance::erase(risse_offset ofs_index)
+{
+	// 配列中の idx にある要素を削除する
+	volatile tSynchronizer sync(this); // sync
+
+	if(ofs_index < 0) ofs_index += Array.size(); // 折り返す
+
+	risse_size index = static_cast<risse_size>(ofs_index);
+	if(index < Array.size() && ofs_index >= 0)
+	{
+		// 範囲内であればそこの要素を削除し、そこにあった値を返す
+		tVariant val = Array[index];
+		Array.erase(Array.begin() + index);
+		return val;
+	}
+	else
+	{
+		// 範囲外ならば default を返す
+		return GetPropertyDirect(ss_default);
+	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tArrayInstance::has(const tVariant & value)
+{
+	// 配列中に value があるかどうかを返す
+	// 比較には === 演算子を用いる
+	volatile tSynchronizer sync(this); // sync
+
+	for(tArray::iterator i = Array.begin(); i != Array.end(); i++)
+	{
+		if(i->DiscEqual(value))
+			return true;
+	}
+
+	return false;
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -265,6 +335,9 @@ void tArrayClass::RegisterMembers()
 	BindFunction(this, ss_shift, &tArrayInstance::shift);
 	BindProperty(this, ss_length, &tArrayInstance::get_length, &tArrayInstance::set_length);
 	BindFunction(this, ss_join, &tArrayInstance::join);
+	BindFunction(this, ss_remove, &tArrayInstance::remove);
+	BindFunction(this, ss_erase, &tArrayInstance::erase);
+	BindFunction(this, ss_has, &tArrayInstance::has);
 }
 //---------------------------------------------------------------------------
 
@@ -275,6 +348,37 @@ tVariant tArrayClass::ovulate()
 	return tVariant(new tArrayInstance());
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tEnumerableIterator::tEnumerableIterator(const tVariant & array) : Array(array)
+{
+	Count = (risse_int64)Array.GetPropertyDirect(Array.GetScriptEngine(), ss_length);
+	Index = (risse_size)(risse_offset)-1;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+bool tEnumerableIterator::Next()
+{
+	Index ++;
+	if(Index >= Count) return false;
+	Value = Array.Invoke(Array.GetScriptEngine(), mnIGet, tVariant((risse_int64)Index));
+	return true;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
 
 } /* namespace Risse */
 

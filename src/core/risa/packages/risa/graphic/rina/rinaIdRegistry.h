@@ -18,7 +18,7 @@
 #include "risa/common/Singleton.h"
 #include "risa/common/TypeCast.h"
 
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 
 
@@ -41,9 +41,9 @@ struct tFourCharId
 //---------------------------------------------------------------------------
 //! @brief		IDレジストリ
 //---------------------------------------------------------------------------
-class tIdRegistry : public Risa::singleton_base<tIdRegistry>, Risa::manual_start<tIdRegistry>
+class tIdRegistry : public singleton_base<tIdRegistry>, manual_start<tIdRegistry>
 {
-	typedef Risa::singleton_base<tIdRegistry> inherited;
+	typedef singleton_base<tIdRegistry> inherited;
 
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 

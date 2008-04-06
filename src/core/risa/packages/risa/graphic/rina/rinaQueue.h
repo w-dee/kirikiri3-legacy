@@ -18,7 +18,7 @@
 #include "risa/packages/risa/graphic/rina/rinaNode.h"
 #include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
 
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 
 
@@ -38,10 +38,10 @@ class tQueueNode;
 //---------------------------------------------------------------------------
 //! @brief		レンダリング要求の基底クラス
 //---------------------------------------------------------------------------
-class tRenderRequest : public Risa::tPolymorphic
+class tRenderRequest : public tPolymorphic
 {
 public:
-	typedef Risa::tPolymorphic inherited;
+	typedef tPolymorphic inherited;
 private:
 
 	tQueueNode * Parent; //!< 親キューノード
@@ -100,10 +100,10 @@ class tQueue;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューノード
 //---------------------------------------------------------------------------
-class tQueueNode : public Risa::tPolymorphic
+class tQueueNode : public tPolymorphic
 {
 public:
-	typedef Risa::tPolymorphic inherited;
+	typedef tPolymorphic inherited;
 private:
 
 protected:
@@ -188,7 +188,7 @@ public:
 
 
 class tInputPin;
-class tGraph;
+class tGraphInstance;
 //---------------------------------------------------------------------------
 //! @brief		コマンドキューを作成するためのオブジェクト
 //---------------------------------------------------------------------------
@@ -196,13 +196,13 @@ class tQueueBuilder : public tCollectee
 {
 	typedef tCollectee inherited;
 
-	tGraph * Graph; //!< グラフインスタンス
+	tGraphInstance * GraphInstance; //!< グラフインスタンス
 
 	tIdRegistry::tRenderGeneration	 RenderGeneration; //!< レンダリングした世代
 
 	//!@brief 最長距離で比較する比較関数を用いたマップのtypedef
 	typedef
-		gc_map<tProcessNode *, int, tProcessNode::tLongestDistanceComparator> tBuildQueueMap;
+		gc_map<tNodeInstance *, int, tNodeInstance::tLongestDistanceComparator> tBuildQueueMap;
 
 	//!@brief 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
 	tBuildQueueMap BuildQueueMap;
@@ -212,7 +212,7 @@ class tQueueBuilder : public tCollectee
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph		グラフインスタンス
-	tQueueBuilder(tGraph * graph);
+	tQueueBuilder(tGraphInstance * graph);
 
 	//! @brief		レンダリング世代を得る
 	//! @return		レンダリング世代
@@ -220,11 +220,11 @@ public:
 
 	//! @brief		コマンドキューを作成する
 	//! @param		node		ルートのプロセスノード
-	void Build(tProcessNode * node);
+	void Build(tNodeInstance * node);
 
 	//! @brief		キュー組み立てを行うための次のノードをpushする
 	//! @param		node		ノード
-	void Push(tProcessNode * node);
+	void Push(tNodeInstance * node);
 
 	//! @brief		ルートとなるコマンドキューノードを登録する
 	//! @param		node	ルートとなるコマンドキューノード

@@ -16,7 +16,7 @@
 #include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
 
 
-namespace Rina {
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(47046,39674,50984,17886,46749,51427,61988,64154);
 //---------------------------------------------------------------------------
 

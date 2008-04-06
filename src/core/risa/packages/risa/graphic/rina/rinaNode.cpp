@@ -15,9 +15,13 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaNode.h"
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
+#include "risse/include/risseNativeBinder.h"
+#include "risse/include/risseObjectClass.h"
+#include "risse/include/risseStaticStrings.h"
+#include "risse/include/risseExceptionClass.h"
 
 
-namespace Rina {
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 //---------------------------------------------------------------------------
 
@@ -25,36 +29,102 @@ RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 
 
 //---------------------------------------------------------------------------
-tProcessNode::tProcessNode(tGraph * graph)
+tNodeInstance::tNodeInstance(tGraphInstance * graph)
 {
-	Graph = graph;
+	GraphInstance = graph;
 	LongestDistance = 0;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tProcessNode::CalcLongestDistance()
+void tNodeInstance::CalcLongestDistance()
 {
-	RISSE_ASSERT_CS_LOCKED(GetGraph()->GetCS());
+	RISSE_ASSERT_CS_LOCKED(*GetGraphInstance()->GetCS());
 
 	risse_size longest = risse_size_max;
-	risse_size output_pincount = GetOutputPins().GetCount();
+	risse_size output_pincount = GetOutputPinArrayInstance().GetCount();
 	for(risse_size i = 0; i < output_pincount; i++)
 	{
-		risse_size dist = GetOutputPins().At(i)->GetLongestDistance();
+		risse_size dist = GetOutputPinArrayInstance().At(i)->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist) longest = dist;
 	}
 	LongestDistance = longest + 1;
 
 	// 子に再帰
-	risse_size input_pincount = GetInputPins().GetCount();
+	risse_size input_pincount = GetInputPinArrayInstance().GetCount();
 	for(risse_size i = 0; i < input_pincount; i++)
 	{
-		GetInputPins().At(i)->GetOutputPin()->GetNode()->CalcLongestDistance();
+		GetInputPinArrayInstance().At(i)->GetOutputPinInstance()->
+			GetNodeInstance()->CalcLongestDistance();
 	}
 }
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNodeInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNodeInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tNodeClass::tNodeClass(tScriptEngine * engine) :
+	inherited(tSS<'G','r','a','p','h'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tNodeClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tNodeClass::ovulate);
+	BindFunction(this, ss_construct, &tNodeInstance::construct);
+	BindFunction(this, ss_initialize, &tNodeInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tNodeClass::ovulate()
+{
+	// このクラスのインスタンスは生成できない
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 

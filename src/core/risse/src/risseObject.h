@@ -97,6 +97,11 @@ public:
 	//! @brief		CS を持っているかどうかを返す
 	bool HasCS() const { return CS != NULL; }
 
+	//! @brief		CS を返す
+	//! @note		CS のロックは tSynchronizer の方を使うこと。
+	//!				これを使うのは RISSE_ASSERT_CS_LOCKED ぐらいにしておくこと。
+	tCriticalSection * GetCS() const { return CS; }
+
 	//! @brief		synchronize を行うクラス
 	class tSynchronizer
 	{

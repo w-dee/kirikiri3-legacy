@@ -14,24 +14,26 @@
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
+#include "risa/common/RisseEngine.h"
+#include "risa/packages/risa/graphic/rina/rina.h"
 
 
-namespace Rina {
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(31046,8618,37955,16475,39331,46428,7001,14742);
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-tPin::tPin()
+tPinInstance::tPinInstance()
 {
-	Node = NULL;
+	NodeInstance = NULL;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tPin::SuggestType(tPin * pin, bool * strong_suggest)
+risse_uint32 tPinInstance::SuggestType(tPinInstance * pin, bool * strong_suggest)
 {
 	const gc_vector<risse_uint32> & this_types = GetSupportedTypes();
 	const gc_vector<risse_uint32> &  his_types = pin->GetSupportedTypes();
@@ -57,21 +59,93 @@ risse_uint32 tPin::SuggestType(tPin * pin, bool * strong_suggest)
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
 //---------------------------------------------------------------------------
-tInputPin::tInputPin()
+void tPinInstance::construct()
 {
-	OutputPin = NULL;
+	// デフォルトでは何もしない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tInputPin::Negotiate(tOutputPin * output_pin)
+void tPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tPinClass::tPinClass(tScriptEngine * engine) :
+	inherited(tSS<'P','i','n'>(), engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPinClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tPinClass::ovulate);
+	BindFunction(this, ss_construct, &tPinInstance::construct);
+	BindFunction(this, ss_initialize, &tPinInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tPinClass::ovulate()
+{
+	// このクラスのインスタンスは生成できない
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tInputPinInstance::tInputPinInstance()
+{
+	OutputPinInstance = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_uint32 tInputPinInstance::Negotiate(tOutputPinInstance * output_pin)
 {
 	bool this_strong_suggestion;
 	risse_uint32 this_suggested_type = SuggestType(output_pin, &this_strong_suggestion);
@@ -94,62 +168,135 @@ risse_uint32 tInputPin::Negotiate(tOutputPin * output_pin)
 
 
 //---------------------------------------------------------------------------
-void tInputPin::InternalConnect(tOutputPin * output_pin)
+void tInputPinInstance::InternalConnect(tOutputPinInstance * output_pin)
 {
 	AgreedType = Negotiate(output_pin);
 //	if(AgreedType == 0) { /* TODO: 例外 */ }
 	RISSE_ASSERT(AgreedType != 0);
-	if(OutputPin)
+	if(OutputPinInstance)
 	{
-		OutputPin->Disconnect(this);
-		OutputPin->GetNode()->CalcLongestDistance();
+		OutputPinInstance->Disconnect(this);
+		OutputPinInstance->GetNodeInstance()->CalcLongestDistance();
 	}
-	OutputPin = output_pin;
+	OutputPinInstance = output_pin;
 	output_pin->Connect(this);
-	OutputPin->GetNode()->CalcLongestDistance();
+	OutputPinInstance->GetNodeInstance()->CalcLongestDistance();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tInputPin::Connect(tOutputPin * output_pin)
+void tInputPinInstance::Connect(tOutputPinInstance * output_pin)
 {
-	volatile tGraphLocker holder(*this);
+	volatile tGraphLocker holder(this);
 	InternalConnect(output_pin);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tInputPin::GetAgreedType() const
+risse_uint32 tInputPinInstance::GetAgreedType() const
 {
-	volatile tGraphLocker holder(*this);
+	volatile tGraphLocker holder(this);
 	return AgreedType;
 }
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-
 //---------------------------------------------------------------------------
-tOutputPin::tOutputPin()
+void tInputPinInstance::construct()
 {
+	// デフォルトでは何もしない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-risse_size tOutputPin::GetLongestDistance() const
+void tInputPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tInputPinClass::tInputPinClass(tScriptEngine * engine) :
+	inherited(tSS<'I','n','p','u','t','P','i','n'>(),
+	tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->PinClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInputPinClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tInputPinClass::ovulate);
+	BindFunction(this, ss_construct, &tInputPinInstance::construct);
+	BindFunction(this, ss_initialize, &tInputPinInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tInputPinClass::ovulate()
+{
+	// このクラスのインスタンスは生成できない
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tOutputPinInstance::tOutputPinInstance()
+{
+	InputPins = static_cast<tArrayInstance*>(
+		tVariant(tRisseScriptEngine::instance()->GetScriptEngine()->ArrayClass).New().GetObjectInterface());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+risse_size tOutputPinInstance::GetLongestDistance() const
 {
 	risse_size longest = risse_size_max;
-	for(tInputPins::const_iterator i = InputPins.begin(); i != InputPins.end(); i++)
+	tEnumerableIterator it(InputPins);
+	while(it.Next())
 	{
-		risse_size dist = (*i)->GetNode()->GetLongestDistance();
+		// 識別子が長げえなぁ
+		risse_size dist = it.GetValue().
+			ExpectAndGetObjectInterafce<tInputPinInstance>(
+				tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->InputPinClass)->
+			GetNodeInstance()->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist)
 			longest = dist;
 	}
@@ -159,22 +306,236 @@ risse_size tOutputPin::GetLongestDistance() const
 
 
 //---------------------------------------------------------------------------
-void tOutputPin::Connect(tInputPin * input_pin)
+void tOutputPinInstance::Connect(tInputPinInstance * input_pin)
 {
-	if(std::find(InputPins.begin(), InputPins.end(), input_pin) == InputPins.end())
-		InputPins.push_back(input_pin);
+	bool already_connected =
+		InputPins->Invoke(ss_has, tVariant(input_pin)).operator bool();
+	if(already_connected)
+	{
+		// すでに input_pin が配列中にあった………
+		RISSE_ASSERT(!"already connected at tOutputPinInstance::Connect");
+		return;
+	}
+
+	InputPins->Invoke(ss_push, input_pin);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tOutputPin::Disconnect(tInputPin * input_pin)
+void tOutputPinInstance::Disconnect(tInputPinInstance * input_pin)
 {
-	tInputPins::iterator i = std::find(InputPins.begin(), InputPins.end(), input_pin);
-	RISSE_ASSERT(i != InputPins.end());
-	InputPins.erase(i);
+	if(InputPins->Invoke(ss_remove, tVariant(input_pin)).IsVoid())
+	{
+		// input_ping が配列中になかった
+		RISSE_ASSERT(!"input_pin is not connected at tOutputPinInstance::Disconnect");
+	}
+
 }
 //---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+void tOutputPinInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOutputPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tOutputPinClass::tOutputPinClass(tScriptEngine * engine) :
+	inherited(tSS<'O','u','t','p','u','t','P','i','n'>(),
+	tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->PinClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOutputPinClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tOutputPinClass::ovulate);
+	BindFunction(this, ss_construct, &tOutputPinInstance::construct);
+	BindFunction(this, ss_initialize, &tOutputPinInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOutputPinClass::ovulate()
+{
+	// このクラスのインスタンスは生成できない
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tInputPinArrayInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
+		tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->NodeClass));
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+tInputPinArrayClass::tInputPinArrayClass(tScriptEngine * engine) :
+	inherited(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>(),
+	engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tInputPinArrayClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tInputPinArrayClass::ovulate);
+	BindFunction(this, ss_construct, &tInputPinArrayInstance::construct);
+	BindFunction(this, ss_initialize, &tInputPinArrayInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tInputPinArrayClass::ovulate()
+{
+	return tVariant(new tInputPinArrayInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tOutputPinArrayInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
+		tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->NodeClass));
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+tOutputPinArrayClass::tOutputPinArrayClass(tScriptEngine * engine) :
+	inherited(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>(),
+	engine->ObjectClass)
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOutputPinArrayClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tOutputPinArrayClass::ovulate);
+	BindFunction(this, ss_construct, &tOutputPinArrayInstance::construct);
+	BindFunction(this, ss_initialize, &tOutputPinArrayInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOutputPinArrayClass::ovulate()
+{
+	return tVariant(new tOutputPinArrayInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 

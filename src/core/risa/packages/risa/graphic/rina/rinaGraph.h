@@ -16,32 +16,59 @@
 #define RINAGRAPH_H
 
 #include "risa/common/RisaThread.h"
+#include "risse/include/risseClass.h"
 
-
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 //! @brief		接続グラフ管理
 //---------------------------------------------------------------------------
-class tGraph : public tCollectee
+class tGraphInstance : public tObjectBase
 {
-	Risa::tCriticalSection * CS; //!< このグラフを保護するためのクリティカルセクション
-
 public:
-	typedef tCollectee inherited;
+	typedef tObjectBase inherited;
 
 public:
 
 	//! @brief		コンストラクタ
-	tGraph();
+	tGraphInstance();
 
-	//! @brief		このグラフを保護するためのクリティカルセクションを得る
-	//! @return		このグラフを保護するためのクリティカルセクション
-	tCriticalSection & GetCS() const { return *CS; }
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Graph" クラス
+//---------------------------------------------------------------------------
+class tGraphClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tGraphClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 //---------------------------------------------------------------------------

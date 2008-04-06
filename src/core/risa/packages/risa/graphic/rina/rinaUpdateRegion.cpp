@@ -16,7 +16,7 @@
 #include "risa/packages/risa/graphic/rina/rinaUpdateRegion.h"
 
 
-namespace Rina {
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(59919,45169,54721,18134,39057,23492,3413,9444);
 //---------------------------------------------------------------------------
 

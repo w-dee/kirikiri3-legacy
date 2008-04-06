@@ -17,7 +17,7 @@
 
 #include "risa/packages/risa/graphic/rina/rinaRectangle.h"
 
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 
 

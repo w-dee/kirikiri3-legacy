@@ -16,7 +16,7 @@
 #define RINATYPES_H
 
 
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 typedef risse_int32		coord; //!< 整数座標タイプ
 typedef float			coord_f; //!< 実数座標タイプ

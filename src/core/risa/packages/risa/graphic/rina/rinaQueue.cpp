@@ -17,7 +17,7 @@
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
 #include "risa/packages/risa/graphic/rina/rinaGraph.h"
 
-namespace Rina {
+namespace Risa {
 RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);
 //---------------------------------------------------------------------------
 
@@ -157,9 +157,9 @@ void tQueue::Push(tQueueNode * node, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-tQueueBuilder::tQueueBuilder(tGraph * graph)
+tQueueBuilder::tQueueBuilder(tGraphInstance * graph)
 {
-	Graph = graph;
+	GraphInstance = graph;
 	RootQueueNode = NULL;
 	RenderGeneration = tIdRegistry::instance()->GetNewRenderGeneration();
 }
@@ -167,10 +167,10 @@ tQueueBuilder::tQueueBuilder(tGraph * graph)
 
 
 //---------------------------------------------------------------------------
-void tQueueBuilder::Build(tProcessNode * node)
+void tQueueBuilder::Build(tNodeInstance * node)
 {
 	// キューの構築中はグラフ全体をロック
-	volatile tCriticalSection::tLocker holder(Graph->GetCS());
+	volatile tNodeInstance::tGraphLocker lock(node);
 
 	// root を Map に挿入
 	BuildQueueMap.insert(tBuildQueueMap::value_type(node, 0));
@@ -193,7 +193,7 @@ void tQueueBuilder::Build(tProcessNode * node)
 
 
 //---------------------------------------------------------------------------
-void tQueueBuilder::Push(tProcessNode * node)
+void tQueueBuilder::Push(tNodeInstance * node)
 {
 	// insert 時にキーが同じ物、つまり同じノードインスタンスは
 	// 重複することはない。これにより同じノードインスタンスが２回以上

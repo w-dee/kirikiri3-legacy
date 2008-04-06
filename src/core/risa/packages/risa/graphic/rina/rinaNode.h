@@ -18,27 +18,24 @@
 #include "risa/packages/risa/graphic/rina/rinaIdRegistry.h"
 #include "risa/packages/risa/graphic/rina/rinaGraph.h"
 
-namespace Rina {
+namespace Risa {
 //---------------------------------------------------------------------------
 
-
-class tInputPin;
-class tOutputPin;
-class tInputPins;
-class tOutputPins;
+class tInputPinArrayInstance;
+class tOutputPinArrayInstance;
 class tQueueNode;
 class tQueueBuilder;
-class tGraph;
+class tGraphInstance;
 //---------------------------------------------------------------------------
-//! @brief		プロセスノード
+//! @brief		プロセスノードインスタンス
 //---------------------------------------------------------------------------
-class tProcessNode : public Risa::tPolymorphic
+class tNodeInstance : public tObjectBase
 {
 public:
-	typedef Risa::tPolymorphic inherited;
+	typedef tObjectBase inherited;
 
 private:
-	tGraph * Graph; //!< グラフインスタンス
+	tGraphInstance * GraphInstance; //!< グラフインスタンス
 
 	risse_size	LongestDistance;
 			//!< ルートノードからの最長距離(ステップ数)。
@@ -48,19 +45,19 @@ private:
 
 public:
 	//! @brief		グラフをロックするためのクラス
-	class tGraphLocker : public Risa::tCriticalSection::tLocker
+	class tGraphLocker : public tObjectInterface::tSynchronizer
 	{
 	public:
-		tGraphLocker(const tProcessNode & _this) :
-			tCriticalSection::tLocker(_this.GetGraph()->GetCS()) {;}
+		tGraphLocker(const tNodeInstance * _this) :
+			tObjectInterface::tSynchronizer(_this->GetGraphInstance()) {;}
 	};
 
 public:
 	//! @brief		プロセスノードを LongestDistance で比較する関数
 	struct tLongestDistanceComparator :
-		public std::binary_function<bool, tProcessNode*, tProcessNode*>
+		public std::binary_function<bool, tNodeInstance*, tNodeInstance*>
 	{
-		bool operator ()(tProcessNode * a, tProcessNode * b)
+		bool operator ()(tNodeInstance * a, tNodeInstance * b)
 		{
 			risse_offset dis = a->GetLongestDistance() - b->GetLongestDistance();
 			if(dis < 0) return true;
@@ -73,14 +70,14 @@ public:
 public:
 	//! @brief		コンストラクタ
 	//! @param		graph		グラフインスタンス
-	tProcessNode(tGraph * graph);
+	tNodeInstance(tGraphInstance * graph);
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	virtual ~tProcessNode() {}
+	virtual ~tNodeInstance() {}
 
 public:
 	//! @brief		グラフインスタンスを得る
-	tGraph * GetGraph() const { return Graph; }
+	tGraphInstance * GetGraphInstance() const { return GraphInstance; }
 
 public:
 	//! @brief		ルートノードからの最長距離を得る
@@ -95,20 +92,48 @@ public:
 public: // サブクラスで実装すべき物
 	//! @brief		入力ピンの配列を得る
 	//! @return		入力ピンの配列
-	virtual tInputPins & GetInputPins() = 0;
+	virtual tInputPinArrayInstance & GetInputPinArrayInstance() = 0;
 
 	//! @brief		出力ピンの配列を得る
 	//! @return		出力ピンの配列
-	virtual tOutputPins & GetOutputPins() = 0;
+	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance() = 0;
 
 public:
 	//! @brief		コマンドキューの組み立てを行う
 	//! @param		builder			キュービルダーオブジェクト
 	virtual void BuildQueue(tQueueBuilder & builder) { return ; }
 
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Node" クラス
+//---------------------------------------------------------------------------
+class tNodeClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tNodeClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

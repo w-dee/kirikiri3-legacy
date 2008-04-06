@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /*
-	Risa [‚è‚³]      alias ‹g—¢‹g—¢3 [kirikiri-3]
+	Risa [ã‚Šã•]      alias å‰é‡Œå‰é‡Œ3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
 	Copyright (C) 2000-2008 W.Dee <dee@kikyou.info> and contributors
 
@@ -10,7 +10,7 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA Œ^‚Æ‚©
+//! @brief RINA å‹ã¨ã‹
 //---------------------------------------------------------------------------
 #ifndef RINATYPES_H
 #define RINATYPES_H
@@ -18,8 +18,8 @@
 
 namespace Risa {
 //---------------------------------------------------------------------------
-typedef risse_int32		coord; //!< ®”À•Wƒ^ƒCƒv
-typedef float			coord_f; //!< À”À•Wƒ^ƒCƒv
+typedef risse_int32		coord; //!< æ•´æ•°åº§æ¨™ã‚¿ã‚¤ãƒ—
+typedef float			coord_f; //!< å®Ÿæ•°åº§æ¨™ã‚¿ã‚¤ãƒ—
 //---------------------------------------------------------------------------
 }
 

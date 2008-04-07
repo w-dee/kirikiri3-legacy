@@ -41,7 +41,7 @@ files.each do |file|
 						"  resulted: #{result}\n" +
 						"  expected: #{match[1]}\n" +
 						"  To examine the test:\n" +
-						"    #{EXECUTABLE} #{file}"
+						"    #{EXECUTABLE} #{EXECUTABLE_OPT} #{file}"
 			else
 				print "\rok     \n"
 			end

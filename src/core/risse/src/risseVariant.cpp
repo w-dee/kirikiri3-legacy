@@ -5363,7 +5363,7 @@ tString tVariantBlock::GetClassName(bool * got) const
 						return tSS<'<','u','n','k','n','o','w','n','>'>();
 					}
 				}
-				else if(type == vtData);
+				else if(type == vtData)
 				{
 					Class = GetDataClassInstance();
 				}

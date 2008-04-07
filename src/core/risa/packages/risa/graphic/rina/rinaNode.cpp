@@ -19,6 +19,7 @@
 #include "risse/include/risseObjectClass.h"
 #include "risse/include/risseStaticStrings.h"
 #include "risse/include/risseExceptionClass.h"
+#include "risa/common/RisseEngine.h"
 
 
 namespace Risa {
@@ -126,6 +127,13 @@ tVariant tNodeClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		Node クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tNodeClass>;
+//---------------------------------------------------------------------------
 
 
 

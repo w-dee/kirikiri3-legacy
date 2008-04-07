@@ -261,10 +261,9 @@ tStreamInstance * tOSFSInstance::open(const tString & filename, risse_uint32 fla
 
 	// OSNativeStreamClass からインスタンスを生成して返す
 	tVariant obj =
-		tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->
-			OSNativeStreamClass->Invoke(ss_new, tString(native_name.c_str()), (risse_int64)flags);
-	obj.AssertClass(tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->
-		GetInitializer()->OSNativeStreamClass);
+		tClassHolder<tOSNativeStreamClass>::instance()->GetClass()->
+			Invoke(ss_new, tString(native_name.c_str()), (risse_int64)flags);
+	obj.AssertClass(tClassHolder<tOSNativeStreamClass>::instance()->GetClass());
 	return static_cast<tStreamInstance *>(obj.GetObjectInterface());
 }
 //---------------------------------------------------------------------------
@@ -356,8 +355,7 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 //---------------------------------------------------------------------------
 tOSFSClass::tOSFSClass(tScriptEngine * engine) :
 	tClassBase(tSS<'O','S','F','S'>(),
-		tPackageInitializerRegisterer<tRisaFsPackageInitializer>::instance()->
-			GetInitializer()->FileSystemClass)
+		tClassHolder<tFileSystemClass>::instance()->GetClass())
 {
 	OSNativeStreamClass = new tOSNativeStreamClass(engine);
 
@@ -407,30 +405,12 @@ tVariant tOSFSClass::ovulate()
 
 
 
-
-
-
-
-
-
 //---------------------------------------------------------------------------
-tRisaOsfsPackageInitializer::tRisaOsfsPackageInitializer(tScriptEngine * engine) :
-	tBuiltinPackageInitializer(
-		tSS<'r','i','s','a','.','f','s','.','o','s','f','s'>())
-{
-	OSFSClass = new tOSFSClass(engine);
-	OSNativeStreamClass = new tOSNativeStreamClass(engine);
-}
+//! @brief		OSFS クラスレジストラ
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaOsfsPackageInitializer::Initialize(
-	tScriptEngine * engine, const tString & name, const tVariant & global)
-{
-	OSFSClass->RegisterInstance(global);
-	OSNativeStreamClass->RegisterInstance(global);
-}
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','f','s'>,
+	tOSFSClass>;
 //---------------------------------------------------------------------------
 
 
@@ -439,11 +419,6 @@ void tRisaOsfsPackageInitializer::Initialize(
 
 
 
-
-//---------------------------------------------------------------------------
-//! @brief		risa.fs.osfs パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>;
-//---------------------------------------------------------------------------
 
 
 

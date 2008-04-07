@@ -403,37 +403,16 @@ tVariant tWaveFilterClass::ovulate()
 
 
 
-
 //---------------------------------------------------------------------------
-tRisaSoundFilterPackageInitializer::tRisaSoundFilterPackageInitializer(tScriptEngine * engine) :
-	tBuiltinPackageInitializer(
-		tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>())
-{
-	WaveFilterClass = new tWaveFilterClass(engine);
-}
+//! @brief		WaveFilter クラスレジストラ
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisaSoundFilterPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
-	const tVariant & global)
-{
-	WaveFilterClass->RegisterInstance(global);
-}
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>,
+	tWaveFilterClass>;
 //---------------------------------------------------------------------------
 
 
 
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.sound.filter パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>;
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

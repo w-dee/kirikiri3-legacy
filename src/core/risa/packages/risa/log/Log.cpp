@@ -295,9 +295,11 @@ void tWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.log パッケージイニシャライザ
+//! @brief		risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
 //---------------------------------------------------------------------------
-class tRisaLogPackageInitializer : public tBuiltinPackageInitializer
+class tRisaLogPackageMemberInitializer : public tPackageMemberInitializer,
+	public singleton_base<tRisaLogPackageMemberInitializer>
+
 {
 public:
 	static void debug(const tString & content) //!< debug メッセージ出力
@@ -336,11 +338,9 @@ public:
 	}
 
 	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaLogPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','l','o','g'>())
+	tRisaLogPackageMemberInitializer()
 	{
+		tPackageRegisterer<tSS<'r','i','s','a','.','l','o','g'> >::instance()->AddInitializer(this);
 	}
 
 	//! @brief		パッケージを初期化する
@@ -354,13 +354,13 @@ public:
 
 		tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
 
-		BindFunction(g, tSS<'d','e','b','u','g'>(), &tRisaLogPackageInitializer::debug);
-		BindFunction(g, tSS<'i','n','f','o'>(), &tRisaLogPackageInitializer::info);
-		BindFunction(g, tSS<'n','o','t','i','c','e'>(), &tRisaLogPackageInitializer::notice);
-		BindFunction(g, tSS<'w','a','r','n','i','n','g'>(), &tRisaLogPackageInitializer::warning);
-		BindFunction(g, tSS<'e','r','r','o','r'>(), &tRisaLogPackageInitializer::error);
-		BindFunction(g, tSS<'r','e','c','o','r','d'>(), &tRisaLogPackageInitializer::record);
-		BindFunction(g, tSS<'c','r','i','t','i','c','a','l'>(), &tRisaLogPackageInitializer::critical);
+		BindFunction(g, tSS<'d','e','b','u','g'>(), &tRisaLogPackageMemberInitializer::debug);
+		BindFunction(g, tSS<'i','n','f','o'>(), &tRisaLogPackageMemberInitializer::info);
+		BindFunction(g, tSS<'n','o','t','i','c','e'>(), &tRisaLogPackageMemberInitializer::notice);
+		BindFunction(g, tSS<'w','a','r','n','i','n','g'>(), &tRisaLogPackageMemberInitializer::warning);
+		BindFunction(g, tSS<'e','r','r','o','r'>(), &tRisaLogPackageMemberInitializer::error);
+		BindFunction(g, tSS<'r','e','c','o','r','d'>(), &tRisaLogPackageMemberInitializer::record);
+		BindFunction(g, tSS<'c','r','i','t','i','c','a','l'>(), &tRisaLogPackageMemberInitializer::critical);
 	}
 };
 //---------------------------------------------------------------------------
@@ -371,11 +371,6 @@ public:
 
 
 
-
-//---------------------------------------------------------------------------
-//! @brief		risa.log パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaLogPackageInitializer>;
-//---------------------------------------------------------------------------
 
 
 

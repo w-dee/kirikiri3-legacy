@@ -163,30 +163,6 @@ public:
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.fs.osfs パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaOsfsPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tOSFSClass * OSFSClass;
-	tOSNativeStreamClass * OSNativeStreamClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaOsfsPackageInitializer(tScriptEngine * engine);
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global);
-};
-//---------------------------------------------------------------------------
-
-
-
 
 
 //---------------------------------------------------------------------------

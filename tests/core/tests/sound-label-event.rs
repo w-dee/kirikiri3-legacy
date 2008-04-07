@@ -1,5 +1,4 @@
 import risa.fs as fs;
-import risa.fs.osfs as osfs;
 import Sound in risa.sound;
 import risa.stdio as stdio;
 import Thread in thread;
@@ -11,7 +10,7 @@ var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../media を /media にマウントする
 
-fs.mount('/media', new osfs.OSFS("\{boot_script_source}/../media", true));
+fs.mount('/media', new fs.OSFS("\{boot_script_source}/../media", true));
 
 // muted_conga_hi.ogg をならす。
 // このサウンドは4つのラベルをもっていて、それぞれ 1～4 という名前である

@@ -306,8 +306,7 @@ public:
 //---------------------------------------------------------------------------
 tWindowClass::tWindowClass(tScriptEngine * engine) :
 	tClassBase(tSS<'W','i','n','d','o','w'>(),
-	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
-		GetInitializer()->EventSourceClass)
+		tClassHolder<tEventSourceClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -348,46 +347,12 @@ tVariant tWindowClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.widget パッケージイニシャライザ
+//! @brief		Window クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaWidgetPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tWindowClass * WindowClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaWidgetPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','w','i','d','g','e','t'>())
-	{
-		WindowClass = new tWindowClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		WindowClass->RegisterInstance(global);
-	}
-};
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','w','i','d','g','e','t'>,
+	tWindowClass>;
 //---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.widget パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaWidgetPackageInitializer>;
-//---------------------------------------------------------------------------
-
 
 
 

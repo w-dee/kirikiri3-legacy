@@ -325,6 +325,14 @@ tVariant tImageClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		Image クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'>,
+	tImageClass>;
+//---------------------------------------------------------------------------
+
 
 
 
@@ -334,20 +342,17 @@ tVariant tImageClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.graphic.image パッケージイニシャライザ
+//! @brief		risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
 //---------------------------------------------------------------------------
-class tRisaGraphicImagePackageInitializer : public tBuiltinPackageInitializer
+class tRisaGraphicImagePackageMemberInitializer : public tPackageMemberInitializer,
+	public singleton_base<tRisaGraphicImagePackageMemberInitializer>
 {
 public:
-	tImageClass * ImageClass;
-
 	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaGraphicImagePackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'>())
+	tRisaGraphicImagePackageMemberInitializer()
 	{
-		ImageClass = new tImageClass(engine);
+		tPackageRegisterer<tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'> >::instance()->
+			AddInitializer(this);
 	}
 
 	//! @brief		パッケージを初期化する
@@ -357,7 +362,6 @@ public:
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{
-		ImageClass->RegisterInstance(global);
 		global.RegisterFinalConstMember(
 			tSS<'p','f','G','r','a','y','8'>(),
 			tVariant((risse_int64)tPixel::pfGray8));
@@ -375,10 +379,9 @@ public:
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.graphic.image パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaGraphicImagePackageInitializer>;
-//---------------------------------------------------------------------------
+
+
+
 
 
 

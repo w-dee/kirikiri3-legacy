@@ -23,6 +23,23 @@ RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 //---------------------------------------------------------------------------
 
 
+
+
+//---------------------------------------------------------------------------
+//! @brief		SoundException クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','o','u','n','d'>,
+	tSoundExceptionClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tSoundALSource::tSoundALSource(tSoundInstance * owner,
 	tALBuffer * buffer, tWaveLoopManager * loopmanager) :
@@ -178,8 +195,7 @@ void tSoundInstance::Open(const tString & filename)
 				{
 					tWaveFilterInstance * filter =
 							item.ExpectAndGetObjectInterafce<tWaveFilterInstance>(
-							tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
-								GetInitializer()->WaveFilterClass);
+							tClassHolder<tWaveFilterClass>::instance()->GetClass());
 						filter->SetInput(last_filter);
 						last_filter = filter;
 				}
@@ -503,8 +519,7 @@ public:
 //---------------------------------------------------------------------------
 tSoundClass::tSoundClass(tScriptEngine * engine) :
 	tClassBase(tSS<'S','o','u','n','d'>(),
-	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
-		GetInitializer()->EventSourceClass)
+		tClassHolder<tEventSourceClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -553,50 +568,14 @@ tVariant tSoundClass::ovulate()
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.sound パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaSoundPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tSoundClass * SoundClass;
-	tSoundExceptionClass * SoundExceptionClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaSoundPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','s','o','u','n','d'>())
-	{
-		SoundClass = new tSoundClass(engine);
-		SoundExceptionClass = new tSoundExceptionClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		SoundClass->RegisterInstance(global);
-		SoundExceptionClass->RegisterInstance(global);
-	}
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
 
 //---------------------------------------------------------------------------
-//! @brief		risa.sound パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaSoundPackageInitializer>;
+//! @brief		Sound クラスレジストラ
 //---------------------------------------------------------------------------
-
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','o','u','n','d'>,
+	tSoundClass>;
+//---------------------------------------------------------------------------
 
 
 

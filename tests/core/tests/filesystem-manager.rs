@@ -1,5 +1,4 @@
 import risa.fs as fs;
-import risa.fs.tmpfs as tmpfs;
 import risa.stdio as stdio;
 
 // ファイル名操作などいろいろ
@@ -57,7 +56,7 @@ fs.createDirectory('mp', true);
 
 // マウント
 assert(!fs.isDirectory('mp/tmpfs'));
-fs.mount('mp/tmpfs', new tmpfs.TmpFS());
+fs.mount('mp/tmpfs', new fs.TmpFS());
 
 // マウントポイントにはディレクトリが作られているはず
 assert(fs.isDirectory('mp/tmpfs'));

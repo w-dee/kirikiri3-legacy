@@ -140,6 +140,13 @@ tVariant tStandardIOStreamClass::ovulate()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		StandardIOStream クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','t','d','i','o'>,
+	tStandardIOStreamClass>;
+//---------------------------------------------------------------------------
 
 
 
@@ -152,20 +159,17 @@ tVariant tStandardIOStreamClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.stdio パッケージイニシャライザ
+//! @brief		risa.stdio のパッケージのメンバを初期化するためのシングルトンインスタンス
 //---------------------------------------------------------------------------
-class tRisaStdioPackageInitializer : public tBuiltinPackageInitializer
+class tRisaStdioPackageMemberInitializer : public tPackageMemberInitializer,
+	public singleton_base<tRisaStdioPackageMemberInitializer>
 {
 public:
-	tStandardIOStreamClass * StandardIOStreamClass;
-
 	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaStdioPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','s','t','d','i','o'>())
+	tRisaStdioPackageMemberInitializer()
 	{
-		StandardIOStreamClass = new tStandardIOStreamClass(engine);
+		tPackageRegisterer<tSS<'r','i','s','a','.','s','t','d','i','o'> >::instance()->
+			AddInitializer(this);
 	}
 
 	//! @brief		パッケージを初期化する
@@ -175,17 +179,15 @@ public:
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{
+		tStandardIOStreamClass * cls = tClassHolder<tStandardIOStreamClass>::instance()->GetClass();
 		// stdin, stdout, stderr を作成して登録する
-		tVariant stdin_v  = StandardIOStreamClass->Invoke(ss_new, (risse_int64)0);
-		tVariant stdout_v = StandardIOStreamClass->Invoke(ss_new, (risse_int64)1);
-		tVariant stderr_v = StandardIOStreamClass->Invoke(ss_new, (risse_int64)2);
+		tVariant stdin_v  = cls->Invoke(ss_new, (risse_int64)0);
+		tVariant stdout_v = cls->Invoke(ss_new, (risse_int64)1);
+		tVariant stderr_v = cls->Invoke(ss_new, (risse_int64)2);
 
 		global.RegisterFinalConstMember(tSS<'s','t','d','i','n'>(),     stdin_v );
 		global.RegisterFinalConstMember(tSS<'s','t','d','o','u','t'>(), stdout_v);
 		global.RegisterFinalConstMember(tSS<'s','t','d','e','r','r'>(), stderr_v);
-
-		// StandardIOStream クラスを登録
-		StandardIOStreamClass->RegisterInstance(global);
 	}
 };
 //---------------------------------------------------------------------------
@@ -193,14 +195,6 @@ public:
 
 
 
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.stdio パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaStdioPackageInitializer>;
-//---------------------------------------------------------------------------
 
 
 

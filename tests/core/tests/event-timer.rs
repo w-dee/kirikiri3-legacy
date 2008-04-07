@@ -1,7 +1,6 @@
 import * in risa.event;
 import * in thread;
 import * in risa.stdio;
-import Timer in risa.event.timer;
 
 // イベントキューと、それを回すためのスレッドを作成する
 

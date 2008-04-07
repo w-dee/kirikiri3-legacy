@@ -287,29 +287,6 @@ public:
 
 
 
-class tFileSystemClass;
-class tFileSystemExceptionClass;
-//---------------------------------------------------------------------------
-//! @brief		risa.fs パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaFsPackageInitializer : public tBuiltinPackageInitializer, private tFileOpenModes
-{
-public:
-	tFileSystemClass * FileSystemClass;
-	tFileSystemExceptionClass * FileSystemExceptionClass;
-public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaFsPackageInitializer(tScriptEngine * engine);
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global);
-};
-//---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------

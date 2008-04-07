@@ -576,12 +576,11 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 
 	// MemoryStreamClass からインスタンスを生成して返す
 	tVariant obj =
-		tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->
-			MemoryStreamClass->Invoke(ss_new, (risse_int64)flags, true);
+		tClassHolder<tMemoryStreamClass>::instance()->GetClass()->
+			Invoke(ss_new, (risse_int64)flags, true);
 				// 第２引数の true は、ストリームになんらメモリブロックがアタッチ
 				// されずにストリームが作成されることを表す(下でアタッチする)
-	obj.AssertClass(tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->
-		GetInitializer()->MemoryStreamClass);
+	obj.AssertClass(tClassHolder<tMemoryStreamClass>::instance()->GetClass());
 	tMemoryStreamInstance *memstream = 
 		static_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
 
@@ -631,8 +630,7 @@ void tTmpFSInstance::load(const tVariant & filename)
 //---------------------------------------------------------------------------
 tTmpFSClass::tTmpFSClass(tScriptEngine * engine) :
 	tClassBase(tSS<'T','m','p','F','S'>(),
-		tPackageInitializerRegisterer<tRisaFsPackageInitializer>::instance()->
-			GetInitializer()->FileSystemClass)
+		tClassHolder<tFileSystemClass>::instance()->GetClass())
 {
 	MemoryStreamClass = new tMemoryStreamClass(engine);
 
@@ -668,10 +666,6 @@ void tTmpFSClass::RegisterMembers()
 
 	BindFunction(this, tSS<'s','a','v','e'>(), &tTmpFSInstance::save);
 	BindFunction(this, tSS<'l','o','a','d'>(), &tTmpFSInstance::load);
-
-	// MemoryStream を登録する
-	RegisterNormalMember(tSS<'M','e','m','o','r','y','S','t','r','e','a','m'>(),
-			tVariant(MemoryStreamClass), tMemberAttribute(), true);
 }
 //---------------------------------------------------------------------------
 
@@ -693,41 +687,13 @@ tVariant tTmpFSClass::ovulate()
 
 
 
-
 //---------------------------------------------------------------------------
-tRisaTmpfsPackageInitializer::tRisaTmpfsPackageInitializer(tScriptEngine * engine) :
-	tBuiltinPackageInitializer(
-		tSS<'r','i','s','a','.','f','s','.','t','m','p','f','s'>())
-{
-	TmpFSClass = new tTmpFSClass(engine);
-	MemoryStreamClass = new tMemoryStreamClass(engine);
-}
+//! @brief		TmpFS クラスレジストラ
 //---------------------------------------------------------------------------
-
-
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','f','s'>,
+	tTmpFSClass>;
 //---------------------------------------------------------------------------
-void tRisaTmpfsPackageInitializer::Initialize(
-	tScriptEngine * engine, const tString & name, const tVariant & global)
-{
-	TmpFSClass->RegisterInstance(global);
-	MemoryStreamClass->RegisterInstance(global);
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.fs.tmpfs パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>;
-//---------------------------------------------------------------------------
-
-
-
 
 
 

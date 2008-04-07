@@ -15,7 +15,6 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
 #include "risa/common/RisseEngine.h"
-#include "risa/packages/risa/graphic/rina/rina.h"
 
 
 namespace Risa {
@@ -117,6 +116,14 @@ tVariant tPinClass::ovulate()
 }
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+//! @brief		Pin クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tPinClass>;
+//---------------------------------------------------------------------------
 
 
 
@@ -228,7 +235,7 @@ void tInputPinInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tInputPinClass::tInputPinClass(tScriptEngine * engine) :
 	inherited(tSS<'I','n','p','u','t','P','i','n'>(),
-	tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->PinClass)
+	tClassHolder<tPinClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -263,6 +270,13 @@ tVariant tInputPinClass::ovulate()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		InputPin クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tInputPinClass>;
+//---------------------------------------------------------------------------
 
 
 
@@ -292,11 +306,10 @@ risse_size tOutputPinInstance::GetLongestDistance() const
 	tEnumerableIterator it(InputPins);
 	while(it.Next())
 	{
-		// 識別子が長げえなぁ
 		risse_size dist = it.GetValue().
 			ExpectAndGetObjectInterafce<tInputPinInstance>(
-				tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->InputPinClass)->
-			GetNodeInstance()->GetLongestDistance();
+				tClassHolder<tInputPinClass>::instance()->GetClass())->
+					GetNodeInstance()->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist)
 			longest = dist;
 	}
@@ -367,7 +380,7 @@ void tOutputPinInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tOutputPinClass::tOutputPinClass(tScriptEngine * engine) :
 	inherited(tSS<'O','u','t','p','u','t','P','i','n'>(),
-	tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->PinClass)
+	tClassHolder<tPinClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -402,6 +415,15 @@ tVariant tOutputPinClass::ovulate()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		OutputPin クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tOutputPinClass>;
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -422,7 +444,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 	volatile tSynchronizer sync(this); // sync
 
 	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
-		tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->NodeClass));
+		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
 }
@@ -468,6 +490,23 @@ tVariant tInputPinArrayClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		InputPinArray クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tInputPinArrayClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------------------------------
@@ -484,7 +523,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 	volatile tSynchronizer sync(this); // sync
 
 	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
-		tPackageInitializerRegisterer<tRisaGraphicRinaPackageInitializer>::instance()->GetInitializer()->NodeClass));
+		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
 }
@@ -532,6 +571,13 @@ tVariant tOutputPinArrayClass::ovulate()
 
 
 
+//---------------------------------------------------------------------------
+//! @brief		OutputPinArray クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tOutputPinArrayClass>;
+//---------------------------------------------------------------------------
 
 
 

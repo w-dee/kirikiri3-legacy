@@ -15,6 +15,7 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaGraph.h"
 #include "risa/common/RisaThread.h"
+#include "risa/common/RisseEngine.h"
 #include "risse/include/risseNativeBinder.h"
 #include "risse/include/risseObjectClass.h"
 #include "risse/include/risseStaticStrings.h"
@@ -91,6 +92,24 @@ tVariant tGraphClass::ovulate()
 	return tVariant(new tGraphInstance());
 }
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Graph クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tGraphClass>;
+//---------------------------------------------------------------------------
+
+
+
 
 
 

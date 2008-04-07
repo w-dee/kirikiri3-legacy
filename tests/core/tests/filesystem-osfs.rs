@@ -1,5 +1,4 @@
 import risa.fs as fs;
-import risa.fs.osfs as osfs;
 import stream;
 import risa.stdio as stdio;
 
@@ -10,7 +9,7 @@ var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../tmp を /tmp にマウントする
 
-fs.mount('/tmp', new osfs.OSFS("\{boot_script_source}/../tmp", true));
+fs.mount('/tmp', new fs.OSFS("\{boot_script_source}/../tmp", true));
 
 // ファイルを作成して書き込んでみる
 fs.open('/tmp/test.txt', fs.omWrite).print("Hello world!").dispose();

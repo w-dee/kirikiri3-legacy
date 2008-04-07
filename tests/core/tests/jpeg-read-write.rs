@@ -1,6 +1,5 @@
 import * in risa.graphic.image;
 import risa.fs as fs;
-import risa.fs.osfs as osfs;
 import risa.stdio as stdio;
 
 // /boot がマウントされているディレクトリを得る
@@ -9,7 +8,7 @@ var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../ を /root にマウントする
 
-fs.mount('/root', new osfs.OSFS("\{boot_script_source}/..", true));
+fs.mount('/root', new fs.OSFS("\{boot_script_source}/..", true));
 
 function compareFile(a, b)
 {

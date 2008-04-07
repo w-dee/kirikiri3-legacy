@@ -549,8 +549,7 @@ public: // Risse 用メソッドとか
 //---------------------------------------------------------------------------
 tTimerClass::tTimerClass(tScriptEngine * engine) :
 	tClassBase(tSS<'T','i','m','e','r'>(),
-	tPackageInitializerRegisterer<tRisaEventPackageInitializer>::instance()->
-		GetInitializer()->EventSourceClass)
+		tClassHolder<tEventSourceClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -596,46 +595,12 @@ tVariant tTimerClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.event.timer パッケージイニシャライザ
+//! @brief		Timer クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaGraphicEventTimerPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tTimerClass * TimerClass; //!< Timer クラス
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaGraphicEventTimerPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','e','v','e','n','t','.','t','i','m','e','r'>())
-	{
-		TimerClass = new tTimerClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		TimerClass->RegisterInstance(global);
-	}
-};
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','e','v','e','n','t'>,
+	tTimerClass>;
 //---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.event.timer パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaGraphicEventTimerPackageInitializer>;
-//---------------------------------------------------------------------------
-
 
 
 

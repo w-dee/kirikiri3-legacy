@@ -1,6 +1,4 @@
 import risa.fs as fs;
-import risa.fs.tmpfs as tmpfs;
-import risa.fs.osfs as osfs;
 import stream;
 import risa.stdio as stdio;
 
@@ -10,10 +8,10 @@ var boot_script_source = fs.getFileSystemAt('/boot/').source;
 
 // boot_script_source/../tmp を /data にマウントする
 
-fs.mount('/data', new osfs.OSFS("\{boot_script_source}/../tmp", true));
+fs.mount('/data', new fs.OSFS("\{boot_script_source}/../tmp", true));
 
 // /tmp に TmpFS をマウントする
-var tmpfs = new tmpfs.TmpFS();
+var tmpfs = new fs.TmpFS();
 fs.mount('/tmp', tmpfs);
 
 // ファイルを作成して書き込んでみる

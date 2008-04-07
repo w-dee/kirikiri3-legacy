@@ -350,7 +350,8 @@ public:
 //! @brief		メインスレッドの(デフォルトの)イベントキューを作成するシングルトンクラス
 //---------------------------------------------------------------------------
 class tMainEventQueue : public singleton_base<tMainEventQueue>,
-	depends_on<tRisseScriptEngine>
+	depends_on<tRisseScriptEngine>,
+	manual_start<tMainEventQueue>
 {
 	tVariant EventQueue; //!< Risseインスタンス
 
@@ -441,32 +442,6 @@ public:
 
 
 
-
-class tEventQueueClass;
-class tEventSourceClass;
-class tEventQueueExceptionClass;
-//---------------------------------------------------------------------------
-//! @brief		risa.event パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaEventPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tEventQueueClass * EventQueueClass; //!< EventQueue クラス
-	tEventSourceClass * EventSourceClass; //!< EventSource クラス
-	tEventQueueExceptionClass * EventQueueExceptionClass; //!< EventSourceException クラス
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaEventPackageInitializer(tScriptEngine * engine);
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global);
-};
-//---------------------------------------------------------------------------
 
 
 

@@ -238,30 +238,6 @@ public:
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.fs.tmpfs パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaTmpfsPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tTmpFSClass * TmpFSClass;
-	tMemoryStreamClass * MemoryStreamClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaTmpfsPackageInitializer(tScriptEngine * engine);
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global);
-};
-//---------------------------------------------------------------------------
-
-
-
 
 
 

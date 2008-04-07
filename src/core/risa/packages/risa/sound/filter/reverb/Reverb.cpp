@@ -98,8 +98,7 @@ void tReverbInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tReverbClass::tReverbClass(tScriptEngine * engine) :
 	tClassBase(tSS<'R','e','v','e','r','b'>(),
-		tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
-			GetInitializer()->WaveFilterClass)
+		tClassHolder<tWaveFilterClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -135,45 +134,14 @@ tVariant tReverbClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.sound.filter.reverb パッケージイニシャライザ
+//! @brief		Reverb クラスレジストラ
 //---------------------------------------------------------------------------
-class tRisaSoundFilterReverbPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tReverbClass * ReverbClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaSoundFilterReverbPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r','.','r','e','v','e','r','b'>())
-	{
-		ReverbClass = new tReverbClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		ReverbClass->RegisterInstance(global);
-	}
-};
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>,
+	tReverbClass>;
 //---------------------------------------------------------------------------
 
 
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-//! @brief		risa.sound.filter.reverb パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaSoundFilterReverbPackageInitializer>;
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 } // namespace Risa

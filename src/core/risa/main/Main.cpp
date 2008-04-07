@@ -156,17 +156,12 @@ bool tApplication::OnInit()
 			// ファイルシステム関連のパッケージのうち、必要な物を初期化しておく
 			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
 				tSS<'r','i','s','a','.','f','s'>());
-			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
-				tSS<'r','i','s','a','.','f','s','.','t','m','p','f','s'>());
-			tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(
-				tSS<'r','i','s','a','.','f','s','.','o','s','f','s'>());
 
 			// / に TmpFS をマウント
 			tFileSystemManager::instance()->Mount(tSS<'/'>(),
-				tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->
-					TmpFSClass->Invoke(ss_new).
+				tClassHolder<tTmpFSClass>::instance()->GetClass()->Invoke(ss_new).
 						ExpectAndGetObjectInterafce<tFileSystemInstance>(
-							tPackageInitializerRegisterer<tRisaTmpfsPackageInitializer>::instance()->GetInitializer()->TmpFSClass
+							tClassHolder<tTmpFSClass>::instance()->GetClass()
 						)
 			);
 
@@ -176,10 +171,9 @@ bool tApplication::OnInit()
 
 				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
-					tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->
-						OSFSClass->Invoke(ss_new, tString(script_dir), true).
+					tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(script_dir), true).
 							ExpectAndGetObjectInterafce<tFileSystemInstance>(
-								tPackageInitializerRegisterer<tRisaOsfsPackageInitializer>::instance()->GetInitializer()->OSFSClass
+								tClassHolder<tOSFSClass>::instance()->GetClass()
 							)
 				);
 			}

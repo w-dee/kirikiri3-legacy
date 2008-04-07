@@ -151,28 +151,6 @@ public: // Risse 用メソッドなど
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.sound.filter パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaSoundFilterPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tWaveFilterClass * WaveFilterClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaSoundFilterPackageInitializer(tScriptEngine * engine);
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global);
-};
-//---------------------------------------------------------------------------
-
-
 
 
 //---------------------------------------------------------------------------

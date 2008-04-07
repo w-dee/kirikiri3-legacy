@@ -284,8 +284,7 @@ void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 tPhaseVocoderClass::tPhaseVocoderClass(tScriptEngine * engine) :
 	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(),
-		tPackageInitializerRegisterer<tRisaSoundFilterPackageInitializer>::instance()->
-			GetInitializer()->WaveFilterClass)
+		tClassHolder<tWaveFilterClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }
@@ -324,45 +323,14 @@ tVariant tPhaseVocoderClass::ovulate()
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		risa.sound.filter.phasevocoder パッケージイニシャライザ
-//---------------------------------------------------------------------------
-class tRisaSoundFilterPhasevocoderPackageInitializer : public tBuiltinPackageInitializer
-{
-public:
-	tPhaseVocoderClass * PhaseVocoderClass;
-
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tRisaSoundFilterPhasevocoderPackageInitializer(tScriptEngine * engine) :
-		tBuiltinPackageInitializer(
-			tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r','.','p','h','a','s','e','v','o','c','o','d','e','r'>())
-	{
-		PhaseVocoderClass = new tPhaseVocoderClass(engine);
-	}
-
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
-	void Initialize(tScriptEngine * engine, const tString & name,
-		const tVariant & global)
-	{
-		PhaseVocoderClass->RegisterInstance(global);
-	}
-};
-//---------------------------------------------------------------------------
-
-
-
-
-
-
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.sound.filter.phasevocoder パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaSoundFilterPhasevocoderPackageInitializer>;
+//! @brief		PhaseVocoder クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>,
+	tPhaseVocoderClass>;
 //---------------------------------------------------------------------------
 
 

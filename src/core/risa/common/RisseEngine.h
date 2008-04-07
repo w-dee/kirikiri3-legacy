@@ -84,30 +84,179 @@ public:
 //---------------------------------------------------------------------------
 
 
+
+
+
+
 //---------------------------------------------------------------------------
-//! @brief		パッケージイニシャライザを
-//!				スクリプトエンジンに登録するためのテンプレートクラス
+//! @brief		パッケージのメンバを初期化するためのインターフェース
 //---------------------------------------------------------------------------
-template <typename InitializerT>
-class tPackageInitializerRegisterer :
-	public singleton_base<tPackageInitializerRegisterer<InitializerT> >,
-	depends_on<tRisseScriptEngine>
+class tPackageMemberInitializer : public tCollectee
 {
-	InitializerT * Initializer; //!< パッケージイニシャライザ
+public:
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tPackageMemberInitializer() {;}
+
+	//! @brief		パッケージのメンバを初期化する
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global) = 0;
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		パッケージをRisseスクリプトエンジンに登録するためのシングルトンインスタンス
+//---------------------------------------------------------------------------
+class tPackage : public tBuiltinPackageInitializer
+{
+	gc_vector<tPackageMemberInitializer *> Initializers; //!< このパッケージに登録するメンバの一覧
+
+	tString PackageName; //!< パッケージ名
+	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス(パッケージが初期化されるよりも前の状態ではNULL)
 public:
 	//! @brief		コンストラクタ
-	tPackageInitializerRegisterer()
+	//! @param		name		パッケージ名
+	tPackage(const tString & name) :
+		tBuiltinPackageInitializer(name), Initializers(),
+		PackageName(name), ScriptEngine(NULL) {}
+
+	//! @brief		パッケージにメンバを初期化するためのインターフェースを登録する
+	//! @param		initializer		パッケージにメンバを初期化するためのインターフェース
+	void AddInitializer(tPackageMemberInitializer * initializer)
+	{
+		// パッケージが初期化前ならば Initializers に追加、
+		// 初期化後ならば直接パッケージグローバルに追加
+		if(!ScriptEngine)
+			Initializers.push_back(initializer);
+		else
+			initializer->Initialize(ScriptEngine, PackageName,
+				ScriptEngine->GetPackageGlobal(PackageName));
+	}
+
+protected:
+	//! @brief		パッケージを初期化する(スクリプトエンジンのtPackageManagerから呼ばれる)
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	//! @note		オーバーライドしても良いがスーパークラスのこれも忘れずに呼ぶこと
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		// Initializers を 順にパッケージに追加
+		for(gc_vector<tPackageMemberInitializer *>::iterator i = Initializers.begin();
+			i != Initializers.end(); i++)
+			(*i)->Initialize(engine, name, global);
+
+		// スクリプトエンジンを設定(以降は AddInitializer を呼んだら
+		// 直接パッケージグローバルにメンバが登録される)
+		ScriptEngine = engine;
+	}
+
+};
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		tPackage をスクリプトエンジンに登録するための
+//!				シングルトンインスタンスのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename NameT>
+class tPackageRegisterer :
+	public singleton_base<tPackageRegisterer<NameT> >,
+	depends_on<tRisseScriptEngine>
+{
+	tPackage * Package; //!< tPackage インスタンス
+public:
+	//! @brief		コンストラクタ
+	tPackageRegisterer()
 	{
 		// ここらへんのプロセスについては tScriptEngine のコンストラクタも参照のこと
 		tScriptEngine * engine = tRisseScriptEngine::instance()->GetScriptEngine();
-		Initializer = new InitializerT(engine);
-		RISSE_ASSERT(dynamic_cast<tBuiltinPackageInitializer *>(Initializer));
-		Initializer->RegisterInstance(engine);
+		Package = new tPackage(NameT());
+		RISSE_ASSERT(dynamic_cast<tPackage *>(Package));
+		Package->RegisterInstance(engine);
 	}
 
-	InitializerT * GetInitializer() const { return Initializer; } //!< パッケージイニシャライザを得る
+	//! @brief	GetPackage()->AddInitializer() へのショートカット
+	//! @param		initializer		パッケージにメンバを初期化するためのインターフェース
+	void AddInitializer(tPackageMemberInitializer * initializer)
+	{
+		Package->AddInitializer(initializer);
+	}
+
+	tPackage * GetPackage() const { return Package; } //!< tPackageインスタンスを得る
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Risseクラス一つを保持するテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename ClassT>
+class tClassHolder :
+	public singleton_base<tClassHolder<ClassT> >,
+	depends_on<tRisseScriptEngine>
+{
+	ClassT * Class; //!< クラスインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	tClassHolder()
+	{
+		Class = new ClassT(tRisseScriptEngine::instance()->GetScriptEngine());
+	}
+
+
+	//! @brief		クラスインスタンスを取得する
+	//! @return		クラスインスタンス
+	ClassT * GetClass() const { return Class; }
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		Risseクラス一つを特定パッケージに登録するための
+//!				シングルトンインスタンスのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename NameT, typename ClassT>
+class tClassRegisterer :
+	private tPackageMemberInitializer,
+	public singleton_base<tClassRegisterer<NameT, ClassT> >,
+	depends_on<tPackageRegisterer<NameT> >,
+	depends_on<tClassHolder<ClassT> >
+{
+public:
+	//! @brief		コンストラクタ
+	tClassRegisterer()
+	{
+		tPackageRegisterer<NameT>::instance()->
+			GetPackage()->AddInitializer(this);
+	}
+
+private:
+	//! @brief		パッケージのメンバを初期化する
+	//!				(tPackageMemberInitializer::Initialize()オーバーライド)
+	//! @param		engine		スクリプトエンジンインスタンス
+	//! @param		name		パッケージ名
+	//! @param		global		パッケージグローバル
+	virtual void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		tClassHolder<ClassT>::instance()->GetClass()->RegisterInstance(global);
+	}
+};
+//---------------------------------------------------------------------------
+
 
 
 //---------------------------------------------------------------------------

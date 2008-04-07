@@ -37,6 +37,13 @@ RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+//! @brief		FileSystemException クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','f','s'>,
+	tFileSystemExceptionClass>;
+//---------------------------------------------------------------------------
 
 
 
@@ -822,8 +829,7 @@ struct tRisaFsStaticMethods
 
 	static void mount(const tString & point, const tVariant & fs)
 	{
-		fs.AssertClass(tPackageInitializerRegisterer<tRisaFsPackageInitializer>::instance()->
-						GetInitializer()->FileSystemClass);
+		fs.AssertClass(tClassHolder<tFileSystemClass>::instance()->GetClass());
 		tFileSystemManager::instance()->Mount(point,
 			static_cast<tFileSystemInstance *>(fs.GetObjectInterface()));
 	}
@@ -990,77 +996,74 @@ struct tRisaFsStaticMethods
 
 
 
-
-
-
 //---------------------------------------------------------------------------
-tRisaFsPackageInitializer::tRisaFsPackageInitializer(tScriptEngine * engine) :
-	tBuiltinPackageInitializer(
-		tSS<'r','i','s','a','.','f','s'>())
+//! @brief		risa.fs のパッケージのメンバを初期化するためのシングルトンインスタンス
+//---------------------------------------------------------------------------
+class tRisaFsPackageMemberInitializer : public tPackageMemberInitializer,
+	public singleton_base<tRisaFsPackageMemberInitializer>,
+	private tFileOpenModes
 {
-	FileSystemClass = new tFileSystemClass(engine);
-	FileSystemExceptionClass = new tFileSystemExceptionClass(engine);
-}
-//---------------------------------------------------------------------------
+public:
+	//! @brief		コンストラクタ
+	tRisaFsPackageMemberInitializer()
+	{
+		tPackageRegisterer<tSS<'r','i','s','a','.','f','s'> >::instance()->AddInitializer(this);
+	}
 
+	void Initialize(tScriptEngine * engine, const tString & name,
+		const tVariant & global)
+	{
+		tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
 
-//---------------------------------------------------------------------------
-void tRisaFsPackageInitializer::Initialize(tScriptEngine * engine, const tString & name,
-	const tVariant & global)
-{
-	tObjectBase * g = static_cast<tObjectBase *>(global.GetObjectInterface());
+		tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
+									tMemberAttribute(tMemberAttribute::ocFinal));
 
-	tMemberAttribute final_const (	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal));
+		BindFunction(g, tSS<'m','o','u','n','t'>(), &tRisaFsStaticMethods::mount, final_const);
+		BindFunction(g, tSS<'u','n','m','o','u','n','t'>(), &tRisaFsStaticMethods::unmount, final_const);
+		BindFunction(g, tSS<'n','o','r','m','a','l','i','z','e'>(), &tRisaFsStaticMethods::normalize, final_const);
+		BindFunction(g, tSS<'w','a','l','k','A','t'>(), &tRisaFsStaticMethods::walkAt, final_const);
+		BindFunction(g, tSS<'e','x','i','s','t','s'>(), &tRisaFsStaticMethods::exists, final_const);
+		BindFunction(g, tSS<'i','s','F','i','l','e'>(), &tRisaFsStaticMethods::isFile, final_const);
+		BindFunction(g, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::isDirectory, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tRisaFsStaticMethods::removeFile, final_const);
+		BindFunction(g, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::removeDirectory, final_const);
+		BindFunction(g, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::createDirectory, final_const);
+		BindFunction(g, tSS<'s','t','a','t'>(), &tRisaFsStaticMethods::stat, final_const);
+		BindFunction(g, tSS<'o','p','e','n'>(), &tRisaFsStaticMethods::open, final_const);
+		BindFunction(g, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tRisaFsStaticMethods::getFileSystemAt, final_const);
+		BindFunction(g, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tRisaFsStaticMethods::chopExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tRisaFsStaticMethods::extractExtension, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tRisaFsStaticMethods::extractName, final_const);
+		BindFunction(g, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tRisaFsStaticMethods::extractPath, final_const);
+		BindProperty(g, tSS<'c','w','d'>(), &tRisaFsStaticMethods::get_cwd, &tRisaFsStaticMethods::set_cwd/*, final_const*/);
+		// TODO: property の final_const なプロパティってちゃんと動作してる？
 
-	BindFunction(g, tSS<'m','o','u','n','t'>(), &tRisaFsStaticMethods::mount, final_const);
-	BindFunction(g, tSS<'u','n','m','o','u','n','t'>(), &tRisaFsStaticMethods::unmount, final_const);
-	BindFunction(g, tSS<'n','o','r','m','a','l','i','z','e'>(), &tRisaFsStaticMethods::normalize, final_const);
-	BindFunction(g, tSS<'w','a','l','k','A','t'>(), &tRisaFsStaticMethods::walkAt, final_const);
-	BindFunction(g, tSS<'e','x','i','s','t','s'>(), &tRisaFsStaticMethods::exists, final_const);
-	BindFunction(g, tSS<'i','s','F','i','l','e'>(), &tRisaFsStaticMethods::isFile, final_const);
-	BindFunction(g, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::isDirectory, final_const);
-	BindFunction(g, tSS<'r','e','m','o','v','e','F','i','l','e'>(), &tRisaFsStaticMethods::removeFile, final_const);
-	BindFunction(g, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::removeDirectory, final_const);
-	BindFunction(g, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(), &tRisaFsStaticMethods::createDirectory, final_const);
-	BindFunction(g, tSS<'s','t','a','t'>(), &tRisaFsStaticMethods::stat, final_const);
-	BindFunction(g, tSS<'o','p','e','n'>(), &tRisaFsStaticMethods::open, final_const);
-	BindFunction(g, tSS<'g','e','t','F','i','l','e','S','y','s','t','e','m','A','t'>(), &tRisaFsStaticMethods::getFileSystemAt, final_const);
-	BindFunction(g, tSS<'c','h','o','p','E','x','t','e','n','s','i','o','n'>(), &tRisaFsStaticMethods::chopExtension, final_const);
-	BindFunction(g, tSS<'e','x','t','r','a','c','t','E','x','t','e','n','s','i','o','n'>(), &tRisaFsStaticMethods::extractExtension, final_const);
-	BindFunction(g, tSS<'e','x','t','r','a','c','t','N','a','m','e'>(), &tRisaFsStaticMethods::extractName, final_const);
-	BindFunction(g, tSS<'e','x','t','r','a','c','t','P','a','t','h'>(), &tRisaFsStaticMethods::extractPath, final_const);
-	BindProperty(g, tSS<'c','w','d'>(), &tRisaFsStaticMethods::get_cwd, &tRisaFsStaticMethods::set_cwd/*, final_const*/);
-	// TODO: property の final_const なプロパティってちゃんと動作してる？
-
-	global.RegisterFinalConstMember(
-			tSS<'o','m','R','e','a','d'>(),
-			tVariant((risse_int64)omRead));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','W','r','i','t','e'>(),
-			tVariant((risse_int64)omWrite));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','U','p','d','a','t','e'>(),
-			tVariant((risse_int64)omUpdate));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','A','c','c','e','s','s','M','a','s','k'>(),
-			tVariant((risse_int64)omAccessMask));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','A','p','p','e','n','d'>(),
-			tVariant((risse_int64)omAppend));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','R','e','a','d','B','i','t'>(),
-			tVariant((risse_int64)omReadBit));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','W','r','i','t','e','B','i','t'>(),
-			tVariant((risse_int64)omWriteBit));
-	global.RegisterFinalConstMember(
-			tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
-			tVariant((risse_int64)omAppendBit));
-
-	FileSystemClass->RegisterInstance(global);
-	FileSystemExceptionClass->RegisterInstance(global);
-}
+		global.RegisterFinalConstMember(
+				tSS<'o','m','R','e','a','d'>(),
+				tVariant((risse_int64)omRead));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','W','r','i','t','e'>(),
+				tVariant((risse_int64)omWrite));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','U','p','d','a','t','e'>(),
+				tVariant((risse_int64)omUpdate));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','c','c','e','s','s','M','a','s','k'>(),
+				tVariant((risse_int64)omAccessMask));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','p','p','e','n','d'>(),
+				tVariant((risse_int64)omAppend));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','R','e','a','d','B','i','t'>(),
+				tVariant((risse_int64)omReadBit));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','W','r','i','t','e','B','i','t'>(),
+				tVariant((risse_int64)omWriteBit));
+		global.RegisterFinalConstMember(
+				tSS<'o','m','A','p','p','e','n','d','B','i','t'>(),
+				tVariant((risse_int64)omAppendBit));
+	}
+};
 //---------------------------------------------------------------------------
 
 
@@ -1071,8 +1074,11 @@ void tRisaFsPackageInitializer::Initialize(tScriptEngine * engine, const tString
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.fs パッケージイニシャライザレジストラ
-template class tPackageInitializerRegisterer<tRisaFsPackageInitializer>;
+//! @brief		FileSystem クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','f','s'>,
+	tFileSystemClass>;
 //---------------------------------------------------------------------------
 
 

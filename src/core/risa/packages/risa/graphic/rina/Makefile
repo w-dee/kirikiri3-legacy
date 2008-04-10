@@ -17,7 +17,8 @@ CPPFILES=\
 	rinaNode.cpp                  \
 	rinaPin.cpp                   \
 	rinaIdRegistry.cpp            \
-	rinaQueue.cpp                 
+	rinaQueue.cpp                 \
+	rinaImageEdge.cpp             
 
 #-----------------------------------------
 # ここのセクションは通常変更する必要なし

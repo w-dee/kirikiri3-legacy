@@ -10,8 +10,8 @@
 //! @file
 //! @brief フレームクラス
 //---------------------------------------------------------------------------
-#ifndef FrameH
-#define FrameH
+#ifndef WIDGETFRAMEH
+#define WIDGETFRAMEH
 
 #include "risa/common/RisaException.h"
 #include "risa/packages/risa/event/Event.h"
@@ -34,6 +34,37 @@ namespace Risa {
 
 	で、tFrame は GC 管理下のオブジェクトではないので注意。
 */
+
+
+//---------------------------------------------------------------------------
+//! @brief		ウィンドウリストを表すクラス
+//! @param		ウィンドウは dispose() されない限りこのリストに登録されたままになる。
+//!				つまり ウィンドウは明示的に dispose() しないと、
+//!				たとえインタプリタからの変数参照が亡くなったとしても永遠にメモリ上に残るので注意。
+//---------------------------------------------------------------------------
+class tWindowList : public singleton_base<tWindowList>
+{
+	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
+	gc_vector<void *> List; //!< リスト
+
+public:
+	//! @brief		コンストラクタ
+	tWindowList();
+
+	//! @brief		デストラクタ
+	~tWindowList();
+
+	//! @brief		ウィンドウリストにウィンドウを登録する
+	//! @param		instance		なんらかのインスタンス
+	void Add(void * instance);
+
+	//! @brief		ウィンドウリストからウィンドウを登録削除する
+	//! @param		instance		なんらかのインスタンス
+	void Remove(void * instance);
+};
+//---------------------------------------------------------------------------
+
+
 
 
 class tFrameInternal;
@@ -140,6 +171,9 @@ public:
 	//! @brief		フレームが破棄されたことを通知する(tFrameInternalから呼ばれる)
 	void NotifyDestroy();
 
+	//! @brief		wxWindow 派生クラスのインスタンスを得る
+	tMainThreadAutoPtr<tFrame> & GetWxWindow() const;
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
@@ -150,6 +184,39 @@ public: // Risse用メソッドなど
 
 };
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"Frame" クラス
+//---------------------------------------------------------------------------
+class tFrameClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tFrameClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
 
 
 

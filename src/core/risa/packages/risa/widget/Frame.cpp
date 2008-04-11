@@ -8,10 +8,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ウィンドウクラス
+//! @brief フレームクラス
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "risa/packages/risa/widget/Window.h"
+#include "risa/packages/risa/widget/Frame.h"
 
 
 namespace Risa {
@@ -27,17 +27,17 @@ RISSE_DEFINE_SOURCE_ID(4811,32114,33460,19785,53925,19531,59339,65072);
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risaのウィンドウを表す wxFrame 派生クラス用のイベントテーブル
+//! @brief		Risaのフレームを表す wxFrame 派生クラス用のイベントテーブル
 //---------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tWindowFrame, wxFrame)
-	EVT_CLOSE(						tWindowFrame::OnClose)
+BEGIN_EVENT_TABLE(tFrame, wxFrame)
+	EVT_CLOSE(						tFrame::OnClose)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-tWindowFrame::tWindowFrame(tWindowInternal * internal) : wxFrame(NULL, -1, wxT(""))
+tFrame::tFrame(tFrameInternal * internal) : wxFrame(NULL, -1, wxT(""))
 {
 	Internal = internal;
 }
@@ -45,14 +45,14 @@ tWindowFrame::tWindowFrame(tWindowInternal * internal) : wxFrame(NULL, -1, wxT("
 
 
 //---------------------------------------------------------------------------
-tWindowFrame::~tWindowFrame()
+tFrame::~tFrame()
 {
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWindowFrame::OnClose(wxCloseEvent & event)
+void tFrame::OnClose(wxCloseEvent & event)
 {
 	// onClose を呼び出す
 	Internal->GetInstance()->Operate(ocFuncCall, NULL, tSS<'o','n','C','l','o','s','e'>(),
@@ -62,7 +62,7 @@ void tWindowFrame::OnClose(wxCloseEvent & event)
 
 
 //---------------------------------------------------------------------------
-bool tWindowFrame::Destroy()
+bool tFrame::Destroy()
 {
 	// Internal にウィンドウが破棄されたことを通知する
 	Internal->NotifyDestroy();
@@ -99,7 +99,7 @@ bool tWindowFrame::Destroy()
 class tWindowList : public singleton_base<tWindowList>
 {
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	gc_vector<tWindowInternal *> WindowInternals; //!< リスト
+	gc_vector<void *> List; //!< リスト
 
 public:
 	//! @brief		コンストラクタ
@@ -113,23 +113,24 @@ public:
 	}
 
 	//! @brief		ウィンドウリストにウィンドウを登録する
-	//! @param		window		tWindowInternal のインスタンス
-	void Add(tWindowInternal * window)
+	//! @param		instance		なんらかのインスタンス
+	void Add(void * instance)
 	{
 		volatile tCriticalSection::tLocker cs_holder(CS);
-		RISSE_ASSERT(std::find(WindowInternals.begin(), WindowInternals.end(), window) == WindowInternals.end());
-		WindowInternals.push_back(window);
+		RISSE_ASSERT(std::find(List.begin(), List.end(), instance) == List.end());
+		List.push_back(instance);
 	}
 
 
 	//! @brief		ウィンドウリストからウィンドウを登録削除する
-	void Remove(tWindowInternal * window)
+	//! @param		instance		なんらかのインスタンス
+	void Remove(void * instance)
 	{
 		volatile tCriticalSection::tLocker cs_holder(CS);
-		gc_vector<tWindowInternal*>::iterator i;
-		i = std::find(WindowInternals.begin(), WindowInternals.end(), window);
-		RISSE_ASSERT(i != WindowInternals.end());
-		WindowInternals.erase(i);
+		gc_vector<void *>::iterator i;
+		i = std::find(List.begin(), List.end(), instance);
+		RISSE_ASSERT(i != List.end());
+		List.erase(i);
 	}
 };
 //---------------------------------------------------------------------------
@@ -142,19 +143,19 @@ public:
 
 
 //---------------------------------------------------------------------------
-tWindowInternal::tWindowInternal(tWindowInstance * instance)
+tFrameInternal::tFrameInternal(tFrameInstance * instance)
 {
 	Instance = instance;
-	Window = new tWindowFrame(this);
+	Frame = new tFrame(this);
 	tWindowList::instance()->Add(this);
 
-	Window->Show();
+	Frame->Show();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tWindowInternal::~tWindowInternal()
+tFrameInternal::~tFrameInternal()
 {
 	if(Instance)
 		tWindowList::instance()->Remove(this);
@@ -163,15 +164,15 @@ tWindowInternal::~tWindowInternal()
 
 
 //---------------------------------------------------------------------------
-void tWindowInternal::NotifyDestroy()
+void tFrameInternal::NotifyDestroy()
 {
-	// tWindowFrame からウィンドウの破棄が伝えられるとき。
+	// tFrame からフレームの破棄が伝えられるとき。
 	if(Instance)
 	{
 		tWindowList::instance()->Remove(this);
 		Instance->NotifyDestroy(); // インスタンスにも通知する
 		Instance = NULL; // インスタンスへの参照を断ち切る
-		Window.set(NULL); // ウィンドウもすでに削除されることになっているので削除キューに登録する必要はない
+		Frame.set(NULL); // フレームもすでに削除されることになっているので削除キューに登録する必要はない
 	}
 }
 //---------------------------------------------------------------------------
@@ -187,7 +188,7 @@ void tWindowInternal::NotifyDestroy()
 
 
 //---------------------------------------------------------------------------
-tWindowInstance::tWindowInstance()
+tFrameInstance::tFrameInstance()
 {
 	Internal = NULL;
 }
@@ -195,7 +196,7 @@ tWindowInstance::tWindowInstance()
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::NotifyDestroy()
+void tFrameInstance::NotifyDestroy()
 {
 	Internal = NULL;
 }
@@ -203,7 +204,7 @@ void tWindowInstance::NotifyDestroy()
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::construct()
+void tFrameInstance::construct()
 {
 	// 特にやること無し
 }
@@ -211,35 +212,35 @@ void tWindowInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::initialize(const tNativeCallInfo &info)
+void tFrameInstance::initialize(const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
 
 	// 親クラスの同名メソッドを呼び出す
 	info.InitializeSuperClass();
 
-	// ウィンドウを作成
-	if(Internal) Internal->GetWindow()->Destroy();
-	Internal = new tWindowInternal(this);
+	// フレームを作成
+	if(Internal) Internal->GetFrame()->Destroy();
+	Internal = new tFrameInternal(this);
 }
 //---------------------------------------------------------------------------
 
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::dispose()
+void tFrameInstance::dispose()
 {
 	// TODO: 呼び出すスレッドのチェックまたはロック
 
 	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
-	Internal->GetWindow()->Destroy();
+	Internal->GetFrame()->Destroy();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::close(const tMethodArgument &args)
+void tFrameInstance::close(const tMethodArgument &args)
 {
 	// TODO: 呼び出すスレッドのチェックまたはロック
 
@@ -247,13 +248,13 @@ void tWindowInstance::close(const tMethodArgument &args)
 
 	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
 
-	Internal->GetWindow()->Close(force);
+	Internal->GetFrame()->Close(force);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tWindowInstance::onClose(bool force)
+void tFrameInstance::onClose(bool force)
 {
 	// TODO: 呼び出すスレッドのチェックまたはロック
 
@@ -278,16 +279,16 @@ void tWindowInstance::onClose(bool force)
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Window" クラス
+//! @brief		"Frame" クラス
 //---------------------------------------------------------------------------
-class tWindowClass : public tClassBase
+class tFrameClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
-	tWindowClass(tScriptEngine * engine);
+	tFrameClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();
@@ -304,8 +305,8 @@ public:
 
 
 //---------------------------------------------------------------------------
-tWindowClass::tWindowClass(tScriptEngine * engine) :
-	tClassBase(tSS<'W','i','n','d','o','w'>(),
+tFrameClass::tFrameClass(tScriptEngine * engine) :
+	tClassBase(tSS<'F','r','a','m','e'>(),
 		tClassHolder<tEventSourceClass>::instance()->GetClass())
 {
 	RegisterMembers();
@@ -314,7 +315,7 @@ tWindowClass::tWindowClass(tScriptEngine * engine) :
 
 
 //---------------------------------------------------------------------------
-void tWindowClass::RegisterMembers()
+void tFrameClass::RegisterMembers()
 {
 	// 親クラスの RegisterMembers を呼ぶ
 	inherited::RegisterMembers();
@@ -324,20 +325,20 @@ void tWindowClass::RegisterMembers()
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	BindFunction(this, ss_ovulate, &tWindowClass::ovulate);
-	BindFunction(this, ss_construct, &tWindowInstance::construct);
-	BindFunction(this, ss_initialize, &tWindowInstance::initialize);
-	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tWindowInstance::dispose);
-	BindFunction(this, tSS<'c','l','o','s','e'>(), &tWindowInstance::close);
-	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tWindowInstance::onClose);
+	BindFunction(this, ss_ovulate, &tFrameClass::ovulate);
+	BindFunction(this, ss_construct, &tFrameInstance::construct);
+	BindFunction(this, ss_initialize, &tFrameInstance::initialize);
+	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tFrameInstance::dispose);
+	BindFunction(this, tSS<'c','l','o','s','e'>(), &tFrameInstance::close);
+	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tFrameInstance::onClose);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tVariant tWindowClass::ovulate()
+tVariant tFrameClass::ovulate()
 {
-	return tVariant(new tWindowInstance());
+	return tVariant(new tFrameInstance());
 }
 //---------------------------------------------------------------------------
 
@@ -347,11 +348,11 @@ tVariant tWindowClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Window クラスレジストラ
+//! @brief		Frame クラスレジストラ
 //---------------------------------------------------------------------------
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','w','i','d','g','e','t'>,
-	tWindowClass>;
+	tFrameClass>;
 //---------------------------------------------------------------------------
 
 

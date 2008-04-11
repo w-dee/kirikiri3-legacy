@@ -8,10 +8,10 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief ウィンドウクラス
+//! @brief フレームクラス
 //---------------------------------------------------------------------------
-#ifndef WindowH
-#define WindowH
+#ifndef FrameH
+#define FrameH
 
 #include "risa/common/RisaException.h"
 #include "risa/packages/risa/event/Event.h"
@@ -25,41 +25,41 @@ namespace Risa {
 /*
 	メモ
 
-	tWindowInstance::Internal -> tWindowInternal::Window -> tWindowFrame
+	tFrameInstance::Internal -> tFrameInternal::Window -> tFrame
 
 	の構成になっている。
 
-	tWindowInstance < tCollectee
-	tWindowInternal < tDestructee
+	tFrameInstance < tCollectee
+	tFramaInternal < tDestructee
 
-	で、tWindowFrame は GC 管理下のオブジェクトではないので注意。
+	で、tFrame は GC 管理下のオブジェクトではないので注意。
 */
 
 
-class tWindowInternal;
+class tFrameInternal;
 //---------------------------------------------------------------------------
-//! @brief		Risaのウィンドウを表す wxFrame 派生クラス
+//! @brief		Risaのフレームを表す wxFrame 派生クラス
 //---------------------------------------------------------------------------
-class tWindowFrame : public wxFrame
+class tFrame : public wxFrame
 {
 	typedef wxFrame inherited;
 
-	tWindowInternal * Internal; //!< tWindowInternal のインスタンスへのポインタ
+	tFrameInternal * Internal; //!< tFrameInternal のインスタンスへのポインタ
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		internal	tWindowInstance のインスタンスへのポインタ
-	tWindowFrame(tWindowInternal * internal);
+	//! @param		internal	tFrameInstance のインスタンスへのポインタ
+	tFrame(tFrameInternal * internal);
 
 	//! @brief		デストラクタ
-	~tWindowFrame();
+	~tFrame();
 
 public:
-	//! @brief		ウィンドウが閉じられようとするとき
+	//! @brief		フレームが閉じられようとするとき
 	//! @param		event イベントオブジェクト
 	void OnClose(wxCloseEvent & event);
 
-	//! @brief		ウィンドウを破棄する
+	//! @brief		フレームを破棄する
 	//! @note		delete オペレータをフックしている訳ではないので注意
 	virtual bool Destroy();
 
@@ -88,32 +88,32 @@ public:
 
 
 
-class tWindowInstance;
+class tFrameInstance;
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウの内部実装クラス
+//! @brief		フレームの内部実装クラス
 //---------------------------------------------------------------------------
-class tWindowInternal : public tDestructee
+class tFrameInternal : public tDestructee
 {
-	tWindowInstance * Instance; //!< tWindowInstance へのポインタ
+	tFrameInstance * Instance; //!< tFrameInstance へのポインタ
 
 private:
-	tMainThreadAutoPtr<tWindowFrame> Window; //!< ウィンドウへのポインタ
+	tMainThreadAutoPtr<tFrame> Frame; //!< フレームへのポインタ
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		instance		tWindowInstance へのポインタ
-	tWindowInternal(tWindowInstance * instance);
+	//! @param		instance		tFrameInstance へのポインタ
+	tFrameInternal(tFrameInstance * instance);
 
 	//! @brief		デストラクタ
-	~tWindowInternal();
+	~tFrameInternal();
 
 	//! @brief		インスタンスを得る
-	tWindowInstance * GetInstance() const { return Instance; }
+	tFrameInstance * GetInstance() const { return Instance; }
 
-	//! @brief		ウィンドウへのポインタを獲る
-	tMainThreadAutoPtr<tWindowFrame> & GetWindow() { return Window; }
+	//! @brief		フレームへのポインタを獲る
+	tMainThreadAutoPtr<tFrame> & GetFrame() { return Frame; }
 
-	//! @brief		ウィンドウが破棄されたことを通知する(tWindowFrameから呼ばれる)
+	//! @brief		フレームが破棄されたことを通知する(tFrameから呼ばれる)
 	void NotifyDestroy();
 };
 //---------------------------------------------------------------------------
@@ -122,29 +122,29 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウクラスのインスタンス
+//! @brief		フレームクラスのインスタンス
 //---------------------------------------------------------------------------
-class tWindowInstance : public tObjectBase
+class tFrameInstance : public tObjectBase
 {
-	friend class tWindowInternal;
+	friend class tFrameInternal;
 private:
-	tWindowInternal * Internal; //!< 内部実装クラスへのポインタ
+	tFrameInternal * Internal; //!< 内部実装クラスへのポインタ
 
 public:
 	//! @brief		コンストラクタ
-	tWindowInstance();
+	tFrameInstance();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
-	virtual ~tWindowInstance() {;}
+	virtual ~tFrameInstance() {;}
 
-	//! @brief		ウィンドウが破棄されたことを通知する(tWindowInternalから呼ばれる)
+	//! @brief		フレームが破棄されたことを通知する(tFrameInternalから呼ばれる)
 	void NotifyDestroy();
 
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
 
-	void dispose(); //!< ウィンドウを破棄する
+	void dispose(); //!< フレームを破棄する
 	void close(const tMethodArgument &args); //!< 「閉じる」ボタンをエミュレートする
 	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
 

@@ -47,6 +47,9 @@ tFrame::tFrame(tFrameInternal * internal) : inherited(NULL, -1, wxT(""))
 //---------------------------------------------------------------------------
 tFrame::~tFrame()
 {
+	fprintf(stderr, "tFrame::~tFrame()\n");
+	fflush(stderr);
+
 }
 //---------------------------------------------------------------------------
 
@@ -188,6 +191,9 @@ tFrameInstance::tFrameInstance()
 //---------------------------------------------------------------------------
 void tFrameInstance::NotifyDestroy()
 {
+	fprintf(stderr, "tFrameInstance::NotifyDestroy()\n");
+	fflush(stderr);
+
 	Internal = NULL;
 }
 //---------------------------------------------------------------------------

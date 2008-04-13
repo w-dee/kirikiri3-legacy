@@ -57,11 +57,6 @@ public:
 	~tRina();
 
 public:
-
-	//! @brief		コントロールを破棄する
-	//! @note		delete オペレータをフックしている訳ではないので注意
-	virtual bool Destroy();
-
 private:
 	//! @brief		イベントテーブルの定義
 	DECLARE_EVENT_TABLE()

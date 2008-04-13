@@ -46,23 +46,19 @@ tRina::tRina(tRinaInternal * internal, wxWindow * parent) : inherited(parent, -1
 //---------------------------------------------------------------------------
 tRina::~tRina()
 {
-}
-//---------------------------------------------------------------------------
+	// wxFrame や wxDialog 以外はこっちでウィンドウ破棄をハンドリングする
 
+	fprintf(stderr, "tRina::~tRina()\n");
+	fflush(stderr);
 
-//---------------------------------------------------------------------------
-bool tRina::Destroy()
-{
 	// Internal にウィンドウが破棄されたことを通知する
 	Internal->NotifyDestroy();
 
 	// Internal を一応切り離す
 	Internal = NULL;
-
-	// 親クラスのメソッドを呼び出す
-	return inherited::Destroy();
 }
 //---------------------------------------------------------------------------
+
 
 
 
@@ -142,6 +138,8 @@ tRinaInstance::tRinaInstance()
 //---------------------------------------------------------------------------
 void tRinaInstance::NotifyDestroy()
 {
+	fprintf(stderr, "tRinaInstance::NotifyDestroy()\n");
+	fflush(stderr);
 	Internal = NULL;
 }
 //---------------------------------------------------------------------------

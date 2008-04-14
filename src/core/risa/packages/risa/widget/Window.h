@@ -94,7 +94,7 @@ public:
 template <typename WX_WINDOW_CLASS, typename RISSE_INSTANCE_CLASS>
 class tRisaWindowBahavior
 {
-protected:
+public:
 	//-----------------------------------------------------------------------
 	//! @brief		ウィンドウの内部実装クラス
 	//-----------------------------------------------------------------------
@@ -143,6 +143,7 @@ protected:
 	};
 	//-----------------------------------------------------------------------
 
+protected:
 	tInternal * Internal; //!< 内部実装クラス
 
 public:

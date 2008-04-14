@@ -39,20 +39,19 @@ namespace Risa {
 
 
 
-class tFrameInternal;
+class tFrameInstance;
 //---------------------------------------------------------------------------
 //! @brief		Risaのフレームを表す wxFrame 派生クラス
 //---------------------------------------------------------------------------
-class tFrame : public wxFrame
+class tFrame : public wxFrame, public tRisaWindowBahavior<tFrame, tFrameInstance>
 {
 	typedef wxFrame inherited;
-
-	tFrameInternal * Internal; //!< tFrameInternal のインスタンスへのポインタ
+	typedef tRisaWindowBahavior<tFrame, tFrameInstance> tBehavior;
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		internal	tFrameInstance のインスタンスへのポインタ
-	tFrame(tFrameInternal * internal);
+	//! @param		instance		Frameクラスのインスタンス
+	tFrame(tFrameInstance * instance);
 
 	//! @brief		デストラクタ
 	~tFrame();
@@ -63,7 +62,8 @@ public:
 	void OnClose(wxCloseEvent & event);
 
 	//! @brief		フレームを破棄する
-	//! @note		delete オペレータをフックしている訳ではないので注意
+	//! @note		デストラクタをフックしている訳ではないので注意
+	//!				(ただしtRisaWindowBahaviorのデストラクタ内も参照)
 	virtual bool Destroy();
 
 private:
@@ -76,47 +76,17 @@ private:
 
 
 
-class tFrameInstance;
-//---------------------------------------------------------------------------
-//! @brief		フレームの内部実装クラス
-//---------------------------------------------------------------------------
-class tFrameInternal : public tDestructee
-{
-	tFrameInstance * Instance; //!< tFrameInstance へのポインタ
-
-private:
-	tMainThreadAutoPtr<tFrame> Frame; //!< フレームへのポインタ
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		instance		tFrameInstance へのポインタ
-	tFrameInternal(tFrameInstance * instance);
-
-	//! @brief		デストラクタ
-	~tFrameInternal();
-
-	//! @brief		インスタンスを得る
-	tFrameInstance * GetInstance() const { return Instance; }
-
-	//! @brief		フレームへのポインタを獲る
-	tMainThreadAutoPtr<tFrame> & GetFrame() { return Frame; }
-
-	//! @brief		フレームが破棄されたことを通知する(tFrameから呼ばれる)
-	void NotifyDestroy();
-};
-//---------------------------------------------------------------------------
-
 
 
 
 //---------------------------------------------------------------------------
 //! @brief		フレームクラスのインスタンス
 //---------------------------------------------------------------------------
-class tFrameInstance : public tObjectBase
+class tFrameInstance : public tWindowInstance
 {
-	friend class tFrameInternal;
+	friend class tWindowInstance;
 private:
-	tFrameInternal * Internal; //!< 内部実装クラスへのポインタ
+	tFrame::tInternal * Internal; //!< 内部実装クラスへのポインタ
 
 public:
 	//! @brief		コンストラクタ
@@ -124,12 +94,6 @@ public:
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tFrameInstance() {;}
-
-	//! @brief		フレームが破棄されたことを通知する(tFrameInternalから呼ばれる)
-	void NotifyDestroy();
-
-	//! @brief		wxWindow 派生クラスのインスタンスを得る
-	tMainThreadAutoPtr<tFrame> & GetWxWindow() const;
 
 public: // Risse用メソッドなど
 	void construct();

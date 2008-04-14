@@ -37,9 +37,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-tFrame::tFrame(tFrameInternal * internal) : inherited(NULL, -1, wxT(""))
+tFrame::tFrame(tFrameInstance * instance) :
+	inherited(NULL, -1, wxT("")),
+	tBehavior(this, instance)
 {
-	Internal = internal;
 }
 //---------------------------------------------------------------------------
 
@@ -89,77 +90,12 @@ bool tFrame::Destroy()
 
 
 
-//---------------------------------------------------------------------------
-tFrameInternal::tFrameInternal(tFrameInstance * instance)
-{
-	Instance = instance;
-	Frame = new tFrame(this);
-	tWindowList::instance()->Add(this);
-
-	Frame->Show();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tFrameInternal::~tFrameInternal()
-{
-	if(Instance)
-		tWindowList::instance()->Remove(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFrameInternal::NotifyDestroy()
-{
-	// tFrame からフレームの破棄が伝えられるとき。
-	if(Instance)
-	{
-		tWindowList::instance()->Remove(this);
-		Instance->NotifyDestroy(); // インスタンスにも通知する
-		Instance = NULL; // インスタンスへの参照を断ち切る
-		Frame.set(NULL); // フレームもすでに削除されることになっているので削除キューに登録する必要はない
-	}
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 
 
 //---------------------------------------------------------------------------
 tFrameInstance::tFrameInstance()
 {
 	Internal = NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFrameInstance::NotifyDestroy()
-{
-	fprintf(stderr, "tFrameInstance::NotifyDestroy()\n");
-	fflush(stderr);
-
-	Internal = NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tMainThreadAutoPtr<tFrame> & tFrameInstance::GetWxWindow() const
-{
-	volatile tSynchronizer sync(this); // sync
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	return Internal->GetFrame();
 }
 //---------------------------------------------------------------------------
 
@@ -181,8 +117,7 @@ void tFrameInstance::initialize(const tNativeCallInfo &info)
 	info.InitializeSuperClass();
 
 	// フレームを作成
-	if(Internal) Internal->GetFrame()->Destroy();
-	Internal = new tFrameInternal(this);
+	SetWxWindow(new tFrame(this));
 }
 //---------------------------------------------------------------------------
 
@@ -195,7 +130,7 @@ void tFrameInstance::dispose()
 
 	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
-	Internal->GetFrame()->Destroy();
+	WxWindow->Destroy();
 }
 //---------------------------------------------------------------------------
 
@@ -209,7 +144,7 @@ void tFrameInstance::close(const tMethodArgument &args)
 
 	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
 
-	Internal->GetFrame()->Close(force);
+	WxWindow->Close(force);
 }
 //---------------------------------------------------------------------------
 
@@ -242,7 +177,7 @@ void tFrameInstance::onClose(bool force)
 //---------------------------------------------------------------------------
 tFrameClass::tFrameClass(tScriptEngine * engine) :
 	tClassBase(tSS<'F','r','a','m','e'>(),
-		tClassHolder<tEventSourceClass>::instance()->GetClass())
+		tClassHolder<tWindowClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }

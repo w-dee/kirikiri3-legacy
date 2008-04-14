@@ -16,6 +16,7 @@
 #include "risa/common/RisaException.h"
 #include "risa/packages/risa/event/Event.h"
 #include "risa/common/RisaGC.h"
+#include "risa/packages/risa/widget/Window.h"
 
 
 namespace Risa {
@@ -34,35 +35,6 @@ namespace Risa {
 
 	で、tFrame は GC 管理下のオブジェクトではないので注意。
 */
-
-
-//---------------------------------------------------------------------------
-//! @brief		ウィンドウリストを表すクラス
-//! @param		ウィンドウは dispose() されない限りこのリストに登録されたままになる。
-//!				つまり ウィンドウは明示的に dispose() しないと、
-//!				たとえインタプリタからの変数参照が亡くなったとしても永遠にメモリ上に残るので注意。
-//---------------------------------------------------------------------------
-class tWindowList : public singleton_base<tWindowList>
-{
-	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
-	gc_vector<void *> List; //!< リスト
-
-public:
-	//! @brief		コンストラクタ
-	tWindowList();
-
-	//! @brief		デストラクタ
-	~tWindowList();
-
-	//! @brief		ウィンドウリストにウィンドウを登録する
-	//! @param		instance		なんらかのインスタンス
-	void Add(void * instance);
-
-	//! @brief		ウィンドウリストからウィンドウを登録削除する
-	//! @param		instance		なんらかのインスタンス
-	void Remove(void * instance);
-};
-//---------------------------------------------------------------------------
 
 
 
@@ -100,21 +72,6 @@ private:
 };
 //---------------------------------------------------------------------------
 
-
-
-
-//---------------------------------------------------------------------------
-//! @brief	wxWindow 派生クラスは delete ではなくて Destroy メソッドを呼ばないとならない
-//---------------------------------------------------------------------------
-template <>
-class tDestructorCaller_Impl<wxWindow *> : public tMainThreadDestructorQueue::tDestructorCaller
-{
-	wxWindow * Ptr;
-public:
-	tDestructorCaller_Impl(wxWindow *  ptr) { Ptr = ptr; }
-	virtual ~tDestructorCaller_Impl() { Ptr->Destroy(); }
-};
-//---------------------------------------------------------------------------
 
 
 

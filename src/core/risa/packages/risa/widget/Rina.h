@@ -23,35 +23,20 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-/*
-	メモ
 
-	tRinaInstance::Internal -> tRinaInternal::Window -> tRina
-
-	の構成になっている。
-
-	tRinaInstance < tCollectee
-	tFramaInternal < tDestructee
-
-	で、tRina は GC 管理下のオブジェクトではないので注意。
-*/
-
-
-class tRinaInternal;
+class tRinaInstance;
 //---------------------------------------------------------------------------
 //! @brief		Rinaコントロールを表す wcControl 派生クラス
 //---------------------------------------------------------------------------
-class tRina : public wxControl
+class tRina : public wxControl, public tRisaWindowBahavior<tRina, tRinaInstance>
 {
 	typedef wxControl inherited;
 
-	tRinaInternal * Internal; //!< tRinaInternal のインスタンスへのポインタ
-
 public:
 	//! @brief		コンストラクタ
-	//! @param		internal	tRinaInstance のインスタンスへのポインタ
+	//! @param		instance	Rinaクラスのインスタンスへのポインタ
 	//! @param		parent		親コントロール
-	tRina(tRinaInternal * internal, wxWindow * parent);
+	tRina(tRinaInstance * internal, wxWindow * parent);
 
 	//! @brief		デストラクタ
 	~tRina();
@@ -69,49 +54,14 @@ private:
 
 
 
-class tRinaInstance;
-class tFrameInstance;
-//---------------------------------------------------------------------------
-//! @brief		Rinaコントロールの内部実装クラス
-//---------------------------------------------------------------------------
-class tRinaInternal : public tDestructee
-{
-	tRinaInstance * Instance; //!< tRinaInstance へのポインタ
-
-private:
-	tMainThreadAutoPtr<tRina> Rina; //!< Rinaコントロールへのポインタ
-
-public:
-	//! @brief		コンストラクタ
-	//! @param		instance		tRinaInstance へのポインタ
-	//! @param		frame			このコントロールを含む親フレーム
-	tRinaInternal(tRinaInstance * instance, tFrameInstance * frame);
-
-	//! @brief		デストラクタ
-	~tRinaInternal();
-
-	//! @brief		インスタンスを得る
-	tRinaInstance * GetInstance() const { return Instance; }
-
-	//! @brief		Rinaコントロールへのポインタを獲る
-	tMainThreadAutoPtr<tRina> & GetRina() { return Rina; }
-
-	//! @brief		Rinaコントロールが破棄されたことを通知する(tRinaから呼ばれる)
-	void NotifyDestroy();
-};
-//---------------------------------------------------------------------------
-
-
-
 
 //---------------------------------------------------------------------------
 //! @brief		Rinaコントロールクラスのインスタンス
 //---------------------------------------------------------------------------
-class tRinaInstance : public tObjectBase
+class tRinaInstance : public tWindowInstance
 {
-	friend class tRinaInternal;
 private:
-	tRinaInternal * Internal; //!< 内部実装クラスへのポインタ
+	tRina::tInternal * Internal; //!< 内部実装クラスへのポインタ
 
 public:
 	//! @brief		コンストラクタ
@@ -120,20 +70,9 @@ public:
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tRinaInstance() {;}
 
-	//! @brief		Rinaコントロールが破棄されたことを通知する(tRinaInternalから呼ばれる)
-	void NotifyDestroy();
-
-	//! @brief		wxWindow 派生クラスのインスタンスを得る
-	tMainThreadAutoPtr<tRina> & GetWxWindow() const;
-
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tVariant & parent, const tNativeCallInfo &info);
-
-	void dispose(); //!< Rinaコントロールを破棄する
-	void close(const tMethodArgument &args); //!< 「閉じる」ボタンをエミュレートする
-	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
-
 };
 //---------------------------------------------------------------------------
 

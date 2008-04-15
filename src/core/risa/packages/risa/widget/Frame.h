@@ -23,20 +23,6 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 
-/*
-	メモ
-
-	tFrameInstance::Internal -> tFrameInternal::Window -> tFrame
-
-	の構成になっている。
-
-	tFrameInstance < tCollectee
-	tFramaInternal < tDestructee
-
-	で、tFrame は GC 管理下のオブジェクトではないので注意。
-*/
-
-
 
 
 class tFrameInstance;
@@ -46,11 +32,10 @@ class tFrameInstance;
 class tFrame : public wxFrame, public tRisaWindowBahavior<tFrame, tFrameInstance>
 {
 	typedef wxFrame inherited;
-	typedef tRisaWindowBahavior<tFrame, tFrameInstance> tBehavior;
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		instance		Frameクラスのインスタンス
+	//! @param		instance		Frameクラスのインスタンスへのポインタ
 	tFrame(tFrameInstance * instance);
 
 	//! @brief		デストラクタ
@@ -84,7 +69,6 @@ private:
 //---------------------------------------------------------------------------
 class tFrameInstance : public tWindowInstance
 {
-	friend class tWindowInstance;
 private:
 	tFrame::tInternal * Internal; //!< 内部実装クラスへのポインタ
 
@@ -98,11 +82,6 @@ public:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
-
-	void dispose(); //!< フレームを破棄する
-	void close(const tMethodArgument &args); //!< 「閉じる」ボタンをエミュレートする
-	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
-
 };
 //---------------------------------------------------------------------------
 

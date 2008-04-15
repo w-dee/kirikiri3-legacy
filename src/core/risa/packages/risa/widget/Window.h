@@ -25,14 +25,15 @@ namespace Risa {
 /*
 	メモ
 
-	tWindowInstance::Internal -> tWindowInternal::Window -> tWindow
+	tWindowInstance::Internal -> tRisaWindowBahavior::tInternal::Window ->
+		wxWindow派生クラス (tRisaWindowBahavior<> のサブクラス)
 
 	の構成になっている。
 
 	tWindowInstance < tCollectee
-	tWindowInternal < tDestructee
+	tRisaWindowBahavior::tInternal < tDestructee
 
-	で、tWindow は GC 管理下のオブジェクトではないので注意。
+	で、wxWindow派生クラス は GC 管理下のオブジェクトではないので注意。
 */
 
 
@@ -95,6 +96,9 @@ template <typename WX_WINDOW_CLASS, typename RISSE_INSTANCE_CLASS>
 class tRisaWindowBahavior
 {
 public:
+	typedef tRisaWindowBahavior<WX_WINDOW_CLASS, RISSE_INSTANCE_CLASS> tBehavior;
+		//!< 自分自身のクラスのエイリアス
+
 	//-----------------------------------------------------------------------
 	//! @brief		ウィンドウの内部実装クラス
 	//-----------------------------------------------------------------------
@@ -143,7 +147,7 @@ public:
 	};
 	//-----------------------------------------------------------------------
 
-protected:
+private:
 	tInternal * Internal; //!< 内部実装クラス
 
 public:
@@ -175,6 +179,15 @@ public:
 	//! @return		ウィンドウの内部実装クラス
 	tInternal * GetInternal() const { return Internal; }
 
+protected:
+	//! @brief		Risseインスタンスを得る
+	//! @return		Risseインスタンス
+	RISSE_INSTANCE_CLASS * GetInstance() const
+	{
+		RISSE_ASSERT(Internal != NULL);
+		return Internal->GetInstance();
+	}
+
 };
 //---------------------------------------------------------------------------
 
@@ -193,7 +206,7 @@ public:
 //---------------------------------------------------------------------------
 class tWindowInstance : public tObjectBase
 {
-protected:
+private:
 	wxWindow * WxWindow; //!< wxWindow へのポインタ
 
 public:
@@ -211,6 +224,11 @@ protected:
 	//! @param		window		wxWindow へのポインタ
 	//! @note		サブクラスで wxWindow へのポインタを作成したらこれを設定すること
 	void SetWxWindow(wxWindow * window) { WxWindow = window; }
+
+public:
+	//! @brief		wxWindow へのポインタを取得する
+	//! @return		wxWindow へのポインタ
+	wxWindow * GetWxWindow() const;
 
 public: // Risse用メソッドなど
 	void construct();

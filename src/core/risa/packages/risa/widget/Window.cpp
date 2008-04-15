@@ -96,6 +96,16 @@ void tWindowInstance::NotifyDestroy()
 
 
 //---------------------------------------------------------------------------
+wxWindow * tWindowInstance::GetWxWindow() const
+{
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	return WxWindow;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tWindowInstance::construct()
 {
 	// 特にやること無し

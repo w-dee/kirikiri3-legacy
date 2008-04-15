@@ -41,6 +41,7 @@ tFrame::tFrame(tFrameInstance * instance) :
 	inherited(NULL, -1, wxT("")),
 	tBehavior(this, instance)
 {
+	Show();
 }
 //---------------------------------------------------------------------------
 
@@ -50,7 +51,6 @@ tFrame::~tFrame()
 {
 	fprintf(stderr, "tFrame::~tFrame()\n");
 	fflush(stderr);
-
 }
 //---------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ tFrame::~tFrame()
 void tFrame::OnClose(wxCloseEvent & event)
 {
 	// onClose を呼び出す
-	Internal->GetInstance()->Operate(ocFuncCall, NULL, tSS<'o','n','C','l','o','s','e'>(),
+	GetInstance()->Operate(ocFuncCall, NULL, tSS<'o','n','C','l','o','s','e'>(),
 			0, tMethodArgument::New(!event.CanVeto()));
 }
 //---------------------------------------------------------------------------
@@ -69,10 +69,7 @@ void tFrame::OnClose(wxCloseEvent & event)
 bool tFrame::Destroy()
 {
 	// Internal にウィンドウが破棄されたことを通知する
-	Internal->NotifyDestroy();
-
-	// Internal を一応切り離す
-	Internal = NULL;
+	NotifyDestroy();
 
 	// 親クラスのメソッドを呼び出す
 	return inherited::Destroy();
@@ -123,45 +120,6 @@ void tFrameInstance::initialize(const tNativeCallInfo &info)
 
 
 
-//---------------------------------------------------------------------------
-void tFrameInstance::dispose()
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	WxWindow->Destroy();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFrameInstance::close(const tMethodArgument &args)
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
-
-	WxWindow->Close(force);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFrameInstance::onClose(bool force)
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	// デフォルトの動作は dispose メソッドを呼び出すこと
-	Operate(ocFuncCall, NULL, tSS<'d','i','s','p','o','s','e'>(),
-			0, tMethodArgument::Empty());
-}
-//---------------------------------------------------------------------------
-
-
-
 
 
 
@@ -198,9 +156,6 @@ void tFrameClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tFrameClass::ovulate);
 	BindFunction(this, ss_construct, &tFrameInstance::construct);
 	BindFunction(this, ss_initialize, &tFrameInstance::initialize);
-	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tFrameInstance::dispose);
-	BindFunction(this, tSS<'c','l','o','s','e'>(), &tFrameInstance::close);
-	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tFrameInstance::onClose);
 }
 //---------------------------------------------------------------------------
 

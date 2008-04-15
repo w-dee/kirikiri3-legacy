@@ -36,9 +36,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-tRina::tRina(tRinaInternal * internal, wxWindow * parent) : inherited(parent, -1)
+tRina::tRina(tRinaInstance * instance, wxWindow * parent) :
+	inherited(parent, -1),
+	tBehavior(this, instance)
 {
-	Internal = internal;
 }
 //---------------------------------------------------------------------------
 
@@ -50,12 +51,6 @@ tRina::~tRina()
 
 	fprintf(stderr, "tRina::~tRina()\n");
 	fflush(stderr);
-
-	// Internal にウィンドウが破棄されたことを通知する
-	Internal->NotifyDestroy();
-
-	// Internal を一応切り離す
-	Internal = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -78,44 +73,6 @@ tRina::~tRina()
 
 
 
-
-
-
-
-//---------------------------------------------------------------------------
-tRinaInternal::tRinaInternal(tRinaInstance * instance, tFrameInstance * frame)
-{
-	Instance = instance;
-	Rina = new tRina(this, frame->GetWxWindow());
-	tWindowList::instance()->Add(this);
-
-	Rina->Show();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tRinaInternal::~tRinaInternal()
-{
-	if(Instance)
-		tWindowList::instance()->Remove(this);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaInternal::NotifyDestroy()
-{
-	// tRina からRinaコントロールの破棄が伝えられるとき。
-	if(Instance)
-	{
-		tWindowList::instance()->Remove(this);
-		Instance->NotifyDestroy(); // インスタンスにも通知する
-		Instance = NULL; // インスタンスへの参照を断ち切る
-		Rina.set(NULL); // Rinaコントロールもすでに削除されることになっているので削除キューに登録する必要はない
-	}
-}
-//---------------------------------------------------------------------------
 
 
 
@@ -131,27 +88,6 @@ void tRinaInternal::NotifyDestroy()
 tRinaInstance::tRinaInstance()
 {
 	Internal = NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaInstance::NotifyDestroy()
-{
-	fprintf(stderr, "tRinaInstance::NotifyDestroy()\n");
-	fflush(stderr);
-	Internal = NULL;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tMainThreadAutoPtr<tRina> & tRinaInstance::GetWxWindow() const
-{
-	volatile tSynchronizer sync(this); // sync
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	return Internal->GetRina();
 }
 //---------------------------------------------------------------------------
 
@@ -178,50 +114,9 @@ void tRinaInstance::initialize(const tVariant & parent, const tNativeCallInfo &i
 			tClassHolder<tFrameClass>::instance()->GetClass());
 
 	// Rinaコントロールを作成
-	if(Internal) Internal->GetRina()->Destroy();
-	Internal = new tRinaInternal(this, frame);
+	SetWxWindow(new tRina(this, frame->GetWxWindow()));
 }
 //---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-void tRinaInstance::dispose()
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	Internal->GetRina()->Destroy();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaInstance::close(const tMethodArgument &args)
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
-
-	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
-
-	Internal->GetRina()->Close(force);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaInstance::onClose(bool force)
-{
-	// TODO: 呼び出すスレッドのチェックまたはロック
-
-	// デフォルトの動作は dispose メソッドを呼び出すこと
-	Operate(ocFuncCall, NULL, tSS<'d','i','s','p','o','s','e'>(),
-			0, tMethodArgument::Empty());
-}
-//---------------------------------------------------------------------------
-
 
 
 
@@ -263,9 +158,6 @@ void tRinaClass::RegisterMembers()
 	BindFunction(this, ss_ovulate, &tRinaClass::ovulate);
 	BindFunction(this, ss_construct, &tRinaInstance::construct);
 	BindFunction(this, ss_initialize, &tRinaInstance::initialize);
-	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tRinaInstance::dispose);
-	BindFunction(this, tSS<'c','l','o','s','e'>(), &tRinaInstance::close);
-	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tRinaInstance::onClose);
 }
 //---------------------------------------------------------------------------
 

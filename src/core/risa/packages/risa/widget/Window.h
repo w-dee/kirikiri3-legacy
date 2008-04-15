@@ -116,6 +116,7 @@ public:
 		tInternal(WX_WINDOW_CLASS * wx_instance, RISSE_INSTANCE_CLASS * instance)
 		{
 			Window = wx_instance;
+			Instance = instance;
 			tWindowList::instance()->Add(this);
 		}
 

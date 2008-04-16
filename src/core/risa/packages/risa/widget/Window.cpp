@@ -143,7 +143,6 @@ void tWindowInstance::dispose()
 void tWindowInstance::close(const tMethodArgument &args)
 {
 	// TODO: 呼び出すスレッドのチェックまたはロック
-
 	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
 
 	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
@@ -161,6 +160,145 @@ void tWindowInstance::onClose(bool force)
 	// デフォルトの動作は dispose メソッドを呼び出すこと
 	Operate(ocFuncCall, NULL, tSS<'d','i','s','p','o','s','e'>(),
 			0, tMethodArgument::Empty());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tWindowInstance::get_left() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int v = 0;
+	WxWindow->GetPosition(&v, NULL);
+	return v;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_left(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int z = 0;
+	WxWindow->GetPosition(NULL, &z);
+	WxWindow->Move(v, z);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tWindowInstance::get_top() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int v = 0;
+	WxWindow->GetPosition(NULL, &v);
+	return v;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_top(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int z = 0;
+	WxWindow->GetPosition(&z, NULL);
+	WxWindow->Move(z, v);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::setPosition(int x, int y)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	WxWindow->Move(x, y);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tWindowInstance::get_width() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int v = 0;
+	WxWindow->GetSize(&v, NULL);
+	return v;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_width(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxSize size = WxWindow->GetSize();
+	size.SetWidth(v);
+	WxWindow->SetSize(size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tWindowInstance::get_height() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int v = 0;
+	WxWindow->GetSize(NULL, &v);
+	return v;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_height(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxSize size = WxWindow->GetSize();
+	size.SetHeight(v);
+	WxWindow->SetSize(size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::setSize(int w, int h)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxSize size(w, h);
+	WxWindow->SetSize(size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::setDimensions(int x, int y, int w, int h)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxRect rect(x, y, w, h);
+	WxWindow->SetSize(rect);
 }
 //---------------------------------------------------------------------------
 
@@ -205,6 +343,14 @@ void tWindowClass::RegisterMembers()
 	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tWindowInstance::dispose);
 	BindFunction(this, tSS<'c','l','o','s','e'>(), &tWindowInstance::close);
 	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tWindowInstance::onClose);
+	BindProperty(this, tSS<'l','e','f','t'>(), &tWindowInstance::get_left, &tWindowInstance::set_left);
+	BindProperty(this, tSS<'t','o','p'>(), &tWindowInstance::get_top, &tWindowInstance::set_top);
+	BindFunction(this, tSS<'s','e','t','P','o','s','i','t','i','o','n'>(), &tWindowInstance::setPosition);
+	BindFunction(this, tSS<'m','o','v','e'>(), &tWindowInstance::move);
+	BindProperty(this, tSS<'w','i','d','t','h'>(), &tWindowInstance::get_width, &tWindowInstance::set_width);
+	BindProperty(this, tSS<'h','e','i','g','h','t'>(), &tWindowInstance::get_height, &tWindowInstance::set_height);
+	BindFunction(this, tSS<'s','e','t','S','i','z','e'>(), &tWindowInstance::setSize);
+	BindFunction(this, tSS<'s','e','t','D','i','m','e','n','s','i','o','n','s'>(), &tWindowInstance::setDimensions);
 }
 //---------------------------------------------------------------------------
 

@@ -239,6 +239,18 @@ public: // Risse用メソッドなど
 	void close(const tMethodArgument &args); //!< 「閉じる」ボタンをエミュレートする
 	void onClose(bool force); //!< 「閉じる」ボタンが押されたときやclose()メソッドが呼ばれたとき
 
+	int get_left() const;
+	void set_left(int v);
+	int get_top() const;
+	void set_top(int v);
+	void setPosition(int x, int y);
+	void move(int x, int y){ setPosition(x, y); } // alias to setPosition
+	int get_width() const;
+	void set_width(int v);
+	int get_height() const;
+	void set_height(int v);
+	void setSize(int w, int h);
+	void setDimensions(int x, int y, int w, int h);
 };
 //---------------------------------------------------------------------------
 

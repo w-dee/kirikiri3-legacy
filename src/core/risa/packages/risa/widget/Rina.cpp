@@ -137,7 +137,7 @@ void tRinaInstance::initialize(const tVariant & parent, const tNativeCallInfo &i
 //---------------------------------------------------------------------------
 tRinaClass::tRinaClass(tScriptEngine * engine) :
 	tClassBase(tSS<'R','i','n','a'>(),
-		tClassHolder<tEventSourceClass>::instance()->GetClass())
+		tClassHolder<tWindowClass>::instance()->GetClass())
 {
 	RegisterMembers();
 }

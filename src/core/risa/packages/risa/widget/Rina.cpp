@@ -37,7 +37,7 @@ END_EVENT_TABLE()
 
 //---------------------------------------------------------------------------
 tRina::tRina(tRinaInstance * instance, wxWindow * parent) :
-	inherited(parent, -1),
+	inherited(parent, -1, wxDefaultPosition, wxDefaultSize, wxNO_BORDER),
 	tBehavior(this, instance)
 {
 }

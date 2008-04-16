@@ -303,6 +303,68 @@ void tWindowInstance::setDimensions(int x, int y, int w, int h)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+int tWindowInstance::get_clientWidth() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int w = 0, h = 0;
+	WxWindow->GetClientSize(&w, &h);
+	return w;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_clientWidth(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxSize size = WxWindow->GetClientSize();
+	size.SetWidth(v);
+	WxWindow->SetClientSize(size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+int tWindowInstance::get_clientHeight() const
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	int w = 0, h = 0;
+	WxWindow->GetClientSize(&w, &h);
+	return h;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::set_clientHeight(int v)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	wxSize size = WxWindow->GetClientSize();
+	size.SetHeight(v);
+	WxWindow->SetClientSize(size);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tWindowInstance::setClientSize(int w, int h)
+{
+	// TODO: 呼び出すスレッドのチェックまたはロック
+	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
+
+	WxWindow->SetClientSize(w, h);
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -351,6 +413,9 @@ void tWindowClass::RegisterMembers()
 	BindProperty(this, tSS<'h','e','i','g','h','t'>(), &tWindowInstance::get_height, &tWindowInstance::set_height);
 	BindFunction(this, tSS<'s','e','t','S','i','z','e'>(), &tWindowInstance::setSize);
 	BindFunction(this, tSS<'s','e','t','D','i','m','e','n','s','i','o','n','s'>(), &tWindowInstance::setDimensions);
+	BindProperty(this, tSS<'c','l','i','e','n','t','W','i','d','t','h'>(), &tWindowInstance::get_clientWidth, &tWindowInstance::set_clientWidth);
+	BindProperty(this, tSS<'c','l','i','e','n','t','H','e','i','g','h','t'>(), &tWindowInstance::get_clientHeight, &tWindowInstance::set_clientHeight);
+	BindFunction(this, tSS<'s','e','t','C','l','i','e','n','t','S','i','z','e'>(), &tWindowInstance::setClientSize);
 }
 //---------------------------------------------------------------------------
 

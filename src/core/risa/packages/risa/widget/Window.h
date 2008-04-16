@@ -251,6 +251,11 @@ public: // Risse用メソッドなど
 	void set_height(int v);
 	void setSize(int w, int h);
 	void setDimensions(int x, int y, int w, int h);
+	int get_clientWidth() const;
+	void set_clientWidth(int v);
+	int get_clientHeight() const;
+	void set_clientHeight(int v);
+	void setClientSize(int w, int h);
 };
 //---------------------------------------------------------------------------
 

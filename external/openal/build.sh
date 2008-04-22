@@ -33,7 +33,7 @@ custom_build()
 	esac
 	
 
-	# ƒrƒ‹ƒh
+	# ãƒ“ãƒ«ãƒ‰
 	make && make install
 
 	cd $current
@@ -45,10 +45,10 @@ custom_build_windows()
 
 	cd OpenAL-Windows
 
-	# .svn ƒfƒBƒŒƒNƒgƒŠ‚ª‘¶İ‚·‚éê‡AˆÙí‚È“®ì‚ğ‚·‚é‚±‚Æ‚ª‚ ‚é‚Ì‚Åíœ
+	# .svn ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒå­˜åœ¨ã™ã‚‹å ´åˆã€ç•°å¸¸ãªå‹•ä½œã‚’ã™ã‚‹ã“ã¨ãŒã‚ã‚‹ã®ã§å‰Šé™¤
 	rm -rf `find . -name .svn`
 
-	# ƒrƒ‹ƒh
+	# ãƒ“ãƒ«ãƒ‰
 	make && make install
 
 	cd $current

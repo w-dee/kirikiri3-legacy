@@ -23,7 +23,15 @@ custom_build()
 	cd OpenAL-Sample
 
 	# configure
-	./configure $common_configure_options
+	case "`uname -s`" in
+	Linux* )
+		CFLAGS=-DPTHREAD_MUTEX_RECURSIVE=PTHREAD_MUTEX_RECURSIVE_NP ./configure $common_configure_options
+		;;
+	*)
+		./configure $common_configure_options
+		;;
+	esac
+	
 
 	# ƒrƒ‹ƒh
 	make && make install

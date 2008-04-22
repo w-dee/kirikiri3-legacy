@@ -26,7 +26,9 @@ jam_build_cmd()
 		# 直接バッチファイルを実行できないようなので
 		# バッチファイルを引数にしてsystem関数を呼ぶ
 		# プログラムをコンパイルしてそれを実行する
-		# MINGW gcc 4.2 dw2 の場合はビルドしたバイナリがうごかない(^^;
+		# gcc 4.2 の場合はビルドしたバイナリがうごかない(^^;
+		# こういう問題がある模様
+		# http://d.hatena.ne.jp/y-hamigaki/20080305#1204718467
 		# --debugオプションをつける
 		echo "
 #include <stdlib.h>
@@ -43,15 +45,14 @@ int main(void)
 
 		;;
 	*)
-		./build.sh
+		./build.sh --debug
 		;;
 	esac
 
-
-
-	# bin. で始まるディレクトリ下のファイルをカレントディレクトリにコピー
-	for dir in bin.*; do
-		cp $dir/* .
+	# bin.*.debug にマッチするディレクトリ下のファイルをカレントディレクトリにコピー
+	# (必要ないかも?)
+	for dir in bin.*.debug; do
+		cp -P $dir/* .
 	done
 }
 
@@ -95,7 +96,7 @@ custom_build()
 	cd $current
 
 	# configure
-	./configure $common_configure_options
+	./configure $common_configure_options --with-bjam=$current/tools/jam/src/bjam
 
 	# ビルド
 	make && make install

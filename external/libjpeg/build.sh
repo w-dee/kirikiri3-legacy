@@ -13,5 +13,8 @@ mkdir  man      || true
 mkdir  man/man1 || true
 
 
+# configu.sub がちょっと古いので libpng のやつから拝借する
+cp ../libpng/src_temp/config.sub src_temp
+
 . ../build_common.sh
 

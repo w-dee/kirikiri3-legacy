@@ -3,7 +3,7 @@
 prefix=`pwd`
 
 common_configure_options="
-	--prefix=$prefix --disable-shared --enable-static
+	--prefix=$prefix --enable-shared
 	"
 
 

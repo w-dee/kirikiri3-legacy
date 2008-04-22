@@ -8,11 +8,12 @@ prefix=`pwd`
 cd src_temp
 cat configure | sed 's|image-base=0x10000000|enable-auto-image-base|' > configure.new
 mv -f configure.new configure
+chmod +x configure
 cd $prefix
 
 
-common_configure_options="
-	--enable-shared --prefix=$prefix
+common_configure_options=" \
+	--enable-shared --prefix=$prefix \
 	"
 
 . ../build_common.sh

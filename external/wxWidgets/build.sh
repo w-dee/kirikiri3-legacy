@@ -41,7 +41,7 @@ Linux*)
 		-DGC_LINUX_THREADS -D_REENTRANT \
 		-include gc.h              \
 		"
-	libs="$libs \"
+	libs="$libs \
 		-L$prefix_gc/lib     -lgc \
 		"
 	;;
@@ -66,26 +66,26 @@ LDFLAGS="$LDFLAGS $libs"
 export LDFLAGS
 
 
-common_configure_options="--with-opengl --enable-exceptions
-	--enable-catch_segvs --enable-mousewheel --enable-unicode
-	--enable-intl --enable-mslu
-	--disable-compat24
-	--disable-compat26
-	--prefix=$prefix
-	--with-zlib=sys
-	--with-expat=sys
-	--with-libpng=sys
-	--with-libjpeg=sys
-	--enable-vendor=k3
+common_configure_options="--with-opengl --enable-exceptions \
+	--enable-catch_segvs --enable-mousewheel --enable-unicode \
+	--enable-intl --enable-mslu \
+	--disable-compat24 \
+	--disable-compat26 \
+	--prefix=$prefix \
+	--with-zlib=sys \
+	--with-expat=sys \
+	--with-libpng=sys \
+	--with-libjpeg=sys \
+	--enable-vendor=k3 \
 	
 	"
 
 build_debug()
 {
-	# temp_build ディレクトリを作成
-	rm -rf temp_build
-	mkdir temp_build
-	cd temp_build
+	# build_debug ディレクトリを作成
+	rm -rf build_debug
+	mkdir build_debug
+	cd build_debug
 	# configure
 	../configure \
 		--disable-shared --enable-static \
@@ -101,10 +101,10 @@ build_debug()
 
 build_release()
 {
-	# temp_build ディレクトリを作成
-	rm -rf temp_build
-	mkdir temp_build
-	cd temp_build
+	# build_release ディレクトリを作成
+	rm -rf build_release
+	mkdir build_release
+	cd build_release
 	# configure
 	../configure \
 		$common_configure_options

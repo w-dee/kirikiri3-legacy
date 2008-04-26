@@ -3482,7 +3482,7 @@ public: // ユーティリティ
 	//! @note		AssertAndGetObjectInterafce に似ているが、型が違ったときの
 	//!				発生する例外が違う。
 	template <typename ObjectT>
-	ObjectT * ExpectAndGetObjectInterafce(tClassBase * cls) const
+	ObjectT * ExpectAndGetObjectInterface(tClassBase * cls) const
 	{
 		AssertClass(cls);
 		return static_cast<ObjectT*>(GetObjectInterface());
@@ -3535,18 +3535,18 @@ public: // ユーティリティ
 	//! @brief		デバッグ用各種構造体サイズ表示
 	void prtsizes() const
 	{
-		fprintf(stderr, "tVariantBlock: %d\n", sizeof(tVariantBlock));
-		fprintf(stderr, "Storage: %d\n", sizeof(Storage));
-		fprintf(stderr, "risse_ptruint: %d\n", sizeof(risse_ptruint));
-		fprintf(stderr, "tString: %d\n", sizeof(tString));
-		fprintf(stderr, "tOctet: %d\n", sizeof(tOctet));
-		fprintf(stderr, "tObject: %d\n", sizeof(tObject));
-		fprintf(stderr, "tBoolean: %d\n", sizeof(tBoolean));
-		fprintf(stderr, "tVoid: %d\n", sizeof(tVoid));
-		fprintf(stderr, "tInteger: %d\n", sizeof(tInteger));
-		fprintf(stderr, "tReal: %d\n", sizeof(tReal));
-		fprintf(stderr, "tNull: %d\n", sizeof(tNull));
-		fprintf(stderr, "tData: %d\n", sizeof(tData));
+		fprintf(stderr, "tVariantBlock: %d\n", (int)sizeof(tVariantBlock));
+		fprintf(stderr, "Storage: %d\n", (int)sizeof(Storage));
+		fprintf(stderr, "risse_ptruint: %d\n", (int)sizeof(risse_ptruint));
+		fprintf(stderr, "tString: %d\n", (int)sizeof(tString));
+		fprintf(stderr, "tOctet: %d\n", (int)sizeof(tOctet));
+		fprintf(stderr, "tObject: %d\n", (int)sizeof(tObject));
+		fprintf(stderr, "tBoolean: %d\n", (int)sizeof(tBoolean));
+		fprintf(stderr, "tVoid: %d\n", (int)sizeof(tVoid));
+		fprintf(stderr, "tInteger: %d\n", (int)sizeof(tInteger));
+		fprintf(stderr, "tReal: %d\n", (int)sizeof(tReal));
+		fprintf(stderr, "tNull: %d\n", (int)sizeof(tNull));
+		fprintf(stderr, "tData: %d\n", (int)sizeof(tData));
 	}
 
 };

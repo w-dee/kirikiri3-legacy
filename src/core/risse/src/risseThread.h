@@ -239,7 +239,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
 		class tConditionalLocker : public tCollectee
 		{
-			char Storage[sizeof(tCriticalSection)]; // !< tLockerを格納する先
+			char Locker[sizeof(tLocker)]; // !< tLockerを格納する先
 			bool Locked; //!< 実際にロックが行われたかどうか
 		public:
 			//! @brief	コンストラクタ
@@ -250,6 +250,10 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 				{
 					Locked = true;
 					new (reinterpret_cast<tLocker*>(Locker)) tLocker(*(cs));
+				}
+				else
+				{
+					Locked = false;
 				}
 			}
 
@@ -264,6 +268,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		};
 	};
 
+	} // namespace Risse
 #endif
 
 
@@ -340,7 +345,7 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			operator long() const { return __exchange_and_add(&v, 0); }
 
 			//! @brief		0 にする (注意: non-atomic)
-			void reset() { static_cast<long volatile &>(v) = 0; }
+			void reset() { static_cast<_Atomic_word volatile &>(v) = 0; }
 		};
 
 	#else

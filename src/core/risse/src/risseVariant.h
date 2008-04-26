@@ -227,7 +227,22 @@ public:
 	tVariantBlock & operator = (const risse_int64 ref)
 	{
 		Type = vtInteger;
-		AsInteger() = ref;
+		AsInteger() = static_cast<risse_int64>(ref);
+		return *this;
+	}
+	//! @brief		コンストラクタ(integer型をrisse_size型から作成)
+	//! @param		ref		元となる整数
+	tVariantBlock(const risse_size ref)
+	{
+		* this = ref;
+	}
+
+	//! @brief		代入演算子(integer型をrisse_size型から代入)
+	//! @param		ref		元となる整数
+	tVariantBlock & operator = (const risse_size ref)
+	{
+		Type = vtInteger;
+		AsInteger() = static_cast<risse_int64>(ref);
 		return *this;
 	}
 
@@ -3063,6 +3078,15 @@ public: // キャスト
 
 		default:		return gtAny|gtEffective;
 		}
+	}
+
+	//-----------------------------------------------------------------------
+	//! @brief		risse_sizeに変換
+	//! @return		risse_size
+	//-----------------------------------------------------------------------
+	operator risse_size() const
+	{
+		return static_cast<risse_size>(operator risse_int64());
 	}
 
 	//-----------------------------------------------------------------------

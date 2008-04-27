@@ -194,7 +194,7 @@ void tSoundInstance::Open(const tString & filename)
 				RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
 				{
 					tWaveFilterInstance * filter =
-							item.ExpectAndGetObjectInterafce<tWaveFilterInstance>(
+							item.ExpectAndGetObjectInterface<tWaveFilterInstance>(
 							tClassHolder<tWaveFilterClass>::instance()->GetClass());
 						filter->SetInput(last_filter);
 						last_filter = filter;

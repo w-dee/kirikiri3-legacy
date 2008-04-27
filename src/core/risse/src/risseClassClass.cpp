@@ -126,7 +126,7 @@ void tClassClass::initialize(const tNativeCallInfo &info)
 			info.This.AssertAndGetObjectInterafce<tClassBase>(
 				info.engine->ClassClass);
 		tClassBase * super_class_intf =
-			super_class.ExpectAndGetObjectInterafce<tClassBase>(
+			super_class.ExpectAndGetObjectInterface<tClassBase>(
 				info.engine->ClassClass);
 
 		this_class_intf->GetClassRTTI() = super_class_intf->GetClassRTTI();

@@ -110,7 +110,7 @@ void tRinaInstance::initialize(const tVariant & parent, const tNativeCallInfo &i
 
 	// parent から tFrameInstance のインスタンスを取り出す
 	tFrameInstance * frame =
-		parent.ExpectAndGetObjectInterafce<tFrameInstance>(
+		parent.ExpectAndGetObjectInterface<tFrameInstance>(
 			tClassHolder<tFrameClass>::instance()->GetClass());
 
 	// Rinaコントロールを作成

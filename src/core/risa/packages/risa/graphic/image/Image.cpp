@@ -185,7 +185,7 @@ void tImageInstance::load(const tString & filename, const tMethodArgument & args
 	if(args.HasArgument(1))
 	{
 		dict = args[1].
-			ExpectAndGetObjectInterafce<tDictionaryInstance>(
+			ExpectAndGetObjectInterface<tDictionaryInstance>(
 					GetRTTI()->GetScriptEngine()->DictionaryClass);
 		// ピクセルフォーマット ('_pixel_format' を得る)
 		tVariant val =
@@ -236,7 +236,7 @@ void tImageInstance::save(const tString & filename, const tMethodArgument & args
 	if(args.HasArgument(1))
 	{
 		dict = args[1].
-			ExpectAndGetObjectInterafce<tDictionaryInstance>(
+			ExpectAndGetObjectInterface<tDictionaryInstance>(
 					GetRTTI()->GetScriptEngine()->DictionaryClass);
 	}
 

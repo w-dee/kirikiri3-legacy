@@ -159,7 +159,7 @@ void tCodeInterpreter::Execute(
 						tVariant(engine->BindingClass).
 									New(0, tMethodArgument::Empty());
 					tBindingInstance * obj =
-						AR(code[1]).ExpectAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
+						AR(code[1]).ExpectAndGetObjectInterface<tBindingInstance>(engine->BindingClass);
 					obj->SetInfo(new tBindingInfo(global, This, new tSharedVariableFrames(shared_overlay)));
 					code += 2;
 					break;

@@ -137,7 +137,7 @@ void tScriptEngine::Evaluate(
 				New(0, tMethodArgument::New(script, name, (risse_int64)lineofs));
 
 		block =
-			sb.ExpectAndGetObjectInterafce<tRisseScriptBlockInstance>(RisseScriptBlockClass);
+			sb.ExpectAndGetObjectInterface<tRisseScriptBlockInstance>(RisseScriptBlockClass);
 
 		// スクリプトを実行
 		block->Evaluate(binding == NULL ? (tBindingInfo(package_global, package_global)) : *binding,

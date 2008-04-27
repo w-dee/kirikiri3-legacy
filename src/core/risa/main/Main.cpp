@@ -160,7 +160,7 @@ bool tApplication::OnInit()
 			// / に TmpFS をマウント
 			tFileSystemManager::instance()->Mount(tSS<'/'>(),
 				tClassHolder<tTmpFSClass>::instance()->GetClass()->Invoke(ss_new).
-						ExpectAndGetObjectInterafce<tFileSystemInstance>(
+						ExpectAndGetObjectInterface<tFileSystemInstance>(
 							tClassHolder<tTmpFSClass>::instance()->GetClass()
 						)
 			);
@@ -172,7 +172,7 @@ bool tApplication::OnInit()
 				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
 					tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(script_dir), true).
-							ExpectAndGetObjectInterafce<tFileSystemInstance>(
+							ExpectAndGetObjectInterface<tFileSystemInstance>(
 								tClassHolder<tOSFSClass>::instance()->GetClass()
 							)
 				);

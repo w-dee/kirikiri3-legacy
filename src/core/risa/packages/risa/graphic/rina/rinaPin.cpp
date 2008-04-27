@@ -307,7 +307,7 @@ risse_size tOutputPinInstance::GetLongestDistance() const
 	while(it.Next())
 	{
 		risse_size dist = it.GetValue().
-			ExpectAndGetObjectInterafce<tInputPinInstance>(
+			ExpectAndGetObjectInterface<tInputPinInstance>(
 				tClassHolder<tInputPinClass>::instance()->GetClass())->
 					GetNodeInstance()->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist)
@@ -443,7 +443,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
+	SetNodeInstance(node.ExpectAndGetObjectInterface<tNodeInstance>(
 		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
@@ -522,7 +522,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterafce<tNodeInstance>(
+	SetNodeInstance(node.ExpectAndGetObjectInterface<tNodeInstance>(
 		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();

@@ -476,6 +476,11 @@ inline tVariant ToVariant<risse_uint32>(risse_uint32 s)
 	return tVariant((risse_int64)s);
 }
 template <>
+inline tVariant ToVariant<int>(int s)
+{
+	return tVariant((risse_int64)s);
+}
+template <>
 inline tVariant ToVariant<risse_offset>(risse_offset s)
 {
 	return tVariant((risse_int64)s);
@@ -519,6 +524,11 @@ template <>
 inline risse_uint32 FromVariant<risse_uint32>(const tVariant & v)
 {
 	return (risse_uint32)(risse_int64)v;
+}
+template <>
+inline int FromVariant<int>(const tVariant & v)
+{
+	return (int)(risse_int64)v;
 }
 template <>
 inline risse_offset FromVariant<risse_offset>(const tVariant & v)

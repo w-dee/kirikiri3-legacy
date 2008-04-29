@@ -98,6 +98,9 @@ int raise_yyerror(const char * msg, void *pr, YYLTYPE *loc);
 /* yyerror のリダイレクト */
 #define risseerror(loc, pr, X) raise_yyerror(X, pr, loc);
 
+/* yystrlen を C 標準の物を使うように
+ (strlenはRisse::の名前空間で再定義されているため) */
+#define yystrlen ::strlen
 
 /*!
 	@brief	文字列リテラルと式を連結するノードを返す

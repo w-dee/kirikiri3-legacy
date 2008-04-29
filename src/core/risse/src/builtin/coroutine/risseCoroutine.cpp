@@ -51,9 +51,9 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 	したがって、Boehm GC にそのコンテキストと保存されているレジスタを教える
 	方法を考える必要がある。
 
-	今のところ boost.coroutine あるいは hamigaki.coroutine を使う方向で
-	コーディングを行っている。 boost.coroutine / hamigaki.coroutine 側には手
-	を入れずにBoehm GCとの相性を改善する方向で実装をする。
+	今のところ hamigaki.coroutine を使う方向でコーディングを行っている。 
+	hamigaki.coroutine 側には手を入れずにBoehm GCとの相性を改善する方
+	向で実装をする。
 
 
 	現状、このコードはGCより一部のコードを流用している。
@@ -92,32 +92,17 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 //---------------------------------------------------------------------------
 // ここのプリプロセッサ分岐については
-// boost の場合は coroutine/detail/default_context_impl.hpp を参照のこと
-// hamigaki の場合は coroutine/detail/default_context.hpp を参照のこと
+// hamigaki の coroutine/detail/default_context.hpp を参照のこと
 #include "boost/config.hpp"
 
-#if defined(RISSE_CORO_USE_HAMIGAKI)
-	// hamigaki
-	#if defined(BOOST_WINDOWS)
-		#define RISSE_CORO_WINDOWS
-	#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 500)
-		#define RISSE_CORO_POSIX
-	#elif defined BOOST_HAS_PTHREADS
-		#define RISSE_CORO_PTHREADS
-	#else
-	    #error unsupported platform
-	#endif
+#if defined(BOOST_WINDOWS)
+	#define RISSE_CORO_WINDOWS
+#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 500)
+	#define RISSE_CORO_POSIX
+#elif defined BOOST_HAS_PTHREADS
+	#define RISSE_CORO_PTHREADS
 #else
-	// boost
-	#if defined(__linux) || defined(linux) || defined(__linux__)
-		#define RISSE_CORO_LINUX
-	#elif defined(_POSIX_VERSION)
-		#define RISSE_CORO_POSIX
-	#elif defined(BOOST_WINDOWS)
-		#define RISSE_CORO_WINDOWS
-	#else
-	    #error unsupported platform
-	#endif
+    #error unsupported platform
 #endif
 //---------------------------------------------------------------------------
 
@@ -135,21 +120,21 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 		posix::alloc_stack と posix::free_stack で確保されているので
 		これを置き換えて管理すれば何とかなると思う。
 */
-    #error unsupported platform for now
+    #error RISSE_CORO_LINUX is unsupported platform for now
 
 #elif defined(RISSE_CORO_POSIX)
 
 /*
 	未調査
 */
-    #error unsupported platform for now
+    #error RISSE_CORO_POSIX is unsupported platform for now
 
 #elif defined(RISSE_CORO_PTHREADS)
 
 /*
 	未調査
 */
-    #error unsupported platform for now
+    #error RISSE_CORO_PTHREADS is unsupported platform for now
 
 #elif defined(RISSE_CORO_WINDOWS)
 //========================================================================
@@ -294,13 +279,11 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 	#define DeleteFiber Risse::RISSE_NEW_DeleteFiber
 #endif
 
-#if defined(RISSE_CORO_USE_HAMIGAKI)
-	#define HAMIGAKI_COROUTINE_NO_DLLIMPORT
-	// HAMIGAKI_COROUTINE_NO_DLLIMPORT を定義すると hamigaki.coroutine
-	// 内での API の dllimport 定義が行われなくなる。今のところ
-	// mingw (g++ 3.4) では問題ないが、他のツールチェインでは問題を
-	// 起こす可能性があるかも………
-#endif
+#define HAMIGAKI_COROUTINE_NO_DLLIMPORT
+// HAMIGAKI_COROUTINE_NO_DLLIMPORT を定義すると hamigaki.coroutine
+// 内での API の dllimport 定義が行われなくなる。今のところ
+// mingw (g++ 3.4) では問題ないが、他のツールチェインでは問題を
+// 起こす可能性があるかも………
 
 // fiber_data の typedef など
 typedef fiber_data tCoroutineContext;
@@ -412,6 +395,15 @@ struct GC_ms_entry *MarkCoroutineContext(
 
 } // namespace Risse
 
+//---------------------------------------------------------------------------
+// hamigaki.coroutine の include
+// これは、関数の置き換えを #define で行っているためで、この位置で
+// include しなければならない
+#include "hamigaki/coroutine/coroutine.hpp"
+namespace coro = hamigaki::coroutines;
+//---------------------------------------------------------------------------
+
+
 //========================================================================
 //                        Windowsの場合 - 終わり
 //========================================================================
@@ -427,18 +419,6 @@ struct GC_ms_entry *MarkCoroutineContext(
 
 
 
-//---------------------------------------------------------------------------
-// boost.coroutine / hamigaki.coroutine の include
-// これは、関数の置き換えを #define で行っているためで、この位置で
-// include しなければならない
-#if defined(RISSE_CORO_USE_HAMIGAKI)
-	#include "hamigaki/coroutine/coroutine.hpp"
-	namespace coro = hamigaki::coroutines;
-#else
-	#include "boost/coroutine/coroutine.hpp"
-	namespace coro = boost::coroutines;
-#endif
-//---------------------------------------------------------------------------
 
 
 

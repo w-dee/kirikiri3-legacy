@@ -169,13 +169,20 @@ int strbufcmp(const risse_char *s1, const risse_char *s2, risse_size n);
 	//! @return		変換された数値
 	double strtod(const risse_char *nptr, risse_char **endptr);
 #else
-	#define RISSE_strcmp			wcscmp
-	#define RISSE_strncmp			wcsncmp
-	#define RISSE_strncpy			wcsncpy
-	#define RISSE_strcat			wcscat
-	#define RISSE_strstr			wcsstr
-	#define RISSE_strchr			wcschr
-	#define RISSE_strtod			wcstod
+	static inline int strcmp(const risse_char *s1, const risse_char *s2)
+		{ return wcscmp(s1, s2); }
+	static inline int strncmp(const risse_char *s1, const risse_char *s2, risse_size n)
+		{ return wcsncmp(s1, s2, n); }
+	static inline risse_char *strncpy(risse_char *d, const risse_char *s, risse_size len)
+		{ return wcsncpy(d, s, len); }
+	static inline risse_char *strcat(risse_char *d, const risse_char *s)
+		{ return wcscat(d, s); }
+	static inline risse_char *strstr(const risse_char *s1, const risse_char *s2)
+		{ return wcsstr(s1, s2); }
+	static inline risse_char *strchr(const risse_char *s, int c)
+		{ return wcschr(s, c); }
+	static inline double strtod(const risse_char *nptr, risse_char **endptr)
+		{ return wcstod(nptr, endptr); }
 #endif
 
 //! @brief		指定された文字列を FILE ストリームに出力する

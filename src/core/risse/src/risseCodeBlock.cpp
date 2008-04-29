@@ -246,7 +246,7 @@ tString tCodeBlock::Dump() const
 			while(count--)
 			{
 				char line_string[22];
-				sprintf(line_string, "#(%d) ", start+1);
+				sprintf(line_string, "#(%ld) ", (long)(start+1));
 				ret += tString(line_string) + ScriptBlockInstance->GetLineAt(start) + RISSE_WS("\n");
 
 				start ++;
@@ -255,7 +255,7 @@ tString tCodeBlock::Dump() const
 
 		// アドレス部分を文字列化
 		char address_string[22];
-		sprintf(address_string, "%05d ", address);
+		sprintf(address_string, "%05ld ", (long)address);
 
 		// VMコードのダンプを組み立てる
 		ret += tString(address_string) + iterator.Dump(Consts) + RISSE_WS("\n");

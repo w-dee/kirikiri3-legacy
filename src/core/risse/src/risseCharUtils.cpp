@@ -669,7 +669,7 @@ wchar_t * CharToWCStringBuffer(const risse_char * str, risse_size len)
 #else
 	// 新しく確保した配列にコピー
 	if(len == risse_size_max) len = ::Risse::strlen(str);
-	wchar_t * buf = new (PointerFreeGC) [len + 1];
+	wchar_t * buf = new (PointerFreeGC) wchar_t[len + 1];
 	memcpy(buf, str, sizeof(wchar_t) * len);
 	buf[len] = 0;
 	return buf;
@@ -705,7 +705,10 @@ wxString CharToWxString(const risse_char * str, risse_size len)
 
 	return wxString(buf);
 #else
-	return wxString(str, (len == risse_size_max) ? wxSTRING_MAXLEN:len);
+	if(len == risse_size_max)
+		return wxString(str);
+	else
+		return wxString(str, len);
 #endif
 }
 //---------------------------------------------------------------------------

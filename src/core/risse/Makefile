@@ -19,9 +19,6 @@ DEP_LIBS=BOOST WX GC HAMIGAKI
 # 最終ターゲット (ふつう、出力バイナリや出力ライブラリ)
 default: $(BIN)
 
-# hamigaki coroutine を使う場合はこれを hamigaki に (boost の場合は boost)
-COROUTINE_LIBRARY=hamigaki
-
 #----------------------------#
 
 document:
@@ -44,11 +41,6 @@ CXXFLAGS += \
 	-DRISSE_SUPPORT_THREADS \
 	-DBOOST_ENABLE_ASSERT_HANDLER
 
-ifeq ($(COROUTINE_LIBRARY),boost)
-endif
-ifeq ($(COROUTINE_LIBRARY),hamigaki)
-	CXXFLAGS += -DRISSE_CORO_USE_HAMIGAKI
-endif
 
 CPPFLAGS = $(CXXFLAGS)
 

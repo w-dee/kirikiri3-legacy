@@ -180,7 +180,8 @@ void tObjectClass::get_hash(const tNativePropGetInfo & info)
 		// tObjectClass::get_hint() も参照のこと
 		if(info.result)
 		{
-			risse_uint32 ptr = ~reinterpret_cast<risse_int32>(info.This.GetObjectInterface());
+			risse_uint32 ptr = ~static_cast<risse_int32>(
+				reinterpret_cast<risse_ptruint>(info.This.GetObjectInterface()));
 			*info.result = static_cast<risse_int64>(ptr ^ (ptr >> 4));
 		}
 		return;

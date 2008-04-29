@@ -96,7 +96,7 @@ void tVariantBlock::ThrowIllegalOperationMethod(const tString & method_name) con
 // これのバイナリレイアウトはtVariantBlockと同一でなければならない
 tVariantBlock::tStaticPrimitive tVariantBlock::VoidObject = {
 	tVariantBlock::vtVoid,
-	{0}
+	{}
 };
 //---------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ tVariantBlock::tStaticPrimitive tVariantBlock::VoidObject = {
 // これのバイナリレイアウトはtVariantBlockと同一でなければならない
 tVariantBlock::tStaticPrimitive tVariantBlock::NullObject = {
 	tVariantBlock::vtNull,
-	{0}
+	{}
 };
 //---------------------------------------------------------------------------
 
@@ -117,7 +117,7 @@ tVariantBlock::tStaticPrimitive tVariantBlock::NullObject = {
 static tIdentifyObject DynamicContextObject;
 tVariantBlock::tStaticObject tVariantBlock::DynamicContext = {
 	reinterpret_cast<risse_ptruint>(&DynamicContextObject) + tVariantBlock::ObjectPointerBias, NULL,
-	{0}
+	{}
 };
 //---------------------------------------------------------------------------
 

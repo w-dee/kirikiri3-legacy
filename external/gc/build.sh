@@ -36,6 +36,9 @@ MINGW* | CYGWIN* )
 	mv $prefix/include/gc/* $prefix/include/
 	rmdir $prefix/include/gc
 
+	# private ディレクトリもコピー
+	cp -pR include/private $prefix/include/
+
 	;;
 
 esac

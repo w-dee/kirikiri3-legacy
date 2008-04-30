@@ -169,8 +169,8 @@ ifeq (unix,$(PLATFORM))
 	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN)-bin $(LIBS) $(DEFAULT_LIBS)
 	@echo '#!/bin/sh -e' > $(BIN)
 	@echo 'bindir=`dirname $$0`' >> $(BIN)
-	@echo '$(LD_LIBRARY_PATH_ENV_NAME)=$$bindir:$$$(LD_LIBRARY_PATH_ENV_NAME)' >> $(BIN)
-	@echo 'exec $$bindir/$(notdir $(BIN))-bin $$@' >> $(BIN)
+	@echo '$(LD_LIBRARY_PATH_ENV_NAME)=$$bindir:$$$(LD_LIBRARY_PATH_ENV_NAME) \
+           exec $$bindir/$(notdir $(BIN))-bin $$@' >> $(BIN)
 	@chmod a+x $(BIN)
 
 

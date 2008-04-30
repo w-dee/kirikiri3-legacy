@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 BASE_DIR = File.dirname(__FILE__)
-EXECUTABLE = BASE_DIR + '/../../build_output/bin/risa.exe'
+EXECUTABLE = BASE_DIR + '/../../build_output/bin/risa'
 EXECUTABLE_OPT = '-a'
 TESTS_DIR = BASE_DIR + '/tests/'
 TEMP_DIR = BASE_DIR

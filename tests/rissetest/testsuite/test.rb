@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 BASE_DIR = File.dirname(__FILE__)
-EXECUTABLE = BASE_DIR + '/../../../build_output/bin/rissetest.exe'
+EXECUTABLE = BASE_DIR + '/../../../build_output/bin/rissetest'
 TESTS_DIR = BASE_DIR + '/tests/'
 TEMP_DIR = BASE_DIR
 

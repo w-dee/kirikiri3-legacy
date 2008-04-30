@@ -5125,9 +5125,8 @@ tVariantBlock::tSynchronizer::tSynchronizer(const tVariant & object)
 {
 	// この ASSERT は、 tObjectInterface::tSynchronizer のサイズが
 	// Synchronizer のサイズ以下であることを保証する。
-	// ヘッダの記述位置では tObjectInterface も tCriticalSection も
-	// 定義済みかどうかが怪しい。とりあえず sizeof(void*) の分を確保しているが、
-	// tCriticalSection::tLocker の実装を見る限りは大丈夫なはず。
+	// ヘッダの記述位置では tObjectInterface が
+	// 定義済みかどうかが怪しい。とりあえず必要な分を確保しているはず。
 	RISSE_ASSERT(sizeof(Synchronizer) >= sizeof(tObjectInterface::tSynchronizer));
 
 	// 今のところ、ロックが出来るのは vtObject だけ。

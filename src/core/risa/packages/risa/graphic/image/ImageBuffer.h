@@ -32,9 +32,9 @@ namespace Risa {
 // TODO: Win64でのチェック
 //---------------------------------------------------------------------------
 #ifdef _WIN32
-	typedef risa_gl::default_allocate_implements pixel_store_allocate_implements;
-#else
 	typedef risa_gl::global_alloc_allocate_implements pixel_store_allocate_implements;
+#else
+	typedef risa_gl::default_allocate_implements pixel_store_allocate_implements;
 #endif
 //---------------------------------------------------------------------------
 

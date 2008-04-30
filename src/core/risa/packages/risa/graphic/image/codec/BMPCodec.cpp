@@ -11,7 +11,7 @@
 //! @brief BMP形式コーデック
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "risa/packages/risa/graphic/image/codec/BMPcodec.h"
+#include "risa/packages/risa/graphic/image/codec/BMPCodec.h"
 #include "risa/common/RisaException.h"
 
 

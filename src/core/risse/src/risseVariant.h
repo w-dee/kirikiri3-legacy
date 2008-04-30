@@ -19,6 +19,7 @@
 #include "risseObjectInterfaceArg.h"
 #include "risseOpCodes.h"
 #include "risseMemberAttribute.h"
+#include "risseThread.h"
 
 namespace Risse
 {
@@ -3306,7 +3307,7 @@ public: // スレッド同期
 		void operator = (const tSynchronizer &); //!< コピー不可です
 		void * operator new(size_t); //!< ヒープ上に置かないでください
 		void * operator new [] (size_t); //!< ヒープ上に置かないでください
-		char Synchronizer[sizeof(void*)+sizeof(void*)]; //!< tObjectInterface::tSynchronizer を作成する先
+		char Synchronizer[sizeof(void*)+sizeof(tCriticalSection::tLocker)]; //!< tObjectInterface::tSynchronizer を作成する先
 	public:
 		//! @brief		コンストラクタ
 		tSynchronizer(const tVariant & object);

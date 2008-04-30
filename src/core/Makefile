@@ -9,7 +9,7 @@ target: subdirs
 
 subdirs:
 	@(set -e; \
-	pwd=$$(PWD); \
+	pwd=`pwd`; \
 	for dir in $(SUB_DIRS); do \
 		cd $$dir; \
 		$(MAKE) || (echo "To compile only the failed directory:"; \

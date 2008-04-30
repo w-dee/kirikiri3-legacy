@@ -11,7 +11,7 @@
 //! @brief フェーズボコーダフィルタ
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "risa/packages/risa/sound/filter/phasevocoder/Phasevocoder.h"
+#include "risa/packages/risa/sound/filter/phasevocoder/PhaseVocoder.h"
 #include "risa/packages/risa/sound/Sound.h"
 
 namespace Risa {

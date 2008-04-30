@@ -635,7 +635,7 @@ void FPrint(FILE * output, const risse_char * str)
 	// 出力
 	fwprintf(output, L"%s", buf);
 #else
-	fwprintf(output, L"%s", str);
+	fwprintf(output, L"%ls", str);
 #endif
 }
 //---------------------------------------------------------------------------

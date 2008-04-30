@@ -180,7 +180,7 @@ bool tOggVorbisDecoder::Open()
 	if(!vi)
 	{
 		ov_clear(&OggVorbisFile->InputFile);
-		return E_FAIL;
+		return false;
 	}
 
 	// set FileInfo up

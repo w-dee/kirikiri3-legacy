@@ -13,17 +13,13 @@
 #include "risa/prec.h"
 #include "risa/common/RisseEngine.h"
 #include "risa/common/RisaException.h"
-#include "risa/common/ui/Editor/ScriptEditor.h"
+#include "risa/common/ui/editor/ScriptEditor.h"
 #include "risa/common/ConfigData.h"
 #include <stdlib.h>
 #include <deque>
 #include <wx/textctrl.h>
 #include <wx/bmpbuttn.h>
-
-#if wxUSE_OWNER_DRAWN
 #include <wx/artprov.h>
-#endif
-
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(45447,29186,11918,17485,47798,28394,33256,47673);

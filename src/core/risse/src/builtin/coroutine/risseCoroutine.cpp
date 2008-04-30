@@ -18,6 +18,11 @@
 #include "risseCoroutineClass.h"
 #include "../../risseExceptionClass.h"
 
+extern "C" {
+#include "private/gc_priv.h"
+#include "gc_backptr.h"
+}
+
 
 namespace Risse
 {
@@ -124,10 +129,69 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 #elif defined(RISSE_CORO_POSIX)
 
+//========================================================================
+//                              POSIXの場合
+//========================================================================
+
 /*
-	未調査
+	::makecontext, ::swapcontext による実装。
+	これらをフックしてもしょうがない、なぜならばコンテキストを削除するタイミングが
+	これらからはわからないから。
+	hamigaki 内部を見ると
+	hamigaki::coroutines::detail::posix::user_context_impl_base::context_ に
+	コンテキストの情報が入っている。これにアクセスできれば…
+	幸いこれは protected メンバなので user_context_impl を派生させたクラスを作ることで
+	この情報にアクセスすることにする。
 */
-    #error RISSE_CORO_POSIX is unsupported platform for now
+
+#include "hamigaki/coroutine/coroutine.hpp"
+namespace coro = hamigaki::coroutines;
+
+
+namespace Risse {
+
+class risse_coroutine_default_context_impl : public coro::detail::posix::user_context_impl
+{
+	typedef coro::detail::posix::user_context_impl inherited;
+public:
+	template<class Functor>
+	risse_coroutine_default_context_impl(Functor& f, std::ptrdiff_t stack_size) :
+		inherited(f, stack_size)
+	{
+	}
+
+	boost::shared_ptr< ::ucontext_t> & get_context() { return context_; }
+};
+
+
+struct tCoroutineContext
+{
+};
+
+
+//! @brief 現在実行中のコルーチンコンテキストを得る
+tCoroutineContext * GetCurrentCoroutineContext()
+{
+	return NULL; 
+}
+
+struct GC_ms_entry *MarkCoroutineContext(
+									tCoroutineContext * co_context,
+									struct GC_ms_entry *mark_sp,
+									struct GC_ms_entry *mark_sp_limit)
+{
+	return mark_sp;
+}
+
+} // namespace Risse
+
+
+
+//========================================================================
+//                          POSIXの場合 - 終わり
+//========================================================================
+
+
 
 #elif defined(RISSE_CORO_PTHREADS)
 
@@ -150,11 +214,6 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 		内容の詳細はMSからは公式にはドキュメント化されていない)を見ることにする。
 	TODO: Win9x でのチェック
 */
-
-extern "C" {
-#include "private/gc_priv.h"
-#include "gc_backptr.h"
-}
 
 namespace Risse {
 
@@ -403,6 +462,7 @@ struct GC_ms_entry *MarkCoroutineContext(
 namespace coro = hamigaki::coroutines;
 //---------------------------------------------------------------------------
 
+typedef hamigaki::coroutines::detail::default_context_impl risse_coroutine_default_context_impl;
 
 //========================================================================
 //                        Windowsの場合 - 終わり
@@ -444,7 +504,10 @@ void InitCoroutine()
 class tCoroutineImpl : public tDestructee /* デストラクタが呼ばれなければならない */
 {
 public:
-	typedef coro::coroutine<tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> coroutine_type;
+	typedef coro::coroutine<
+		tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant),
+		risse_coroutine_default_context_impl
+		> coroutine_type;
 	coroutine_type Coroutine;
 
 	coroutine_type::self * CoroutineSelf;

@@ -205,7 +205,7 @@ bool tMemoryStreamInstance::seek(risse_int64 offset, tOrigin whence)
 			break;
 		}
 
-		if(newpos >= 0 && newpos <= Block->GetSize())
+		if(newpos >= 0 && newpos <= (risse_int64)Block->GetSize())
 		{
 			CurrentPos = newpos;
 			return true;

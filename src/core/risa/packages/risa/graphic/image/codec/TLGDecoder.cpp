@@ -20,6 +20,9 @@
 	#include "risa/common/opt_sse/xmmlib.h"
 #endif
 
+#define TLG_DECODER_BENCH(X) 
+
+
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(56439,41578,12253,18753,50573,34933,38961,51441);
 //---------------------------------------------------------------------------
@@ -180,9 +183,9 @@ void tTLGImageDecoder::ProcessTLG5(tStreamAdapter & src,
 
 
 	// decomperss
-DWORD dim = GetTickCount();
+TLG_DECODER_BENCH(DWORD dim = GetTickCount();)
 	SetDimensions(width, height, tPixel::pfARGB32);
-fprintf(stderr, "dim %dms\n", GetTickCount() - dim);
+TLG_DECODER_BENCH(fprintf(stderr, "dim %dms\n", GetTickCount() - dim);)
 
 	risse_uint8 *inbuf = NULL;
 	risse_uint8 *outbuf[4];
@@ -197,12 +200,12 @@ fprintf(stderr, "dim %dms\n", GetTickCount() - dim);
 	for(risse_int i = 0; i < colors; i++)
 		outbuf[i] = static_cast<risse_uint8*>(AlignedMallocAtomicCollectee(blockheight * width + 10, 4));
 
-static DWORD total =0;
-static DWORD io = 0;
-static DWORD lzss = 0;
-static DWORD filter = 0;
+TLG_DECODER_BENCH(static DWORD total =0;)
+TLG_DECODER_BENCH(static DWORD io = 0;)
+TLG_DECODER_BENCH(static DWORD lzss = 0;)
+TLG_DECODER_BENCH(static DWORD filter = 0;)
 
-DWORD total_start =  GetTickCount();
+TLG_DECODER_BENCH(DWORD total_start =  GetTickCount();)
 
 	risse_uint8 *prevline = NULL;
 	for(risse_int y_blk = 0; y_blk < height; y_blk += blockheight)
@@ -210,27 +213,27 @@ DWORD total_start =  GetTickCount();
 		// read file and decompress
 		for(risse_int c = 0; c < colors; c++)
 		{
-DWORD io_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD io_start = GetTickCount();)
 			src.ReadBuffer(mark, 1);
 			risse_uint32 size;
 			size = src.ReadI32LE();
-io += GetTickCount() - io_start;
+TLG_DECODER_BENCH(io += GetTickCount() - io_start;)
 			if(mark[0] == 0)
 			{
 				// modified LZSS compressed data
-DWORD io_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD io_start = GetTickCount();)
 				src.ReadBuffer(inbuf, size);
-io += GetTickCount() - io_start;
-DWORD lzss_start = GetTickCount();
+TLG_DECODER_BENCH(io += GetTickCount() - io_start;)
+TLG_DECODER_BENCH(DWORD lzss_start = GetTickCount();)
 				r = TLG5DecompressSlide(outbuf[c], inbuf, size, text, r);
-lzss += GetTickCount() - lzss_start;
+TLG_DECODER_BENCH(lzss += GetTickCount() - lzss_start;)
 			}
 			else
 			{
 				// raw data
-DWORD io_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD io_start = GetTickCount();)
 				src.ReadBuffer(outbuf[c], size);
-io += GetTickCount() - io_start;
+TLG_DECODER_BENCH(io += GetTickCount() - io_start;)
 			}
 		}
 
@@ -247,7 +250,7 @@ io += GetTickCount() - io_start;
 			if(prevline)
 			{
 				// not first line
-DWORD filter_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD filter_start = GetTickCount();)
 				switch(colors)
 				{
 				case 3:
@@ -261,7 +264,7 @@ DWORD filter_start = GetTickCount();
 					outbufp[2] += width; outbufp[3] += width;
 					break;
 				}
-filter += GetTickCount() - filter_start;
+TLG_DECODER_BENCH(filter += GetTickCount() - filter_start;)
 			}
 			else
 			{
@@ -316,12 +319,12 @@ filter += GetTickCount() - filter_start;
 		}
 
 	}
-total += GetTickCount()- total_start;
+TLG_DECODER_BENCH(total += GetTickCount()- total_start;)
 
-fprintf(stderr, "total %dms\n", total);
-fprintf(stderr, "io %dms\n", io);
-fprintf(stderr, "lzss %dms\n", lzss);
-fprintf(stderr, "filter %dms\n", filter);
+TLG_DECODER_BENCH(fprintf(stderr, "total %dms\n", total);)
+TLG_DECODER_BENCH(fprintf(stderr, "io %dms\n", io);)
+TLG_DECODER_BENCH(fprintf(stderr, "lzss %dms\n", lzss);)
+TLG_DECODER_BENCH(fprintf(stderr, "filter %dms\n", filter);)
 
 }
 //---------------------------------------------------------------------------
@@ -1131,8 +1134,8 @@ void tTLGImageDecoder::ProcessTLG6(tStreamAdapter & src,
 					tDictionaryInstance * dict)
 {
 	// load TLG v6.0 lossless/near-lossless compressed graphic
-static DWORD total = 0;
-DWORD total_start = GetTickCount();
+TLG_DECODER_BENCH(static DWORD total = 0;)
+TLG_DECODER_BENCH(DWORD total_start = GetTickCount();)
 	unsigned char buf[12];
 
 	src.ReadBuffer(buf, 4);
@@ -1166,15 +1169,15 @@ DWORD total_start = GetTickCount();
 
 	max_bit_length = src.ReadI32LE();
 
-static DWORD dim = 0;
-static DWORD io = 0;
-static DWORD golomb = 0;
-static DWORD filter = 0;
+TLG_DECODER_BENCH(static DWORD dim = 0;)
+TLG_DECODER_BENCH(static DWORD io = 0;)
+TLG_DECODER_BENCH(static DWORD golomb = 0;)
+TLG_DECODER_BENCH(static DWORD filter = 0;)
 
-DWORD dim_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD dim_start = GetTickCount();)
 	// set destination size
 	SetDimensions(width, height, tPixel::pfARGB32);
-dim += GetTickCount() - dim_start;
+TLG_DECODER_BENCH(dim += GetTickCount() - dim_start;)
 
 	// compute some values
 	risse_int x_block_count = (risse_int)((width - 1)/ TLG6_W_BLOCK_SIZE) + 1;
@@ -1229,9 +1232,9 @@ dim += GetTickCount() - dim_start;
 		for(risse_int c = 0; c < colors; c++)
 		{
 			// read bit length
-DWORD io_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD io_start = GetTickCount();)
 			risse_int bit_length = src.ReadI32LE();
-io += GetTickCount() - io_start;
+TLG_DECODER_BENCH(io += GetTickCount() - io_start;)
 
 			// get compress method
 			int method = (bit_length >> 30)&3;
@@ -1242,9 +1245,9 @@ io += GetTickCount() - io_start;
 			if(bit_length % 8) byte_length++;
 
 			// read source from input
-io_start = GetTickCount();
+TLG_DECODER_BENCH(io_start = GetTickCount();)
 			src.ReadBuffer(bit_pool, byte_length);
-io += GetTickCount() - io_start;
+TLG_DECODER_BENCH(io += GetTickCount() - io_start;)
 
 			// decode values
 			// two most significant bits of bitlength are
@@ -1254,7 +1257,7 @@ io += GetTickCount() - io_start;
 			// 10 means modified LZSS method (not yet supported),
 			// 11 means raw (uncompressed) data (not yet supported).
 
-DWORD golomb_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD golomb_start = GetTickCount();)
 			switch(method)
 			{
 			case 0:
@@ -1269,7 +1272,7 @@ DWORD golomb_start = GetTickCount();
 				tIOExceptionClass::Throw(
 					tString(RISSE_WS_TR("error on reading TLG6: unsupported entropy coding method")));
 			}
-golomb += GetTickCount() - golomb_start;
+TLG_DECODER_BENCH(golomb += GetTickCount() - golomb_start;)
 		}
 
 		// for each line
@@ -1283,7 +1286,7 @@ golomb += GetTickCount() - golomb_start;
 
 			int dir = (yy&1)^1;
 			int oddskip = ((ylim - yy -1) - (yy-y));
-DWORD filter_start = GetTickCount();
+TLG_DECODER_BENCH(DWORD filter_start = GetTickCount();)
 			if(main_count)
 			{
 				int start =
@@ -1313,20 +1316,20 @@ DWORD filter_start = GetTickCount();
 					skipbytes,
 					pixelbuf + start, colors==3?0xff000000:0, oddskip, dir);
 			}
-filter += GetTickCount() - filter_start;
+TLG_DECODER_BENCH(filter += GetTickCount() - filter_start;)
 
 			DoneLines();
 			prevline = curline;
 		}
 
 	}
-total += GetTickCount() - total_start;
+TLG_DECODER_BENCH(total += GetTickCount() - total_start;)
 
-fprintf(stderr, "total %dms\n", total);
-fprintf(stderr, "dim %dms\n", dim);
-fprintf(stderr, "io %dms\n", io);
-fprintf(stderr, "golomb %dms\n", golomb);
-fprintf(stderr, "filter %dms\n", filter);
+TLG_DECODER_BENCH(fprintf(stderr, "total %dms\n", total);)
+TLG_DECODER_BENCH(fprintf(stderr, "dim %dms\n", dim);)
+TLG_DECODER_BENCH(fprintf(stderr, "io %dms\n", io);)
+TLG_DECODER_BENCH(fprintf(stderr, "golomb %dms\n", golomb);)
+TLG_DECODER_BENCH(fprintf(stderr, "filter %dms\n", filter);)
 
 }
 //---------------------------------------------------------------------------

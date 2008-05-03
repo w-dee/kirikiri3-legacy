@@ -6,21 +6,21 @@ all: build_lib
 build_lib: build_completed
 
 
-copy_complated: Makefile
+copy_completed: Makefile
 	rm -rf src_temp
 	svn export src src_temp || cp -pR src src_temp
 	if [ "x`ls src_temp`" = "x" ]; then rm -rf src_temp; cp -pR src src_temp; fi
-	touch copy_complated
+	touch copy_completed
 
-build_completed: Makefile copy_complated
+build_completed: Makefile copy_completed
 	./build.sh
 	touch build_completed
 
 distclean:
-	rm -f copy_complated build_completed
+	rm -f copy_completed build_completed
 	for dir in *; do if [ -d "$$dir" ] && [ "x$$dir" != "xsrc" ] ; then rm -rf $$dir; fi; done
 
 clean:
-	rm -f build_completed copy_complated
+	rm -f build_completed copy_completed
 	rm -rf src_temp
 

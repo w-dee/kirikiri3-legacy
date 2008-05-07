@@ -29,6 +29,8 @@ namespace Risse
 //---------------------------------------------------------------------------
 RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 //---------------------------------------------------------------------------
+class tCoroutineImpl;
+class tCoroutine;
 }
 /*
 	コルーチンとBoehm GCの相性の改善
@@ -135,53 +137,117 @@ RISSE_DEFINE_SOURCE_ID(26814,21547,55164,18773,58509,59432,16039,26450);
 
 /*
 	::makecontext, ::swapcontext による実装。
-	これらをフックしてもしょうがない、なぜならばコンテキストを削除するタイミングが
-	これらからはわからないから。
-	hamigaki 内部を見ると
-	hamigaki::coroutines::detail::posix::user_context_impl_base::context_ に
-	コンテキストの情報が入っている。これにアクセスできれば…
-	幸いこれは protected メンバなので user_context_impl を派生させたクラスを作ることで
-	この情報にアクセスすることにする。
+	コンテキストの生成は ::makecontext をフックすればわかる。
+	コンテキストの消滅は coro::detail::posix::user_context_impl のデストラクタを
+	フックすればわかる。
+	問題はどのコルーチンインスタンスとどのコンテキストが紐づいているかの把握だが、
+	これはコルーチンインスタンスのコンストラクタ中で呼ばれた ::makecontext を
+	コルーチンインスタンスと結びつけることで実現する。
 */
+#include <ucontext.h>
 
+//! @brief		一番最後に作成されたコルーチンコンテキストを表す変数
+static ::ucontext_t * LastMadeContext = NULL;
+
+//! @brief		makecontext をフックする関数
+static void risse_makecontext(::ucontext_t *ucp, void (*func)(),
+       int argc, void *f)
+{
+	RISSE_ASSERT(argc == 1);
+	::makecontext(ucp, func, argc, f);
+	LastMadeContext = ucp;
+}
+
+// makecontext を置き換える
+#define makecontext risse_makecontext
+
+
+// ここでコルーチンライブラリを include する。この中で使用されている
+// makecontext は、上記の makecontext の #define により risse_makecontext に
+// 置き換えられる。
 #include "hamigaki/coroutine/coroutine.hpp"
 namespace coro = hamigaki::coroutines;
 
 
 namespace Risse {
 
-class risse_coroutine_default_context_impl : public coro::detail::posix::user_context_impl
+
+typedef ::ucontext_t tCoroutineContext;
+
+
+
+typedef coro::coroutine<
+	tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> risse_coroutine_base;
+
+
+class risse_coroutine_type : public risse_coroutine_base
 {
-	typedef coro::detail::posix::user_context_impl inherited;
+	tCoroutineContext * Context;
 public:
-	template<class Functor>
-	risse_coroutine_default_context_impl(Functor& f, std::ptrdiff_t stack_size) :
-		inherited(f, stack_size)
+	risse_coroutine_type(tVariant (*body)(risse_coroutine_type::self &self, tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant arg), ptrdiff_t stack_size)
+		: risse_coroutine_base(body, stack_size)
 	{
+		RISSE_ASSERT(LastMadeContext != NULL);
+		// 上記の risse_coroutine_base のコンストラクタ内で
+		// ::risse_makecontext が呼ばれ、その中で LastMadeContext が設定されるため、
+		// その情報を利用する。
+		Context = LastMadeContext;
+		LastMadeContext = NULL;
 	}
 
-	boost::shared_ptr< ::ucontext_t> & get_context() { return context_; }
-};
-
-
-struct tCoroutineContext
-{
+	tCoroutineContext * GetContext() const { return Context; }
 };
 
 
 //! @brief 現在実行中のコルーチンコンテキストを得る
-tCoroutineContext * GetCurrentCoroutineContext()
+tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
 {
-	return NULL; 
+	return coro->GetContext();
 }
+
+static GC_ms_entry *MarkMemory(
+									ptr_t ref,
+									ptr_t base,
+									ptr_t limit,
+									struct GC_ms_entry *mark_sp,
+									struct GC_ms_entry *mark_sp_limit)
+{
+	for(ptr_t p = base; p < limit; p += sizeof(GC_PTR) / sizeof(*p))
+	{
+		void * ptr = (*(void**)p);
+		mark_sp = GC_MARK_AND_PUSH((GC_PTR)ptr, mark_sp, mark_sp_limit, (GC_PTR*)ref);
+	}
+
+	return mark_sp;
+}
+
 
 struct GC_ms_entry *MarkCoroutineContext(
 									tCoroutineContext * co_context,
 									struct GC_ms_entry *mark_sp,
 									struct GC_ms_entry *mark_sp_limit)
 {
+	// co_context の中身をすべてマークする
+
+	// スタック
+	mark_sp = MarkMemory(
+				(ptr_t)(co_context),
+				(ptr_t)(co_context->uc_stack.ss_sp),
+				(ptr_t)((char*)(co_context->uc_stack.ss_sp) + co_context->uc_stack.ss_size),
+				mark_sp, mark_sp_limit);
+
+	// レジスタ
+	mark_sp = MarkMemory(
+				(ptr_t)(co_context),
+				(ptr_t)(&co_context->uc_mcontext),
+				(ptr_t)(&(co_context->uc_mcontext) + 1),
+				mark_sp, mark_sp_limit);
+
 	return mark_sp;
 }
+
+static const ptrdiff_t StackSize = 65536; //!< スタックサイズ
+
 
 } // namespace Risse
 
@@ -347,19 +413,6 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 // fiber_data の typedef など
 typedef fiber_data tCoroutineContext;
 
-//! @brief 現在実行中のコルーチンコンテキストを得る
-tCoroutineContext * GetCurrentCoroutineContext()
-{
-	tCoroutineContext * p = (tCoroutineContext*)GetCurrentFiber();
-#ifdef RISSE_CORO_DEBUG
-	fflush(stdout); fflush(stderr);
-	fprintf(stdout, "fiber context %p created\n", p);
-	fflush(stdout); fflush(stderr);
-#endif
-
-	RISSE_ASSERT(p != reinterpret_cast<void *>(0x1E00));
-	return p;
-}
 
 //! @brief コルーチンコンテキストの内容をGCに対してプッシュする
 struct GC_ms_entry *MarkCoroutineContext(
@@ -462,8 +515,29 @@ struct GC_ms_entry *MarkCoroutineContext(
 namespace coro = hamigaki::coroutines;
 //---------------------------------------------------------------------------
 
-typedef hamigaki::coroutines::detail::default_context_impl risse_coroutine_default_context_impl;
+typedef coro::coroutine<
+	tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> risse_coroutine_type;
 
+
+namespace Risse {
+//! @brief 現在実行中のコルーチンコンテキストを得る
+tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
+{
+	(void)impl; // not used
+	tCoroutineContext * p = (tCoroutineContext*)GetCurrentFiber();
+#ifdef RISSE_CORO_DEBUG
+	fflush(stdout); fflush(stderr);
+	fprintf(stdout, "fiber context %p created\n", p);
+	fflush(stdout); fflush(stderr);
+#endif
+
+	RISSE_ASSERT(p != reinterpret_cast<void *>(0x1E00));
+	return p;
+}
+
+static const ptrdiff_t StackSize = -1; //!< スタックサイズ
+
+} // namespace Risse
 //========================================================================
 //                        Windowsの場合 - 終わり
 //========================================================================
@@ -504,18 +578,14 @@ void InitCoroutine()
 class tCoroutineImpl : public tDestructee /* デストラクタが呼ばれなければならない */
 {
 public:
-	typedef coro::coroutine<
-		tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant),
-		risse_coroutine_default_context_impl
-		> coroutine_type;
-	coroutine_type Coroutine;
+	risse_coroutine_type Coroutine;
 
-	coroutine_type::self * CoroutineSelf;
+	risse_coroutine_type::self * CoroutineSelf;
 	tCoroutineContext * Context;
 	bool Alive;
 	bool Running;
 
-	tCoroutineImpl() : Coroutine(Body)
+	tCoroutineImpl() : Coroutine(Body, StackSize)
 	{
 		CoroutineSelf = NULL;
 		Context = NULL;
@@ -542,10 +612,10 @@ public:
 #endif
 
 private:
-	static tVariant Body(coroutine_type::self &self, tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant arg)
+	static tVariant Body(risse_coroutine_type::self &self, tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant arg)
 	{
 		coroimpl->CoroutineSelf = &self;
-		coroimpl->Context = GetCurrentCoroutineContext();
+		coroimpl->Context = GetCurrentCoroutineContext(&coroimpl->Coroutine);
 		tVariant ret;
 
 		try

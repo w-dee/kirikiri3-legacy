@@ -218,20 +218,70 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 	class tCriticalSection : public tDestructee
 	{
 		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
+#ifdef RISSE_ASSERT_ENABLED
+		pthread_t LockingThreadId; //!< ロックを行っているスレッドID
+		unsigned long LockingNestCount; //!< ロックのネストカウント
+#endif
 	public:
-		tCriticalSection() { ; } //!< コンストラクタ
-		~tCriticalSection() { ; } //!< デストラクタ
+		//! @brief		コンストラクタ
+		tCriticalSection()
+		{
+#ifdef RISSE_ASSERT_ENABLED
+			LockingThreadId = 0;
+			LockingNestCount = 0;
+#endif
+		}
+		//! @brief		デストラクタ
+		~tCriticalSection()
+		{
+#ifdef RISSE_ASSERT_ENABLED
+			RISSE_ASSERT(LockingNestCount == 0);
+#endif
+		}
 
 	private:
 		tCriticalSection(const tCriticalSection &); // non-copyable
+
+#ifdef RISSE_ASSERT_ENABLED
+	public:
+		pthread_t GetLockingThreadId() const { return LockingThreadId; }
+#endif
+
+#ifdef RISSE_ASSERT_ENABLED
+	#define RISSE_ASSERT_CS_LOCKED(x) \
+		RISSE_ASSERT((x).GetLockingThreadId() == pthread_self())
+#endif
 
 	public:
 		//! @brief  クリティカルセクション用ロッカー
 		class tLocker : public tCollectee
 		{
+#ifdef RISSE_ASSERT_ENABLED
+			tCriticalSection & CS;
+#endif
 			boost::recursive_mutex::scoped_lock lock;
 		public:
-			tLocker(tCriticalSection & cs) : lock(cs.mutex) {;}
+			tLocker(tCriticalSection & cs) :
+#ifdef RISSE_ASSERT_ENABLED
+				CS(cs),
+#endif
+				lock(cs.mutex)
+			{
+#ifdef RISSE_ASSERT_ENABLED
+				if(CS.LockingNestCount == 0)
+					CS.LockingThreadId = pthread_self();
+				CS.LockingNestCount ++;
+#endif
+			}
+
+			~tLocker()
+			{
+#ifdef RISSE_ASSERT_ENABLED
+				CS.LockingNestCount --;
+				if(CS.LockingNestCount == 0)
+					CS.LockingThreadId = 0;
+#endif
+			}
 		private:
 			tLocker(const tLocker &); // non-copyable
 		};

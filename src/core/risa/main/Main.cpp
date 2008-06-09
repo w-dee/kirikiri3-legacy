@@ -167,9 +167,9 @@ bool tApplication::OnInit()
 
 			if(script_filename_set)
 			{
+				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				wxString script_dir = script_filename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
-				// /boot に 引数で与えられたファイル名が存在するディレクトリをマウントする
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
 					tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(script_dir), true).
 							ExpectAndGetObjectInterface<tFileSystemInstance>(
@@ -177,6 +177,16 @@ bool tApplication::OnInit()
 							)
 				);
 			}
+
+			// bin に argv[0] のあるディレクトリをマウントする
+			wxString bin_dir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
+
+			tFileSystemManager::instance()->Mount(tSS<'/','b','i','n'>(),
+				tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(bin_dir), true).
+						ExpectAndGetObjectInterface<tFileSystemInstance>(
+							tClassHolder<tOSFSClass>::instance()->GetClass()
+						)
+			);
 
 			if(!script_filename_set)
 			{

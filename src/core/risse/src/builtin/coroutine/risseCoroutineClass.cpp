@@ -93,6 +93,7 @@ tVariant tCoroutineInstance::yield(const tMethodArgument & args) const
 {
 	volatile tSynchronizer sync(this); // sync
 
+	GC_gcollect();
 #ifdef RISSE_CORO_DEBUG
 	fflush(stdout); fflush(stderr);
 	fprintf(stdout, "in tCoroutineInstance::yield b: tCoroutine %p: tCoroutineInstance %p\n",

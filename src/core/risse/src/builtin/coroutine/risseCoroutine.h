@@ -18,7 +18,7 @@
 #include "../../risseGC.h"
 #include "../../risseVariant.h"
 
-// #define RISSE_CORO_DEBUG
+#define RISSE_CORO_DEBUG
 // #define RISSE_TRACK_FIBERS
 
 

@@ -97,10 +97,20 @@ class tCoroutine;
 
 */
 
+
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 // ここのプリプロセッサ分岐については
 // hamigaki の coroutine/detail/default_context.hpp を参照のこと
 #include "boost/config.hpp"
+
+// POSIX makecontext/swapcontext は Boehm GC と相性が悪いので、
+// pthreads を使うように…相性問題が何とかなれば解決なんだけどなあ
+#ifdef _XOPEN_SOURCE
+	#undef _XOPEN_SOURCE
+#endif
 
 #if defined(BOOST_WINDOWS)
 	#define RISSE_CORO_WINDOWS
@@ -212,10 +222,10 @@ static GC_ms_entry *MarkMemory(
 									struct GC_ms_entry *mark_sp,
 									struct GC_ms_entry *mark_sp_limit)
 {
-	for(ptr_t p = base; p < limit; p += sizeof(GC_PTR) / sizeof(*p))
+	for(ptr_t p = base; p < limit; p += sizeof(void*) / sizeof(*p))
 	{
 		void * ptr = (*(void**)p);
-		mark_sp = GC_MARK_AND_PUSH((GC_PTR)ptr, mark_sp, mark_sp_limit, (GC_PTR*)ref);
+		mark_sp = GC_MARK_AND_PUSH((void*)ptr, mark_sp, mark_sp_limit, (void**)ref);
 	}
 
 	return mark_sp;
@@ -228,7 +238,9 @@ struct GC_ms_entry *MarkCoroutineContext(
 									struct GC_ms_entry *mark_sp_limit)
 {
 	// co_context の中身をすべてマークする
-
+/*
+fprintf(stdout, "marking stack %p size %ld\n", co_context->uc_stack.ss_sp, co_context->uc_stack.ss_size);
+fflush(stdout);
 	// スタック
 	mark_sp = MarkMemory(
 				(ptr_t)(co_context),
@@ -242,7 +254,7 @@ struct GC_ms_entry *MarkCoroutineContext(
 				(ptr_t)(&co_context->uc_mcontext),
 				(ptr_t)(&(co_context->uc_mcontext) + 1),
 				mark_sp, mark_sp_limit);
-
+*/
 	return mark_sp;
 }
 
@@ -261,10 +273,54 @@ static const ptrdiff_t StackSize = 65536; //!< スタックサイズ
 
 #elif defined(RISSE_CORO_PTHREADS)
 
+//========================================================================
+//                              PTHREADの場合
+//========================================================================
+
 /*
-	未調査
+	Boehm GC がうまくやってくれるはずなので特に対処無し。
 */
-    #error RISSE_CORO_PTHREADS is unsupported platform for now
+
+
+#include "hamigaki/coroutine/coroutine.hpp"
+namespace coro = hamigaki::coroutines;
+
+
+namespace Risse {
+
+
+typedef int tCoroutineContext;
+
+
+
+typedef coro::coroutine<
+	tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> risse_coroutine_type;
+
+
+//! @brief 現在実行中のコルーチンコンテキストを得る
+tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
+{
+	return NULL;
+}
+
+
+struct GC_ms_entry *MarkCoroutineContext(
+									tCoroutineContext * co_context,
+									struct GC_ms_entry *mark_sp,
+									struct GC_ms_entry *mark_sp_limit)
+{
+	return mark_sp;
+}
+
+static const ptrdiff_t StackSize = 65536; //!< スタックサイズ
+
+} // namespace Risse
+
+//========================================================================
+//                         PTHREADの場合 - 終わり
+//========================================================================
+
+
 
 #elif defined(RISSE_CORO_WINDOWS)
 //========================================================================
@@ -774,8 +830,12 @@ struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
 #endif
 
 		// a->Impl を push する
-		mark_sp = GC_MARK_AND_PUSH((GC_PTR)a->Impl, mark_sp, mark_sp_limit, (void**)addr);
+		mark_sp = GC_MARK_AND_PUSH((void*)a->Impl, mark_sp, mark_sp_limit, (void**)addr);
 
+#ifdef RISSE_CORO_DEBUG
+		fprintf(stdout, "a->Impl->Context: %p\n", a->Impl->Context);
+		fflush(stdout); fflush(stderr);
+#endif
 		if(a->Impl->Context)
 		{
 			// Context の内容 (スタックエリアだとかCPUレジスタだとか) を push する

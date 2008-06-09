@@ -25,12 +25,15 @@ namespace Risa {
 
 
 class tRinaInstance;
+class tImageInstance;
 //---------------------------------------------------------------------------
 //! @brief		Rinaコントロールを表す wcControl 派生クラス
 //---------------------------------------------------------------------------
 class tRina : public wxControl, public tRisaWindowBahavior<tRina, tRinaInstance>
 {
 	typedef wxControl inherited;
+
+	tImageInstance * TestImage; //!< テスト用イメージ
 
 public:
 	//! @brief		コンストラクタ
@@ -45,6 +48,10 @@ public:
 private:
 	//! @brief		イベントテーブルの定義
 	DECLARE_EVENT_TABLE()
+
+protected: // イベント
+	//! @brief		内容をペイントするとき
+	void OnPaint(wxPaintEvent& event);
 };
 //---------------------------------------------------------------------------
 

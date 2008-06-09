@@ -12,6 +12,7 @@
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
 #include "risa/packages/risa/widget/Rina.h"
+#include "risa/packages/risa/graphic/image/Image.h"
 
 
 namespace Risa {
@@ -30,6 +31,7 @@ RISSE_DEFINE_SOURCE_ID(58627,32079,6056,17748,10429,30722,59446,14940);
 //! @brief		Rinaの表示領域を表す wxControl 派生クラス用のイベントテーブル
 //---------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(tRina, wxControl)
+	EVT_PAINT(tRina::OnPaint)
 END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
@@ -40,6 +42,12 @@ tRina::tRina(tRinaInstance * instance, wxWindow * parent) :
 	inherited(parent, -1, wxDefaultPosition, wxDefaultSize, wxNO_BORDER),
 	tBehavior(this, instance)
 {
+	TestImage =
+			tClassHolder<tImageClass>::instance()->GetClass()->Invoke(ss_new).
+				ExpectAndGetObjectInterface<tImageInstance>(
+				tClassHolder<tImageClass>::instance()->GetClass()
+				);
+	TestImage->Load(RISSE_WS("/root/media/jpegFullColor.jpg"));
 }
 //---------------------------------------------------------------------------
 
@@ -55,8 +63,32 @@ tRina::~tRina()
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tRina::OnPaint(wxPaintEvent& event)
+{
+    wxPaintDC dc(this);
 
+    dc.SetPen(*wxBLACK_PEN);
+    dc.SetBrush(*wxRED_BRUSH);
 
+    // Get window dimensions
+    wxSize sz = GetClientSize();
+
+    // Our rectangle dimensions
+    wxCoord w = 100, h = 50;
+
+    // Center the rectangle on the window, but never
+    // draw at a negative position.
+    int x = wxMax(0, (sz.x-w)/2);
+    int y = wxMax(0, (sz.y-h)/2);
+
+    wxRect rectToDraw(x, y, w, h);
+
+    // For efficiency, do not draw if not exposed
+    if (IsExposed(rectToDraw))
+        dc.DrawRectangle(rectToDraw);
+}
+//---------------------------------------------------------------------------
 
 
 

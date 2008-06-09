@@ -88,6 +88,16 @@ public:
 	//! @param		v			0xAARRGGBB 形式のピクセル値
 	void SetARGB32(risse_size x, risse_size y, risse_uint32 v);
 
+	//! @brief		画像をロードする
+	//! @param		filename		ファイル名
+	//! @param		format			読み込みたいフォーマット
+	//! @param		dict			ロードするパラメータの入った辞書配列(NULL=指定なし)
+	//! @param		cbfunc			コールバック(void = 指定なし)
+	void Load(const tString & filename,
+			tPixel::tFormat format = tPixel::pfARGB32,
+			tDictionaryInstance * dict = NULL,
+			const tVariant & cbfunc = tVariant::GetVoidObject());
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);

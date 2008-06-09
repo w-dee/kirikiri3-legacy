@@ -136,6 +136,44 @@ void tImageInstance::SetARGB32(risse_size x, risse_size y, risse_uint32 v)
 
 
 //---------------------------------------------------------------------------
+void tImageInstance::Load(const tString & filename,
+		tPixel::tFormat format,
+		tDictionaryInstance * dict,
+		const tVariant & cbfunc)
+{
+	// ファイル名(の拡張子)に対応したデコーダを得る
+	tImageDecoder * decoder = tImageCodecFactoryManager::instance()->CreateDecoder(filename);
+
+	// ストリームを作成
+	tStreamInstance * stream =
+		tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead);
+
+	try
+	{
+		// コールバックは？
+		if(!cbfunc.IsVoid())
+		{
+			tRisseProgressCallback cb(GetRTTI()->GetScriptEngine(), cbfunc);
+			decoder->Decode(stream, this, format, &cb, dict);
+		}
+		else
+		{
+			// コールバック無し
+			decoder->Decode(stream, this, format, NULL, dict);
+		}
+	}
+	catch(...)
+	{
+		tStreamAdapter(stream).Dispose();
+		throw;
+	}
+
+	tStreamAdapter(stream).Dispose();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tImageInstance::initialize(const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
@@ -176,9 +214,6 @@ void tImageInstance::independ(const tMethodArgument &args)
 //---------------------------------------------------------------------------
 void tImageInstance::load(const tString & filename, const tMethodArgument & args)
 {
-	// ファイル名(の拡張子)に対応したデコーダを得る
-	tImageDecoder * decoder = tImageCodecFactoryManager::instance()->CreateDecoder(filename);
-
 	// 辞書配列インスタンスを第２引数から取得
 	tPixel::tFormat format = tPixel::pfARGB32; // デフォルトフォーマット
 	tDictionaryInstance * dict = NULL;
@@ -196,31 +231,12 @@ void tImageInstance::load(const tString & filename, const tMethodArgument & args
 			format = (tPixel::tFormat)(risse_int64)val;
 	}
 
-	// ストリームを作成
-	tStreamInstance * stream =
-		tFileSystemManager::instance()->Open(filename, tFileOpenModes::omRead);
+	// コールバック
+	tVariant cb;
+	if(args.HasBlockArgument(0)) cb = args.GetBlockArgument(0);
 
-	try
-	{
-		// コールバックは？
-		if(args.HasBlockArgument(0))
-		{
-			tRisseProgressCallback cb(GetRTTI()->GetScriptEngine(), args.GetBlockArgument(0));
-			decoder->Decode(stream, this, format, &cb, dict);
-		}
-		else
-		{
-			// コールバック無し
-			decoder->Decode(stream, this, format, NULL, dict);
-		}
-	}
-	catch(...)
-	{
-		tStreamAdapter(stream).Dispose();
-		throw;
-	}
-
-	tStreamAdapter(stream).Dispose();
+	// ロードを行う
+	Load(filename, format, dict, cb);
 }
 //---------------------------------------------------------------------------
 

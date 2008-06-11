@@ -320,7 +320,7 @@ tLogViewerStatusBar::tLogViewerStatusBar(wxWindow *parent)
 	int lineheight = dc.GetCharHeight();
 
 	TextCtrl = new tHistoryTextCtrl(this);
-	SetSize(-1, -1, -1, lineheight + 10); // XXX 10?
+	SetSize(-1, -1, -1, lineheight + 13); // XXX 13?
 
 	AdjustControlSize();
 }
@@ -358,7 +358,7 @@ void tLogViewerStatusBar::AdjustControlSize()
 	wxRect rect;
 	GetFieldRect(0, rect);
 
-	TextCtrl->SetSize(rect.x +2, rect.y +2, rect.width - 4, rect.height - 4);
+	TextCtrl->SetSize(rect.x +1, rect.y +1, rect.width - 4, rect.height - 2);
 }
 //---------------------------------------------------------------------------
 

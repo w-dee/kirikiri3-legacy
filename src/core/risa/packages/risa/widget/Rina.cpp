@@ -14,6 +14,8 @@
 #include "risa/packages/risa/widget/Rina.h"
 #include "risa/packages/risa/graphic/image/Image.h"
 
+#include <gdk/gdk.h>
+
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(58627,32079,6056,17748,10429,30722,59446,14940);
@@ -66,27 +68,16 @@ tRina::~tRina()
 //---------------------------------------------------------------------------
 void tRina::OnPaint(wxPaintEvent& event)
 {
-    wxPaintDC dc(this);
+	wxPaintDC dc(this);
 
-    dc.SetPen(*wxBLACK_PEN);
-    dc.SetBrush(*wxRED_BRUSH);
+	const tImageBuffer::tDescriptor & desc = TestImage->GetDescriptor();
+	const tImageBuffer::tBufferPointer & pointer = TestImage->GetBufferPointer();
 
-    // Get window dimensions
-    wxSize sz = GetClientSize();
+	gdk_draw_rgb_32_image(dc.m_window, dc.m_penGC, 0, 0,
+			desc.Width, desc.Height, GDK_RGB_DITHER_NONE,
+			(guchar*)pointer.Buffer, pointer.Pitch);
 
-    // Our rectangle dimensions
-    wxCoord w = 100, h = 50;
-
-    // Center the rectangle on the window, but never
-    // draw at a negative position.
-    int x = wxMax(0, (sz.x-w)/2);
-    int y = wxMax(0, (sz.y-h)/2);
-
-    wxRect rectToDraw(x, y, w, h);
-
-    // For efficiency, do not draw if not exposed
-    if (IsExposed(rectToDraw))
-        dc.DrawRectangle(rectToDraw);
+	pointer.Release();
 }
 //---------------------------------------------------------------------------
 

@@ -31,6 +31,13 @@ DEP_LIBS=BOOST BOOST_THREAD ZLIB WX LIBOGG LIBVORBIS OPENAL COMMON GC RISAGL LIB
 # 追加の CFLAGS
 CXXFLAGS += -DBOOST_ENABLE_ASSERT_HANDLER
 
+ifeq (unix,$(PLATFORM))
+  # プログラム内で直接Gtk+の関数を呼び出すため、この様な処置が必要
+  GTK_CONFIG := $(shell pkg-config --cflags gtk+-2.0)
+  CXXFLAGS += $(GTK_CONFIG)
+endif
+
+
 # pre-compiled header 用ファイル
 PREC_H_NAME = $(CURRENT_DIR)/$(CORE_DIR)/risa/prec.h
 

@@ -322,37 +322,6 @@ public: // Risse 用メソッドなど
 
 
 
-//---------------------------------------------------------------------------
-//! @brief		ピンの説明
-//---------------------------------------------------------------------------
-struct tPinDescriptor
-{
-public:
-	tString			ShortName; //!< 短い名前 (i18nしないこと)
-	tString			LongDescription; //!< 長い説明 (i18n可)
-
-	//! @brief		デフォルトコンストラクタ
-	tPinDescriptor() {;}
-
-	//! @brief		コンストラクタ
-	//! @param		shortname		短い名前 (i18nしないこと)
-	//! @param		longdesc		長い説明 (i18n可)
-	tPinDescriptor(const tString shortname, const tString longdesc)
-		: ShortName(shortname), LongDescription(longdesc) {;}
-
-	//! @brief		ref の 各文字列メンバの %1 を数値に置き換えて設定する
-	//! @param		ref		元になるピンの説明
-	//! @param		n		各文字列メンバの '%1' に置き換わる文字列
-	void MakeNumbered(const tPinDescriptor & ref, risse_size n)
-	{
-		tString num(tString::AsString(static_cast<risse_int64>(n)));
-		ShortName			= tString(ref.ShortName			, num);
-		LongDescription		= tString(ref.LongDescription	, num);
-	}
-};
-//---------------------------------------------------------------------------
-
-
 // TODO: InputPinArray と OutputPinArray のスーパークラスの PinArray クラスは作るべき?
 
 class tNodeInstance;
@@ -419,28 +388,6 @@ public:
 	{
 		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
 		/* TODO: 例外 */
-	}
-
-	//! @brief		指定インデックスのピンの情報を得る
-	//! @param		index		インデックス
-	//! @return		ピンの情報
-	virtual tPinDescriptor GetDescriptor(risse_size index)
-	{
-		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
-		/* TODO: 例外 */
-		return tPinDescriptor();
-	}
-
-	//! @brief		指定の名前のピンのインデックスを探して返す
-	//! @param		name		ピン名 (tPinDescriptor::ShortName のもの)
-	//! @return		見つかったピンのインデックス (見つからなかった場合は risse_size_max)
-	virtual risse_size FindPinByShortName(const tString & name)
-	{
-		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS()); 
-		risse_size count = GetCount();
-		for(risse_size i = 0; i < count; i++)
-			if(GetDescriptor(i).ShortName == name) return i;
-		return risse_size_max;
 	}
 };
 //---------------------------------------------------------------------------
@@ -520,7 +467,7 @@ public: // Risse 用メソッドなど
 
 
 
-
+// TODO: 名前が変。あたかもピンが無いのに Array という名前? 
 //---------------------------------------------------------------------------
 //! @brief		出力ピンのピン配列
 //! @note		このクラスではすべてのメソッドが実装されているが、

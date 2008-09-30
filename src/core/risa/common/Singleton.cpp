@@ -18,6 +18,68 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
+
+//---------------------------------------------------------------------------
+const char * Demangle(const char * name)
+{
+#ifdef HAVE_CXXABI_H
+	// __cxa_demangle を用いて、name のマングリングを解除する
+	int status = 0;
+	char * demangled = abi::__cxa_demangle(name, NULL, 0, &status);
+	if(demangled)
+	{
+		// GC の管理下のバッファに文字列をコピーする
+		// Risse::tSS<...> はちょっと特殊なので別途処理をする
+		// Risse::tSS<"パッケージ名"> みたいな感じに変換なのだ
+		size_t demangled_len = strlen(demangled);
+		char *p = (char*)MallocAtomicCollectee(demangled_len+3);
+		char *pp = p;
+		for(size_t i = 0; i < demangled_len; i++)
+		{
+			if(memcmp(demangled + i, "Risse::tSS<", 11) == 0)
+			{
+				i += 11;
+				memcpy(pp, "Risse::tSS<\"", 12); pp += 12;
+				while(true)
+				{
+					while(i < demangled_len &&
+							demangled[i] != '>' &&
+							!(demangled[i] >= '0' && demangled[i] <= '9')) i++;
+					if(i == demangled_len) return NULL; // ??
+					if(demangled[i] == '>') { i++; break; }
+					int n = 0;
+					while(demangled[i] >= '0' && demangled[i] <= '9')
+						n*=10, n+=demangled[i]-'0', i++;
+					if(n != 0) *(pp++) = (char)n;
+					while(demangled[i] != ',' && demangled[i] != '>') i++;
+					if(demangled[i] == '>')
+					{
+						*(pp++) = '"';
+						*(pp++) = '>';
+						break;
+					}
+					i++;
+				}
+			}
+			else
+			{
+				*pp = demangled[i];
+				pp++;
+			}
+		}
+		*pp = 0;
+		free(demangled);
+		return p;
+	}
+	else
+		return name;
+#else
+	return name;
+#endif
+}
+//---------------------------------------------------------------------------
+
+
 //---------------------------------------------------------------------------
 gc_vector<singleton_manager::register_info_t> * singleton_manager::functions = NULL;
 gc_vector<singleton_manager::handler_t> * singleton_manager::disconnectors = NULL;

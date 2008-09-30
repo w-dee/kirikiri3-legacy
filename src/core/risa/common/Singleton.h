@@ -70,6 +70,14 @@ namespace Risa {
 
 using namespace Risse;
 
+
+//---------------------------------------------------------------------------
+//! @brief  型名のデマングルを行う
+//! @param		name		マングルされた名前
+//! @return		デマングルされた名前(GC管理下あるいはstaticなので明示的に開放しなくてよい)
+//---------------------------------------------------------------------------
+const char * Demangle(const char * name);
+
 //---------------------------------------------------------------------------
 //! @brief  シングルトンオブジェクト管理用クラス
 //---------------------------------------------------------------------------
@@ -215,23 +223,7 @@ class singleton_base : public tCollectee
 	//! @brief クラス名を得る
 	static const char * get_name()
 	{
-#ifdef HAVE_CXXABI_H
-		// __cxa_demangle を用いて、name のマングリングを解除する
-		int status = 0;
-		char * demangled = abi::__cxa_demangle(typeid(T).name(), NULL, 0, &status);
-		if(demangled)
-		{
-			// GC の管理下のバッファに文字列をコピーする
-			char *p = (char*)MallocAtomicCollectee(strlen(demangled)+1);
-			strcpy(p, demangled);
-			free(demangled);
-			return p;
-		}
-		else
-			return typeid(T).name();
-#else
-		return typeid(T).name();
-#endif
+		return Demangle(typeid(T).name());
 	}
 
 protected:

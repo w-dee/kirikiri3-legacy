@@ -120,8 +120,37 @@ public:
 	//! @brief		内容の更新があったことを上位のノードに伝える
 	//! @param		rect		更新のあった矩形
 	virtual void NotifyUpdate(const tTexturePolygon & rect);
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ラスタ画像用の入力ピンクラス
+//---------------------------------------------------------------------------
+class tImageInputPinClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tImageInputPinClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
 
 
 
@@ -147,9 +176,37 @@ public:
 	//! @brief		内容の更新があったことを上位のノードに伝える
 	//! @param		rect		更新のあった矩形
 	virtual void NotifyUpdate(const tTexturePolygon & rect);
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ミキサ(あるいはコンポジッタ)用のラスタ画像用の入力ピンクラス
+//---------------------------------------------------------------------------
+class tImageMixerInputPinClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tImageMixerInputPinClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
 
 
 
@@ -176,8 +233,37 @@ public:
 	//! @brief		内容の更新があったことを上位のノードに伝える
 	//! @param		rect		更新のあった矩形
 	void NotifyUpdate(const tTexturePolygon & rect);
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		ラスタ画像用の出力ピンクラス
+//---------------------------------------------------------------------------
+class tImageOutputPinClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tImageOutputPinClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
 
 
 

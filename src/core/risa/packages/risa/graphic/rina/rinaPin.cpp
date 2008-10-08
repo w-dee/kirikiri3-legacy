@@ -508,6 +508,89 @@ template class tClassRegisterer<
 
 
 
+//---------------------------------------------------------------------------
+void tOneInputPinArrayInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant & pin,
+			const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// ピンを設定する
+	PinInstance = pin.ExpectAndGetObjectInterface<tInputPinInstance>(
+			tClassHolder<tInputPinClass>::instance()->GetClass());
+
+	// 親クラスの同名メソッドを呼び出す
+	// 引数はそのまま渡す
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+tOneInputPinArrayClass::tOneInputPinArrayClass(tScriptEngine * engine) :
+	inherited(tSS<'O','n','e','I','n','p','u','t','P','i','n','A','r','r','a','y'>(),
+	tClassHolder<tInputPinArrayClass>::instance()->GetClass())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOneInputPinArrayClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tOneInputPinArrayClass::ovulate);
+	BindFunction(this, ss_construct, &tOneInputPinArrayInstance::construct);
+	BindFunction(this, ss_initialize, &tOneInputPinArrayInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOneInputPinArrayClass::ovulate()
+{
+	return tVariant(new tOneInputPinArrayInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		OneInputPinArray クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tOneInputPinArrayClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 void tOutputPinArrayInstance::construct()
@@ -578,6 +661,102 @@ template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tOutputPinArrayClass>;
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+void tOneOutputPinArrayInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVariant & pin,
+		const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	// ピンを設定する
+	PinInstance = pin.ExpectAndGetObjectInterface<tOutputPinInstance>(
+			tClassHolder<tOutputPinClass>::instance()->GetClass());
+
+	// 親クラスの同名メソッドを呼び出す
+	// 引数はそのまま渡す
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+tOneOutputPinArrayClass::tOneOutputPinArrayClass(tScriptEngine * engine) :
+	inherited(tSS<'O','n','e','O','u','t','p','u','t','P','i','n','A','r','r','a','y'>(),
+	tClassHolder<tOutputPinArrayClass>::instance()->GetClass())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tOneOutputPinArrayClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tOneOutputPinArrayClass::ovulate);
+	BindFunction(this, ss_construct, &tOneOutputPinArrayInstance::construct);
+	BindFunction(this, ss_initialize, &tOneOutputPinArrayInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tOneOutputPinArrayClass::ovulate()
+{
+	return tVariant(new tOneOutputPinArrayInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		OneOutputPinArray クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tOneOutputPinArrayClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

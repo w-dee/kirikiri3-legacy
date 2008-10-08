@@ -400,11 +400,13 @@ public:
 
 
 
+
 //---------------------------------------------------------------------------
 //! @brief		入力ピンのピン配列
 //! @note		このクラスではすべてのメソッドが実装されているが、
 //!				すべてあたかもピンが無いかのように振る舞う。
-//!				そのため、入力ピンを持たないノードの入力ピン配列に使うことができる。
+//!				そのため、そのクラス名に反して、入力ピンを持たないノードの入力ピン配列に使うことができる。
+//!				また、すべての InputPinArray の基底クラスである。
 //---------------------------------------------------------------------------
 class tInputPinArrayInstance : public tPinArray<tInputPinInstance>, public tObjectBase
 {
@@ -467,12 +469,107 @@ public: // Risse 用メソッドなど
 
 
 
-// TODO: 名前が変。あたかもピンが無いのに Array という名前? 
+//---------------------------------------------------------------------------
+//! @brief		入力ピンのピン配列(一個だけの要素の場合)
+//---------------------------------------------------------------------------
+class tOneInputPinArrayInstance : public tInputPinArrayInstance
+{
+public:
+	typedef tInputPinArrayInstance inherited;
+
+private:
+	tInputPinInstance * PinInstance; //!< ピンインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	tOneInputPinArrayInstance() {PinInstance=NULL;}
+
+	//! @brief		ピンの数を得る
+	//! @return		ピンの総数
+	virtual risse_size GetCount()
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		return 1;
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	virtual tPinInstance * Get(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+		if(index ==0) return PinInstance;
+		return NULL;
+	}
+
+	//! @brief		指定インデックスのピンを削除する
+	//! @param		index		インデックス
+	virtual void Delete(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスにピンを挿入する
+	//! @param		index		インデックス
+	virtual void Insert(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+	}
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tVariant & node, const tVariant & pin, const tNativeCallInfo &info);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		入力ピンのピン配列クラス(一個だけの要素の場合)
+//---------------------------------------------------------------------------
+class tOneInputPinArrayClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tOneInputPinArrayClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 //! @brief		出力ピンのピン配列
 //! @note		このクラスではすべてのメソッドが実装されているが、
 //!				すべてあたかもピンが無いかのように振る舞う。
-//!				そのため、出力ピンを持たないノードの出力ピン配列に使うことができる。
+//!				そのため、そのクラス名に反して、出力ピンを持たないノードの出力ピン配列に使うことができる。
+//!				また、すべての OutputPinArray の基底クラスである。
 //---------------------------------------------------------------------------
 class tOutputPinArrayInstance : public tPinArray<tOutputPinInstance>, public tObjectBase
 {
@@ -515,6 +612,99 @@ public:
 	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
 	tOutputPinArrayClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		出力ピンのピン配列(一個だけの要素の場合)
+//---------------------------------------------------------------------------
+class tOneOutputPinArrayInstance : public tOutputPinArrayInstance
+{
+public:
+	typedef tOutputPinArrayInstance inherited;
+
+private:
+	tOutputPinInstance * PinInstance; //!< ピンインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	tOneOutputPinArrayInstance() {PinInstance = NULL;}
+
+	//! @brief		ピンの数を得る
+	//! @return		ピンの総数
+	virtual risse_size GetCount()
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		return 1;
+	}
+
+	//! @brief		指定インデックスのピンを得る
+	//! @param		index		インデックス
+	virtual tPinInstance * Get(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+		if(index ==0) return PinInstance;
+		return NULL;
+	}
+
+	//! @brief		指定インデックスのピンを削除する
+	//! @param		index		インデックス
+	virtual void Delete(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+	}
+
+	//! @brief		指定インデックスにピンを挿入する
+	//! @param		index		インデックス
+	virtual void Insert(risse_size index)
+	{
+		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
+		/* TODO: 例外 */
+	}
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tVariant & node, const tVariant & pin, const tNativeCallInfo &info);
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		出力ピンのピン配列クラス(一個だけの要素の場合)
+//---------------------------------------------------------------------------
+class tOneOutputPinArrayClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tOneOutputPinArrayClass(tScriptEngine * engine);
 
 	//! @brief		各メンバをインスタンスに追加する
 	void RegisterMembers();

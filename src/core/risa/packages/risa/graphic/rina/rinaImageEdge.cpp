@@ -75,6 +75,23 @@ void tImageInputPinInstance::NotifyUpdate(const tTexturePolygon & rect)
 
 
 
+//---------------------------------------------------------------------------
+void tImageInputPinInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageInputPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -141,6 +158,27 @@ void tImageMixerInputPinInstance::NotifyUpdate(const tTexturePolygon & area)
 	// TODO: 通常、ここでは変形先座標を通知する必要がある
 }
 //---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+void tImageMixerInputPinInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageMixerInputPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
 
 
 
@@ -238,6 +276,25 @@ void tImageOutputPinInstance::NotifyUpdate(const tTexturePolygon & area)
 	{
 		// TODO: すべての入力ピンに対してアップデート通知を送る
 	}
+}
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+void tImageOutputPinInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageOutputPinInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass();
 }
 //---------------------------------------------------------------------------
 

@@ -69,15 +69,21 @@ public:
 
 public:
 	//! @brief		コンストラクタ
-	//! @param		graph		グラフインスタンス
-	tNodeInstance(tGraphInstance * graph);
+	tNodeInstance();
 
 	//! @brief		デストラクタ(おそらく呼ばれない)
 	virtual ~tNodeInstance() {}
 
+protected:
+	//! @brief		グラフインスタンスを設定する
+	//! @param		graph		グラフインスタンス
+	//! @note		initialize Risse関数から呼ぶこと
+	void SetGraphInstance(tGraphInstance * graph)
+		{ RISSE_ASSERT(!GraphInstance); GraphInstance = graph; }
+
 public:
 	//! @brief		グラフインスタンスを得る
-	tGraphInstance * GetGraphInstance() const { return GraphInstance; }
+	tGraphInstance * GetGraphInstance() const { RISSE_ASSERT(GraphInstance); return GraphInstance; }
 
 public:
 	//! @brief		ルートノードからの最長距離を得る
@@ -105,7 +111,7 @@ public:
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tNativeCallInfo &info);
+	void initialize(const tVariant &graph, const tNativeCallInfo &info);
 
 };
 //---------------------------------------------------------------------------

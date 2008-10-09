@@ -30,9 +30,9 @@ RISSE_DEFINE_SOURCE_ID(35503,37740,38367,18777,41870,21345,15082,43304);
 
 
 //---------------------------------------------------------------------------
-tNodeInstance::tNodeInstance(tGraphInstance * graph)
+tNodeInstance::tNodeInstance()
 {
-	GraphInstance = graph;
+	GraphInstance = NULL;
 	LongestDistance = 0;
 }
 //---------------------------------------------------------------------------
@@ -72,9 +72,12 @@ void tNodeInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tNodeInstance::initialize(const tNativeCallInfo &info)
+void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
+
+	SetGraphInstance(graph.ExpectAndGetObjectInterface<tGraphInstance>(
+					tClassHolder<tGraphClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
 }

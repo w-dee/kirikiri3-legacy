@@ -17,10 +17,76 @@
 #include "risa/packages/risa/event/Event.h"
 #include "risa/common/RisaGC.h"
 #include "risa/packages/risa/widget/Frame.h"
-
+#include "risa/packages/risa/graphic/rina/rinaNode.h"
+#include "risa/packages/risa/graphic/rina/rinaImageEdge.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//! @brief		Rina widget 用のノード
+//---------------------------------------------------------------------------
+class tRinaWidgetNodeInstance : public tNodeInstance
+{
+	typedef tNodeInstance inherited; //!< 親クラス
+
+	tInputPinArrayInstance * InputPinArrayInstance; //!< 入力ピン配列インスタンス
+	tOutputPinArrayInstance * OutputPinArrayInstance; //!< 出力ピン配列インスタンス
+	tImageInputPinInstance * InputPinInstance; //!< 入力ピンインスタンス
+
+public:
+	//! @brief		コンストラクタ
+	tRinaWidgetNodeInstance();
+
+	//! @brief		デストラクタ(おそらく呼ばれない)
+	virtual ~tRinaWidgetNodeInstance() {}
+
+public: // サブクラスで実装すべき物
+	//! @brief		入力ピンの配列を得る
+	//! @return		入力ピンの配列
+	virtual tInputPinArrayInstance & GetInputPinArrayInstance();
+
+	//! @brief		出力ピンの配列を得る
+	//! @return		出力ピンの配列
+	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance();
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tNativeCallInfo &info);
+};
+//---------------------------------------------------------------------------
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		"RinaWidgetNode" クラス
+//---------------------------------------------------------------------------
+class tRinaWidgetNodeClass : public tClassBase
+{
+	typedef tClassBase inherited; //!< 親クラスの typedef
+
+public:
+	//! @brief		コンストラクタ
+	//! @param		engine		スクリプトエンジンインスタンス
+	tRinaWidgetNodeClass(tScriptEngine * engine);
+
+	//! @brief		各メンバをインスタンスに追加する
+	void RegisterMembers();
+
+	//! @brief		newの際の新しいオブジェクトを作成して返す
+	static tVariant ovulate();
+
+public: // Risse 用メソッドなど
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
 

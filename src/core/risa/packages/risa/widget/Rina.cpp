@@ -14,12 +14,141 @@
 #include "risa/packages/risa/widget/Rina.h"
 #include "risa/packages/risa/graphic/image/Image.h"
 
+
 #include <gdk/gdk.h>
 
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(58627,32079,6056,17748,10429,30722,59446,14940);
 //---------------------------------------------------------------------------
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRinaWidgetNodeInstance::tRinaWidgetNodeInstance()
+{
+	InputPinArrayInstance = NULL;
+	OutputPinArrayInstance = NULL;
+	InputPinInstance = NULL;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tInputPinArrayInstance & tRinaWidgetNodeInstance::GetInputPinArrayInstance()
+{
+	return *InputPinArrayInstance;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tOutputPinArrayInstance & tRinaWidgetNodeInstance::GetOutputPinArrayInstance()
+{
+	return *OutputPinArrayInstance;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRinaWidgetNodeInstance::construct()
+{
+	// 入力ピンインスタンスを作成
+	InputPinInstance =
+		tClassHolder<tImageInputPinClass>::instance()->GetClass()->
+			Invoke(ss_new).
+		ExpectAndGetObjectInterface<tImageInputPinInstance>(
+		tClassHolder<tImageInputPinClass>::instance()->GetClass()
+		);
+	// 入力ピン配列と出力ピン配列を生成
+	InputPinArrayInstance =
+			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()->
+				Invoke(ss_new, tVariant(this)).
+			ExpectAndGetObjectInterface<tOneInputPinArrayInstance>(
+			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()
+			);
+	OutputPinArrayInstance =
+			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()->
+				Invoke(ss_new, tVariant(this)).
+			ExpectAndGetObjectInterface<tOutputPinArrayInstance>(
+			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()
+			);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRinaWidgetNodeInstance::initialize(const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	info.InitializeSuperClass(info.args); // 引数はそのまま渡す
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+tRinaWidgetNodeClass::tRinaWidgetNodeClass(tScriptEngine * engine) :
+	tClassBase(tSS<'R','i','n','a','W','i','d','g','e','t','N','o','d','e'>(),
+		tClassHolder<tNodeClass>::instance()->GetClass())
+{
+	RegisterMembers();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tRinaWidgetNodeClass::RegisterMembers()
+{
+	// 親クラスの RegisterMembers を呼ぶ
+	inherited::RegisterMembers();
+
+	// クラスに必要なメソッドを登録する
+	// 基本的に ss_construct と ss_initialize は各クラスごとに
+	// 記述すること。たとえ construct の中身が空、あるいは initialize の
+	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+
+	BindFunction(this, ss_ovulate, &tRinaWidgetNodeClass::ovulate);
+	BindFunction(this, ss_construct, &tRinaWidgetNodeInstance::construct);
+	BindFunction(this, ss_initialize, &tRinaWidgetNodeInstance::initialize);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tRinaWidgetNodeClass::ovulate()
+{
+	return tVariant(new tRinaWidgetNodeInstance());
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+//! @brief		RinaWidgetNode クラスレジストラ
+//---------------------------------------------------------------------------
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','w','i','d','g','e','t'>,
+	tRinaWidgetNodeClass>;
+//---------------------------------------------------------------------------
+
+
+
+
 
 
 

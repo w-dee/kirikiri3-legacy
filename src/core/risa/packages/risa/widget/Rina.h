@@ -135,6 +135,7 @@ class tRinaInstance : public tWindowInstance
 {
 private:
 	tRina::tInternal * Internal; //!< 内部実装クラスへのポインタ
+	tRinaWidgetNodeInstance * RinaWidgetNode; //!< RinaWidgetNode インスタンス
 
 public:
 	//! @brief		コンストラクタ
@@ -145,7 +146,7 @@ public:
 
 public: // Risse用メソッドなど
 	void construct();
-	void initialize(const tVariant & parent, const tNativeCallInfo &info);
+	void initialize(const tVariant & parent, const tVariant & graph, const tNativeCallInfo &info);
 };
 //---------------------------------------------------------------------------
 

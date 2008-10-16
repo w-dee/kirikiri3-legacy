@@ -240,6 +240,7 @@ void tRina::OnPaint(wxPaintEvent& event)
 tRinaInstance::tRinaInstance()
 {
 	Internal = NULL;
+	RinaWidgetNode = NULL;
 }
 //---------------------------------------------------------------------------
 
@@ -253,7 +254,7 @@ void tRinaInstance::construct()
 
 
 //---------------------------------------------------------------------------
-void tRinaInstance::initialize(const tVariant & parent, const tNativeCallInfo &info)
+void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, const tNativeCallInfo &info)
 {
 	volatile tSynchronizer sync(this); // sync
 
@@ -265,8 +266,20 @@ void tRinaInstance::initialize(const tVariant & parent, const tNativeCallInfo &i
 		parent.ExpectAndGetObjectInterface<tFrameInstance>(
 			tClassHolder<tFrameClass>::instance()->GetClass());
 
+	// graph から tGraphInstance のインスタンスを取り出す
+	tGraphInstance * graph_instance =
+		graph.ExpectAndGetObjectInterface<tGraphInstance>(
+			tClassHolder<tGraphClass>::instance()->GetClass());
+
 	// Rinaコントロールを作成
 	SetWxWindow(new tRina(this, frame->GetWxWindow()));
+
+	// tGraphInstance のインスタンスを引数にして RinaWidgetNode のインスタンスを作成する
+	RinaWidgetNode =
+		tClassHolder<tRinaWidgetNodeClass>::instance()->GetClass()->Invoke(ss_new, tVariant(graph_instance)).
+						ExpectAndGetObjectInterface<tRinaWidgetNodeInstance>(
+						tClassHolder<tRinaWidgetNodeClass>::instance()->GetClass()
+						);
 }
 //---------------------------------------------------------------------------
 

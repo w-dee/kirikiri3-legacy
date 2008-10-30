@@ -65,15 +65,15 @@ void tRinaWidgetNodeInstance::construct()
 	// 入力ピン配列と出力ピン配列を生成
 	InputPinArrayInstance =
 			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()->
-				Invoke(ss_new, tVariant(this)).
+				Invoke(ss_new, tVariant(this), tVariant(InputPinInstance)).
 			ExpectAndGetObjectInterface<tOneInputPinArrayInstance>(
 			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()
 			);
 	OutputPinArrayInstance =
-			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()->
+			tClassHolder<tOutputPinArrayClass>::instance()->GetClass()->
 				Invoke(ss_new, tVariant(this)).
 			ExpectAndGetObjectInterface<tOutputPinArrayInstance>(
-			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()
+			tClassHolder<tOutputPinArrayClass>::instance()->GetClass()
 			);
 }
 //---------------------------------------------------------------------------

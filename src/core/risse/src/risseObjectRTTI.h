@@ -90,11 +90,11 @@ public:
 	}
 
 public:
-	//! @param		スクリプトエンジンインスタンスを取得する
+	//! @brief		スクリプトエンジンインスタンスを取得する
 	//! @return		スクリプトエンジンインスタンス
 	tScriptEngine * GetScriptEngine() const { return Engine; }
 
-	//! @param		スクリプトエンジンインスタンスを設定する
+	//! @brief		スクリプトエンジンインスタンスを設定する
 	//! @param		engine		スクリプトエンジンインスタンス
 	void SetScriptEngine(tScriptEngine * engine) { Engine = engine; }
 };

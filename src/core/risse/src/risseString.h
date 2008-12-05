@@ -736,7 +736,7 @@ public: // other utilities
 	//! @brief		文字列の置き換え
 	//! @param		old_str			置き換え元の文字列
 	//! @param		new_str			置き換え先の文字列
-	//! @parma		replace_all		すべての一致を置き換えるかどうか
+	//! @param		replace_all		すべての一致を置き換えるかどうか
 	//! @return		置き換えられた文字列
 	tStringBlock Replace(const tStringBlock &old_str,
 		const tStringBlock &new_str, bool replace_all = true) const;
@@ -762,17 +762,17 @@ public: // other utilities
 	{ return Escape(risse_size_max, true); }
 
 	//! @brief		値を人間が読み取り可能な文字列に変換する
-	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は 
+	//! @param		maxlen		おおよその最大コードポイント数; 収まり切らない場合は
 	//!							省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	//! @return		人間が読み取り可能な文字列
 	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return Escape(maxlen, true); }
 
-	//! @param		大文字を小文字に変換する(コレーションなし)
+	//! @brief		大文字を小文字に変換する(コレーションなし)
 	//! @note		[A-Z] を [a-z] に変換する。これ以外の文字については変換 *しない*。
 	void ToLowerCaseNC();
 
-	//! @param		子文字を大文字に変換する(コレーションなし)
+	//! @brief		子文字を大文字に変換する(コレーションなし)
 	//! @note		[a-z] を [A-Z] に変換する。これ以外の文字については変換 *しない*。
 	void ToUpperCaseNC();
 
@@ -815,7 +815,7 @@ public:
 	//! @return		static な空文字列
 	//! @note		tString() は空文字列になるがstaticではない。
 	//!				このメソッドは空文字列をstaticに保持しているデータへの
-	//!				参照を返す。よって単に空文字列が欲しい場合には tString() 
+	//!				参照を返す。よって単に空文字列が欲しい場合には tString()
 	//!				と比べて効率的。ただし、あくまでこれは参照を返すので、
 	//!				たとえば tString GetXXX() { return tString::GetEmptyString(); }
 	//!				などとすると参照から実体が作られて、それが帰ることになるので非効率的。

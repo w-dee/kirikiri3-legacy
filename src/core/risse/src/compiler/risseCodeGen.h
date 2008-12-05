@@ -117,11 +117,11 @@ public:
 		{ return CodeToSourcePosition; }
 
 protected:
-	//! @param		コードを1ワード分置く(ただしコード用)
+	//! @brief		コードを1ワード分置く(ただしコード用)
 	//! @param		r コード
 	void PutCode(tOpCode r) { LastCode = r; Code.push_back(static_cast<risse_uint32>(r)); }
 
-	//! @param		コードを1ワード分置く
+	//! @brief		コードを1ワード分置く
 	//! @param		r コード
 	void PutWord(risse_uint32 r) { Code.push_back(r); }
 
@@ -208,11 +208,11 @@ public:
 	// コードの種類別に関数を用意するのは無駄にみえるが、バイトコードのための
 	// 知識をこのクラス内で囲っておくために必要
 
-	//! @param		これから置く命令コードがソースコード上のどの位置に対応するかを通知する
+	//! @brief		これから置く命令コードがソースコード上のどの位置に対応するかを通知する
 	//! @param		pos		ソースコード上の位置
 	void SetSourceCodePosition(risse_size pos);
 
-	//! @param		これから置く命令コードがソースコード上のどの位置に対応するかを得る
+	//! @brief		これから置く命令コードがソースコード上のどの位置に対応するかを得る
 	//! @return		ソースコード上の位置(まだ位置が特定されていない場合は risse_size_max が帰る)
 	risse_size GetSourceCodePosition() const;
 

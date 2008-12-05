@@ -63,7 +63,7 @@ class tClassInstance : public tClassClass
 	typedef tClassClass inherited; //!< 親クラスの typedef
 
 public:
-	// ! @brief		コンストラクタ
+	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
 	tClassInstance(tScriptEngine * engine);
 

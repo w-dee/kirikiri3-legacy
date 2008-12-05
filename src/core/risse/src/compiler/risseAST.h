@@ -368,7 +368,7 @@ public:
 	virtual bool DoWriteSSA(tSSAForm *form, void * param,
 			tSSAVariable * value) const { return false; }
 
-	//! @param		SSA 形式の書き込み用の表現を生成する
+	//! @brief		SSA 形式の書き込み用の表現を生成する
 	//! @param		form	SSA 形式インスタンス
 	//! @param		var		SSA 形式における変数 (この結果が書き込まれる)
 	//! @return		書き込みが成功したかどうか

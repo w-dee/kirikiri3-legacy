@@ -29,7 +29,7 @@ class tStreamInstance;
 class tStreamConstants
 {
 public:
-	//! @param		基準位置の列挙
+	//! @brief		基準位置の列挙
 	enum tOrigin
 	{
 		soSet , //!< ストリームの先頭

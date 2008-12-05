@@ -137,16 +137,16 @@ public:
 	//! @note		すでに同じ名前のラベルが存在していた場合は例外が発生する
 	void AddLabelMap(const tString &labelname, tSSABlock * block);
 
-	//! @param		変数を共有する
+	//! @brief		変数を共有する
 	//! @param		name		変数名(番号付き)
 	void ShareVariable(const tString & name);
 
-	//! @param		変数が共有されているかを得る
+	//! @brief		変数が共有されているかを得る
 	//! @param		name		変数名(番号付き)
 	//! @return		変数が共有されているかどうか
 	bool GetShared(const tString & name);
 
-	//! @param		この関数のネストレベルが共有変数を持っているかどうかを返す
+	//! @brief		この関数のネストレベルが共有変数を持っているかどうかを返す
 	//! @return		この関数のネストレベルが共有変数を持っているかどうか
 	bool HasSharedVariable() const { return SharedVariableMap.size() > 0; }
 

@@ -193,7 +193,7 @@ protected:
 	typedef void (*tCallee)(TT f, const tNativeCallInfo & info);
 
 	//! @brief		Risseクラスインスタンス
-	tClassBase * Class; 
+	tClassBase * Class;
 
 	//! @brief		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
 	TT TargetFunction;
@@ -314,7 +314,7 @@ public:
 
 private:
 	//! @brief		Risseクラスインスタンス
-	tClassBase * Class; 
+	tClassBase * Class;
 
 	//! @brief		Risseプロパティが読み込まれる際に本当に呼ばれるネイティブな関数
 	TT TargetFunction;
@@ -357,7 +357,7 @@ public:
 
 private:
 	//! @brief		Risseクラスインスタンス
-	tClassBase * Class; 
+	tClassBase * Class;
 
 	//! @brief		Risseプロパティが書き込まれる際に本当に呼ばれるネイティブな関数
 	TT TargetFunction;
@@ -390,7 +390,7 @@ public:
 template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindProperty : public tObjectInterface
 {
-	//! @param		親クラスのtypedef
+	//! @brief		親クラスのtypedef
 	typedef tObjectInterface inherited;
 
 	tObjectInterface * Getter; //!< Risseプロパティが読み込まれる際に呼ばれるメソッド

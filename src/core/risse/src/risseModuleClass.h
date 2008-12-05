@@ -28,7 +28,7 @@ class tModuleClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
-	// ! @brief		コンストラクタ
+	//! @brief		コンストラクタ
 	//! @param		engine		スクリプトエンジンインスタンス
 	tModuleClass(tScriptEngine * engine);
 

@@ -254,7 +254,7 @@ private:
 
 public:
 	// コンストラクタ
-	//! @param		frames				共有変数フレーム
+	//! @brief		frames				共有変数フレーム
 	//! @param		overlayed_frame_level		新しいフレームのレベル
 	//! @param		overlayed_frame_size		新しいフレームのサイズ
 	tSharedVariableFramesOverlay(const tSharedVariableFrames * frames,

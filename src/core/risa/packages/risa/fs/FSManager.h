@@ -84,7 +84,7 @@ struct tStatStruc : public tAtomicCollectee
 //---------------------------------------------------------------------------
 struct tFileOpenModes
 {
-	//! @param		ファイルオープンモード
+	//! @brief		ファイルオープンモード
 	enum tOpenMode
 	{
 		omRead = 1, //!< 読み込みのみ(対象ファイルが無い場合は失敗する)
@@ -210,7 +210,7 @@ private:
 	//! @brief		ファイル一覧を取得する(内部関数)
 	//! @param		dirname ディレクトリ名(正規化されているべきこと)
 	//! @param		callback コールバック先
-	//! @callback	コールバックオブジェクト
+	//! @param		コールバックオブジェクト
 	size_t InternalList(const tString & dirname,
 		tFileSystemIterationCallback * callback);
 

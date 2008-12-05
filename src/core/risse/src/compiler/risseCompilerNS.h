@@ -57,22 +57,22 @@ public:
 	//! @param		write		その変数に対するアクセスが書き込みか(真)、読み込みか(偽)
 	void SetUsed(const tString & name, const tString & q_name, bool write);
 
-	//! @param		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
+	//! @brief		遅延評価ブロック中で「書き込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
 	void GenerateChildWrite(tSSAForm * form, risse_size pos);
 
-	//! @param		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
+	//! @brief		遅延評価ブロック中で「読み込み」が発生した変数に対して読み込みを行う文を作成する
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
 	void GenerateChildRead(tSSAForm * form, risse_size pos);
 
-	//! @param		アクセスマップの終了を表す ocEndAccessMap を追加する
+	//! @brief		アクセスマップの終了を表す ocEndAccessMap を追加する
 	//! @param		form		SSA形式インスタンス
 	//! @param		pos			スクリプト上の位置
 	void GenerateEndAccessMap(tSSAForm * form, risse_size pos);
 
-	//! @param		ID文字列を得る
+	//! @brief		ID文字列を得る
 	tString GetIdString() const { return Variable->GetQualifiedName(); }
 
 };

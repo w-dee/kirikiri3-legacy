@@ -46,7 +46,9 @@ tCodeBlock::tCodeBlock(tScriptBlockInstance * sb)
 
 
 //---------------------------------------------------------------------------
-//! @brief		CodeToSourcePosition をソートするための比較関数
+/**
+ * CodeToSourcePosition をソートするための比較関数
+ */
 struct tCodeToSourcePositionComparator
 {
 	bool operator () (const std::pair<risse_size, risse_size> & a, const std::pair<risse_size, risse_size> & b)

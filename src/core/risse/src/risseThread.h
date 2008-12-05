@@ -108,7 +108,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 	namespace Risse
 	{
-	//! @brief クリティカルセクションの実装
+	/**
+	 * クリティカルセクションの実装
+	 */
 	class tCriticalSection : public tDestructee
 	{
 		CRITICAL_SECTION CS; //!< Win32 クリティカルセクションオブジェクト
@@ -117,7 +119,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		DWORD LockingNestCount; //!< ロックのネストカウント
 #endif
 	public:
-		//! @brief		コンストラクタ
+		/**
+		 * コンストラクタ
+		 */
 		tCriticalSection(){
 #ifdef RISSE_ASSERT_ENABLED
 			LockingThreadId = 0;
@@ -140,7 +144,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 #endif
 
 	public:
-		//! @brief  クリティカルセクション用ロッカー
+		/**
+		 * クリティカルセクション用ロッカー
+		 */
 		class tLocker : public tCollectee
 		{
 			tCriticalSection & CS;
@@ -172,14 +178,18 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		RISSE_ASSERT((x).GetLockingThreadId() == GetCurrentThreadId())
 #endif
 
-		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		/**
+		 * 「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		 */
 		class tConditionalLocker : public tCollectee
 		{
 			char Locker[sizeof(tLocker)]; // !< tLockerを格納する先
 			bool Locked; //!< 実際にロックが行われたかどうか
 		public:
-			//! @brief	コンストラクタ
-			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			/**
+			 * コンストラクタ
+			 * @param cs	クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			 */
 			tConditionalLocker(tCriticalSection * cs)
 			{
 				if(cs)
@@ -193,7 +203,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 				}
 			}
 
-			//! @brief	デストラクタ
+			/**
+			 * デストラクタ
+			 */
 			~tConditionalLocker()
 			{
 				if(Locked)
@@ -214,7 +226,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 
 	namespace Risse
 	{
-	//! @brief クリティカルセクションの実装
+	/**
+	 * クリティカルセクションの実装
+	 */
 	class tCriticalSection : public tDestructee
 	{
 		boost::recursive_mutex mutex; //!< boost::recursive_mutex mutexオブジェクト
@@ -223,7 +237,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		unsigned long LockingNestCount; //!< ロックのネストカウント
 #endif
 	public:
-		//! @brief		コンストラクタ
+		/**
+		 * コンストラクタ
+		 */
 		tCriticalSection()
 		{
 #ifdef RISSE_ASSERT_ENABLED
@@ -231,7 +247,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			LockingNestCount = 0;
 #endif
 		}
-		//! @brief		デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~tCriticalSection()
 		{
 #ifdef RISSE_ASSERT_ENABLED
@@ -253,7 +271,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 #endif
 
 	public:
-		//! @brief  クリティカルセクション用ロッカー
+		/**
+		 * クリティカルセクション用ロッカー
+		 */
 		class tLocker : public tCollectee
 		{
 #ifdef RISSE_ASSERT_ENABLED
@@ -286,14 +306,18 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			tLocker(const tLocker &); // non-copyable
 		};
 
-		//! @brief  「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		/**
+		 * 「条件によってはロックを行わない」クリティカルセクション用ロッカー
+		 */
 		class tConditionalLocker : public tCollectee
 		{
 			char Locker[sizeof(tLocker)]; // !< tLockerを格納する先
 			bool Locked; //!< 実際にロックが行われたかどうか
 		public:
-			//! @brief	コンストラクタ
-			//! @param	cs		クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			/**
+			 * コンストラクタ
+			 * @param cs	クリティカルセクションオブジェクトへのポインタ(NULLの場合はロックを行わない)
+			 */
 			tConditionalLocker(tCriticalSection * cs)
 			{
 				if(cs)
@@ -307,7 +331,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 				}
 			}
 
-			//! @brief	デストラクタ
+			/**
+			 * デストラクタ
+			 */
 			~tConditionalLocker()
 			{
 				if(Locked)
@@ -332,7 +358,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 		// Windows 用実装
 		// TODO: Win64は？
 
-		//! @brief		アトミックカウンタ
+		/**
+		 * アトミックカウンタ
+		 */
 		class tAtomicCounter : public tAtomicCollectee
 		{
 			mutable long v; //!< 値
@@ -340,24 +368,36 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
 
 		public:
-			//! @brief		デフォルトコンストラクタ
-			//! @param		v		初期値
+			/**
+			 * デフォルトコンストラクタ
+			 * @param v	初期値
+			 */
 			explicit tAtomicCounter() : v(0) { }
 
-			//! @brief		コンストラクタ
-			//! @param		v		初期値
+			/**
+			 * コンストラクタ
+			 * @param v	初期値
+			 */
 			explicit tAtomicCounter(long v_) : v(v_) { }
 
-			//! @brief		インクリメントを行う(前置インクリメント演算子)
+			/**
+			 * インクリメントを行う(前置インクリメント演算子)
+			 */
 			long operator ++() { return ::InterlockedIncrement(&v); }
 
-			//! @brief		デクリメントを行う(前置デクリメント演算子)
+			/**
+			 * デクリメントを行う(前置デクリメント演算子)
+			 */
 			long operator --() { return ::InterlockedDecrement(&v); }
 
-			//! @brief		long へのキャスト
+			/**
+			 * long へのキャスト
+			 */
 			operator long() const { return ::InterlockedExchangeAdd(&v, 0); }
 
-			//! @brief		0 にする (注意: non-atomic)
+			/**
+			 * 0 にする (注意: non-atomic)
+			 */
 			void reset() { static_cast<long volatile &>(v) = 0; }
 		};
 
@@ -369,7 +409,9 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			using __gnu_cxx::__exchange_and_add;
 		#endif
 
-		//! @brief		アトミックカウンタ
+		/**
+		 * アトミックカウンタ
+		 */
 		class tAtomicCounter : public tAtomicCollectee
 		{
 			mutable _Atomic_word v; //!< 値
@@ -377,24 +419,36 @@ Risse は wxWidgets と boost という２つのライブラリのスレッド�
 			tAtomicCounter & operator = (const tAtomicCounter &); //!< non copyable
 
 		public:
-			//! @brief		デフォルトコンストラクタ
-			//! @param		v		初期値
+			/**
+			 * デフォルトコンストラクタ
+			 * @param v	初期値
+			 */
 			explicit tAtomicCounter() : v(0) { }
 
-			//! @brief		コンストラクタ
-			//! @param		v		初期値
+			/**
+			 * コンストラクタ
+			 * @param v	初期値
+			 */
 			explicit tAtomicCounter(long v_) : v(v_) { }
 
-			//! @brief		インクリメントを行う(前置インクリメント演算子)
+			/**
+			 * インクリメントを行う(前置インクリメント演算子)
+			 */
 			long operator ++() { return __exchange_and_add(&v, 1) + 1; }
 
-			//! @brief		デクリメントを行う(前置デクリメント演算子)
+			/**
+			 * デクリメントを行う(前置デクリメント演算子)
+			 */
 			long operator --() { return __exchange_and_add(&v, -1) - 1; }
 
-			//! @brief		long へのキャスト
+			/**
+			 * long へのキャスト
+			 */
 			operator long() const { return __exchange_and_add(&v, 0); }
 
-			//! @brief		0 にする (注意: non-atomic)
+			/**
+			 * 0 にする (注意: non-atomic)
+			 */
 			void reset() { static_cast<_Atomic_word volatile &>(v) = 0; }
 		};
 
@@ -429,7 +483,9 @@ namespace Risse
 
 // スレッドをサポートしない場合は何もしない tCriticalSection を定義する
 
-	//! @brief クリティカルセクションの実装
+	/**
+	 * クリティカルセクションの実装
+	 */
 	class tCriticalSection : public tDestructee
 	{
 	public:
@@ -489,8 +545,9 @@ namespace Risse
 
 class tThreadInternal;
 //---------------------------------------------------------------------------
-//! @brief		スレッドの基本クラス
-//---------------------------------------------------------------------------
+/**
+ * スレッドの基本クラス
+ */
 class tThread : public tDestructee
 {
 	friend class tThreadInternal;
@@ -507,51 +564,67 @@ class tThread : public tDestructee
 	tString Name; //!< スレッドの名前
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tThread();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	virtual ~tThread();
 
 	const tString GetName() const { return Name; } //!< スレッドの名前を得る
 
-	//! @brief		スレッドの実行を開始する
+	/**
+	 * スレッドの実行を開始する
+	 */
 	void Run();
 
-	//! @brief		スレッドが終了するまで待つ
-	//! @note		呼び出し時点でまだスレッドが実行されていない場合は実行・終了するまで待つ。
-	//!				スレッドの実行が開始されてない場合は開始されるまで永遠に待つことになるので
-	//!				注意。
+	/**
+	 * スレッドが終了するまで待つ
+	 * @note	呼び出し時点でまだスレッドが実行されていない場合は実行・終了するまで待つ。
+	 *			スレッドの実行が開始されてない場合は開始されるまで永遠に待つことになるので
+	 *			注意。
+	 */
 	void Wait();
 
 	void Terminate() { Set_Terminated(); } //!< スレッドに終了を通知する
 
-	//! @brief		現在実行しているスレッドがメインスレッドかどうかを帰す
+	/**
+	 * 現在実行しているスレッドがメインスレッドかどうかを帰す
+	 */
 	static bool IsMainThread() { return ::wxIsMainThread(); }
 
 protected:
-	//! @brief		スレッドが終了すべきかどうかを得る
-	//! @return		スレッドが終了すべきであれば真
+	/**
+	 * スレッドが終了すべきかどうかを得る
+	 * @return	スレッドが終了すべきであれば真
+	 */
 	volatile bool ShouldTerminate();
 
-	//! @brief		スレッドのメイン関数を呼ぶ
-	//! @note		Execute() メソッドを呼ぶこと。
-	//!				下位クラスでオーバーライドする事も出来る。
+	/**
+	 * スレッドのメイン関数を呼ぶ
+	 * @note	Execute() メソッドを呼ぶこと。
+	 *			下位クラスでオーバーライドする事も出来る。
+	 */
 	virtual void CallExecute() { Execute(); }
 
-	//! @brief		スレッドのメイン関数(サブクラスで実装する)
-	//! @note		以下のような形式で記述する
-	//! <code>
-	//! void Execute() {
-	//!		// スレッドが終了すべき場合はループを抜ける
-	//!		while(!ShouldTerminate()) {
-	//!			何か処理
-	//!		}
-	//!	}
-	//! </code>
-	//! スレッドが終了する場合はかならずこの関数を抜けるようにし、
-	//! Exit() は呼ばないこと。
-	//! スレッド外からスレッドを終了させたい場合は Terminate を呼ぶ。
+	/**
+	 * スレッドのメイン関数(サブクラスで実装する)
+	 * @note	以下のような形式で記述する
+	 *			<code>
+	 *			void Execute() {
+	 *			// スレッドが終了すべき場合はループを抜ける
+	 *			while(!ShouldTerminate()) {
+	 *			何か処理
+	 *			}
+	 *			}
+	 *			</code>
+	 *			スレッドが終了する場合はかならずこの関数を抜けるようにし、
+	 *			Exit() は呼ばないこと。
+	 *			スレッド外からスレッドを終了させたい場合は Terminate を呼ぶ。
+	 */
 	virtual void Execute() = 0;
 };
 //---------------------------------------------------------------------------
@@ -560,7 +633,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		スレッドイベントクラス
+/**
+ * スレッドイベントクラス
+ */
 /*! @note
  tThreadEvent はカウント上限が1のセマフォをカプセル化したもの。はっきり
  言ってこれぐらいではカプセル化する意味は無いかもしれないが、吉里吉里２が
@@ -585,22 +660,30 @@ class tThreadEvent : public tDestructee
 {
 	wxSemaphore Semaphore; //!< セマフォオブジェクト
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tThreadEvent() : Semaphore(0, 1) {;}
 
-	//! @brief デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tThreadEvent() {;}
 
-	//! @brief どれか一つの待ちスレッドを解放する
+	/**
+	 * どれか一つの待ちスレッドを解放する
+	 */
 	void Signal()
 	{
 	    wxLogNull logNo; // セマフォがオーバーフローするとエラーを吐くので抑止
 		Semaphore.Post();
 	}
 
-	//! @brief 他のスレッドがSignalするのを待つ
-	//! @param	timeout タイムアウト時間(ミリ秒) 0 = タイムアウトなし
-	//! @return タイムアウトしたかどうか
+	/**
+	 * 他のスレッドがSignalするのを待つ
+	 * @param timeout	タイムアウト時間(ミリ秒) 0 = タイムアウトなし
+	 * @return	タイムアウトしたかどうか
+	 */
 	bool Wait(unsigned long timeout = 0)
 	{
 		if(timeout == 0)

@@ -25,9 +25,10 @@ RISSE_DEFINE_SOURCE_ID(63449,40639,29098,17674,37258,38306,59594,20366);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから16bit LE整数を読み込む
-//! @param		mem メモリ
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから16bit LE整数を読み込む
+ * @param mem	メモリ
+ */
 static inline wxUint16 ReadI16LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint16>(mem[0]) + (static_cast<wxUint16>(mem[1]) << 8);
@@ -36,9 +37,10 @@ static inline wxUint16 ReadI16LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから32bit LE整数を読み込む
-//! @param		mem メモリ
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから32bit LE整数を読み込む
+ * @param mem	メモリ
+ */
 static inline wxUint32 ReadI32LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint32>(mem[0]) + (static_cast<wxUint32>(mem[1]) << 8) +
@@ -48,9 +50,10 @@ static inline wxUint32 ReadI32LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから64bit LE整数を読み込む
-//! @param		mem メモリ
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから64bit LE整数を読み込む
+ * @param mem	メモリ
+ */
 static inline wxUint64 ReadI64LEFromMem(const unsigned char *mem)
 {
 	wxUint32 low  = ReadI32LEFromMem(mem);
@@ -61,14 +64,15 @@ static inline wxUint64 ReadI64LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		チャンクを探す
-//! @param		chunkname チャンク名
-//! @param		mem 検索を行うメモリ領域の先頭位置
-//! @param		limit 検索を行うメモリ領域のサイズ
-//! @param		chunkcontent チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
-//! @param		chunksize チャンクが見つかった場合、そのチャンクのサイズが入る
-//! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
-//---------------------------------------------------------------------------
+/**
+ * チャンクを探す
+ * @param chunkname		チャンク名
+ * @param mem			検索を行うメモリ領域の先頭位置
+ * @param limit			検索を行うメモリ領域のサイズ
+ * @param chunkcontent	チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
+ * @param chunksize		チャンクが見つかった場合、そのチャンクのサイズが入る
+ * @return	チャンクが見つかった場合に 真、見つからなかった場合は偽
+ */
 static bool FindChunk(const unsigned char * chunkname,
 	const unsigned char *mem, size_t memsize,
 	const unsigned char ** chunkcontent, size_t * chunksize)

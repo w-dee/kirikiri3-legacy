@@ -27,8 +27,9 @@ _ALIGN16(const float) RISA_V_VEC_MAGNIFY[4] =
 
 
 //---------------------------------------------------------------------------
-//! @brief		int16→float32変換
-//---------------------------------------------------------------------------
+/**
+ * int16→float32変換
+ */
 void _PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
 	float * d = static_cast<float*>(dest);
@@ -69,8 +70,9 @@ RISA_DEFINE_STACK_ALIGN_128_TRAMPOLINE(
 
 
 //---------------------------------------------------------------------------
-//! @brief		float32→int16変換
-//---------------------------------------------------------------------------
+/**
+ * float32→int16変換
+ */
 void _PCMConvertLoopFloat32ToInt16(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
 	risse_uint16 * d = reinterpret_cast<risse_uint16*>(dest);

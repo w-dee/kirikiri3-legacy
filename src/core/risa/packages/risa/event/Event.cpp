@@ -23,8 +23,9 @@ RISSE_DEFINE_SOURCE_ID(1676,31212,48005,18878,7819,32358,49817,14499);
 
 
 //---------------------------------------------------------------------------
-//! @brief	イベントキュー用例外クラス
-//---------------------------------------------------------------------------
+/**
+ * イベントキュー用例外クラス
+ */
 RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
 	(tSS<'r','i','s','a','.','e','v','e','n','t'>()),
 	(tSS<'E','v','e','n','t','Q','u','e','u','e','E','x','c','e','p','t','i','o','n'>()),
@@ -34,8 +35,9 @@ RISA_DEFINE_EXCEPTION_SUBCLASS(tEventQueueExceptionClass,
 
 
 //---------------------------------------------------------------------------
-//! @brief		EventQueueException クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * EventQueueException クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','e','v','e','n','t'>,
 	tEventQueueExceptionClass>;
@@ -453,8 +455,9 @@ tVariant tEventQueueClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		EventQueue クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * EventQueue クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','e','v','e','n','t'>,
 	tEventQueueClass>;
@@ -584,8 +587,9 @@ tVariant tEventSourceClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		EventSource クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * EventSource クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','e','v','e','n','t'>,
 	tEventSourceClass>;

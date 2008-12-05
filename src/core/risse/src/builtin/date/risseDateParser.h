@@ -55,13 +55,17 @@ public:
 	bool HasError; //!< エラーが発生したか？
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		str		parse 対象文字列
+	/**
+	 * コンストラクタ
+	 * @param str	parse 対象文字列
+	 */
 	tDateParser(const tString & str);
 
-	//! @brief		トークンを得る
-	//! @param		value		値の格納先
-	//! @return		トークンID
+	/**
+	 * トークンを得る
+	 * @param value	値の格納先
+	 * @return	トークンID
+	 */
 	int GetToken(long & val);
 
 };

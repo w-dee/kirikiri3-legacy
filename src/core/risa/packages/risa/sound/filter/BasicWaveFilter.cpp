@@ -404,8 +404,9 @@ tVariant tWaveFilterClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		WaveFilter クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * WaveFilter クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>,
 	tWaveFilterClass>;

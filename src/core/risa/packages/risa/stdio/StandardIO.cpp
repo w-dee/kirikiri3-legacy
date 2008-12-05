@@ -141,8 +141,9 @@ tVariant tStandardIOStreamClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		StandardIOStream クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * StandardIOStream クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','s','t','d','i','o'>,
 	tStandardIOStreamClass>;
@@ -159,23 +160,28 @@ template class tClassRegisterer<
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.stdio のパッケージのメンバを初期化するためのシングルトンインスタンス
-//---------------------------------------------------------------------------
+/**
+ * risa.stdio のパッケージのメンバを初期化するためのシングルトンインスタンス
+ */
 class tRisaStdioPackageMemberInitializer : public tPackageMemberInitializer,
 	public singleton_base<tRisaStdioPackageMemberInitializer>
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRisaStdioPackageMemberInitializer()
 	{
 		tPackageRegisterer<tSS<'r','i','s','a','.','s','t','d','i','o'> >::instance()->
 			AddInitializer(this);
 	}
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{

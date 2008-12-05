@@ -29,8 +29,9 @@ RISSE_DEFINE_SOURCE_ID(18367,25403,3163,16422,1923,3893,57628,424);
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risseスクリプト用スレッドを実装するクラス
-//---------------------------------------------------------------------------
+/**
+ * Risseスクリプト用スレッドを実装するクラス
+ */
 class tScriptThread : protected tThread
 {
 	//TODO: 正しくスレッドの状態をハンドリングすること
@@ -40,7 +41,9 @@ class tScriptThread : protected tThread
 #endif
 
 protected:
-	//! @brief		スレッドの実行ルーチン
+	/**
+	 * スレッドの実行ルーチン
+	 */
 	void Execute()
 	{
 		if(Owner)
@@ -80,33 +83,41 @@ protected:
 	}
 
 public:
-	//! @brief	コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tScriptThread()
 	{
 		Owner = NULL;
 	}
 
-	//! @brief	スレッドの実行を開始する
-	//! @param	owner		オーナーとなる tThreadInstance のインスタンス
+	/**
+	 * スレッドの実行を開始する
+	 * @param owner	オーナーとなる tThreadInstance のインスタンス
+	 */
 	void Start(tThreadInstance * owner)
 	{
 		Owner = owner;
 		Run(); // tThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
 
-	//! @brief	スレッドの終了を待つ
-	//! @return	スレッドメソッドの戻り値
+	/**
+	 * スレッドの終了を待つ
+	 * @return	スレッドメソッドの戻り値
+	 */
 	void Join()
 	{
 		Wait(); // tThread のメソッドのネーミングは Risse スクリプト上の物と違うので注意
 	}
 #if 0
-	//! @brief	スレッドを一定時間停止する
-	//! @param	timeout		タイムアウト(-1=無限に待つ)
-	//! @return	タイムアウトした場合は真、Wakeup により Sleep が中断された場合は偽
-	//! @note	他のスレッドからこのメソッドを呼び出した場合、呼び出したスレッドが待つ事になるが
-	//!			想定外の使い方である (将来的にはそのようなことを行った場合は例外を吐くように
-	//!			するかもしれない)
+	/**
+	 * スレッドを一定時間停止する
+	 * @param timeout	タイムアウト(-1=無限に待つ)
+	 * @return	タイムアウトした場合は真、Wakeup により Sleep が中断された場合は偽
+	 * @note	他のスレッドからこのメソッドを呼び出した場合、呼び出したスレッドが待つ事になるが
+	 *			想定外の使い方である (将来的にはそのようなことを行った場合は例外を吐くように
+	 *			するかもしれない)
+	 */
 	bool Sleep(risse_int64 timeout)
 	{
 		if(timeout == 0) return true; // すぐに戻る
@@ -128,10 +139,12 @@ public:
 		return Event.Wait(static_cast<unsigned long>(timeout));
 	}
 
-	//! @brief	Sleep しているスレッドの Sleep を解除する
-	//! @note	スレッドが Sleep していない場合は、スレッドが次回 Sleep した
-	//!			場合はその Sleep はすぐに false を伴って戻るので注意。
-	//! 		呼び出し側でこれのCriticalSectionによる保護を行うこと。
+	/**
+	 * Sleep しているスレッドの Sleep を解除する
+	 * @note	スレッドが Sleep していない場合は、スレッドが次回 Sleep した
+	 *			場合はその Sleep はすぐに false を伴って戻るので注意。
+	 *			呼び出し側でこれのCriticalSectionによる保護を行うこと。
+	 */
 	void Wakeup()
 	{
 		Event.Signal();

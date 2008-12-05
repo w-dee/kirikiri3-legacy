@@ -446,15 +446,18 @@ void tJPEGImageEncoder::Process(tStreamInstance * stream,
 
 
 //---------------------------------------------------------------------------
-//! @brief		JPEGイメージコーデックファクトリ
-//---------------------------------------------------------------------------
+/**
+ * JPEGイメージコーデックファクトリ
+ */
 class tJPEGImageCodecFactory : public tImageDecoderFactory, public tImageEncoderFactory,
 								public singleton_base<tJPEGImageCodecFactory>
 {
 	virtual tImageDecoder * CreateDecoder() { return new tJPEGImageDecoder; }
 	virtual tImageEncoder * CreateEncoder() { return new tJPEGImageEncoder; }
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tJPEGImageCodecFactory()
 	{
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','j','p','g'>(), (tImageDecoderFactory*)this);

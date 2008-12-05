@@ -243,9 +243,11 @@ STIN float _mm_min_horz(__m128 x)
 #endif /* (defined(__SSE__)&&defined(__GNUC__))||defined(_MSC_VER) */
 
 
-//! @brief 128ビット境界にポインタがアラインメントされているかどうか
-//! @param	p		ポインタ
-//! @return			128ビット境界にポインタがアラインメントされているかどうか
+/**
+ * 128ビット境界にポインタがアラインメントされているかどうか
+ * @param p	ポインタ
+ * @return	128ビット境界にポインタがアラインメントされているかどうか
+ */
 inline bool IsAlignedTo128bits(const void * p)
 {
 	return !(reinterpret_cast<risse_offset>(p) & 0xf);
@@ -256,7 +258,9 @@ inline bool IsAlignedTo128bits(const void * p)
 // TODO: 64bitではここらへんどうなるんですかね
 
 
-//! @brief	スタックを128bit境界にあわせた上で指定された関数を呼び出す関数を生成するためのマクロ
+/**
+ * スタックを128bit境界にあわせた上で指定された関数を呼び出す関数を生成するためのマクロ
+ */
 // alloca を用いると、コンパイラは -fomit-frame-pointer を指定されていても
 // フレームポインタを作らざるを得なくなる。
 // あとはスタックポインタを調整して目的の関数を呼び出す。

@@ -31,8 +31,9 @@ RISSE_DEFINE_SOURCE_ID(58978,40915,31180,20110,43417,63480,33374,56600);
 
 
 //---------------------------------------------------------------------------
-//! @brief		ダミーのイニシャライザ
-//---------------------------------------------------------------------------
+/**
+ * ダミーのイニシャライザ
+ */
 class tDummyBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
 {
 public:
@@ -44,13 +45,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		組み込みパッケージ用の仮想的なファイルシステム
-//! @note		組み込みパッケージに対する要求でなければユーザプログラム指定の
-//!				ファイルシステムインターフェースを呼び出す機構も持つ
-//---------------------------------------------------------------------------
+/**
+ * 組み込みパッケージ用の仮想的なファイルシステム
+ * @note	組み込みパッケージに対する要求でなければユーザプログラム指定の
+ *			ファイルシステムインターフェースを呼び出す機構も持つ
+ */
 class tBuiltinPackageFileSystem : public tCollectee
 {
-	//! @brief		ディレクトリのノード
+	/**
+	 * ディレクトリのノード
+	 */
 	struct tNode : public tCollectee
 	{
 		typedef gc_map<tString, tNode *> tChildren;
@@ -64,20 +68,23 @@ class tBuiltinPackageFileSystem : public tCollectee
 	tNode Root; //!< ルートノード
 	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
 	tDummyBuiltinPackageInitializer DummyBuiltinPackageInitializer;
-		//!< ダミーのパッケージイニシャライザ
 
 public:
-	//! @brief			コンストラクタ
-	//! @param			engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tBuiltinPackageFileSystem(tScriptEngine * engine) { ScriptEngine = engine; }
 
 
-	//! @brief		指定ディレクトリにあるファイル名をすべて列挙する
-	//! @param		dir		ディレクトリ(区切りには '/' が用いられる)
-	//! @param		files	そこにあるファイル/ディレクトリ名一覧
-	//! @note		. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
-	//!				ディレクトリの場合はfilesの最後を '/' で終わらせること。
-	//!				files は呼び出し側で最初に clear() しておくこと。
+	/**
+	 * 指定ディレクトリにあるファイル名をすべて列挙する
+	 * @param dir	ディレクトリ(区切りには '/' が用いられる)
+	 * @param files	そこにあるファイル/ディレクトリ名一覧
+	 * @note	. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
+	 *			ディレクトリの場合はfilesの最後を '/' で終わらせること。
+	 *			files は呼び出し側で最初に clear() しておくこと。
+	 */
 	void List(const tString & dir, gc_vector<tString> & files)
 	{
 		if(!dir.StartsWith(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()))
@@ -100,9 +107,11 @@ public:
 		}
 	}
 
-	//! @brief		ファイル種別を得る
-	//! @param		file	ファイル名
-	//! @return		種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	/**
+	 * ファイル種別を得る
+	 * @param file	ファイル名
+	 * @return	種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	 */
 	int GetType(const tString & file)
 	{
 		if(!file.StartsWith(tSS<'[','*','b','u','i','l','t','i','n','*',']'>()))
@@ -117,10 +126,12 @@ public:
 		return node->IsFile() ? 1 : 2;
 	}
 
-	//! @brief		パッケージを初期化する
-	//! @param		file		パッケージのありそうなファイル名
-	//! @param		package		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param file		パッケージのありそうなファイル名
+	 * @param package	パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	void Initialize(
 		const tString & file,
 		const tString & package,
@@ -150,9 +161,11 @@ public:
 		}
 	}
 
-	//! @brief		組み込みパッケージを登録する
-	//! @param		name	パッケージ名
-	//! @param		init	パッケージ初期化用インターフェース
+	/**
+	 * 組み込みパッケージを登録する
+	 * @param name	パッケージ名
+	 * @param init	パッケージ初期化用インターフェース
+	 */
 	void AddPackage(const tString & name, tBuiltinPackageInitializerInterface * init)
 	{
 		// name のなかの '.' を '/' に変換する
@@ -180,14 +193,18 @@ public:
 		current->Initializer = init;
 	}
 
-	//! @brief		ダミーのパッケージイニシャライザをとってくる
+	/**
+	 * ダミーのパッケージイニシャライザをとってくる
+	 */
 	tBuiltinPackageInitializerInterface * GetDummyBuiltinPackageInitializer()
 		{ return &DummyBuiltinPackageInitializer; }
 
 private:
-	//! @brief		指定の名前を持つノードを検索する
-	//! @param		name		名前
-	//! @return		そのノード(null=見つからない)
+	/**
+	 * 指定の名前を持つノードを検索する
+	 * @param name	名前
+	 * @return	そのノード(null=見つからない)
+	 */
 	tNode * GetNodeAt(const tString & name)
 	{
 		tString::tSplitter splitter(name, RISSE_WC('/'));

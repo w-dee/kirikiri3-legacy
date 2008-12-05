@@ -25,11 +25,15 @@ class tObjectClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tObjectClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
@@ -60,10 +64,12 @@ public: // Risse用メソッドなど
 	static bool toBoolean() { return true; }
 
 public: // ユーティリティ
-	//! @brief		intf を Object クラスのインスタンスとしてマークする
-	//! @param		intf		マークする対象となるインスタンス
-	//! @note		いまだ Object クラスが初期化されていない時期に作成されたインスタンス
-	//!				に対してオブジェクトクラスとしての情報を付加するために用いる
+	/**
+	 * intf を Object クラスのインスタンスとしてマークする
+	 * @param intf	マークする対象となるインスタンス
+	 * @note	いまだ Object クラスが初期化されていない時期に作成されたインスタンス
+	 *			に対してオブジェクトクラスとしての情報を付加するために用いる
+	 */
 	void Bless(tObjectInterface * intf);
 };
 //---------------------------------------------------------------------------

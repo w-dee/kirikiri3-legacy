@@ -26,48 +26,62 @@ class tBindingInfo;
 class tPackageManager;
 class tScriptEngine;
 //---------------------------------------------------------------------------
-//! @brief		パッケージ検索のためのインターフェース
-//---------------------------------------------------------------------------
+/**
+ * パッケージ検索のためのインターフェース
+ */
 class tPackageFileSystemInterface : public tCollectee
 {
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tPackageFileSystemInterface() {}
 
-	//! @brief		指定ディレクトリにあるファイル名をすべて列挙する
-	//! @param		dir		ディレクトリ(区切りには '/' が用いられる)
-	//! @param		files	そこにあるファイル/ディレクトリ名一覧
-	//! @note		. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
-	//!				ディレクトリの場合はfilesの最後を '/' で終わらせること。
-	//!				files は呼び出し側で最初に clear() しておくこと。
+	/**
+	 * 指定ディレクトリにあるファイル名をすべて列挙する
+	 * @param dir	ディレクトリ(区切りには '/' が用いられる)
+	 * @param files	そこにあるファイル/ディレクトリ名一覧
+	 * @note	. で始まるディレクトリやファイル,隠しファイルは含めなくて良い。
+	 *			ディレクトリの場合はfilesの最後を '/' で終わらせること。
+	 *			files は呼び出し側で最初に clear() しておくこと。
+	 */
 	virtual void List(const tString & dir, gc_vector<tString> & files) = 0;
 
-	//! @brief		ファイル種別を得る
-	//! @param		file	ファイル名
-	//! @return		種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	/**
+	 * ファイル種別を得る
+	 * @param file	ファイル名
+	 * @return	種別(0=ファイルが存在しない, 1=ファイル, 2=ディレクトリ)
+	 */
 	virtual int GetType(const tString & file) = 0;
 
-	//! @brief		ファイルを読み込む
-	//! @param		file	ファイル名
-	//! @return		読み込まれたファイルの中身
+	/**
+	 * ファイルを読み込む
+	 * @param file	ファイル名
+	 * @return	読み込まれたファイルの中身
+	 */
 	virtual tString ReadFile(const tString & file) = 0;
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		組み込みパッケージのための初期化用インターフェース
-//---------------------------------------------------------------------------
+/**
+ * 組み込みパッケージのための初期化用インターフェース
+ */
 class tBuiltinPackageInitializerInterface : public tCollectee
 {
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tBuiltinPackageInitializerInterface() {}
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	virtual void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global) = 0;
 };
@@ -75,18 +89,23 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		警告情報等の通知インターフェース
-//---------------------------------------------------------------------------
+/**
+ * 警告情報等の通知インターフェース
+ */
 class tLineOutputInterface : public tCollectee
 {
 public:
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tLineOutputInterface() {}
 
-	//! @brief		情報を通知する
-	//! @param		info		情報
-	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
+	/**
+	 * 情報を通知する
+	 * @param info	情報
+	 * @note	警告情報は複数スレッドから同時に出力される可能性があるので注意
+	 */
 	virtual void Output(const tString & info) = 0;
 };
 //---------------------------------------------------------------------------
@@ -103,8 +122,9 @@ public:
 #undef RISSE_BUILTINPACKAGES_PACKAGE
 
 //---------------------------------------------------------------------------
-//! @brief		スクリプトエンジンクラス
-//---------------------------------------------------------------------------
+/**
+ * スクリプトエンジンクラス
+ */
 class tScriptEngine : public tCollectee
 {
 public:
@@ -132,18 +152,24 @@ protected:
 	tPackageFileSystemInterface * PackageFileSystem; //!< パッケージ読み込み用のファイルシステムインターフェース
 
 public:
-	//! @brief		スクリプトエンジンの動作オプション用構造体
+	/**
+	 * スクリプトエンジンの動作オプション用構造体
+	 */
 	struct tOptions
 	{
 		bool AssertEnabled;  //!< assert によるテストが有効かどうか
 
-		//! @brief		デフォルトコンストラクタ
+		/**
+		 * デフォルトコンストラクタ
+		 */
 		tOptions()
 		{
 			AssertEnabled = false;
 		}
 
-		//! @brief		比較演算子
+		/**
+		 * 比較演算子
+		 */
 		bool operator ==(const tOptions & rhs) const
 		{
 			return AssertEnabled == rhs.AssertEnabled;
@@ -154,80 +180,110 @@ private:
 	tOptions Options; //!< オプション
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tScriptEngine();
 
-	//! @brief		"risse" パッケージのグローバルオブジェクトを得る
+	/**
+	 * "risse" パッケージのグローバルオブジェクトを得る
+	 */
 	const tVariant & GetRissePackageGlobal() const { return RissePackageGlobal; }
 
-	//! @brief		"main" パッケージのグローバルオブジェクトを得る
+	/**
+	 * "main" パッケージのグローバルオブジェクトを得る
+	 */
 	const tVariant & GetMainPackageGlobal() const { return MainPackageGlobal; }
 
-	//! @brief		スクリプトを評価する
-	//! @param		script			スクリプトの内容
-	//! @param		name			スクリプトブロックの名称
-	//! @param		lineofs			行オフセット(ドキュメント埋め込みスクリプト用に、
-	//!								スクリプトのオフセットを記録できる)
-	//! @param		result			実行の結果(NULL可)
-	//! @param		binding			バインディング情報(NULLの場合は"main"パッケージグローバル)
-	//! @param		is_expression	式モードかどうか(Risseのように文と式の区別を
-	//!								する必要がない言語ではfalseでよい)
+	/**
+	 * スクリプトを評価する
+	 * @param script		スクリプトの内容
+	 * @param name			スクリプトブロックの名称
+	 * @param lineofs		行オフセット(ドキュメント埋め込みスクリプト用に、
+	 *						スクリプトのオフセットを記録できる)
+	 * @param result		実行の結果(NULL可)
+	 * @param binding		バインディング情報(NULLの場合は"main"パッケージグローバル)
+	 * @param is_expression	式モードかどうか(Risseのように文と式の区別を
+	 *						する必要がない言語ではfalseでよい)
+	 */
 	void Evaluate(
 					const tString & script, const tString & name,
 					risse_size lineofs = 0,
 					tVariant * result = NULL,
 					const tBindingInfo * binding = NULL, bool is_expression = false);
 
-	//! @brief		警告情報の出力先を設定する
-	//! @param		output		警告情報の出力先
-	//! @note		警告情報は複数スレッドから同時に出力される可能性があるので注意
+	/**
+	 * 警告情報の出力先を設定する
+	 * @param output	警告情報の出力先
+	 * @note	警告情報は複数スレッドから同時に出力される可能性があるので注意
+	 */
 	void SetWarningOutput(tLineOutputInterface * output)  { WarningOutput = output; }
 
-	//! @brief		警告情報の出力先を取得する
-	//! @return		警告情報の出力先
+	/**
+	 * 警告情報の出力先を取得する
+	 * @return	警告情報の出力先
+	 */
 	tLineOutputInterface * GetWarningOutput() const  { return WarningOutput; }
 
-	//! @brief		パッケージ読み込み用のファイルシステムインターフェースを設定する
-	//! @param		intf	パッケージ読み込み用のファイルシステムインターフェース
+	/**
+	 * パッケージ読み込み用のファイルシステムインターフェースを設定する
+	 * @param intf	パッケージ読み込み用のファイルシステムインターフェース
+	 */
 	void SetPackageFileSystem(tPackageFileSystemInterface * intf) { PackageFileSystem = intf; }
 
-	//! @brief		パッケージ読み込み用のファイルシステムインターフェースを取得する
-	//! @return		パッケージ読み込み用のファイルシステムインターフェース
+	/**
+	 * パッケージ読み込み用のファイルシステムインターフェースを取得する
+	 * @return	パッケージ読み込み用のファイルシステムインターフェース
+	 */
 	tPackageFileSystemInterface * GetPackageFileSystem() const { return PackageFileSystem; }
 
-	//! @brief		警告情報を出力する
-	//! @param		info	警告情報
+	/**
+	 * 警告情報を出力する
+	 * @param info	警告情報
+	 */
 	void OutputWarning(const tString & info) const
 	{
 		if(WarningOutput) WarningOutput->Output(info);
 	}
 
-	//! @brief		オプション情報を得る
+	/**
+	 * オプション情報を得る
+	 */
 	const tOptions & GetOptions() const { return Options; }
 
-	//! @brief		assertion が有効かどうかを得る
-	//! @return		assertion が有効かどうか
+	/**
+	 * assertion が有効かどうかを得る
+	 * @return	assertion が有効かどうか
+	 */
 	bool GetAssertionEnabled() const { return Options.AssertEnabled; }
 
-	//! @brief		assertion が有効かどうかを設定する
-	//! @param		b		asssrtion が有効かどうか
+	/**
+	 * assertion が有効かどうかを設定する
+	 * @param b	asssrtion が有効かどうか
+	 */
 	void SetAssertionEnabled(bool b) { Options.AssertEnabled = b; }
 
-	//! @brief		パッケージマネージャを得る
-	//! @return		パッケージマネージャ
+	/**
+	 * パッケージマネージャを得る
+	 * @return	パッケージマネージャ
+	 */
 	tPackageManager * GetPackageManager() const { return PackageManager; }
 
-	//! @brief		指定されたパッケージのパッケージグローバルを得る
-	//! @return		パッケージグローバル
-	//! @note		もしパッケージが初期化されていない場合は初期化される。
-	//!				tPackageManager::GetPackageGlobal() へのショートカット。
+	/**
+	 * 指定されたパッケージのパッケージグローバルを得る
+	 * @return	パッケージグローバル
+	 * @note	もしパッケージが初期化されていない場合は初期化される。
+	 *			tPackageManager::GetPackageGlobal() へのショートカット。
+	 */
 	tVariant GetPackageGlobal(const tString & name);
 
-	//! @brief		組み込みパッケージの情報を追加する
-	//! @param		package		パッケージ名
-	//! @param		init		イニシャライザ
-	//!							(パッケージが初めて初期化される際に呼ばれる)
-	//! @note		tPackageManager::AddBuiltinPackage() へのショートカット。
+	/**
+	 * 組み込みパッケージの情報を追加する
+	 * @param package	パッケージ名
+	 * @param init		イニシャライザ
+	 *					(パッケージが初めて初期化される際に呼ばれる)
+	 * @note	tPackageManager::AddBuiltinPackage() へのショートカット。
+	 */
 	void AddBuiltinPackage(const tString & package,
 		tBuiltinPackageInitializerInterface * init);
 };

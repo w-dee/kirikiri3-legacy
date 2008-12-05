@@ -139,8 +139,9 @@ tVariant tRinaWidgetNodeClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		RinaWidgetNode クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * RinaWidgetNode クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','w','i','d','g','e','t'>,
 	tRinaWidgetNodeClass>;
@@ -159,8 +160,9 @@ template class tClassRegisterer<
 
 
 //---------------------------------------------------------------------------
-//! @brief		Rinaの表示領域を表す wxControl 派生クラス用のイベントテーブル
-//---------------------------------------------------------------------------
+/**
+ * Rinaの表示領域を表す wxControl 派生クラス用のイベントテーブル
+ */
 BEGIN_EVENT_TABLE(tRina, wxControl)
 	EVT_PAINT(tRina::OnPaint)
 END_EVENT_TABLE()
@@ -340,8 +342,9 @@ tVariant tRinaClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Rina クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * Rina クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','w','i','d','g','e','t'>,
 	tRinaClass>;

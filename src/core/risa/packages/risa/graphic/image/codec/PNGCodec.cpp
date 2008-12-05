@@ -639,15 +639,18 @@ void tPNGImageEncoder::Process(tStreamInstance * stream,
 
 
 //---------------------------------------------------------------------------
-//! @brief		PNGイメージコーデックファクトリ
-//---------------------------------------------------------------------------
+/**
+ * PNGイメージコーデックファクトリ
+ */
 class tPNGImageCodecFactory : public tImageDecoderFactory, public tImageEncoderFactory,
 								public singleton_base<tPNGImageCodecFactory>
 {
 	virtual tImageDecoder * CreateDecoder() { return new tPNGImageDecoder; }
 	virtual tImageEncoder * CreateEncoder() { return new tPNGImageEncoder; }
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tPNGImageCodecFactory()
 	{
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','p','n','g'>(), (tImageDecoderFactory*)this);

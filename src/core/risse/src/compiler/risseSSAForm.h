@@ -31,9 +31,10 @@ class tCodeBlock;
 class tSSAVariableAccessMap;
 
 //---------------------------------------------------------------------------
-//! @brief	break あるいは continue の情報
-//! @note	break や continue は goto と同様、ラベルへのジャンプとして扱われている
-//---------------------------------------------------------------------------
+/**
+ * break あるいは continue の情報
+ * @note	break や continue は goto と同様、ラベルへのジャンプとして扱われている
+ */
 class tBreakInfo : public tCollectee
 {
 	tSSAForm * Form; //!< この情報を保持するSSA形式インスタンス
@@ -41,46 +42,60 @@ class tBreakInfo : public tCollectee
 	typedef gc_vector<tSSABlock *> tPendingJumpSourceBlocks;
 	tPendingJumpSourceBlocks PendingJumpSourceBlocks;
 	bool IsBlock; //!< この break/continue が block に対する物か
-				//!< (block に対する breakやcontinueは他と意味が異なるため)
 	bool NonValueBreakShouldSetVoidToLastEvalValue;
-		//!< 値なし break が _ に void をセットすべきかどうか(デフォルトでtrueなので注意)
 	tString JumpTargetLabel; //!< ジャンプ先のラベル名
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		form			この情報を保持するSSA形式インスタンス
-	//! @param		label_prefix	ラベル名プリフィックス
+	/**
+	 * コンストラクタ
+	 * @param form			この情報を保持するSSA形式インスタンス
+	 * @param label_prefix	ラベル名プリフィックス
+	 */
 	tBreakInfo(tSSAForm * form,
 		const tString & label_prefix = tString::GetEmptyString());
 
-	//! @brief		この break/continue が block に対する物かを設定する
-	//! @param		b この break/continue が block に対する物か
+	/**
+	 * この break/continue が block に対する物かを設定する
+	 * @param b	この break/continue が block に対する物か
+	 */
 	void SetIsBlock(bool b) { IsBlock = b; }
 
-	//! @brief		この break/continue が block に対する物かを取得する
-	//! @return		この break/continue が block に対する物か
+	/**
+	 * この break/continue が block に対する物かを取得する
+	 * @return	この break/continue が block に対する物か
+	 */
 	bool GetIsBlock() const { return IsBlock; }
 
-	//! @brief		値なし break が _ に void をセットすべきかどうかを設定する
-	//! @param		b 値なし break が _ に void をセットすべきかどうか
+	/**
+	 * 値なし break が _ に void をセットすべきかどうかを設定する
+	 * @param b	値なし break が _ に void をセットすべきかどうか
+	 */
 	void SetNonValueBreakShouldSetVoidToLastEvalValue(bool b)
 		{ NonValueBreakShouldSetVoidToLastEvalValue = b; }
 
-	//! @brief		値なし break が _ に void をセットすべきかどうかを得る
-	//! @return		値なし break が _ に void をセットすべきかどうか
+	/**
+	 * 値なし break が _ に void をセットすべきかどうかを得る
+	 * @return	値なし break が _ に void をセットすべきかどうか
+	 */
 	bool GetNonValueBreakShouldSetVoidToLastEvalValue() const
 		{ return NonValueBreakShouldSetVoidToLastEvalValue; }
 
-	//! @brief		この break のジャンプ先のラベル名を得る
-	//! @return		この break のジャンプ先のラベル名
+	/**
+	 * この break のジャンプ先のラベル名を得る
+	 * @return	この break のジャンプ先のラベル名
+	 */
 	const tString & GetJumpTargetLabel() const { return JumpTargetLabel; }
 
-	//! @brief		未バインドのジャンプを追加する
-	//! @param		jump_block		ジャンプもとの基本ブロック
+	/**
+	 * 未バインドのジャンプを追加する
+	 * @param jump_block	ジャンプもとの基本ブロック
+	 */
 	void AddJump(tSSABlock * jump_block);
 
-	//! @brief		未バインドのジャンプをすべてバインドする
-	//! @param		target		ターゲットのブロック
+	/**
+	 * 未バインドのジャンプをすべてバインドする
+	 * @param target	ターゲットのブロック
+	 */
 	void BindAll(tSSABlock * target);
 };
 //---------------------------------------------------------------------------
@@ -89,8 +104,9 @@ typedef tBreakInfo tContinueInfo;
 
 
 //---------------------------------------------------------------------------
-//! @brief	switch 文に関する情報を表すクラス
-//---------------------------------------------------------------------------
+/**
+ * switch 文に関する情報を表すクラス
+ */
 class tSwitchInfo : public tCollectee
 {
 	tSSAVariable * Reference; //!< 参照変数 ( switch の次のカッコの中の値 )
@@ -99,9 +115,11 @@ class tSwitchInfo : public tCollectee
 	tSSABlock * DefaultBlock; //!< default 文のあるブロック
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		node			SwitchのASTノード
-	//! @param		reference		参照変数
+	/**
+	 * コンストラクタ
+	 * @param node		SwitchのASTノード
+	 * @param reference	参照変数
+	 */
 	tSwitchInfo(tSSAVariable * reference)
 	{
 		Reference = reference;
@@ -110,32 +128,46 @@ public:
 		DefaultBlock = NULL;
 	}
 
-	//! @brief		参照変数を得る
-	//! @return		参照変数
+	/**
+	 * 参照変数を得る
+	 * @return	参照変数
+	 */
 	tSSAVariable * GetReference() const { return Reference; }
 
-	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを得る
-	//! @return		最後のジャンプまたは分岐文を含む基本ブロック
+	/**
+	 * 最後のジャンプまたは分岐文を含む基本ブロックを得る
+	 * @return	最後のジャンプまたは分岐文を含む基本ブロック
+	 */
 	tSSABlock * GetLastBlock() const { return LastBlock; }
 
-	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを設定する
-	//! @param		block		最後のジャンプまたは分岐文を含む基本ブロック
+	/**
+	 * 最後のジャンプまたは分岐文を含む基本ブロックを設定する
+	 * @param block	最後のジャンプまたは分岐文を含む基本ブロック
+	 */
 	void SetLastBlock(tSSABlock * block) { LastBlock = block; }
 
-	//! @brief		最後のジャンプまたは分岐文を得る
-	//! @return		最後のジャンプまたは分岐文
+	/**
+	 * 最後のジャンプまたは分岐文を得る
+	 * @return	最後のジャンプまたは分岐文
+	 */
 	tSSAStatement * GetLastStatement() const { return LastStatement; }
 
-	//! @brief		最後のジャンプまたは分岐文を含む基本ブロックを設定する
-	//! @param		stmt		最後のジャンプまたは分岐文
+	/**
+	 * 最後のジャンプまたは分岐文を含む基本ブロックを設定する
+	 * @param stmt	最後のジャンプまたは分岐文
+	 */
 	void SetLastStatement(tSSAStatement * stmt) { LastStatement = stmt; }
 
-	//! @brief		default 文のあるブロックを得る
-	//! @return		default 文のあるブロック
+	/**
+	 * default 文のあるブロックを得る
+	 * @return	default 文のあるブロック
+	 */
 	tSSABlock * GetDefaultBlock() const { return DefaultBlock; }
 
-	//! @brief		default 文のあるブロックを設定する
-	//! @param		block		default 文のあるブロック
+	/**
+	 * default 文のあるブロックを設定する
+	 * @param block	default 文のあるブロック
+	 */
 	void SetDefaultBlock(tSSABlock * block) { DefaultBlock = block; }
 
 };
@@ -145,8 +177,9 @@ public:
 class tCompilerFunction;
 class tSSAVariableAccessMap;
 //---------------------------------------------------------------------------
-//! @brief	SSA形式を表すクラス
-//---------------------------------------------------------------------------
+/**
+ * SSA形式を表すクラス
+ */
 class tSSAForm : public tCollectee
 {
 	tCompilerFunction * Function; //!< この SSA 形式が含まれる関数インスタンス
@@ -156,13 +189,13 @@ class tSSAForm : public tCollectee
 
 	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
 	typedef gc_map<tString, risse_size> tExitTryBranchTargetLabels;
-		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
 	tExitTryBranchTargetLabels *ExitTryBranchTargetLabels;
-		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
 	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
 
-	//! @brief	このSSA形式が保持しているTryCallしたあとのCatchBranch文と、
-	//!			そのTryCallの戻り値(例外の値)の情報
+	/**
+	 * このSSA形式が保持しているTryCallしたあとのCatchBranch文と、
+	 * そのTryCallの戻り値(例外の値)の情報
+	 */
 	struct tCatchBranchAndExceptionValue : public tCollectee
 	{
 		tCatchBranchAndExceptionValue(
@@ -179,11 +212,7 @@ class tSSAForm : public tCollectee
 		tExitTryBranchTargetLabels * ExitTryBranchTargetLabels;
 	};
 	typedef gc_map<risse_size, tCatchBranchAndExceptionValue *> tCatchBranchAndExceptionMap;
-		//!< このSSA形式が保持しているTri識別子と、
-		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリストのtypedef
 	tCatchBranchAndExceptionMap CatchBranchAndExceptionMap;
-		//!< このSSA形式が保持しているTri識別子と、
-		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリスト
 
 	tString Name; //!< このSSA形式インスタンスの名前
 	tSSALocalNamespace * LocalNamespace; //!< ローカル名前空間
@@ -202,7 +231,9 @@ class tSSAForm : public tCollectee
 	risse_size CodeBlockIndex; //!< コードブロックのスクリプトブロック内でのインデックス
 
 public:
-	//! @brief		このSSA形式の状態を表す列挙型
+	/**
+	 * このSSA形式の状態を表す列挙型
+	 */
 	enum tState {
 		ssSSA, //!< 有効な SSA 形式である
 		ssNonSSA, //!< phi関数の除去などでSSA性は失われた
@@ -213,131 +244,175 @@ private:
 	tState State; //!< ステート
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		pos				ソースコード上の位置
-	//! @param		function		この SSA 形式が含まれる関数インスタンス
-	//! @param		name			このSSA形式インスタンスの名前
-	//! @param		parent			親SSA形式インスタンス
-	//! @param		useparentframe	親SSA形式インスタンスのフレームを使うかどうか
+	/**
+	 * コンストラクタ
+	 * @param pos				ソースコード上の位置
+	 * @param function			この SSA 形式が含まれる関数インスタンス
+	 * @param name				このSSA形式インスタンスの名前
+	 * @param parent			親SSA形式インスタンス
+	 * @param useparentframe	親SSA形式インスタンスのフレームを使うかどうか
+	 */
 	tSSAForm(risse_size pos, tCompilerFunction * function, const tString & name,
 		tSSAForm * parent, bool useparentframe);
 
-	//! @brief		AST を SSA 形式に変換する
-	//! @param		roots	ASTのルートノードの配列
+	/**
+	 * AST を SSA 形式に変換する
+	 * @param roots	ASTのルートノードの配列
+	 */
 	void Generate(const gc_vector<tASTNode *> & roots);
 
-	//! @brief		AST を SSA 形式に変換する
-	//! @param		root	ASTのルートノード
+	/**
+	 * AST を SSA 形式に変換する
+	 * @param root	ASTのルートノード
+	 */
 	void Generate(const tASTNode * root);
 
-	//! @brief		SSA形式の最適化と通常形式への変換
+	/**
+	 * SSA形式の最適化と通常形式への変換
+	 */
 	void OptimizeAndUnSSA();
 
-	//! @brief		関数インスタンスを得る
-	//! @return		関数インスタンス
+	/**
+	 * 関数インスタンスを得る
+	 * @return	関数インスタンス
+	 */
 	tCompilerFunction * GetFunction() const { return Function; }
 
-	//! @brief		親SSA形式インスタンスを得る
-	//! @param		親SSA形式インスタンス
+	/**
+	 * 親SSA形式インスタンスを得る
+	 */
 	tSSAForm * GetParent() const { return Parent; }
 
-	//! @brief		親SSA形式インスタンスのフレームを使うかどうかを得る
-	//! @param		親SSA形式インスタンスのフレームを使うかどうか
+	/**
+	 * 親SSA形式インスタンスのフレームを使うかどうかを得る
+	 */
 	bool GetUseParentFrame() const { return UseParentFrame; }
 
-	//! @brief		スクリプトブロックインスタンスを得る
-	//! @return		スクリプトブロックインスタンス
+	/**
+	 * スクリプトブロックインスタンスを得る
+	 * @return	スクリプトブロックインスタンス
+	 */
 	tScriptBlockInstance * GetScriptBlockInstance() const;
 
-	//! @brief		このSSA形式インスタンスの名前を設定する
-	//! @param		name		このSSA形式インスタンスの名前
+	/**
+	 * このSSA形式インスタンスの名前を設定する
+	 * @param name	このSSA形式インスタンスの名前
+	 */
 	void SetName(const tString & name) { Name = name; }
 
-	//! @brief		このSSA形式インスタンスの名前を得る
-	//! @return		このSSA形式インスタンスの名前
+	/**
+	 * このSSA形式インスタンスの名前を得る
+	 * @return	このSSA形式インスタンスの名前
+	 */
 	const tString & GetName() const { return Name; }
 
-	//! @brief		ローカル名前空間を得る
-	//! @return		ローカル名前空間
+	/**
+	 * ローカル名前空間を得る
+	 * @return	ローカル名前空間
+	 */
 	tSSALocalNamespace * GetLocalNamespace() const { return LocalNamespace; }
 
-	//! @brief		this-proxyを得る
-	//! @return		this-proxy
+	/**
+	 * this-proxyを得る
+	 * @return	this-proxy
+	 */
 	tSSAVariable * GetThisProxy(risse_size pos);
 
-	//! @brief		現在変換中の基本ブロックを得る
-	//! @return		現在変換中の基本ブロック
+	/**
+	 * 現在変換中の基本ブロックを得る
+	 * @return	現在変換中の基本ブロック
+	 */
 	tSSABlock * GetCurrentBlock() const { return CurrentBlock; }
 
-	//! @brief		関数引数の無名の * を保持している変数を得る
-	//! @return		関数引数の無名の * を保持している変数
+	/**
+	 * 関数引数の無名の * を保持している変数を得る
+	 * @return	関数引数の無名の * を保持している変数
+	 */
 	tSSAVariable * GetFunctionCollapseArgumentVariable() const
 		{ return FunctionCollapseArgumentVariable; }
 
-	//! @brief		Try識別子のインデックスを設定する
-	//! @param		idx		Try識別子のインデックス
+	/**
+	 * Try識別子のインデックスを設定する
+	 * @param idx	Try識別子のインデックス
+	 */
 	void SetTryIdentifierIndex(risse_size idx) { TryIdentifierIndex = idx; }
 
-	//! @brief		Try識別子のインデックスを得る
-	//! @return		Try識別子のインデックス(risse_size_max が帰った場合は無効)
+	/**
+	 * Try識別子のインデックスを得る
+	 * @return	Try識別子のインデックス(risse_size_max が帰った場合は無効)
+	 */
 	risse_size GetTryIdentifierIndex() const { return TryIdentifierIndex; }
 
 public:
-	//! @brief		_ 変数に値を書き込む
-	//! @param		pos		スクリプト上の位置
-	//! @param		value	値(NULLの場合は何もしない)
+	/**
+	 * _ 変数に値を書き込む
+	 * @param pos	スクリプト上の位置
+	 * @param value	値(NULLの場合は何もしない)
+	 */
 	void WriteLastEvalResult(risse_size pos, tSSAVariable * value);
 
-	//! @brief		新しい基本ブロックを作成する
-	//! @param		name	基本ブロック名プリフィックス
-	//! @param		ns		引き継ぐローカル名前空間(nullを指定すると現在の名前空間を引き継ぐ)
-	//! @return		新しく作成された基本ブロック
+	/**
+	 * 新しい基本ブロックを作成する
+	 * @param name	基本ブロック名プリフィックス
+	 * @param ns	引き継ぐローカル名前空間(nullを指定すると現在の名前空間を引き継ぐ)
+	 * @return	新しく作成された基本ブロック
+	 */
 	tSSABlock * CreateNewBlock(const tString & name, const tSSALocalNamespace * ns = NULL);
 
 private:
-	//! @brief		任意の ExitTryBranchTargetLabels にマップを追加する(AddExitTryBranchTargetLabel()から呼ばれる)
-	//! @param		target_label	ExitTryBranchTargetLabels
-	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
-	//! @return		そのラベルを表すインデックス
+	/**
+	 * 任意の ExitTryBranchTargetLabels にマップを追加する(AddExitTryBranchTargetLabel()から呼ばれる)
+	 * @param target_label	ExitTryBranchTargetLabels
+	 * @param label			ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	 * @return	そのラベルを表すインデックス
+	 */
 	static risse_size InternalAddExitTryBranchTargetLabel(
 				tExitTryBranchTargetLabels * target_label, 
 				const tString & label);
 
 public:
-	//! @brief		このSSA形式インスタンスが保持している任意の ExitTryBranchTargetLabels にマップを追加する
-	//! @param		try_id			try識別子
-	//! @param		target_label	ExitTryBranchTargetLabels
-	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
-	//! @return		そのラベルを表すインデックス
+	/**
+	 * このSSA形式インスタンスが保持している任意の ExitTryBranchTargetLabels にマップを追加する
+	 * @param try_id		try識別子
+	 * @param target_label	ExitTryBranchTargetLabels
+	 * @param label			ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	 * @return	そのラベルを表すインデックス
+	 */
 	risse_size AddExitTryBranchTargetLabel(
 				risse_size try_id,
 				const tString & label);
 
-	//! @brief		ExitTryBranchTargetLabels にマップを追加する
-	//! @param		label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
-	//! @return		そのラベルを表すインデックス
-	//! @note		AddExitTryBranchTargetLabelのtry_id指定無し版と違い、
-	//!				このメソッドは現在の ExitTryBranchTargetLabels を対象に用いる。
+	/**
+	 * ExitTryBranchTargetLabels にマップを追加する
+	 * @param label	ラベル名または "@return" または "@break" のような特別なジャンプ先の名前
+	 * @return	そのラベルを表すインデックス
+	 * @note	AddExitTryBranchTargetLabelのtry_id指定無し版と違い、
+	 *			このメソッドは現在の ExitTryBranchTargetLabels を対象に用いる。
+	 */
 	risse_size AddExitTryBranchTargetLabel(const tString & label);
 
-	//! @brief		現在の基本ブロックに定数値を得る文を追加する
-	//! @param		pos		スクリプト上の位置
-	//! @param		val		定数
-	//! @return		定数値を表す一時変数
-	//! @note		このメソッドは、定数値を一時変数に代入する
-	//!				文を生成し、その一時変数を返す
+	/**
+	 * 現在の基本ブロックに定数値を得る文を追加する
+	 * @param pos	スクリプト上の位置
+	 * @param val	定数
+	 * @return	定数値を表す一時変数
+	 * @note	このメソッドは、定数値を一時変数に代入する
+	 *			文を生成し、その一時変数を返す
+	 */
 	tSSAVariable * AddConstantValueStatement(risse_size pos, const tVariant & val);
 
-	//! @brief		現在の基本ブロックに文を追加する
-	//! @param		pos		スクリプト上の位置
-	//! @param		code	オペレーションコード
-	//! @param		ret_var	この文で変数を定義する場合はtSSAVariable *へのポインタを渡す
-	//!						(変数を定義したくない場合はNULLを渡す)
-	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
-	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
-	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
-	//! @param		using4	この文で使用する変数その4(NULL=使用しない)
-	//! @return		新しく追加された文
+	/**
+	 * 現在の基本ブロックに文を追加する
+	 * @param pos		スクリプト上の位置
+	 * @param code		オペレーションコード
+	 * @param ret_var	この文で変数を定義する場合はtSSAVariable *へのポインタを渡す
+	 *					(変数を定義したくない場合はNULLを渡す)
+	 * @param using1	この文で使用する変数その1(NULL=使用しない)
+	 * @param using2	この文で使用する変数その2(NULL=使用しない)
+	 * @param using3	この文で使用する変数その3(NULL=使用しない)
+	 * @param using4	この文で使用する変数その4(NULL=使用しない)
+	 * @return	新しく追加された文
+	 */
 	tSSAStatement * AddStatement(risse_size pos, tOpCode code,
 		tSSAVariable ** ret_var,
 			tSSAVariable *using1 = NULL,
@@ -346,14 +421,16 @@ public:
 			tSSAVariable *using4 = NULL
 			);
 
-	//! @brief		現在の基本ブロックに文を追加し、定義された変数を返す
-	//! @param		pos		スクリプト上の位置
-	//! @param		code	オペレーションコード
-	//! @param		using1	この文で使用する変数その1(NULL=使用しない)
-	//! @param		using2	この文で使用する変数その2(NULL=使用しない)
-	//! @param		using3	この文で使用する変数その3(NULL=使用しない)
-	//! @param		using4	この文で使用する変数その4(NULL=使用しない)
-	//! @return		定義された変数
+	/**
+	 * 現在の基本ブロックに文を追加し、定義された変数を返す
+	 * @param pos		スクリプト上の位置
+	 * @param code		オペレーションコード
+	 * @param using1	この文で使用する変数その1(NULL=使用しない)
+	 * @param using2	この文で使用する変数その2(NULL=使用しない)
+	 * @param using3	この文で使用する変数その3(NULL=使用しない)
+	 * @param using4	この文で使用する変数その4(NULL=使用しない)
+	 * @return	定義された変数
+	 */
 	tSSAVariable * AddVariableWithStatement(risse_size pos, tOpCode code,
 			tSSAVariable *using1 = NULL, 
 			tSSAVariable *using2 = NULL, 
@@ -365,18 +442,24 @@ public:
 		return ret_var;
 	}
 
-	//! @brief		現在の基本ブロックにreturn文を生成する
-	//! @param		pos		スクリプト上の位置
-	//! @param		var		returnする値 (NULL=voidを返す)
+	/**
+	 * 現在の基本ブロックにreturn文を生成する
+	 * @param pos	スクリプト上の位置
+	 * @param var	returnする値 (NULL=voidを返す)
+	 */
 	void AddReturnStatement(risse_size pos, tSSAVariable * var);
 
-	//! @brief		現在の switch に関する情報を得る
-	//! @return		現在の switch に関する情報
+	/**
+	 * 現在の switch に関する情報を得る
+	 * @return	現在の switch に関する情報
+	 */
 	tSwitchInfo * GetCurrentSwitchInfo() const { return CurrentSwitchInfo; }
 
-	//! @brief		現在の switch に関する情報を設定する
-	//! @param		info		現在の switch に関する情報
-	//! @return		設定前の switch に関する情報
+	/**
+	 * 現在の switch に関する情報を設定する
+	 * @param info	現在の switch に関する情報
+	 * @return	設定前の switch に関する情報
+	 */
 	tSwitchInfo * SetCurrentSwitchInfo(tSwitchInfo * info)
 	{
 		tSwitchInfo * prev = CurrentSwitchInfo;
@@ -384,13 +467,17 @@ public:
 		return prev;
 	}
 
-	//! @brief		現在の break に関する情報を得る
-	//! @return		現在の break に関する情報
+	/**
+	 * 現在の break に関する情報を得る
+	 * @return	現在の break に関する情報
+	 */
 	tBreakInfo * GetCurrentBreakInfo() const { return CurrentBreakInfo; }
 
-	//! @brief		現在の break に関する情報を設定する
-	//! @param		info		現在の break に関する情報
-	//! @return		設定前の break に関する情報
+	/**
+	 * 現在の break に関する情報を設定する
+	 * @param info	現在の break に関する情報
+	 * @return	設定前の break に関する情報
+	 */
 	tBreakInfo * SetCurrentBreakInfo(tBreakInfo * info)
 	{
 		tBreakInfo * prev = CurrentBreakInfo;
@@ -398,13 +485,17 @@ public:
 		return prev;
 	}
 
-	//! @brief		現在の continue に関する情報を得る
-	//! @return		現在の continue に関する情報
+	/**
+	 * 現在の continue に関する情報を得る
+	 * @return	現在の continue に関する情報
+	 */
 	tContinueInfo * GetCurrentContinueInfo() const { return CurrentContinueInfo; }
 
-	//! @brief		現在の continue に関する情報を設定する
-	//! @param		info		現在の continue に関する情報
-	//! @return		設定前の continue に関する情報
+	/**
+	 * 現在の continue に関する情報を設定する
+	 * @param info	現在の continue に関する情報
+	 * @return	設定前の continue に関する情報
+	 */
 	tContinueInfo * SetCurrentContinueInfo(tContinueInfo * info)
 	{
 		tContinueInfo * prev = CurrentContinueInfo;
@@ -412,45 +503,57 @@ public:
 		return prev;
 	}
 
-	//! @brief		break 文を追加する
-	//! @param		pos			スクリプト上の位置
-	//! @param		var			breakに伴った値 (NULL=voidを返す)
+	/**
+	 * break 文を追加する
+	 * @param pos	スクリプト上の位置
+	 * @param var	breakに伴った値 (NULL=voidを返す)
+	 */
 	void AddBreakStatement(risse_size pos, tSSAVariable * var);
 
-	//! @brief		continue 文を追加する
-	//! @param		pos			スクリプト上の位置
-	//! @param		var			continueに伴った値 (NULL=voidを返す)
+	/**
+	 * continue 文を追加する
+	 * @param pos	スクリプト上の位置
+	 * @param var	continueに伴った値 (NULL=voidを返す)
+	 */
 	void AddContinueStatement(risse_size pos, tSSAVariable * var);
 
 private:
-	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
-	//!				作成する
-	//! @param		catch_branch_stmt	ocCatchBranch文(すでに2つのused
-	//!									それぞれ例外が発生しなかったときと例外が
-	//!									発生したときのジャンプ先が登録されていること)
-	//! @param		except_value		例外オブジェクトを示す変数
-	//! @param		target_labels		ExitTryBranchTargetLabels
-	//! @note		このSSAインスタンス内のCurrentBlock は保存される
+	/**
+	 * ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
+	 * 作成する
+	 * @param catch_branch_stmt	ocCatchBranch文(すでに2つのused
+	 *							それぞれ例外が発生しなかったときと例外が
+	 *							発生したときのジャンプ先が登録されていること)
+	 * @param except_value		例外オブジェクトを示す変数
+	 * @param target_labels		ExitTryBranchTargetLabels
+	 * @note	このSSAインスタンス内のCurrentBlock は保存される
+	 */
 	void AddCatchBranchTargetsForOne(tSSAStatement * catch_branch_stmt,
 					tSSAVariable * except_value,
 					tExitTryBranchTargetLabels * target_labels);
 
 public:
-	//! @brief		ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
-	//!				作成する
-	//! @note		このSSAインスタンス内のCurrentBlock は保存される
+	/**
+	 * ocCatchBranch文にreturn例外などを受け取るための分岐先とそのブロックを
+	 * 作成する
+	 * @note	このSSAインスタンス内のCurrentBlock は保存される
+	 */
 	void AddCatchBranchTargets();
 
-	//! @brief		CatchBranch文を追加する
-	//! @param		catch_branch_stmt	ocCatchBranch文(すでに2つのused
-	//!									それぞれ例外が発生しなかったときと例外が
-	//!									発生したときのジャンプ先が登録されていること)
-	//! @param		except_value		例外オブジェクトを示す変数
+	/**
+	 * CatchBranch文を追加する
+	 * @param catch_branch_stmt	ocCatchBranch文(すでに2つのused
+	 *							それぞれ例外が発生しなかったときと例外が
+	 *							発生したときのジャンプ先が登録されていること)
+	 * @param except_value		例外オブジェクトを示す変数
+	 */
 	void AddCatchBranchAndExceptionValue(tSSAStatement * catch_branch_stmt,
 					tSSAVariable * except_value);
 
 protected:
-	//! @brief	CreateLazyBlock で返される情報の構造体
+	/**
+	 * CreateLazyBlock で返される情報の構造体
+	 */
 	struct tLazyBlockParam : public tCollectee
 	{
 		tSSAForm * NewForm; //!< 新しいSSA形式インスタンス(遅延評価ブロックを表す)
@@ -459,87 +562,115 @@ protected:
 		tSSAVariableAccessMap * AccessMap; //!< アクセスマップ
 	};
 public:
-	//! @brief		AccessMap を作成する
-	//! @param		pos			スクリプト上の位置
-	//! @return		作成された AccessMap
-	//! @note		ここで作成したアクセスマップは CreateLazyBlock() に
-	//!				渡し、使い終わったら CleanupAccessMap() を呼ぶこと。
-	//!				このメソッドはCreateLazyBlockでsharevars=falseの場合に必須。
+	/**
+	 * AccessMap を作成する
+	 * @param pos	スクリプト上の位置
+	 * @return	作成された AccessMap
+	 * @note	ここで作成したアクセスマップは CreateLazyBlock() に
+	 *			渡し、使い終わったら CleanupAccessMap() を呼ぶこと。
+	 *			このメソッドはCreateLazyBlockでsharevars=falseの場合に必須。
+	 */
 	tSSAVariableAccessMap * CreateAccessMap(risse_size pos);
 
-	//! @brief		新しい遅延評価ブロックを作成する
-	//! @param		pos			スクリプト上の位置
-	//! @param		basename	新しい遅延評価ブロックの名前(実際にはこれにさらに連番がつく)
-	//! @param		sharevars	遅延評価ブロックからブロック外の変数を参照された場合に
-	//!							その参照された変数を共有変数として扱うかどうか。
-	//!							変数を共有することにより、遅延評価ブロックを、そのブロックが定義
-	//!							された位置以外から呼び出しても安全に変数にアクセスできるように
-	//!							なる ( function 内 function でレキシカルクロージャを使用するとき
-	//!							などに有効 )
-	//! @param		accessmap	アクセスマップ (sharevars が false の場合のみ必須, trueの場合は不要)
-	//! @param		new_form	新しく作成されたSSA形式のインスタンス
-	//! @param		block_var	その遅延評価ブロックを表すSSA変数を格納する先
-	//! @return		CleanupLazyBlock() に渡すべき情報
-	//! @note		このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
-	//!				表す変数をblock_varに返す。遅延評価ブロックを表すSSA形式はnew_form
-	//!				に返されるが、中身は空っぽなので呼び出しがわで内容を生成すること。
-	//!				内容を生成したら、ListVariablesForLazyBlock() を呼ぶこと。
-	//!				block_var に返される変数はメソッドオブジェクトなので、呼び出して使う。
-	//! 			使い終わったらCleanupLazyBlock() メソッドを呼ぶこと。
+	/**
+	 * 新しい遅延評価ブロックを作成する
+	 * @param pos		スクリプト上の位置
+	 * @param basename	新しい遅延評価ブロックの名前(実際にはこれにさらに連番がつく)
+	 * @param sharevars	遅延評価ブロックからブロック外の変数を参照された場合に
+	 *					その参照された変数を共有変数として扱うかどうか。
+	 *					変数を共有することにより、遅延評価ブロックを、そのブロックが定義
+	 *					された位置以外から呼び出しても安全に変数にアクセスできるように
+	 *					なる ( function 内 function でレキシカルクロージャを使用するとき
+	 *					などに有効 )
+	 * @param accessmap	アクセスマップ (sharevars が false の場合のみ必須, trueの場合は不要)
+	 * @param new_form	新しく作成されたSSA形式のインスタンス
+	 * @param block_var	その遅延評価ブロックを表すSSA変数を格納する先
+	 * @return	CleanupLazyBlock() に渡すべき情報
+	 * @note	このメソッドは遅延評価ブロックを作成してその遅延評価ブロックを
+	 *			表す変数をblock_varに返す。遅延評価ブロックを表すSSA形式はnew_form
+	 *			に返されるが、中身は空っぽなので呼び出しがわで内容を生成すること。
+	 *			内容を生成したら、ListVariablesForLazyBlock() を呼ぶこと。
+	 *			block_var に返される変数はメソッドオブジェクトなので、呼び出して使う。
+	 *			使い終わったらCleanupLazyBlock() メソッドを呼ぶこと。
+	 */
 	void * CreateLazyBlock(risse_size pos, const tString & basename,
 		bool sharevars, tSSAVariableAccessMap * accessmap,
 		tSSAForm *& new_form, tSSAVariable *& block_var);
 
-	//! @brief		遅延評価ブロックで使用されている変数を親から子へコピーする
-	//! @param		pos			スクリプト上の位置
-	//! @param		accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	/**
+	 * 遅延評価ブロックで使用されている変数を親から子へコピーする
+	 * @param pos		スクリプト上の位置
+	 * @param accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	 */
 	void ListVariablesForLazyBlock(risse_size pos, tSSAVariableAccessMap * accessmap);
 
-	//! @brief		遅延評価ブロックのクリーンアップ処理を行う
-	//! @param		param	CreateLazyBlock() の戻り値
+	/**
+	 * 遅延評価ブロックのクリーンアップ処理を行う
+	 * @param param	CreateLazyBlock() の戻り値
+	 */
 	void CleanupLazyBlock(void * param);
 
-	//! @brief		アクセスマップのクリーンアップ処理を行う
-	//! @param		pos			スクリプト上の位置
-	//! @param		accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	/**
+	 * アクセスマップのクリーンアップ処理を行う
+	 * @param pos		スクリプト上の位置
+	 * @param accessmap	アクセスマップ ( CreateAccessMap() で作成された物を指定)
+	 */
 	void CleanupAccessMap(risse_size pos, tSSAVariableAccessMap * accessmap);
 
-	//! @brief		バインディングマップを追加する
-	//! @param		pos			スクリプト上の位置
-	//! @param		binding		バインディングオブジェクトを表すSSA形式変数
-	//! @note		このメソッドを実行すると、現時点で可視な変数がすべて共有変数に
-	//!				なる。
+	/**
+	 * バインディングマップを追加する
+	 * @param pos		スクリプト上の位置
+	 * @param binding	バインディングオブジェクトを表すSSA形式変数
+	 * @note	このメソッドを実行すると、現時点で可視な変数がすべて共有変数に
+	 *			なる。
+	 */
 	void AddBindingMap(risse_size pos, tSSAVariable * binding);
 
-	//! @brief		ダンプを行う
-	//! @return		ダンプ文字列
+	/**
+	 * ダンプを行う
+	 * @return	ダンプ文字列
+	 */
 	tString Dump() const;
 
 //----
 public:
-	//! @brief		実行ブロックの最後の return を生成する
-	//! @param		root		実行ブロックを表すASTノード
+	/**
+	 * 実行ブロックの最後の return を生成する
+	 * @param root	実行ブロックを表すASTノード
+	 */
 	void GenerateLastReturn(const tASTNode * root);
 
-	//! @brief		到達しない直前ブロックを削除する
-	//! @note		この時点では条件付き定数伝播解析を行っていない
+	/**
+	 * 到達しない直前ブロックを削除する
+	 * @note	この時点では条件付き定数伝播解析を行っていない
+	 */
 	void LeapDeadPredBlocks();
 
-	//! @brief		到達しないブロックを削除する
-	//! @note		この処理は条件付き定数伝播解析の結果を利用する
+	/**
+	 * 到達しないブロックを削除する
+	 * @note	この処理は条件付き定数伝播解析の結果を利用する
+	 */
 	void LeapDeadBlocks();
 
-	//! @brief		共有された変数へのアクセスを別形式の文に変換
+	/**
+	 * 共有された変数へのアクセスを別形式の文に変換
+	 */
 	void ConvertSharedVariableAccess();
 
-	//! @brief		変数の生存区間を基本ブロック単位で解析する(すべての変数に対して)
+	/**
+	 * 変数の生存区間を基本ブロック単位で解析する(すべての変数に対して)
+	 */
 	void AnalyzeVariableBlockLiveness();
 
-	//! @brief		変数の生存区間を基本ブロック単位で解析する(個別の変数に対して)
-	//! @param		var		変数
+	/**
+	 * 変数の生存区間を基本ブロック単位で解析する(個別の変数に対して)
+	 * @param var	変数
+	 */
 	void AnalyzeVariableBlockLiveness(tSSAVariable * var);
 
-	//! @brief		文の前後関係を高速に判断するため、文に通し番号を振る
+	/**
+	 * 文の前後関係を高速に判断するため、文に通し番号を振る
+	 */
 	void SetStatementOrder();
 
 	// @brief		変数の干渉グラフを作成する
@@ -548,61 +679,91 @@ public:
 	// @brief		文レベルでの最適化を行う
 	void OptimizeStatement();
 
-	//! @brief		型 Assertion コードを挿入する
+	/**
+	 * 型 Assertion コードを挿入する
+	 */
 	void InsertTypeAssertion();
 
-	//! @brief		定数代入を置き換える
+	/**
+	 * 定数代入を置き換える
+	 */
 	void ReplaceConstantAssign();
 
-	//! @brief		死んでる変数を除去する
+	/**
+	 * 死んでる変数を除去する
+	 */
 	void DeleteDeadVariables();
 
-	//! @brief		変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	/**
+	 * 変数の合併を行うために、どの変数が合併できそうかどうかを調査する
+	 */
 	void TraceCoalescable();
 
-	//! @brief		TraceCoalescable() の結果に基づいて変数の合併を行う
-	//! @note		これによって SSA性が破壊される
+	/**
+	 * TraceCoalescable() の結果に基づいて変数の合併を行う
+	 * @note	これによって SSA性が破壊される
+	 */
 	void Coalesce();
 
-	//! @brief		φ関数を削除する
-	//! @note		SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
+	/**
+	 * φ関数を削除する
+	 * @note	SSA形式->通常形式の変換過程においてφ関数を削除する処理がこれ
+	 */
 	void RemovePhiStatements();
 
-	//! @brief		3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	/**
+	 * 3番地形式の格納先が他の変数と異なっていることを保証(暫定処置)
+	 */
 	void Check3AddrAssignee();
 
-	//! @brief		変数にレジスタを割り当てる
+	/**
+	 * 変数にレジスタを割り当てる
+	 */
 	void AssignRegisters();
 
-	//! @brief		バイトコードジェネレータのインスタンスを生成する
+	/**
+	 * バイトコードジェネレータのインスタンスを生成する
+	 */
 	void EnsureCodeGenerator();
 
-	//! @brief		バイトコードジェネレータを得る
-	//! @return		バイトコードジェネレータ
+	/**
+	 * バイトコードジェネレータを得る
+	 * @return	バイトコードジェネレータ
+	 */
 	tCodeGenerator * GetCodeGenerator() const { return CodeGenerator; }
 
-	//! @brief		コードブロックを得る
-	//! @return		コードブロック
+	/**
+	 * コードブロックを得る
+	 * @return	コードブロック
+	 */
 	tCodeBlock * GetCodeBlock() const { return CodeBlock; }
 
-	//! @brief		コードブロックのスクリプトブロック内でのインデックスを得る
-	//! @return		コードブロックのスクリプトブロック内でのインデックス
+	/**
+	 * コードブロックのスクリプトブロック内でのインデックスを得る
+	 * @return	コードブロックのスクリプトブロック内でのインデックス
+	 */
 	risse_size GetCodeBlockIndex() const { return CodeBlockIndex; }
 
-	//! @brief		バイトコードを生成する
+	/**
+	 * バイトコードを生成する
+	 */
 	void GenerateCode();
 
-	//! @brief		最大の共有変数のネストカウントを設定する
-	//! @note		トップレベルの関数は、共有変数のネストカウントに応じたバッファを
-	//!				確保しなければならないため、ネスト数が最大でどれほどまでに行くの
-	//!				かを知っていなくてはならない。このメソッドはネストレベルが0の
-	//!				関数(つまり、関数グループのうち一番最初に実行される関数)の先頭のSSA形式
-	//!				にのみ有効である。このメソッドはコードジェネレータに
-	//!				共有変数のネストレベルを問い合わせ、それをコードブロックに設定する。
+	/**
+	 * 最大の共有変数のネストカウントを設定する
+	 * @note	トップレベルの関数は、共有変数のネストカウントに応じたバッファを
+	 *			確保しなければならないため、ネスト数が最大でどれほどまでに行くの
+	 *			かを知っていなくてはならない。このメソッドはネストレベルが0の
+	 *			関数(つまり、関数グループのうち一番最初に実行される関数)の先頭のSSA形式
+	 *			にのみ有効である。このメソッドはコードジェネレータに
+	 *			共有変数のネストレベルを問い合わせ、それをコードブロックに設定する。
+	 */
 	void SetSharedVariableNestCount();
 
-	//! @brief		状態を得る
-	//! @return		状態
+	/**
+	 * 状態を得る
+	 * @return	状態
+	 */
 	tState GetState() const { return State; }
 };
 //---------------------------------------------------------------------------

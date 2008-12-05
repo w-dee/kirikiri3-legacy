@@ -18,28 +18,35 @@
 
 namespace Risse {
 //---------------------------------------------------------------------------
-//! @brief		組み込みパッケージイニシャライザの共通クラス
-//---------------------------------------------------------------------------
+/**
+ * 組み込みパッケージイニシャライザの共通クラス
+ */
 class tBuiltinPackageInitializer : public tBuiltinPackageInitializerInterface
 {
 	tString PackageName; //!< パッケージ名
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		name		パッケージ名
+	/**
+	 * コンストラクタ
+	 * @param name	パッケージ名
+	 */
 	tBuiltinPackageInitializer(const tString & name) : PackageName(name) {;}
 
-	//! @brief		インスタンスをパッケージマネージャに登録する
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * インスタンスをパッケージマネージャに登録する
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	void RegisterInstance(tScriptEngine * engine)
 	{
 		engine->AddBuiltinPackage(PackageName, this);
 	}
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	virtual void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global) = 0;
 };

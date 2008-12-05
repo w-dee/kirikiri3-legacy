@@ -20,13 +20,17 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		「不正なパラメータの個数」例外を発生(暫定)
-//! @param		passed		実際に渡された個数
-//! @param		expected	期待した数
+/**
+ * 「不正なパラメータの個数」例外を発生(暫定)
+ * @param passed	実際に渡された個数
+ * @param expected	期待した数
+ */
 void ThrowBadArgumentCount(risse_size passed, risse_size expected);
-//! @brief		「不正なブロックパラメータの個数」例外を発生(暫定)
-//! @param		passed		実際に渡された個数
-//! @param		expected	期待した数
+/**
+ * 「不正なブロックパラメータの個数」例外を発生(暫定)
+ * @param passed	実際に渡された個数
+ * @param expected	期待した数
+ */
 void ThrowBadBlockArgumentCount(risse_size passed, risse_size expected);
 //---------------------------------------------------------------------------
 
@@ -36,9 +40,10 @@ typedef tVariantBlock tVariant;
 class tMethodArgument;
 
 //---------------------------------------------------------------------------
-//! @brief		メソッドへ渡す引数を表すクラス(可変引数用テンプレートクラス)
-//! @note		スレッド保護はない
-//---------------------------------------------------------------------------
+/**
+ * メソッドへ渡す引数を表すクラス(可変引数用テンプレートクラス)
+ * @note	スレッド保護はない
+ */
 template <risse_size AC, risse_size BC = 0>
 class tMethodArgumentOf : public tCollectee
 {
@@ -48,7 +53,9 @@ protected:
 	const tVariant * Arguments[(AC+BC)<1?1:(AC+BC)]; //!< 普通の引数を表す値へのポインタの配列
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tMethodArgumentOf()
 	{
 		ArgumentCount = AC;
@@ -59,68 +66,86 @@ public:
 
 
 public:
-	//! @brief		tMethodArgumentへのキャスト
-	//! @return		tMethodArgumentへの参照
-	//! @note		バイナリレイアウトが同一なのでtMethodArgumentへは安全に
-	//!				キャストできるはず
+	/**
+	 * tMethodArgumentへのキャスト
+	 * @return	tMethodArgumentへの参照
+	 * @note	バイナリレイアウトが同一なのでtMethodArgumentへは安全に
+	 *			キャストできるはず
+	 */
 	operator const tMethodArgument & () const
 		{ return * reinterpret_cast<const tMethodArgument *>(this); }
 
-	//! @brief		普通の引数の個数を得る
-	//! @return		普通の引数の個数
+	/**
+	 * 普通の引数の個数を得る
+	 * @return	普通の引数の個数
+	 */
 	risse_size GetArgumentCount() const { return ArgumentCount; }
 
-	//! @brief		ブロック引数の個数を得る
-	//! @return		ブロック引数の個数
+	/**
+	 * ブロック引数の個数を得る
+	 * @return	ブロック引数の個数
+	 */
 	risse_size GetBlockArgumentCount() const { return BlockArgumentCount; }
 
-	//! @brief		指定位置にある普通の引数への参照を返す(const版)
-	//! @param		n		位置(0～)
-	//! @return		引数への参照
-	//! @note		n の範囲はチェックしていない
+	/**
+	 * 指定位置にある普通の引数への参照を返す(const版)
+	 * @param n	位置(0～)
+	 * @return	引数への参照
+	 * @note	n の範囲はチェックしていない
+	 */
 	const tVariant & operator [] (risse_size n) const
 	{
 		return *Arguments[n];
 	}
 
-	//! @brief		指定位置にあるブロック引数への参照を返す(const版)
-	//! @param		n		位置(0～)
-	//! @return		引数への参照
-	//! @note		n の範囲はチェックしていない
+	/**
+	 * 指定位置にあるブロック引数への参照を返す(const版)
+	 * @param n	位置(0～)
+	 * @return	引数への参照
+	 * @note	n の範囲はチェックしていない
+	 */
 	const tVariant & GetBlockArgument (risse_size n) const
 	{
 		return *Arguments[n];
 	}
 
-	//! @brief		普通の引数へ値への参照をセットする
-	//! @param		n		パラメータ位置
-	//! @param		v		(パラメータの値)
-	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
-	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	/**
+	 * 普通の引数へ値への参照をセットする
+	 * @param n	パラメータ位置
+	 * @param v	(パラメータの値)
+	 * @note	tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	 *			値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	 */
 	void SetArgument(risse_size n, const tVariant *v)
 	{
 		Arguments[n] = v;
 	}
 
-	//! @brief		ブロック引数へ値への参照をセットする
-	//! @param		n		パラメータ位置
-	//! @param		v		(パラメータの値)
-	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
-	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	/**
+	 * ブロック引数へ値への参照をセットする
+	 * @param n	パラメータ位置
+	 * @param v	(パラメータの値)
+	 * @note	tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	 *			値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	 */
 	void SetBlockArgument(risse_size n, const tVariant *v)
 	{
 		Arguments[n+ArgumentCount] = v;
 	}
 
-	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
-	//! @param		n		想定したパラメータの数
+	/**
+	 * 普通の引数が想定した数未満の場合に例外を発生させる
+	 * @param n	想定したパラメータの数
+	 */
 	void ExpectArgumentCount(risse_size n) const
 	{
 		if(AC < n) ThrowBadArgumentCount(AC, n);
 	}
 
-	//! @brief		ブロック引数が想定した数未満の場合に例外を発生させる
-	//! @param		n		想定したパラメータの数
+	/**
+	 * ブロック引数が想定した数未満の場合に例外を発生させる
+	 * @param n	想定したパラメータの数
+	 */
 	void ExpectBlockArgumentCount(risse_size n) const
 	{
 		if(BC < n) ThrowBadBlockArgumentCount(BC, n);
@@ -130,9 +155,10 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		メソッドへ渡す引数を表すクラス
-//! @note		スレッド保護はない
-//---------------------------------------------------------------------------
+/**
+ * メソッドへ渡す引数を表すクラス
+ * @note	スレッド保護はない
+ */
 class tMethodArgument : public tCollectee
 {
 	class tEmptyMethodArgument
@@ -154,8 +180,10 @@ private:
 	void operator = (const tMethodArgument &); // non copy-able
 
 public:
-	//! @brief		引数0の引数を表すstaticオブジェクトへの参照を返す
-	//! @return		引数0の引数を表すstaticオブジェクトへの参照
+	/**
+	 * 引数0の引数を表すstaticオブジェクトへの参照を返す
+	 * @return	引数0の引数を表すstaticオブジェクトへの参照
+	 */
 	static const tMethodArgument & GetEmptyArgument()
 	{
 		// バイナリレイアウトが同一なので安全にキャストできるはず
@@ -167,29 +195,37 @@ private:
 	tMethodArgument(); //!< コンストラクタ (このクラスのインスタンスを作成するには以下のstatic関数をつかってね)
 
 public:
-	//! @brief		N個の引数分のストレージを持つこのクラスのインスタンスを動的に作成して返す
-	//! @param		ac		普通の引数の数
-	//! @param		bc		ブロック引数の数
-	//! @return		動的に確保されたこのクラスのインスタンス
+	/**
+	 * N個の引数分のストレージを持つこのクラスのインスタンスを動的に作成して返す
+	 * @param ac	普通の引数の数
+	 * @param bc	ブロック引数の数
+	 * @return	動的に確保されたこのクラスのインスタンス
+	 */
 	static tMethodArgument & Allocate(risse_size ac, risse_size bc = 0);
 
 public:
-	//! @brief		引数=0のtMethodArgumentOfオブジェクトを返す(New()のエイリアス)
+	/**
+	 * 引数=0のtMethodArgumentOfオブジェクトを返す(New()のエイリアス)
+	 */
 	static const tMethodArgument & Empty()
 	{
 		return GetEmptyArgument();
 	}
 
-	//! @brief		引数=0のtMethodArgumentOfオブジェクトを返す
+	/**
+	 * 引数=0のtMethodArgumentOfオブジェクトを返す
+	 */
 	static const tMethodArgument & New()
 	{
 		return Empty();
 	}
 
-	//! @brief		普通の引数=1のtMethodArgumentOfオブジェクトを返す
-	//! @param		a0		パラメータ0
-	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
-	//!				パラメータの実体が消えないように保証すること
+	/**
+	 * 普通の引数=1のtMethodArgumentOfオブジェクトを返す
+	 * @param a0	パラメータ0
+	 * @note	パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	 *			パラメータの実体が消えないように保証すること
+	 */
 	static const tMethodArgumentOf<1> New(const tVariant &a0)
 	{
 		tMethodArgumentOf<1> arg;
@@ -197,11 +233,13 @@ public:
 		return arg;
 	}
 
-	//! @brief		普通の引数=2のtMethodArgumentOfオブジェクトを返す
-	//! @param		a0		パラメータ0
-	//! @param		a1		パラメータ1
-	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
-	//!				パラメータの実体が消えないように保証すること
+	/**
+	 * 普通の引数=2のtMethodArgumentOfオブジェクトを返す
+	 * @param a0	パラメータ0
+	 * @param a1	パラメータ1
+	 * @note	パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	 *			パラメータの実体が消えないように保証すること
+	 */
 	static const tMethodArgumentOf<2> New(const tVariant &a0,
 								const tVariant &a1)
 	{
@@ -211,12 +249,14 @@ public:
 		return arg;
 	}
 
-	//! @brief		普通の引数=3のtMethodArgumentOfオブジェクトを返す
-	//! @param		a0		パラメータ0
-	//! @param		a1		パラメータ1
-	//! @param		a2		パラメータ2
-	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
-	//!				パラメータの実体が消えないように保証すること
+	/**
+	 * 普通の引数=3のtMethodArgumentOfオブジェクトを返す
+	 * @param a0	パラメータ0
+	 * @param a1	パラメータ1
+	 * @param a2	パラメータ2
+	 * @note	パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	 *			パラメータの実体が消えないように保証すること
+	 */
 	static const tMethodArgumentOf<3> New(const tVariant &a0,
 								const tVariant &a1, const tVariant &a2)
 	{
@@ -227,13 +267,15 @@ public:
 		return arg;
 	}
 
-	//! @brief		普通の引数=4のtMethodArgumentOfオブジェクトを返す
-	//! @param		a0		パラメータ0
-	//! @param		a1		パラメータ1
-	//! @param		a2		パラメータ2
-	//! @param		a3		パラメータ3
-	//! @note		パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
-	//!				パラメータの実体が消えないように保証すること
+	/**
+	 * 普通の引数=4のtMethodArgumentOfオブジェクトを返す
+	 * @param a0	パラメータ0
+	 * @param a1	パラメータ1
+	 * @param a2	パラメータ2
+	 * @param a3	パラメータ3
+	 * @note	パラメータは参照(ポインタ)で保持されるため、このオブジェクトの存在期間中は
+	 *			パラメータの実体が消えないように保証すること
+	 */
 	static const tMethodArgumentOf<4> New(const tVariant &a0,
 								const tVariant &a1,
 								const tVariant &a2,
@@ -248,55 +290,69 @@ public:
 	}
 
 public:
-	//! @brief		普通の引数の個数を得る
-	//! @return		普通の引数の個数
+	/**
+	 * 普通の引数の個数を得る
+	 * @return	普通の引数の個数
+	 */
 	risse_size GetArgumentCount() const { return ArgumentCount; }
 
-	//! @brief		ブロック引数の個数を得る
-	//! @return		ブロック引数の個数
+	/**
+	 * ブロック引数の個数を得る
+	 * @return	ブロック引数の個数
+	 */
 	risse_size GetBlockArgumentCount() const { return BlockArgumentCount; }
 
-	//! @brief		指定位置にある普通の引数への参照を返す(const版)
-	//! @param		n		位置(0～)
-	//! @return		引数への参照
-	//! @note		n の範囲はチェックしていない
+	/**
+	 * 指定位置にある普通の引数への参照を返す(const版)
+	 * @param n	位置(0～)
+	 * @return	引数への参照
+	 * @note	n の範囲はチェックしていない
+	 */
 	const tVariant & operator [] (risse_size n) const
 	{
 		return *Arguments[n];
 	}
 
-	//! @brief		指定位置にあるブロック引数への参照を返す(const版)
-	//! @param		n		位置(0～)
-	//! @return		引数への参照
-	//! @note		n の範囲はチェックしていない
+	/**
+	 * 指定位置にあるブロック引数への参照を返す(const版)
+	 * @param n	位置(0～)
+	 * @return	引数への参照
+	 * @note	n の範囲はチェックしていない
+	 */
 	const tVariant & GetBlockArgument (risse_size n) const
 	{
 		return *Arguments[n+ArgumentCount];
 	}
 
-	//! @brief		普通の引数へ値への参照をセットする
-	//! @param		n		パラメータ位置
-	//! @param		v		(パラメータの値)
-	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
-	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	/**
+	 * 普通の引数へ値への参照をセットする
+	 * @param n	パラメータ位置
+	 * @param v	(パラメータの値)
+	 * @note	tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	 *			値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	 */
 	void SetArgument(risse_size n, const tVariant *v)
 	{
 		Arguments[n] = v;
 	}
 
-	//! @brief		ブロック引数へ値への参照をセットする
-	//! @param		n		パラメータ位置
-	//! @param		v		(パラメータの値)
-	//! @note		tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
-	//!				値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	/**
+	 * ブロック引数へ値への参照をセットする
+	 * @param n	パラメータ位置
+	 * @param v	(パラメータの値)
+	 * @note	tMethodArgument とその仲間は、値へのポインタしか保持しない。このため、
+	 *			値が関数呼び出しの間存在し、不変であることを呼び出し側で保証すること。
+	 */
 	void SetBlockArgument(risse_size n, const tVariant *v)
 	{
 		Arguments[n+ArgumentCount] = v;
 	}
 
-	//! @brief		引数が存在するかどうかを得る
-	//! @param		n		パラメータ位置
-	//! @return		引数が存在するかどうか
+	/**
+	 * 引数が存在するかどうかを得る
+	 * @param n	パラメータ位置
+	 * @return	引数が存在するかどうか
+	 */
 	bool HasArgument(risse_size n) const
 	{
 		if(GetArgumentCount() <= n) return false;
@@ -307,9 +363,11 @@ public:
 		return !reinterpret_cast<const tVariantData*>(Arguments[n])->IsVoid();
 	}
 
-	//! @brief		ブロック引数が存在するかどうかを得る
-	//! @param		n		パラメータ位置
-	//! @return		ブロック引数が存在するかどうか
+	/**
+	 * ブロック引数が存在するかどうかを得る
+	 * @param n	パラメータ位置
+	 * @return	ブロック引数が存在するかどうか
+	 */
 	bool HasBlockArgument(risse_size n) const
 	{
 		if(GetBlockArgumentCount() <= n) return false;
@@ -317,15 +375,19 @@ public:
 		return !reinterpret_cast<const tVariantData*>(Arguments[n+ArgumentCount])->IsVoid();
 	}
 
-	//! @brief		普通の引数が想定した数未満の場合に例外を発生させる
-	//! @param		n		想定したパラメータの数
+	/**
+	 * 普通の引数が想定した数未満の場合に例外を発生させる
+	 * @param n	想定したパラメータの数
+	 */
 	void ExpectArgumentCount(risse_size n) const
 	{
 		if(ArgumentCount < n) ThrowBadArgumentCount(ArgumentCount, n);
 	}
 
-	//! @brief		ブロック引数が想定した数未満の場合に例外を発生させる
-	//! @param		n		想定したパラメータの数
+	/**
+	 * ブロック引数が想定した数未満の場合に例外を発生させる
+	 * @param n	想定したパラメータの数
+	 */
 	void ExpectBlockArgumentCount(risse_size n) const
 	{
 		if(BlockArgumentCount < n) ThrowBadBlockArgumentCount(BlockArgumentCount, n);

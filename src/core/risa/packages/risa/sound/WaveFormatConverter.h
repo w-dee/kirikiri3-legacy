@@ -25,13 +25,15 @@ namespace Risa {
 class tWaveFormatConverter : public tCollectee
 {
 public:
-	//! @brief		PCM形式の変換を行う
-	//! @param		outformat		出力フォーマット
-	//! @param		outdata			出力フォーマットを書き出すバッファ
-	//! @param		informat		入力フォーマット
-	//! @param		indata			入力データ
-	//! @param		channels		チャンネル数
-	//! @param		numsamples		処理を行うサンプルグラニュール数
+	/**
+	 * PCM形式の変換を行う
+	 * @param outformat		出力フォーマット
+	 * @param outdata		出力フォーマットを書き出すバッファ
+	 * @param informat		入力フォーマット
+	 * @param indata		入力データ
+	 * @param channels		チャンネル数
+	 * @param numsamples	処理を行うサンプルグラニュール数
+	 */
 	static void Convert(
 		tPCMTypes::tType outformat, void * RISSE_RESTRICT outdata,
 		tPCMTypes::tType informat, const void * RISSE_RESTRICT indata,

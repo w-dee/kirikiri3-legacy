@@ -25,8 +25,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		矩形クラス
-//---------------------------------------------------------------------------
+/**
+ * 矩形クラス
+ */
 template <typename VALUE_TYPE>
 class tRectBase : public tCollectee
 {
@@ -53,7 +54,9 @@ public:
 
 public:
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRectBase(tValue l, tValue t, tValue r, tValue b)
 		{ Left = l, Top = t, Right = r, Bottom =b; }
 
@@ -72,18 +75,22 @@ public:
 	void SetWidth(tValue w) { Right = Left + w; } //!< 横幅を設定する(Leftはそのままで、Rightが変更される)
 	void SetHeight(tValue h) { Bottom = Top + h; } //!< 縦幅を設定する(Topはそのままで、Bottomが変更される)
 
-	//! @brief		オフセットを加算する(矩形を指定しただけ移動する)
-	//! @param		x		横方向に加算したい値
-	//! @param		y		縦方向に加算したい値
+	/**
+	 * オフセットを加算する(矩形を指定しただけ移動する)
+	 * @param x	横方向に加算したい値
+	 * @param y	縦方向に加算したい値
+	 */
 	void AddOffsets(tValue x, tValue y)
 	{
 		Left += x; Right += x;
 		Top += y; Bottom += y;
 	}
 
-	//! @brief		オフセットを設定する(矩形の大きさはそのままで、左上点だけを指定位置に変更する)
-	//! @param 		x		左上点の新しいX座標値
-	//! @param		y		左上点の新しいY座標値
+	/**
+	 * オフセットを設定する(矩形の大きさはそのままで、左上点だけを指定位置に変更する)
+	 * @param x	左上点の新しいX座標値
+	 * @param y	左上点の新しいY座標値
+	 */
 	void SetOffsets(tValue x, tValue y)
 	{
 		tValue w = GetWidth();
@@ -94,36 +101,46 @@ public:
 		Bottom = y + h;
 	}
 
-	//! @brief		サイズを設定する(矩形の左上点はそのまま)
-	//! @param		w		新しい横幅
-	//! @param		h		新しい縦幅
+	/**
+	 * サイズを設定する(矩形の左上点はそのまま)
+	 * @param w	新しい横幅
+	 * @param h	新しい縦幅
+	 */
 	void SetSize(tValue w, tValue h)
 	{
 		Right = Left + w;
 		Bottom = Top + h;
 	}
 
-	//! @brief		矩形をクリアする (頂点をすべて0にする)
+	/**
+	 * 矩形をクリアする (頂点をすべて0にする)
+	 */
 	void Clear()
 	{
 		Left = Top = Right = Bottom = 0;
 	}
 
-	//! @brief		矩形が有効か (0あるいは正のサイズを持っているか) を返す
+	/**
+	 * 矩形が有効か (0あるいは正のサイズを持っているか) を返す
+	 */
 	bool IsValid() const
 	{
 		return Left >= Right || Top >= Bottom;
 	}
 
-	//! @brief		矩形がサイズを持ってるか (0以上のサイズを持っているか) を返す
+	/**
+	 * 矩形がサイズを持ってるか (0以上のサイズを持っているか) を返す
+	 */
 	bool HasArea() const
 	{
 		return Right > Left && Bottom > Top;
 	}
 
-	//! @brief		矩形を統合する(二つの矩形を囲む矩形にする)
-	//! @param		ref		統合する相手
-	//! @note		この矩形およびrefの有効性はチェックしない
+	/**
+	 * 矩形を統合する(二つの矩形を囲む矩形にする)
+	 * @param ref	統合する相手
+	 * @note	この矩形およびrefの有効性はチェックしない
+	 */
 	void Unite(const tRectBase & ref)
 	{
 		Left   = std::min(Left,   ref.Left);
@@ -132,10 +149,12 @@ public:
 		Bottom = std::max(Bottom, ref.Bottom);
 	}
 
-	//! @brief		矩形の交差を得る(二つの矩形に共通の矩形にする)
-	//! @param		ref		交差を得る相手
-	//! @note		この矩形およびrefの有効性はチェックしない。
-	//!				交差が得られなかった場合はこの矩形はサイズが0になるか無効になる(HasAreaでチェック可能)
+	/**
+	 * 矩形の交差を得る(二つの矩形に共通の矩形にする)
+	 * @param ref	交差を得る相手
+	 * @note	この矩形およびrefの有効性はチェックしない。
+	 *			交差が得られなかった場合はこの矩形はサイズが0になるか無効になる(HasAreaでチェック可能)
+	 */
 	void Intersect(const tRectBase &ref)
 	{
 		Left   = std::max(Left,   ref.Left);
@@ -146,7 +165,9 @@ public:
 
 };
 //---------------------------------------------------------------------------
-//! @brief		整数矩形クラスのtypedef
+/**
+ * 整数矩形クラスのtypedef
+ */
 typedef tRectBase<coord> tRect;
 //---------------------------------------------------------------------------
 

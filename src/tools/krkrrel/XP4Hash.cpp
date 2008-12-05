@@ -20,10 +20,11 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルのハッシュ値を計算する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		filename ハッシュを計算するファイル名
-//---------------------------------------------------------------------------
+/**
+ * ファイルのハッシュ値を計算する
+ * @param callback	進捗コールバックオブジェクト
+ * @param filename	ハッシュを計算するファイル名
+ */
 void tXP4Hash::Make(iRisaProgressCallback * callback, const wxString &filename)
 {
 	if(find_hash(RISA__XP4_HASH_METHOD_INTERNAL_STRING) == -1)
@@ -56,8 +57,9 @@ void tXP4Hash::Make(iRisaProgressCallback * callback, const wxString &filename)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ値を標準出力に表示する
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ値を標準出力に表示する
+ */
 void tXP4Hash::Print() const
 {
 	for(size_t i = 0; i < RISA__XP4_HASH_SIZE; i++)
@@ -67,9 +69,10 @@ void tXP4Hash::Print() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュのチャンク名を得る
-//! @return		ハッシュのチャンク名(constではないが内容は変更しないこと!)
-//---------------------------------------------------------------------------
+/**
+ * ハッシュのチャンク名を得る
+ * @return	ハッシュのチャンク名(constではないが内容は変更しないこと!)
+ */
 /* const */ unsigned  char *  tXP4Hash::GetHashChunkName()
 {
 	static unsigned char hash_name[] = RISA__XP4_HASH_METHOD_CHUNK_NAME;

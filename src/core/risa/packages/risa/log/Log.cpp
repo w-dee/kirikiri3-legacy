@@ -295,8 +295,9 @@ void tWxLogProxy::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
-//---------------------------------------------------------------------------
+/**
+ * risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
+ */
 class tRisaLogPackageMemberInitializer : public tPackageMemberInitializer,
 	public singleton_base<tRisaLogPackageMemberInitializer>
 
@@ -337,16 +338,20 @@ public:
 		tLogger::instance()->Log(content, tLogger::llCritical);
 	}
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRisaLogPackageMemberInitializer()
 	{
 		tPackageRegisterer<tSS<'r','i','s','a','.','l','o','g'> >::instance()->AddInitializer(this);
 	}
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{

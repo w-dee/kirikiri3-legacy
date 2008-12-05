@@ -26,8 +26,9 @@ RISSE_DEFINE_SOURCE_ID(47626,3140,27936,19656,12175,17772,57131,58681);
 
 
 //---------------------------------------------------------------------------
-//! @brief		SoundException クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * SoundException クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','s','o','u','n','d'>,
 	tSoundExceptionClass>;
@@ -491,21 +492,28 @@ void tSoundInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Sound" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Sound" クラス
+ */
 class tSoundClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tSoundClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
@@ -570,8 +578,9 @@ tVariant tSoundClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Sound クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * Sound クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','s','o','u','n','d'>,
 	tSoundClass>;

@@ -9,9 +9,10 @@
 //---------------------------------------------------------------------------
 //! @file
 //! @brief Win32 GDI 経由でのFreeType Face
-//! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tFreeTypeFace もプラットフォームごとに異なった実装となる。
-//---------------------------------------------------------------------------
+/**
+ * @note	フォント名からフォントファイル名を得る動作がOSごとに異なるため、
+ *			tFreeTypeFace もプラットフォームごとに異なった実装となる。
+ */
 #include "../prec.h"
 #include "NativeFreeTypeFace.h"
 #include "../FreeType.h"
@@ -29,10 +30,11 @@ namespace Risa {
 #define RISA__TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		fontname フォント名
-//! @param		options オプション
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param fontname	フォント名
+ * @param options	オプション
+ */
 tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 	risse_uint32 options)
 {
@@ -229,8 +231,9 @@ tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tNativeFreeTypeFace::~tNativeFreeTypeFace()
 {
 	Clear();
@@ -240,8 +243,9 @@ tNativeFreeTypeFace::~tNativeFreeTypeFace()
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType の Face オブジェクトを返す
-//---------------------------------------------------------------------------
+/**
+ * FreeType の Face オブジェクトを返す
+ */
 FT_Face tNativeFreeTypeFace::GetFTFace() const
 {
 	return Face;
@@ -250,9 +254,10 @@ FT_Face tNativeFreeTypeFace::GetFTFace() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		このフォントファイルが持っているフォントを配列として返す
-//! @param		dest 格納先配列
-//---------------------------------------------------------------------------
+/**
+ * このフォントファイルが持っているフォントを配列として返す
+ * @param dest	格納先配列
+ */
 void tNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	// このFaceの場合、既にFaceは特定されているため、利用可能な
@@ -266,8 +271,9 @@ void tNativeFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 
 
 //---------------------------------------------------------------------------
-//! @brief		全てのオブジェクトを解放する
-//---------------------------------------------------------------------------
+/**
+ * 全てのオブジェクトを解放する
+ */
 void tNativeFreeTypeFace::Clear()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
@@ -284,13 +290,14 @@ void tNativeFreeTypeFace::Clear()
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType 用 ストリーム読み込み関数
-//! @param		stream FT_Streamへのポインタ
-//! @param		offset ストリーム先頭からのオフセット
-//! @param		buffer 格納先バッファ
-//! @param		count  読み出すバイト数
-//! @return		何バイト読み込まれたか
-//---------------------------------------------------------------------------
+/**
+ * FreeType 用 ストリーム読み込み関数
+ * @param stream	FT_Streamへのポインタ
+ * @param offset	ストリーム先頭からのオフセット
+ * @param buffer	格納先バッファ
+ * @param count		読み出すバイト数
+ * @return	何バイト読み込まれたか
+ */
 unsigned long tNativeFreeTypeFace::IoFunc(
 			FT_Stream stream,
 			unsigned long   offset,
@@ -317,9 +324,10 @@ unsigned long tNativeFreeTypeFace::IoFunc(
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType 用 ストリーム削除関数
-//! @param		stream FT_Streamへのポインタ
-//---------------------------------------------------------------------------
+/**
+ * FreeType 用 ストリーム削除関数
+ * @param stream	FT_Streamへのポインタ
+ */
 void tNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
 	// 何もしない
@@ -328,10 +336,11 @@ void tNativeFreeTypeFace::CloseFunc( FT_Stream  stream )
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定インデックスのFaceを開く
-//! @param		index	開くindex
-//! @return		Faceを開ければ true そうでなければ false
-//---------------------------------------------------------------------------
+/**
+ * 指定インデックスのFaceを開く
+ * @param index	開くindex
+ * @return	Faceを開ければ true そうでなければ false
+ */
 bool tNativeFreeTypeFace::OpenFaceByIndex(int index)
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;

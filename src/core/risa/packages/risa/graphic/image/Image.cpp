@@ -342,8 +342,9 @@ tVariant tImageClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Image クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * Image クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'>,
 	tImageClass>;
@@ -358,23 +359,28 @@ template class tClassRegisterer<
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
-//---------------------------------------------------------------------------
+/**
+ * risa.log のパッケージのメンバを初期化するためのシングルトンインスタンス
+ */
 class tRisaGraphicImagePackageMemberInitializer : public tPackageMemberInitializer,
 	public singleton_base<tRisaGraphicImagePackageMemberInitializer>
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRisaGraphicImagePackageMemberInitializer()
 	{
 		tPackageRegisterer<tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','i','m','a','g','e'> >::instance()->
 			AddInitializer(this);
 	}
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global)
 	{

@@ -28,8 +28,9 @@ void NotifyPreviewFrameFaceChanged();
 
 
 //---------------------------------------------------------------------------
-//! @brief プレビューウィンドウクラス
-//---------------------------------------------------------------------------
+/**
+ * プレビューウィンドウクラス
+ */
 class wxFontPreviewFrame:public wxPreviewFrame_Base
 {
 	wxMainDialog * MainDialog;

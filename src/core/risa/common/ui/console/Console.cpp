@@ -28,8 +28,9 @@ RISSE_DEFINE_SOURCE_ID(42206,11515,36168,20323,34721,49407,49922,37589);
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンソール用のヒストリ付きカスタムテキストコントロール
-//---------------------------------------------------------------------------
+/**
+ * コンソール用のヒストリ付きカスタムテキストコントロール
+ */
 class tHistoryTextCtrl :  public wxTextCtrl, protected depends_on<tConfig>
 {
 	const static size_t MaxNumHistoryItems = 100; //!< ヒストリの最大個数
@@ -55,8 +56,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブル
-//---------------------------------------------------------------------------
+/**
+ * イベントテーブル
+ */
 BEGIN_EVENT_TABLE(tHistoryTextCtrl, wxTextCtrl)
 	EVT_TEXT_ENTER(wxID_ANY,	tHistoryTextCtrl::OnEnter)
 	EVT_CHAR(					tHistoryTextCtrl::OnChar)
@@ -65,9 +67,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		parent 親ウィンドウ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param parent	親ウィンドウ
+ */
 tHistoryTextCtrl::tHistoryTextCtrl(wxWindow *parent):
 	wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
 		wxTE_PROCESS_ENTER)
@@ -91,8 +94,9 @@ tHistoryTextCtrl::tHistoryTextCtrl(wxWindow *parent):
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tHistoryTextCtrl::~tHistoryTextCtrl()
 {
 	// ヒストリなどを設定情報に書き出す
@@ -102,8 +106,9 @@ tHistoryTextCtrl::~tHistoryTextCtrl()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ヒストリを設定情報に書き出す
-//---------------------------------------------------------------------------
+/**
+ * ヒストリを設定情報に書き出す
+ */
 void tHistoryTextCtrl::WriteConfig()
 {
 	tConfigData & config = tConfig::instance()->GetVariableConfig();
@@ -120,9 +125,10 @@ void tHistoryTextCtrl::WriteConfig()
 
 
 //---------------------------------------------------------------------------
-//! @brief		式をヒストリに入れる
-//! @param		item	式
-//---------------------------------------------------------------------------
+/**
+ * 式をヒストリに入れる
+ * @param item	式
+ */
 void tHistoryTextCtrl::PushHistory(const wxString & item)
 {
 	History.push_front(item);
@@ -137,9 +143,10 @@ void tHistoryTextCtrl::PushHistory(const wxString & item)
 
 
 //---------------------------------------------------------------------------
-//! @brief		Enterキーが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * Enterキーが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void tHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 {
 	// ヒストリの内容をファイルに保存する
@@ -168,9 +175,10 @@ void tHistoryTextCtrl::OnEnter(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字が入力されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 文字が入力されたとき
+ * @param event	イベントオブジェクト
+ */
 void tHistoryTextCtrl::OnChar(wxKeyEvent & event)
 {
 	switch ( event.GetKeyCode() )
@@ -277,8 +285,9 @@ void tHistoryTextCtrl::OnChar(wxKeyEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンソール用のカスタムステータスバー
-//---------------------------------------------------------------------------
+/**
+ * コンソール用のカスタムステータスバー
+ */
 class tLogViewerStatusBar : public wxStatusBar
 {
 	tHistoryTextCtrl * TextCtrl; //!< テキストコントロール
@@ -299,8 +308,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ログビューア用のカスタムステータスバー用のイベントテーブル
-//---------------------------------------------------------------------------
+/**
+ * ログビューア用のカスタムステータスバー用のイベントテーブル
+ */
 BEGIN_EVENT_TABLE(tLogViewerStatusBar, wxStatusBar)
 	EVT_SIZE(					tLogViewerStatusBar::OnSize)
 END_EVENT_TABLE()
@@ -308,9 +318,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		parent 親ウィンドウ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param parent	親ウィンドウ
+ */
 tLogViewerStatusBar::tLogViewerStatusBar(wxWindow *parent)
 		   : wxStatusBar(parent, wxID_ANY)
 {
@@ -328,8 +339,9 @@ tLogViewerStatusBar::tLogViewerStatusBar(wxWindow *parent)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tLogViewerStatusBar::~tLogViewerStatusBar()
 {
 }
@@ -337,10 +349,11 @@ tLogViewerStatusBar::~tLogViewerStatusBar()
 
 
 //---------------------------------------------------------------------------
-//! @brief		テキストコントロールにフォーカスを合わせる
-//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
-//!								押されたキー (必要ならばこれを挿入する)
-//---------------------------------------------------------------------------
+/**
+ * テキストコントロールにフォーカスを合わせる
+ * @param insert_code	テキストコントロールにフォーカスを合わせた際に
+ *						押されたキー (必要ならばこれを挿入する)
+ */
 void tLogViewerStatusBar::FocusToTextCtrl(int insert_code)
 {
 	TextCtrl->SetFocus();
@@ -351,8 +364,9 @@ void tLogViewerStatusBar::FocusToTextCtrl(int insert_code)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コントロールのサイズを調整する
-//---------------------------------------------------------------------------
+/**
+ * コントロールのサイズを調整する
+ */
 void tLogViewerStatusBar::AdjustControlSize()
 {
 	wxRect rect;
@@ -364,9 +378,10 @@ void tLogViewerStatusBar::AdjustControlSize()
 
 
 //---------------------------------------------------------------------------
-//! @brief		サイズが変更されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * サイズが変更されたとき
+ * @param event	イベントオブジェクト
+ */
 void tLogViewerStatusBar::OnSize(wxSizeEvent& event)
 {
 	AdjustControlSize();

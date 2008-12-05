@@ -24,22 +24,27 @@ namespace Risa {
 
 struct RISSE_WIN_BITMAPINFOHEADER;
 //---------------------------------------------------------------------------
-//! @brief		BMPイメージデコーダ
-//---------------------------------------------------------------------------
+/**
+ * BMPイメージデコーダ
+ */
 class tBMPImageDecoder : public tImageDecoder
 {
 public:
-	//! @brief		デコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * デコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
 
 private:
-	//! @brief		内部関数
+	/**
+	 * 内部関数
+	 */
 	void InternalLoadBMP(tStreamAdapter src,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict, RISSE_WIN_BITMAPINFOHEADER & bi,
@@ -51,16 +56,19 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		BMPイメージエンコーダ
-//---------------------------------------------------------------------------
+/**
+ * BMPイメージエンコーダ
+ */
 class tBMPImageEncoder : public tImageEncoder
 {
 public:
-	//! @brief		エンコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * エンコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict);

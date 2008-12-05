@@ -28,104 +28,130 @@ class tScriptEngine;
 class tClassBase;
 class tPrimitiveClassBase;
 //---------------------------------------------------------------------------
-//! @brief	バリアント型
-//! @note	tVariantData よりも高度な動作をここで定義する
-//! @note	スレッド保護無し
-//---------------------------------------------------------------------------
+/**
+ * バリアント型
+ * @note	tVariantData よりも高度な動作をここで定義する
+ * @note	スレッド保護無し
+ */
 class tVariantBlock : public tVariantData, public tOperateRetValue
 {
 private:
-	//! @brief		CannotCreateInstanceFromNonClassObjectException を投げる
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	/**
+	 * CannotCreateInstanceFromNonClassObjectException を投げる
+	 * @note	本来 risseExceptionClass.h に書いてある物だが
+	 *			ここの位置からは参照できないのでわざわざワンクッションを置く
+	 */
 	static void ThrowCannotCreateInstanceFromNonClassObjectException() RISSE_NORETURN;
 
-	//! @brief		BadContextException を投げる
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	/**
+	 * BadContextException を投げる
+	 * @note	本来 risseExceptionClass.h に書いてある物だが
+	 *			ここの位置からは参照できないのでわざわざワンクッションを置く
+	 */
 	static void ThrowBadContextException() RISSE_NORETURN;
 
-	//! @brief		NoSuchMemberException を投げる
-	//! @param		name		メンバ名
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	/**
+	 * NoSuchMemberException を投げる
+	 * @param name	メンバ名
+	 * @note	本来 risseExceptionClass.h に書いてある物だが
+	 *			ここの位置からは参照できないのでわざわざワンクッションを置く
+	 */
 	static void ThrowNoSuchMemberException(const tString & name) RISSE_NORETURN;
 
-	//! @brief		IllegalArgumentClassException を投げる
-	//! @param		class_name			クラス名
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	/**
+	 * IllegalArgumentClassException を投げる
+	 * @param class_name	クラス名
+	 * @note	本来 risseExceptionClass.h に書いてある物だが
+	 *			ここの位置からは参照できないのでわざわざワンクッションを置く
+	 */
 	static void ThrowIllegalArgumentClassException(const tString & class_name) RISSE_NORETURN;
 
-	//! @brief		IllegalArgumentClassException を投げる
-	//! @param		method_name			メソッド名
-	//! @note		本来 risseExceptionClass.h に書いてある物だが
-	//!				ここの位置からは参照できないのでわざわざワンクッションを置く
+	/**
+	 * IllegalArgumentClassException を投げる
+	 * @param method_name	メソッド名
+	 * @note	本来 risseExceptionClass.h に書いてある物だが
+	 *			ここの位置からは参照できないのでわざわざワンクッションを置く
+	 */
 	void ThrowIllegalOperationMethod(const tString & method_name) const RISSE_NORETURN;
 
 private: // static オブジェクト
-	//! @brief	null/void/などの特殊な値を表すstaticな領域
+	/**
+	 * null/void/などの特殊な値を表すstaticな領域
+	 */
 	struct tStaticPrimitive
 	{
 		risse_ptruint Type; //!< バリアントタイプ
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)];
-			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticPrimitive VoidObject;
 	static tStaticPrimitive NullObject;
 
-	//! @brief	DynamicContext などの特殊な値を表す static な領域
+	/**
+	 * DynamicContext などの特殊な値を表す static な領域
+	 */
 	struct tStaticObject
 	{
 		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
 		const tVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
-						//!< 指しているとして)メソッドが動作するコンテキスト
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tVariantBlock *)];
-			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticObject DynamicContext;
 
 public: // static オブジェクト
-	//! @brief		void オブジェクトを得る
-	//! @return		void オブジェクトへのstaticなconst参照
+	/**
+	 * void オブジェクトを得る
+	 * @return	void オブジェクトへのstaticなconst参照
+	 */
 	static const tVariantBlock & GetVoidObject()
 	{
 		return *reinterpret_cast<tVariantBlock*>(&VoidObject);
 	}
 
-	//! @brief		null オブジェクトを得る
-	//! @return		null オブジェクトへのstaticなconst参照
+	/**
+	 * null オブジェクトを得る
+	 * @return	null オブジェクトへのstaticなconst参照
+	 */
 	static const tVariantBlock & GetNullObject()
 	{
 		return *reinterpret_cast<tVariantBlock*>(&NullObject);
 	}
 
-	//! @brief		DynamicContext オブジェクトを得る
+	/**
+	 * DynamicContext オブジェクトを得る
+	 */
 	static const tVariantBlock * GetDynamicContext()
 	{
 		return reinterpret_cast<tVariantBlock*>(&DynamicContext);
 	}
 
 public: // バリアントタイプ
-	//! @brief		バリアントのタイプを文字列化する
-	//! @param		type タイプ
-	//! @return		型を表す文字列
+	/**
+	 * バリアントのタイプを文字列化する
+	 * @param type	タイプ
+	 * @return	型を表す文字列
+	 */
 	static const risse_char * GetTypeString(tType type);
 
-	//! @brief		バリアントのタイプを文字列化する
-	//! @param		type タイプ
-	//! @return		型を表す文字列
+	/**
+	 * バリアントのタイプを文字列化する
+	 * @param type	タイプ
+	 * @return	型を表す文字列
+	 */
 	const risse_char * GetTypeString() const { return GetTypeString(GetType()); }
 
-	//! @brief		バリアントのタイプをタグとして設定する
-	//! @param		type		型
-	//! @note		バリアントのタイプがこれによって設定されるが、
-	//!				元の値は破棄され、値は各バリアントタイプの代表値になる
-	//!				(例えば文字列ならば空文字列、数値ならば0)
+	/**
+	 * バリアントのタイプをタグとして設定する
+	 * @param type	型
+	 * @note	バリアントのタイプがこれによって設定されるが、
+	 *			元の値は破棄され、値は各バリアントタイプの代表値になる
+	 *			(例えば文字列ならば空文字列、数値ならば0)
+	 */
 	void SetTypeTag(tType type);
 
 public: // GuessTypeXXXXX で使用されるもの
-	//! @brief		GuessTypeXXXXX で使用される列挙型
+	/**
+	 * GuessTypeXXXXX で使用される列挙型
+	 */
 	enum tGuessType
 	{
 		gtVoid		= vtVoid,
@@ -139,13 +165,9 @@ public: // GuessTypeXXXXX で使用されるもの
 		gtObject	= vtObject,
 
 		gtAny = 9,	//!< 任意の型(GuessTypeXXXXX の入力として用いられた場合は
-					//!< どのような型もあり得ることを表す。出力として得られた場合も
-					//!< どのような型もあり得ることを表す)
 
 		// 以降、出力のみ
 		gtError		//!< (出力のみ) この演算の組み合わせは「必ず」エラーになる。
-					//!< 「場合によってはエラーになる」場合は他の結果が
-					//!< 得られる。
 	};
 	enum tGuessTypeFlags
 	{
@@ -153,28 +175,36 @@ public: // GuessTypeXXXXX で使用されるもの
 		gtEffective = 0x40 //!< (出力のみ) 副作用を持っている場合にこれを組み合わせて使う。
 	};
 
-	//! @brief		tGuessType を文字列化する
-	//! @param		type		タイプ
-	//! @return		type		を文字列化した物
+	/**
+	 * tGuessType を文字列化する
+	 * @param type	タイプ
+	 * @return	type		を文字列化した物
+	 */
 	static const risse_char * GetGuessTypeString(tGuessType type);
 
 public: // コンストラクタ/代入演算子
 
-	//! @brief デフォルトコンストラクタ(void型を作成)
+	/**
+	 * デフォルトコンストラクタ(void型を作成)
+	 */
 	tVariantBlock()
 	{
 		Clear();
 	}
 
-	//! @brief		コピーコンストラクタ
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * コピーコンストラクタ
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock(const tVariantBlock & ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		単純代入
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * 単純代入
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock & operator = (const tVariantBlock & ref)
 	{
 		switch(ref.GetType())
@@ -193,53 +223,65 @@ public: // コンストラクタ/代入演算子
 	}
 
 private:
-	//! @brief		コンストラクタ(const void * から)
-	//! @param		ref		値
-	//! @note		tObjectInterface に変換できない任意のポインタを
-	//!				ここで引っかけるためのコンストラクタ。ここで
-	//!				引っかかった場合はコードを見直すこと。
-	//!				おそらく、
-	//!				 1. なにか関係のないポインタを tVariant に突っ込もうとした
-	//!				 2. 確かに tObjectInterface 派生クラスだが
-	//!				    必要な情報を include してないためにコンパイラがアップキャスト
-	//!				    に失敗している
-	//!				 3. const な tObjectInterface へのポインタを渡そうとした
-	//!				    (非const な tObjectInterface * しか受け付けない)
+	/**
+	 * コンストラクタ(const void * から)
+	 * @param ref	値
+	 * @note	tObjectInterface に変換できない任意のポインタを
+	 *			ここで引っかけるためのコンストラクタ。ここで
+	 *			引っかかった場合はコードを見直すこと。
+	 *			おそらく、
+	 *			1. なにか関係のないポインタを tVariant に突っ込もうとした
+	 *			2. 確かに tObjectInterface 派生クラスだが
+	 *			必要な情報を include してないためにコンパイラがアップキャスト
+	 *			に失敗している
+	 *			3. const な tObjectInterface へのポインタを渡そうとした
+	 *			(非const な tObjectInterface * しか受け付けない)
+	 */
 	tVariantBlock(const void * ref);
 
-	//! @brief		代入演算子(const void * を代入)
-	//! @param		ref		値
-	//! @note		tObjectInterface に変換できない任意のポインタを
-	//!				ここで引っかけるための代入演算子。
-	//!				ここで引っかかったた場合はコードを見直すこと。
-	//!				(tVariantBlock(const void * )も参照)
+	/**
+	 * 代入演算子(const void * を代入)
+	 * @param ref	値
+	 * @note	tObjectInterface に変換できない任意のポインタを
+	 *			ここで引っかけるための代入演算子。
+	 *			ここで引っかかったた場合はコードを見直すこと。
+	 *			(tVariantBlock(const void * )も参照)
+	 */
 	void operator = (const void * ref);
 
 public:
-	//! @brief		コンストラクタ(integer型を作成)
-	//! @param		ref		元となる整数
+	/**
+	 * コンストラクタ(integer型を作成)
+	 * @param ref	元となる整数
+	 */
 	tVariantBlock(const risse_int64 ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(integer型を代入)
-	//! @param		ref		元となる整数
+	/**
+	 * 代入演算子(integer型を代入)
+	 * @param ref	元となる整数
+	 */
 	tVariantBlock & operator = (const risse_int64 ref)
 	{
 		Type = vtInteger;
 		AsInteger() = static_cast<risse_int64>(ref);
 		return *this;
 	}
-	//! @brief		コンストラクタ(integer型をrisse_size型から作成)
-	//! @param		ref		元となる整数
+	/**
+	 * コンストラクタ(integer型をrisse_size型から作成)
+	 * @param ref	元となる整数
+	 */
 	tVariantBlock(const risse_size ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(integer型をrisse_size型から代入)
-	//! @param		ref		元となる整数
+	/**
+	 * 代入演算子(integer型をrisse_size型から代入)
+	 * @param ref	元となる整数
+	 */
 	tVariantBlock & operator = (const risse_size ref)
 	{
 		Type = vtInteger;
@@ -247,15 +289,19 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(real型を作成)
-	//! @param		ref		元となる実数
+	/**
+	 * コンストラクタ(real型を作成)
+	 * @param ref	元となる実数
+	 */
 	tVariantBlock(const risse_real ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(real型を代入)
-	//! @param		ref		元となる実数
+	/**
+	 * 代入演算子(real型を代入)
+	 * @param ref	元となる実数
+	 */
 	tVariantBlock & operator = (const risse_real ref)
 	{
 		Type = vtReal;
@@ -263,15 +309,19 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(bool型を作成)
-	//! @param		ref		元となる真偽値
+	/**
+	 * コンストラクタ(bool型を作成)
+	 * @param ref	元となる真偽値
+	 */
 	tVariantBlock(const bool ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(bool型を代入)
-	//! @param		ref		元となる真偽値
+	/**
+	 * 代入演算子(bool型を代入)
+	 * @param ref	元となる真偽値
+	 */
 	tVariantBlock & operator = (const bool ref)
 	{
 		Type = vtBoolean;
@@ -279,31 +329,39 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(boolean型を作成)
-	//! @param		ref		元となるtBoolean型オブジェクト
+	/**
+	 * コンストラクタ(boolean型を作成)
+	 * @param ref	元となるtBoolean型オブジェクト
+	 */
 	tVariantBlock(const tBoolean & ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(bool型を代入)
-	//! @param		ref		元となるtBoolean型オブジェクト
+	/**
+	 * 代入演算子(bool型を代入)
+	 * @param ref	元となるtBoolean型オブジェクト
+	 */
 	tVariantBlock & operator = (const tBoolean & ref)
 	{
 		AsBoolean() = ref;
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(string型を作成)
-	//! @param		ref		元となる文字列
+	/**
+	 * コンストラクタ(string型を作成)
+	 * @param ref	元となる文字列
+	 */
 	tVariantBlock(const tString & ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(string型を代入)
-	//! @param		ref		元となる文字列
-	//! @return		このオブジェクトへの参照
+	/**
+	 * 代入演算子(string型を代入)
+	 * @param ref	元となる文字列
+	 * @return	このオブジェクトへの参照
+	 */
 	tVariantBlock & operator = (const tString & ref)
 	{
 		// Type の設定は必要なし
@@ -311,16 +369,20 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(string型を作成)
-	//! @param		ref		元となる文字列
+	/**
+	 * コンストラクタ(string型を作成)
+	 * @param ref	元となる文字列
+	 */
 	tVariantBlock(const risse_char * ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(string型を代入)
-	//! @param		ref		元となる文字列
-	//! @return		このオブジェクトへの参照
+	/**
+	 * 代入演算子(string型を代入)
+	 * @param ref	元となる文字列
+	 * @return	このオブジェクトへの参照
+	 */
 	tVariantBlock & operator = (const risse_char * ref)
 	{
 		// Type の設定は必要なし
@@ -328,15 +390,19 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(octet型を作成)
-	//! @param		ref		元となるオクテット列
+	/**
+	 * コンストラクタ(octet型を作成)
+	 * @param ref	元となるオクテット列
+	 */
 	tVariantBlock(const tOctet & ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(octet型を代入)
-	//! @param		ref		元となるオクテット列
+	/**
+	 * 代入演算子(octet型を代入)
+	 * @param ref	元となるオクテット列
+	 */
 	tVariantBlock & operator = (const tOctet & ref)
 	{
 		// Type の設定は必要なし
@@ -344,16 +410,20 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(tObjectInterface*型より)
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * コンストラクタ(tObjectInterface*型より)
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock(tObjectInterface * ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		コンストラクタ(tObjectInterface*型とコンテキストを表すtVariant型より)
-	//! @param		ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストオブジェクトを表す
+	/**
+	 * コンストラクタ(tObjectInterface*型とコンテキストを表すtVariant型より)
+	 * @param ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
+	 * @param context	そのメソッドやプロパティが実行されるべきコンテキストオブジェクトを表す
+	 */
 	tVariantBlock(tObjectInterface * ref, const tVariantBlock * context)
 	{
 		Type = vtObject;
@@ -362,9 +432,11 @@ public:
 		AsObject().Context = context;
 	}
 
-	//! @brief		コンストラクタ(クラスを表すtPrimitiveClassBase*型とデータを表す void* 型より)
-	//! @param		Class		クラスインスタンス
-	//! @param		data		データ
+	/**
+	 * コンストラクタ(クラスを表すtPrimitiveClassBase*型とデータを表す void* 型より)
+	 * @param Class	クラスインスタンス
+	 * @param data	データ
+	 */
 	tVariantBlock(tPrimitiveClassBase * Class, void * data)
 	{
 		Type = vtData;
@@ -373,8 +445,10 @@ public:
 		AsData().Data = data;
 	}
 
-	//! @brief		代入演算子(tObjectInterface*型を代入)
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * 代入演算子(tObjectInterface*型を代入)
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock & operator = (tObjectInterface * ref)
 	{
 		// これはちょっと特殊
@@ -384,15 +458,19 @@ public:
 		return *this;
 	}
 
-	//! @brief		コンストラクタ(tData型から)
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * コンストラクタ(tData型から)
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock(const tData & ref)
 	{
 		* this = ref;
 	}
 
-	//! @brief		代入演算子(tData型を代入)
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * 代入演算子(tData型を代入)
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock & operator = (const tData & ref)
 	{
 		Type = vtData;
@@ -400,8 +478,10 @@ public:
 		return *this;
 	}
 
-	//! @brief		代入演算子(tObject型を代入)
-	//! @param		ref		元となるオブジェクト
+	/**
+	 * 代入演算子(tObject型を代入)
+	 * @param ref	元となるオブジェクト
+	 */
 	tVariantBlock & operator = (const tObject & ref)
 	{
 		Type = vtObject;
@@ -410,7 +490,9 @@ public:
 	}
 
 public: // デストラクタ
-	//! @brief		デストラクタ(tHashTableがこれを呼ぶ)
+	/**
+	 * デストラクタ(tHashTableがこれを呼ぶ)
+	 */
 	void Destruct()
 	{
 		// 少なくとも、メンバとして持っているポインタが破壊できればよい
@@ -419,9 +501,11 @@ public: // デストラクタ
 
 public: // スクリプトエンジンインスタンス
 
-	//! @brief		スクリプトエンジンインスタンスを得る
-	//! @return		スクリプトエンジンインスタンス
-	//! @note		vtObject あるいは vtData 限定。
+	/**
+	 * スクリプトエンジンインスタンスを得る
+	 * @return	スクリプトエンジンインスタンス
+	 * @note	vtObject あるいは vtData 限定。
+	 */
 	tScriptEngine * GetScriptEngine() const
 	{
 		RISSE_ASSERT(GetType() == vtObject || GetType() == vtData);
@@ -438,29 +522,37 @@ public: // スクリプトエンジンインスタンス
 	tScriptEngine * GetScriptEngine_Object() const;
 
 public: // String関連
-	//! @brief		文字列が空文字列かどうかを得る
-	//! @note		文字列が空の場合に真が帰るが、vt が vtString 以外の場合は
-	//!				(vtVoidでも) 偽を返すので注意
+	/**
+	 * 文字列が空文字列かどうかを得る
+	 * @note	文字列が空の場合に真が帰るが、vt が vtString 以外の場合は
+	 *			(vtVoidでも) 偽を返すので注意
+	 */
 	bool IsEmptyString() const
 	{
 		return GetType() == vtString && AsString().IsEmpty();
 	}
 
 public: // Primitive関連
-	//! @brief		プリミティブ型に即してプリミティブ型クラスを得る
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * プリミティブ型に即してプリミティブ型クラスを得る
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tPrimitiveClassBase * GetPrimitiveClass(tScriptEngine * engine) const;
 
 public: // Data関連
-	//! @brief		データオブジェクトを得る
+	/**
+	 * データオブジェクトを得る
+	 */
 	void * GetData() const { return AsData().Data; }
 
 public: // Object関連
-	//! @brief		オブジェクトインターフェースがマッチするかどうかを調べる
-	//! @param		rhs			右辺値
-	//! @return		マッチしたかどうか
-	//! @note		このメソッドは、(1)thisとrhsが両方ともvtObjectかつ(2)オブジェクトインターフェース
-	//!				ポインタが同一であるかどうかを調べる
+	/**
+	 * オブジェクトインターフェースがマッチするかどうかを調べる
+	 * @param rhs	右辺値
+	 * @return	マッチしたかどうか
+	 * @note	このメソッドは、(1)thisとrhsが両方ともvtObjectかつ(2)オブジェクトインターフェース
+	 *			ポインタが同一であるかどうかを調べる
+	 */
 	bool ObjectInterfaceMatch(const tVariant & rhs) const
 	{
 		if(GetType() != vtObject) return false;
@@ -468,12 +560,14 @@ public: // Object関連
 		return AsObject().Intf == rhs.AsObject().Intf;
 	}
 
-	//! @brief		コンテキストを設定する
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
-	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
-	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
-	//!				チェックしないので注意すること。@n
-	//!				DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。
+	/**
+	 * コンテキストを設定する
+	 * @param context	そのメソッドやプロパティが実行されるべきコンテキストを表す
+	 * @note	このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
+	 *			オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
+	 *			チェックしないので注意すること。@n
+	 *			DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。
+	 */
 	void SetContext(const tVariantBlock * context)
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
@@ -481,31 +575,37 @@ public: // Object関連
 		AsObject().Context = context;
 	}
 
-	//! @brief		コンテキストを設定する
-	//! @param		context	そのメソッドやプロパティが実行されるべきコンテキストを表す
-	//! @note		このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
-	//!				オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
-	//!				チェックしないので注意すること。@n
-	//!				DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。@n
-	//!				このメソッドは const tVariantBlock * context を引数に取る版とちがい、
-	//!				context がどうやら dynamic コンテキストらしい場合は自動的に
-	//!				GetDynamicContext() の戻りに変換する。そうでない場合は
-	//!				tVariantBlock を new してそのポインタを SetContext() で設定する。
+	/**
+	 * コンテキストを設定する
+	 * @param context	そのメソッドやプロパティが実行されるべきコンテキストを表す
+	 * @note	このメソッドは、vtがvtObjectで、そのオブジェクトがメソッドオブジェクトやプロパティ
+	 *			オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
+	 *			チェックしないので注意すること。@n
+	 *			DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。@n
+	 *			このメソッドは const tVariantBlock * context を引数に取る版とちがい、
+	 *			context がどうやら dynamic コンテキストらしい場合は自動的に
+	 *			GetDynamicContext() の戻りに変換する。そうでない場合は
+	 *			tVariantBlock を new してそのポインタを SetContext() で設定する。
+	 */
 	void SetContext(const tVariantBlock &context);
 
-	//! @brief		コンテキストを取得する
-	//! @return		そのメソッドやプロパティが実行されるべきコンテキスト
-	//! @note		このメソッドはvtがvtObjectかどうかを
-	//!				チェックしないので注意すること
+	/**
+	 * コンテキストを取得する
+	 * @return	そのメソッドやプロパティが実行されるべきコンテキスト
+	 * @note	このメソッドはvtがvtObjectかどうかを
+	 *			チェックしないので注意すること
+	 */
 	const tVariantBlock * GetContext() const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		return AsObject().Context;
 	}
 
-	//! @brief		コンテキストを持っているかどうかを得る
-	//! @note		このメソッドはvtがvtObject以外の場合はtrueを返す。
-	//!				コンテキストを持っている(コンテキストが dynamic でない)場合に真を返す
+	/**
+	 * コンテキストを持っているかどうかを得る
+	 * @note	このメソッドはvtがvtObject以外の場合はtrueを返す。
+	 *			コンテキストを持っている(コンテキストが dynamic でない)場合に真を返す
+	 */
 	bool HasContext() const
 	{
 		if(GetType() != vtObject) return true;
@@ -514,8 +614,10 @@ public: // Object関連
 		return obj.Context != GetDynamicContext();
 	}
 
-	//! @brief		このオブジェクトが DynamicContext かどうかを返す
-	//! @return		このオブジェクトが DynamicContext かどうか
+	/**
+	 * このオブジェクトが DynamicContext かどうかを返す
+	 * @return	このオブジェクトが DynamicContext かどうか
+	 */
 	bool IsDynamicContext() const
 	{
 		if(GetType() != vtObject) return false;
@@ -523,23 +625,27 @@ public: // Object関連
 		return AsObject().Intf == GetDynamicContext()->AsObject().Intf;
 	}
 
-	//! @brief		コンテキストを上書きする
-	//! @param		context	上書きするコンテキスト
-	//! @note		このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
-	//!				このオブジェクトのコンテキストが設定されいていない場合のみに発生する。
+	/**
+	 * コンテキストを上書きする
+	 * @param context	上書きするコンテキスト
+	 * @note	このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
+	 *			このオブジェクトのコンテキストが設定されいていない場合のみに発生する。
+	 */
 	void OverwriteContext(const tVariantBlock * context)
 	{
 		RISSE_ASSERT(context != NULL);
 		if(!HasContext()) SetContext(context);
 	}
 
-	//! @brief		コンテキストを選択する
-	//! @param		flags		フラグ
-	//! @param		This		コンテキストを持っていなかった場合に返されるコンテキスト
-	//! @return		選択されたコンテキスト
-	//! @note		このメソッドはvtがvtObjectかどうかをチェックしないので注意。
-	//!				この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
-	//!				ただし、フラグに ofUseClassMembersRule が指定されていた場合は常に This を返す
+	/**
+	 * コンテキストを選択する
+	 * @param flags	フラグ
+	 * @param This	コンテキストを持っていなかった場合に返されるコンテキスト
+	 * @return	選択されたコンテキスト
+	 * @note	このメソッドはvtがvtObjectかどうかをチェックしないので注意。
+	 *			この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
+	 *			ただし、フラグに ofUseClassMembersRule が指定されていた場合は常に This を返す
+	 */
 	const tVariantBlock & SelectContext(risse_uint32 flags, const tVariantBlock & This) const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
@@ -554,35 +660,39 @@ public: // Object関連
 	}
 
 public: // operate
-	//! @brief		オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		code	オペレーションコード
-	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		name	操作を行うメンバ名
-	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
-	//! @param		flags	オペレーションフラグ
-	//! @param		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @note		何か操作に失敗した場合は例外が発生する。このため、このメソッドに
-	//!				エラーコードなどの戻り値はない
+	/**
+	 * オブジェクトに対して操作を行う(失敗した場合は例外を発生させる)
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param code		オペレーションコード
+	 * @param result	結果の格納先 (NULLの場合は結果が要らない場合)
+	 * @param name		操作を行うメンバ名
+	 *					(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	 * @param flags		オペレーションフラグ
+	 * @param args		引数
+	 * @param This		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @note	何か操作に失敗した場合は例外が発生する。このため、このメソッドに
+	 *			エラーコードなどの戻り値はない
+	 */
 	void Do(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		tRetValue ret = Operate(engine, RISSE_OBJECTINTERFACE_PASS_ARG);
 		if(ret != rvNoError) RaiseError(ret, name);
 	}
 
-	//! @brief		オブジェクトに対して操作を行う
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		code	オペレーションコード
-	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		name	操作を行うメンバ名
-	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
-	//! @param		flags	オペレーションフラグ
-	//! @param		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @return		エラーコード
+	/**
+	 * オブジェクトに対して操作を行う
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param code		オペレーションコード
+	 * @param result	結果の格納先 (NULLの場合は結果が要らない場合)
+	 * @param name		操作を行うメンバ名
+	 *					(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	 * @param flags		オペレーションフラグ
+	 * @param args		引数
+	 * @param This		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @return	エラーコード
+	 */
 	tRetValue
 		Operate(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
@@ -805,18 +915,20 @@ public: // operate
 		return  rvNoError;
 	}
 
-	//! @brief		オブジェクトのメンバに対して操作を行う
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		code	オペレーションコード
-	//! @param		result	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		name	操作を行うメンバ名
-	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
-	//! @param		flags	オペレーションフラグ
-	//! @param		args	引数
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @note		Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
-	//! @return		エラーコード
+	/**
+	 * オブジェクトのメンバに対して操作を行う
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param code		オペレーションコード
+	 * @param result	結果の格納先 (NULLの場合は結果が要らない場合)
+	 * @param name		操作を行うメンバ名
+	 *					(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	 * @param flags		オペレーションフラグ
+	 * @param args		引数
+	 * @param This		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @note	Operate() メソッドがname付きで呼ばれた場合にこのメソッドが呼ばれる
+	 * @return	エラーコード
+	 */
 	tRetValue
 		OperateForMember(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
@@ -829,12 +941,13 @@ public: // 演算子
 	*/
 
 	//-----------------------------------------------------------------------
-	//! @brief		直接プロパティ取得		GetPropertyDirect dget
-	//! @param		name		メンバ名
-	//! @param		flags		フラグ
-	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	//! @return		プロパティ取得の結果
-	//-----------------------------------------------------------------------
+	/**
+	 * 直接プロパティ取得		GetPropertyDirect dget
+	 * @param name	メンバ名
+	 * @param flags	フラグ
+	 * @param This	このメソッドが実行されるべき"Thisオブジェクト"
+	 * @return	プロパティ取得の結果
+	 */
 	tVariantBlock GetPropertyDirect(tScriptEngine * engine, const tString & name,
 		risse_uint32 flags = 0,
 		const tVariant & This = tVariant::GetNullObject()) const
@@ -860,13 +973,14 @@ public: // 演算子
 	tVariantBlock GetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
 
 	//-----------------------------------------------------------------------
-	//! @brief		直接プロパティ設定		SetPropertyDirect dset
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		name		メンバ名
-	//! @param		value		設定する値
-	//! @param		flags		フラグ
-	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	//-----------------------------------------------------------------------
+	/**
+	 * 直接プロパティ設定		SetPropertyDirect dset
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		メンバ名
+	 * @param value		設定する値
+	 * @param flags		フラグ
+	 * @param This		このメソッドが実行されるべき"Thisオブジェクト"
+	 */
 	void SetPropertyDirect(tScriptEngine * engine, const tString & name, risse_uint32 flags,
 		const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const
 	{
@@ -890,10 +1004,11 @@ public: // 演算子
 	void SetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		間接プロパティ取得		IGet iget
-	//! @param		key		キー
-	//! @return		プロパティ取得の結果
-	//-----------------------------------------------------------------------
+	/**
+	 * 間接プロパティ取得		IGet iget
+	 * @param key	キー
+	 * @return	プロパティ取得の結果
+	 */
 	tVariantBlock IGet(const tVariantBlock & key) const
 	{
 		switch(GetType())
@@ -922,10 +1037,11 @@ public: // 演算子
 	tVariantBlock IGet_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		間接削除		IDelete idel
-	//! @param		key		キー
-	//! @return		削除されたキーの値(削除できなかった場合は普通void)
-	//-----------------------------------------------------------------------
+	/**
+	 * 間接削除		IDelete idel
+	 * @param key	キー
+	 * @return	削除されたキーの値(削除できなかった場合は普通void)
+	 */
 	tVariantBlock IDelete(const tVariantBlock & key) const
 	{
 		switch(GetType())
@@ -954,10 +1070,11 @@ public: // 演算子
 	tVariantBlock IDelete_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIDelete, key); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		間接プロパティ設定		ISet iset
-	//! @param		key			キー
-	//! @param		value		設定する値
-	//-----------------------------------------------------------------------
+	/**
+	 * 間接プロパティ設定		ISet iset
+	 * @param key	キー
+	 * @param value	設定する値
+	 */
 	void ISet(const tVariantBlock & key, const tVariantBlock & value) const
 	{
 		switch(GetType())
@@ -987,11 +1104,12 @@ public: // 演算子
 		複数の key を使用可能にする可能性があるためである */ }
 
 	//-----------------------------------------------------------------------
-	//! @brief		直接プロパティ削除		DeletePropertyDirect ddelete
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		name		メンバ名
-	//! @param		flags		フラグ
-	//-----------------------------------------------------------------------
+	/**
+	 * 直接プロパティ削除		DeletePropertyDirect ddelete
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		メンバ名
+	 * @param flags		フラグ
+	 */
 	void DeletePropertyDirect(tScriptEngine * engine, const tString & name, risse_uint32 flags) const
 	{
 		switch(GetType())
@@ -1014,11 +1132,12 @@ public: // 演算子
 	void DeletePropertyDirect_Object   (                        const tString & name, risse_uint32 flags) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		属性の設定		DSetAttrib dseta
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		key			キー
-	//! @param		attrib		設定する属性値
-	//-----------------------------------------------------------------------
+	/**
+	 * 属性の設定		DSetAttrib dseta
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param key		キー
+	 * @param attrib	設定する属性値
+	 */
 	void SetAttributeDirect(tScriptEngine * engine, const tString & key, risse_uint32 attrib) const
 	{
 		switch(GetType())
@@ -1041,26 +1160,28 @@ public: // 演算子
 	void SetAttributeDirect_Object   (                        const tString & key, risse_uint32 attrib) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトに対する)関数呼び出し		FuncCall
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		flags		呼び出しフラグ
-	//! @param		args		引数
-	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトに対する)関数呼び出し		FuncCall
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param ret		関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	 * @param flags		呼び出しフラグ
+	 * @param args		引数
+	 * @param This		このメソッドが実行されるべき"Thisオブジェクト"
+	 */
 	void FuncCall(tScriptEngine * engine, tVariantBlock * ret = NULL, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトのメンバに対する)関数呼び出し		FuncCall
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		ret			関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
-	//! @param		name		関数名
-	//! @param		flags		呼び出しフラグ
-	//! @param		args		引数
-	//! @param		This		このメソッドが実行されるべき"Thisオブジェクト"
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトのメンバに対する)関数呼び出し		FuncCall
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param ret		関数呼び出し結果の格納先(NULL=呼び出し結果は必要なし)
+	 * @param name		関数名
+	 * @param flags		呼び出しフラグ
+	 * @param args		引数
+	 * @param This		このメソッドが実行されるべき"Thisオブジェクト"
+	 */
 	void FuncCall(
 		tScriptEngine * engine,
 		tVariantBlock * ret,
@@ -1088,11 +1209,12 @@ public: // 演算子
 	void FuncCall_Object   (                        tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		membername	メンバ名
-	//! @return		戻り値
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	 * @param engine		スクリプトエンジンインスタンス
+	 * @param membername	メンバ名
+	 * @return	戻り値
+	 */
 	tVariantBlock Invoke(tScriptEngine * engine,
 		const tString & membername) const
 	{
@@ -1117,12 +1239,13 @@ public: // 演算子
 	tVariantBlock Invoke_Object   (                        const tString & membername) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		membername	メンバ名
-	//! @param		arg1		引数
-	//! @return		戻り値
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	 * @param engine		スクリプトエンジンインスタンス
+	 * @param membername	メンバ名
+	 * @param arg1			引数
+	 * @return	戻り値
+	 */
 	tVariantBlock Invoke(
 		tScriptEngine * engine,
 		const tString & membername,
@@ -1149,13 +1272,14 @@ public: // 演算子
 	tVariantBlock Invoke_Object   (                        const tString & membername,const tVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
-	//! @param		engine	スクリプトエンジンインスタンス
-	//! @param		membername	メンバ名
-	//! @param		arg1		引数
-	//! @param		arg2		引数
-	//! @return		戻り値
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
+	 * @param engine		スクリプトエンジンインスタンス
+	 * @param membername	メンバ名
+	 * @param arg1			引数
+	 * @param arg2			引数
+	 * @return	戻り値
+	 */
 	tVariantBlock Invoke(
 		tScriptEngine * engine,
 		const tString & membername,
@@ -1185,11 +1309,12 @@ public: // 演算子
 
 public:
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトに対する)インスタンス作成		New
-	//! @param		flags		呼び出しフラグ
-	//! @param		args		引数
-	//! @return		新しいインスタンス
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトに対する)インスタンス作成		New
+	 * @param flags	呼び出しフラグ
+	 * @param args	引数
+	 * @return	新しいインスタンス
+	 */
 	tVariantBlock New(risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty()) const // TODO: あれ、Thisは？
 	{
@@ -1206,12 +1331,13 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		(このオブジェクトのメンバに対する)インスタンス作成		New
-	//! @param		name		関数名
-	//! @param		flags		呼び出しフラグ
-	//! @param		args		引数
-	//! @return		新しいインスタンス
-	//-----------------------------------------------------------------------
+	/**
+	 * (このオブジェクトのメンバに対する)インスタンス作成		New
+	 * @param name	関数名
+	 * @param flags	呼び出しフラグ
+	 * @param args	引数
+	 * @return	新しいインスタンス
+	 */
 	tVariantBlock New(
 		const tString & name, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty()) const
@@ -1242,10 +1368,11 @@ public:
 
 
 	//-----------------------------------------------------------------------
-	//! @brief		単項 ! 演算子		LogNot
-	//! @return		演算結果(booleanへのキャストの真偽を反転させた物)
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * 単項 ! 演算子		LogNot
+	 * @return	演算結果(booleanへのキャストの真偽を反転させた物)
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	bool LogNot() const
 	{
 		return !(bool)(*this);
@@ -1271,9 +1398,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		単項 ~ 演算子		BitNot
-	//! @return		演算結果(通常、integerへのキャストのビットを反転させた物)
-	//-----------------------------------------------------------------------
+	/**
+	 * 単項 ~ 演算子		BitNot
+	 * @return	演算結果(通常、integerへのキャストのビットを反転させた物)
+	 */
 	tVariantBlock BitNot() const
 	{
 		switch(GetType())
@@ -1325,9 +1453,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		++ 演算子			Inc
-	//! @return		演算結果(通常、+1 をした数値)
-	//-----------------------------------------------------------------------
+	/**
+	 * ++ 演算子			Inc
+	 * @return	演算結果(通常、+1 をした数値)
+	 */
 	tVariantBlock & Inc()
 	{
 		switch(GetType())
@@ -1378,9 +1507,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		-- 演算子			Dec
-	//! @return		演算結果(通常、-1 をした数値)
-	//-----------------------------------------------------------------------
+	/**
+	 * -- 演算子			Dec
+	 * @return	演算結果(通常、-1 をした数値)
+	 */
 	tVariantBlock & Dec()
 	{
 		switch(GetType())
@@ -1431,9 +1561,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		単項 + 演算子		Plus
-	//! @return		演算結果(通常、数値へのキャスト)
-	//-----------------------------------------------------------------------
+	/**
+	 * 単項 + 演算子		Plus
+	 * @return	演算結果(通常、数値へのキャスト)
+	 */
 	tVariantBlock Plus() const
 	{
 		switch(GetType())
@@ -1484,9 +1615,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		単項 - 演算子		Minus
-	//! @return		演算結果(通常、符号が反転した物)
-	//-----------------------------------------------------------------------
+	/**
+	 * 単項 - 演算子		Minus
+	 * @return	演算結果(通常、符号が反転した物)
+	 */
 	tVariantBlock Minus() const
 	{
 		switch(GetType())
@@ -1536,12 +1668,13 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		|| 演算子		LogOr
-	//! @return		演算結果(通常、双方のbooleanキャストの論理和)
-	//! @note		この演算子はショートカットを行う。すなわち、左辺が真ならば
-	//!				右辺は評価されない
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * || 演算子		LogOr
+	 * @return	演算結果(通常、双方のbooleanキャストの論理和)
+	 * @note	この演算子はショートカットを行う。すなわち、左辺が真ならば
+	 *			右辺は評価されない
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	bool LogOr(const tVariantBlock & rhs) const
 	{
 		return (bool)*this || (bool)rhs; // 短絡を行う
@@ -1560,9 +1693,10 @@ public:
 	bool LogOr_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		||= 演算子		LogOrAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * ||= 演算子		LogOrAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & LogOrAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -1571,12 +1705,13 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		&& 演算子		LogAnd
-	//! @return		演算結果(通常、双方のbooleanキャストの論理積)
-	//! @note		この演算子はショートカットを行う。すなわち、左辺が偽ならば
-	//!				右辺は評価されない
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * && 演算子		LogAnd
+	 * @return	演算結果(通常、双方のbooleanキャストの論理積)
+	 * @note	この演算子はショートカットを行う。すなわち、左辺が偽ならば
+	 *			右辺は評価されない
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	bool LogAnd(const tVariantBlock & rhs) const
 	{
 		return (bool)*this && (bool)rhs; // 短絡を行う
@@ -1595,9 +1730,10 @@ public:
 	bool LogAnd_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		&&= 演算子		LogAndAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * &&= 演算子		LogAndAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & LogAndAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -1606,9 +1742,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		| 演算子		BitOr
-	//! @return		演算結果(通常、双方のintegerキャストのビット和)
-	//-----------------------------------------------------------------------
+	/**
+	 * | 演算子		BitOr
+	 * @return	演算結果(通常、双方のintegerキャストのビット和)
+	 */
 	tVariantBlock BitOr(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
@@ -1670,9 +1807,10 @@ public:
 	static int GuessTypeBitOr_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		|= 演算子		BitOrAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * |= 演算子		BitOrAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & BitOrAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -1683,9 +1821,10 @@ public:
 	tVariantBlock & operator |=(const tVariantBlock & rhs) { return BitOrAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		^ 演算子		BitXor
-	//! @return		演算結果(通常、双方のintegerキャストのビット排他的論理和)
-	//-----------------------------------------------------------------------
+	/**
+	 * ^ 演算子		BitXor
+	 * @return	演算結果(通常、双方のintegerキャストのビット排他的論理和)
+	 */
 	tVariantBlock BitXor(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
@@ -1747,9 +1886,10 @@ public:
 	static int GuessTypeBitXor_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		^= 演算子		BitXorAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * ^= 演算子		BitXorAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & BitXorAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -1760,9 +1900,10 @@ public:
 	tVariantBlock & operator ^=(const tVariantBlock & rhs) { return BitXorAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		& 演算子		BitAnd
-	//! @return		演算結果(通常、双方のintegerキャストのビット論理積)
-	//-----------------------------------------------------------------------
+	/**
+	 * & 演算子		BitAnd
+	 * @return	演算結果(通常、双方のintegerキャストのビット論理積)
+	 */
 	tVariantBlock BitAnd(const tVariantBlock & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
@@ -1824,9 +1965,10 @@ public:
 	static int GuessTypeBitAnd_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		&= 演算子		BitAndAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * &= 演算子		BitAndAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & BitAndAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -1837,10 +1979,11 @@ public:
 	tVariantBlock & operator &=(const tVariantBlock & rhs) { return BitAndAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		!= 演算子		NotEqual
-	//! @return		演算結果
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * != 演算子		NotEqual
+	 * @return	演算結果
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	bool NotEqual(const tVariantBlock & rhs) const
 	{
 		// vtObject 以外は == 演算子の真偽を逆にした物である
@@ -1871,10 +2014,11 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		== 演算子		Equal
-	//! @return		演算結果
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * == 演算子		Equal
+	 * @return	演算結果
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	tVariantBlock Equal(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -1915,10 +2059,11 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		!== 演算子		DiscNotEqual
-	//! @return		演算結果
-	//! @note		この演算子の戻り値は常に bool
-	//-----------------------------------------------------------------------
+	/**
+	 * !== 演算子		DiscNotEqual
+	 * @return	演算結果
+	 * @note	この演算子の戻り値は常に bool
+	 */
 	bool DiscNotEqual(const tVariantBlock & rhs) const
 	{
 		// vtObject 以外は === 演算子の真偽を逆にした物である
@@ -1947,10 +2092,11 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		識別 === 演算子		DiscEqual
-	//! @param		rhs			右辺
-	//! @return		識別の結果、同一ならば真、そうでなければ偽
-	//-----------------------------------------------------------------------
+	/**
+	 * 識別 === 演算子		DiscEqual
+	 * @param rhs	右辺
+	 * @return	識別の結果、同一ならば真、そうでなければ偽
+	 */
 	bool DiscEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -1998,13 +2144,14 @@ public:
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		厳密な識別演算子		StrictEqual
-	//! @param		rhs			右辺
-	//! @return		識別の結果、同一ならば真、そうでなければ偽。
-	//!				=== 演算子と異なり、real の符合判断も厳密に行う。
-	//!				オブジェクト型の場合、インスタンスのポインタが同一があることで
-	//!				真とみなす。
-	//-----------------------------------------------------------------------
+	/**
+	 * 厳密な識別演算子		StrictEqual
+	 * @param rhs	右辺
+	 * @return	識別の結果、同一ならば真、そうでなければ偽。
+	 *			=== 演算子と異なり、real の符合判断も厳密に行う。
+	 *			オブジェクト型の場合、インスタンスのポインタが同一があることで
+	 *			真とみなす。
+	 */
 	bool StrictEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2041,11 +2188,12 @@ public:
 			{ return rhs.GetType() == vtObject && rhs.AsObject().StrictEqual(AsObject()); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		同定演算子		Identify
-	//! @param		rhs			右辺
-	//! @return		同定の結果、同一ならば真、そうでなければ偽。
-	//!				Dictionary のキーの比較に用いられる。
-	//-----------------------------------------------------------------------
+	/**
+	 * 同定演算子		Identify
+	 * @param rhs	右辺
+	 * @return	同定の結果、同一ならば真、そうでなければ偽。
+	 *			Dictionary のキーの比較に用いられる。
+	 */
 	bool Identify(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2074,10 +2222,11 @@ public:
 	bool Identify_Object   (const tVariantBlock & rhs) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		< 演算子		Lesser
-	//! @param		rhs			右辺
-	//! @return		*this < rhs ならば真
-	//-----------------------------------------------------------------------
+	/**
+	 * < 演算子		Lesser
+	 * @param rhs	右辺
+	 * @return	*this < rhs ならば真
+	 */
 	bool Lesser(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2137,10 +2286,11 @@ public:
 	static int GuessTypeLesser_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		> 演算子		Greater
-	//! @param		rhs			右辺
-	//! @return		*this > rhs ならば真
-	//-----------------------------------------------------------------------
+	/**
+	 * > 演算子		Greater
+	 * @param rhs	右辺
+	 * @return	*this > rhs ならば真
+	 */
 	bool Greater(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2200,10 +2350,11 @@ public:
 	static int GuessTypeGreater_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		<= 演算子		LesserOrEqual
-	//! @param		rhs			右辺
-	//! @return		*this < rhs ならば真
-	//-----------------------------------------------------------------------
+	/**
+	 * <= 演算子		LesserOrEqual
+	 * @param rhs	右辺
+	 * @return	*this < rhs ならば真
+	 */
 	bool LesserOrEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2264,10 +2415,11 @@ public:
 	static int GuessTypeLesserOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		>= 演算子		GreaterOrEqual
-	//! @param		rhs			右辺
-	//! @return		*this < rhs ならば真
-	//-----------------------------------------------------------------------
+	/**
+	 * >= 演算子		GreaterOrEqual
+	 * @param rhs	右辺
+	 * @return	*this < rhs ならば真
+	 */
 	bool GreaterOrEqual(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2327,12 +2479,13 @@ public:
 	static int GuessTypeGreaterOrEqual_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		>>> 演算子(符号なし右シフト)		RBitShift
-	//! @param		rhs			右辺
-	//! @return		通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integer だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * >>> 演算子(符号なし右シフト)		RBitShift
+	 * @param rhs	右辺
+	 * @return	通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integer だとは限らない
+	 */
 	tVariantBlock RBitShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2390,9 +2543,10 @@ public:
 	static int GuessTypeRBitShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		>>>= 演算子		RBitShiftAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * >>>= 演算子		RBitShiftAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & RBitShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2403,12 +2557,13 @@ public:
 	// 対応する C++ 演算子は無い
 
 	//-----------------------------------------------------------------------
-	//! @brief		<< 演算子(符号つき左シフト)		LShift
-	//! @param		rhs			右辺
-	//! @return		通常、左辺をintegerにキャストした後右辺辺回数分シフトしたもの
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integer だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * << 演算子(符号つき左シフト)		LShift
+	 * @param rhs	右辺
+	 * @return	通常、左辺をintegerにキャストした後右辺辺回数分シフトしたもの
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integer だとは限らない
+	 */
 	tVariantBlock LShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2468,9 +2623,10 @@ public:
 	static int GuessTypeLShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		<<= 演算子		LShiftAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * <<= 演算子		LShiftAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & LShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2481,12 +2637,13 @@ public:
 	tVariantBlock & operator <<=(const tVariantBlock & rhs) { return LShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		>> 演算子(符号つき右シフト)		RShift
-	//! @param		rhs			右辺
-	//! @return		通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integer だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * >> 演算子(符号つき右シフト)		RShift
+	 * @param rhs	右辺
+	 * @return	通常、左辺をintegerにキャストした後右辺回数分シフトしたもの
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integer だとは限らない
+	 */
 	tVariantBlock RShift(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2546,9 +2703,10 @@ public:
 	static int GuessTypeRShift_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		>>= 演算子		RShiftAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * >>= 演算子		RShiftAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & RShiftAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2559,12 +2717,13 @@ public:
 	tVariantBlock & operator >>=(const tVariantBlock & rhs) { return RShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		% 演算子(剰余)		Mod
-	//! @param		rhs			右辺
-	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったあまり
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integer だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * % 演算子(剰余)		Mod
+	 * @param rhs	右辺
+	 * @return	通常、両方をintegerにキャストし、左辺を右辺で割ったあまり
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integer だとは限らない
+	 */
 	tVariantBlock Mod(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2624,9 +2783,10 @@ public:
 	static int GuessTypeMod_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		%= 演算子		ModAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * %= 演算子		ModAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & ModAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2637,12 +2797,13 @@ public:
 	tVariantBlock & operator %=(const tVariantBlock & rhs) { return ModAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		/ 演算子(剰余)		Div
-	//! @param		rhs			右辺
-	//! @return		通常、両方を real にキャストし、左辺を右辺で割ったもの
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が real だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * / 演算子(剰余)		Div
+	 * @param rhs	右辺
+	 * @return	通常、両方を real にキャストし、左辺を右辺で割ったもの
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が real だとは限らない
+	 */
 	tVariantBlock Div(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2702,9 +2863,10 @@ public:
 	static int GuessTypeDiv_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		/= 演算子		DivAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * /= 演算子		DivAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & DivAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2715,12 +2877,13 @@ public:
 	tVariantBlock & operator /=(const tVariantBlock & rhs) { return DivAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		\ 演算子(整数除算)		Idiv
-	//! @param		rhs			右辺
-	//! @return		通常、両方をintegerにキャストし、左辺を右辺で割ったもの
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integer だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * \ 演算子(整数除算)		Idiv
+	 * @param rhs	右辺
+	 * @return	通常、両方をintegerにキャストし、左辺を右辺で割ったもの
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integer だとは限らない
+	 */
 	tVariantBlock Idiv(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2778,9 +2941,10 @@ public:
 	static int GuessTypeIdiv_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		\= 演算子		IdivAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * \= 演算子		IdivAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & IdivAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2791,12 +2955,13 @@ public:
 	// 対応する C++ 演算子は無い
 
 	//-----------------------------------------------------------------------
-	//! @brief		* 演算子(除算)		Mul
-	//! @param		rhs			右辺
-	//! @return		通常、両方を 数値 にキャストし、左辺と右辺を乗算した物。
-	//! @note		オブジェクトが演算子をオーバーロードしている可能性もあるので
-	//!				戻り値が integerやreal だとは限らない
-	//-----------------------------------------------------------------------
+	/**
+	 * * 演算子(除算)		Mul
+	 * @param rhs	右辺
+	 * @return	通常、両方を 数値 にキャストし、左辺と右辺を乗算した物。
+	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
+	 *			戻り値が integerやreal だとは限らない
+	 */
 	tVariantBlock Mul(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2855,9 +3020,10 @@ public:
 	static int GuessTypeMul_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		*= 演算子		MulAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * *= 演算子		MulAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & MulAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2868,10 +3034,11 @@ public:
 	tVariantBlock & operator *=(const tVariantBlock & rhs) { return MulAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		+ 演算子(加算)		Add
-	//! @param		rhs			右辺
-	//! @return		左辺に右辺を加算した物
-	//-----------------------------------------------------------------------
+	/**
+	 * + 演算子(加算)		Add
+	 * @param rhs	右辺
+	 * @return	左辺に右辺を加算した物
+	 */
 	tVariantBlock Add(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -2931,9 +3098,10 @@ public:
 	static int GuessTypeAdd_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		+= 演算子		AddAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * += 演算子		AddAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & AddAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -2944,10 +3112,11 @@ public:
 	tVariantBlock & operator +=(const tVariantBlock & rhs) { return AddAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		- 演算子(減算)		Sub
-	//! @param		rhs			右辺
-	//! @return		左辺から右辺を減算した物
-	//-----------------------------------------------------------------------
+	/**
+	 * - 演算子(減算)		Sub
+	 * @param rhs	右辺
+	 * @return	左辺から右辺を減算した物
+	 */
 	tVariantBlock Sub(const tVariantBlock & rhs) const
 	{
 		switch(GetType())
@@ -3007,9 +3176,10 @@ public:
 	static int GuessTypeSub_Object   (tGuessType r) { return gtAny|gtEffective; }
 
 	//-----------------------------------------------------------------------
-	//! @brief		-= 演算子		SubAssign
-	//! @return		演算後の*thisへの参照
-	//-----------------------------------------------------------------------
+	/**
+	 * -= 演算子		SubAssign
+	 * @return	演算後の*thisへの参照
+	 */
 	tVariantBlock & SubAssign(const tVariantBlock & rhs)
 	{
 		// TODO: より効率的な実装
@@ -3020,19 +3190,21 @@ public:
 	tVariantBlock & operator -=(const tVariantBlock & rhs) { return SubAssign(rhs); }
 
 	//-----------------------------------------------------------------------
-	//! @brief		instanceof 演算子(instanceof)		InstanceOf
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		rhs			右辺
-	//! @return		左辺が右辺で示したクラスのインスタンスならば真
-	//-----------------------------------------------------------------------
+	/**
+	 * instanceof 演算子(instanceof)		InstanceOf
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param rhs		右辺
+	 * @return	左辺が右辺で示したクラスのインスタンスならば真
+	 */
 	bool InstanceOf(tScriptEngine * engine, const tVariantBlock & rhs) const;
 
 
 public: // キャスト
 	//-----------------------------------------------------------------------
-	//! @brief		integerに変換
-	//! @return		integer
-	//-----------------------------------------------------------------------
+	/**
+	 * integerに変換
+	 * @return	integer
+	 */
 	operator risse_int64() const
 	{
 		switch(GetType())
@@ -3082,18 +3254,20 @@ public: // キャスト
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		risse_sizeに変換
-	//! @return		risse_size
-	//-----------------------------------------------------------------------
+	/**
+	 * risse_sizeに変換
+	 * @return	risse_size
+	 */
 	operator risse_size() const
 	{
 		return static_cast<risse_size>(operator risse_int64());
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		realに変換
-	//! @return		real
-	//-----------------------------------------------------------------------
+	/**
+	 * realに変換
+	 * @return	real
+	 */
 	operator risse_real() const
 	{
 		switch(GetType())
@@ -3143,9 +3317,10 @@ public: // キャスト
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		boolに変換
-	//! @return		bool
-	//-----------------------------------------------------------------------
+	/**
+	 * boolに変換
+	 * @return	bool
+	 */
 	operator bool() const
 	{
 		switch(GetType())
@@ -3195,9 +3370,10 @@ public: // キャスト
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		文字列に変換
-	//! @return		文字列
-	//-----------------------------------------------------------------------
+	/**
+	 * 文字列に変換
+	 * @return	文字列
+	 */
 	operator tString() const
 	{
 		switch(GetType())
@@ -3247,9 +3423,10 @@ public: // キャスト
 	}
 
 	//-----------------------------------------------------------------------
-	//! @brief		オクテット列に変換
-	//! @return		オクテット列
-	//-----------------------------------------------------------------------
+	/**
+	 * オクテット列に変換
+	 * @return	オクテット列
+	 */
 	operator tOctet() const
 	{
 		switch(GetType())
@@ -3300,7 +3477,9 @@ public: // キャスト
 
 public: // スレッド同期
 
-	//! @brief		オブジェクトをロックする為のクラス
+	/**
+	 * オブジェクトをロックする為のクラス
+	 */
 	class tSynchronizer
 	{
 		tSynchronizer(const tSynchronizer &); //!< コピー不可です
@@ -3309,19 +3488,24 @@ public: // スレッド同期
 		void * operator new [] (size_t); //!< ヒープ上に置かないでください
 		char Synchronizer[sizeof(void*)+sizeof(tCriticalSection::tLocker)]; //!< tObjectInterface::tSynchronizer を作成する先
 	public:
-		//! @brief		コンストラクタ
+		/**
+		 * コンストラクタ
+		 */
 		tSynchronizer(const tVariant & object);
 
-		//! @brief		デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~tSynchronizer();
 	};
 
 public: // ハッシュ/ヒント
 
 	//-----------------------------------------------------------------------
-	//! @brief		ヒントを得る
-	//! @return		ヒント(0=ヒント無効)
-	//-----------------------------------------------------------------------
+	/**
+	 * ヒントを得る
+	 * @return	ヒント(0=ヒント無効)
+	 */
 	risse_uint32 GetHint() const
 	{
 		switch(GetType())
@@ -3350,9 +3534,10 @@ public: // ハッシュ/ヒント
 	risse_uint32 GetHint_Object   () const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		ヒントを設定する
-	//! @param		hint		ヒント
-	//-----------------------------------------------------------------------
+	/**
+	 * ヒントを設定する
+	 * @param hint	ヒント
+	 */
 	void SetHint(risse_uint32 hint) const
 	{
 		switch(GetType())
@@ -3380,9 +3565,10 @@ public: // ハッシュ/ヒント
 	void SetHint_Object   (risse_uint32 hint) const;
 
 	//-----------------------------------------------------------------------
-	//! @brief		ハッシュを得る
-	//! @return		ハッシュ値
-	//-----------------------------------------------------------------------
+	/**
+	 * ハッシュを得る
+	 * @return	ハッシュ値
+	 */
 	risse_uint32 GetHash() const
 	{
 		switch(GetType())
@@ -3418,13 +3604,14 @@ public: // ハッシュ/ヒント
 
 public: // ユーティリティ
 	//-----------------------------------------------------------------------
-	//! @brief		人間が可読な形式に変換
-	//! @param		maxlen		出力最大コードポイント数(目安)<br>
-	//!							あくまで目安。無視されたり、ぴったりのコード
-	//!							ポイント数にならなかったりする。risse_size_max
-	//!							を指定すると制限なし
-	//! @return		人間が可読な文字列
-	//-----------------------------------------------------------------------
+	/**
+	 * 人間が可読な形式に変換
+	 * @param maxlen	出力最大コードポイント数(目安)<br>
+	 *					あくまで目安。無視されたり、ぴったりのコード
+	 *					ポイント数にならなかったりする。risse_size_max
+	 *					を指定すると制限なし
+	 * @return	人間が可読な文字列
+	 */
 	tString AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{
 		switch(GetType())
@@ -3460,10 +3647,12 @@ public: // ユーティリティ
 					{ return tString(); /* incomplete */ }
 
 
-	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
-	//! @param		cls		クラスオブジェクトインスタンス
-	//! @note		AssertAndGetObjectInterafce() に似るが、チェックに失敗した場合は
-	//!				例外が発生せずに NULL が帰る。
+	/**
+	 * Object型に対するtypeチェック(コンテキストチェック用)
+	 * @param cls	クラスオブジェクトインスタンス
+	 * @note	AssertAndGetObjectInterafce() に似るが、チェックに失敗した場合は
+	 *			例外が発生せずに NULL が帰る。
+	 */
 	template <typename ObjectT>
 	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
@@ -3474,19 +3663,21 @@ public: // ユーティリティ
 		return intf;
 	}
 
-	//! @brief		Object型に対するtypeチェック(コンテキストチェック用)
-	//! @param		cls		クラスオブジェクトインスタンス
-	//! @note		バリアントが期待したタイプであるかどうかをチェックし
-	//!				またそのオブジェクトインターフェースを得る。
-	//!				期待した値でなければ「"期待したクラスではありません"」例外を発生する。
-	//!				テンプレートパラメータのObjectTはtObjectBaseの派生クラス、
-	//!				clsにはtClassBaseの派生クラスのインスタンスを指定すること。
-	//!				ObjectT::tClassBase というのは tObjectBase の定義を見れば分かるが
-	//!				単に tClassBase の typedef で、このテンプレート内には tClassBase の
-	//!				完全な定義がないと解釈できない部分があるが、その解釈を実際の
-	//!				実体化の時まで遅らせるための処置。
-	//!				ちなみに InstanceOf はモジュールもチェックするが、
-	//!				これはモジュールまではチェックしないというかモジュールはチェックのしようがない。
+	/**
+	 * Object型に対するtypeチェック(コンテキストチェック用)
+	 * @param cls	クラスオブジェクトインスタンス
+	 * @note	バリアントが期待したタイプであるかどうかをチェックし
+	 *			またそのオブジェクトインターフェースを得る。
+	 *			期待した値でなければ「"期待したクラスではありません"」例外を発生する。
+	 *			テンプレートパラメータのObjectTはtObjectBaseの派生クラス、
+	 *			clsにはtClassBaseの派生クラスのインスタンスを指定すること。
+	 *			ObjectT::tClassBase というのは tObjectBase の定義を見れば分かるが
+	 *			単に tClassBase の typedef で、このテンプレート内には tClassBase の
+	 *			完全な定義がないと解釈できない部分があるが、その解釈を実際の
+	 *			実体化の時まで遅らせるための処置。
+	 *			ちなみに InstanceOf はモジュールもチェックするが、
+	 *			これはモジュールまではチェックしないというかモジュールはチェックのしようがない。
+	 */
 	template <typename ObjectT>
 	ObjectT * AssertAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
 	{
@@ -3497,15 +3688,19 @@ public: // ユーティリティ
 		return intf;
 	}
 
-	//! @brief		インスタンスチェック(指定されたクラスのインスタンスかどうかをチェック)
-	//! @param		cls		クラスオブジェクトインスタンス
-	//! @note		指定されたクラスのインスタンスでないばあいは IllegalArgumentClassException 例外が発生する)
+	/**
+	 * インスタンスチェック(指定されたクラスのインスタンスかどうかをチェック)
+	 * @param cls	クラスオブジェクトインスタンス
+	 * @note	指定されたクラスのインスタンスでないばあいは IllegalArgumentClassException 例外が発生する)
+	 */
 	void AssertClass(tClassBase * cls) const;
 
-	//! @brief		Object型に対するtypeチェック(引数チェック用)
-	//! @param		cls		クラスオブジェクトインスタンス
-	//! @note		AssertAndGetObjectInterafce に似ているが、型が違ったときの
-	//!				発生する例外が違う。
+	/**
+	 * Object型に対するtypeチェック(引数チェック用)
+	 * @param cls	クラスオブジェクトインスタンス
+	 * @note	AssertAndGetObjectInterafce に似ているが、型が違ったときの
+	 *			発生する例外が違う。
+	 */
 	template <typename ObjectT>
 	ObjectT * ExpectAndGetObjectInterface(tClassBase * cls) const
 	{
@@ -3513,51 +3708,65 @@ public: // ユーティリティ
 		return static_cast<ObjectT*>(GetObjectInterface());
 	}
 
-	//! @brief		型名を得る
-	//! @param		got		型名が正常に取得できた場合に 真、
-	//!						型名が不明だったり取得に失敗した場合に 偽が書き込まれる。
-	//!						この情報が必要ない場合は NULL を指定する。
-	//! @return		型名(文字列)   型名が不明な場合は <unknown>, 匿名クラスの場合は <anomymous> が帰る
-	//! @note		この値の型名を得る。たとえば整数ならば "Integer" など
+	/**
+	 * 型名を得る
+	 * @param got	型名が正常に取得できた場合に 真、
+	 *				型名が不明だったり取得に失敗した場合に 偽が書き込まれる。
+	 *				この情報が必要ない場合は NULL を指定する。
+	 * @return	型名(文字列)   型名が不明な場合は <unknown>, 匿名クラスの場合は <anomymous> が帰る
+	 * @note	この値の型名を得る。たとえば整数ならば "Integer" など
+	 */
 	tString GetClassName(bool * got = NULL) const;
 
-	//! @brief		トレースを追加する
-	//! @param		sb			スクリプトブロック
-	//! @param		pos			スクリプト上の位置
-	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
-	//!				指定されたトレースを追加する。sb が null の場合は
-	//!				トレースは追加されない。
+	/**
+	 * トレースを追加する
+	 * @param sb	スクリプトブロック
+	 * @param pos	スクリプト上の位置
+	 * @note	この variant に Throwable クラスのインスタンスが入っているとみなし、
+	 *			指定されたトレースを追加する。sb が null の場合は
+	 *			トレースは追加されない。
+	 */
 	void AddTrace(const tScriptBlockInstance * sb, risse_size pos) const;
 
-	//! @brief		メッセージにプレフィックスを追加する
-	//! @param		sb			スクリプトブロック
-	//! @param		pos			スクリプト上の位置
-	//! @note		この variant に Throwable クラスのインスタンスが入っているとみなし、
-	//!				message プロパティの前に指定されたメッセージを追加する。
+	/**
+	 * メッセージにプレフィックスを追加する
+	 * @param sb	スクリプトブロック
+	 * @param pos	スクリプト上の位置
+	 * @note	この variant に Throwable クラスのインスタンスが入っているとみなし、
+	 *			message プロパティの前に指定されたメッセージを追加する。
+	 */
 	void PrependMessage(const tString & message) const;
 
-	//! @brief		デバッグ用ダンプ(標準出力に出力する)
+	/**
+	 * デバッグ用ダンプ(標準出力に出力する)
+	 */
 	void DebugDump() const;
 
-	//! @brief		メンバを新規作成する
-	//! @param		name	メンバ名
-	//! @param		value	値
-	//! @param		attrib	属性
-	//! @note		メンバを新規作成するのは非プリミティブクラスだけ。
-	//!				プリミティブクラスに対してはこれは使用しないこと。
-	//!				メンバは強制的に上書きされる(属性チェックなどはスルー)
+	/**
+	 * メンバを新規作成する
+	 * @param name		メンバ名
+	 * @param value		値
+	 * @param attrib	属性
+	 * @note	メンバを新規作成するのは非プリミティブクラスだけ。
+	 *			プリミティブクラスに対してはこれは使用しないこと。
+	 *			メンバは強制的に上書きされる(属性チェックなどはスルー)
+	 */
 	void RegisterMember(const tString & name, const tVariantBlock & value,
 		tMemberAttribute attrib = tMemberAttribute::GetDefault(),
 		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
 
-	//! @brief		final const なメンバを新規作成する
-	//! @param		name	メンバ名
-	//! @param		value	値
-	//! @note		RegisterMember へのショートカット
+	/**
+	 * final const なメンバを新規作成する
+	 * @param name	メンバ名
+	 * @param value	値
+	 * @note	RegisterMember へのショートカット
+	 */
 	void RegisterFinalConstMember(const tString & name, const tVariantBlock & value,
 		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
 
-	//! @brief		デバッグ用各種構造体サイズ表示
+	/**
+	 * デバッグ用各種構造体サイズ表示
+	 */
 	void prtsizes() const
 	{
 		fprintf(stderr, "tVariantBlock: %d\n", (int)sizeof(tVariantBlock));

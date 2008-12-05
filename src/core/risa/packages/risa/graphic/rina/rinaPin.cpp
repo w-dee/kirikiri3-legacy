@@ -118,8 +118,9 @@ tVariant tPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Pin クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * Pin クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tPinClass>;
@@ -271,8 +272,9 @@ tVariant tInputPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		InputPin クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * InputPin クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tInputPinClass>;
@@ -416,8 +418,9 @@ tVariant tOutputPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		OutputPin クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * OutputPin クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tOutputPinClass>;
@@ -491,8 +494,9 @@ tVariant tInputPinArrayClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		InputPinArray クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * InputPinArray クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tInputPinArrayClass>;
@@ -573,8 +577,9 @@ tVariant tOneInputPinArrayClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		OneInputPinArray クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * OneInputPinArray クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tOneInputPinArrayClass>;
@@ -655,8 +660,9 @@ tVariant tOutputPinArrayClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		OutputPinArray クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * OutputPinArray クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tOutputPinArrayClass>;
@@ -738,8 +744,9 @@ tVariant tOneOutputPinArrayClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		OneOutputPinArray クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * OneOutputPinArray クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tOneOutputPinArrayClass>;

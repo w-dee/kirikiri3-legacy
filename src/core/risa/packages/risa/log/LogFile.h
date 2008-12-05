@@ -36,21 +36,26 @@ namespace Risa {
 class tLogReceiver;
 
 //---------------------------------------------------------------------------
-//! @brief		ログファイルクラス(シングルトン)
-//---------------------------------------------------------------------------
+/**
+ * ログファイルクラス(シングルトン)
+ */
 class tLogFile : public singleton_base<tLogFile>, protected depends_on<tLogger>
 {
 	static const size_t NumLastLog  = 50; //!< ファイルへのログ記録を開始した際に出力する LastLog の行数
 
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	//! @brief ログを受け取るためのレシーバークラス
+	/**
+	 * ログを受け取るためのレシーバークラス
+	 */
 	class tReceiver : public tLogReceiver
 	{
 		tLogFile & Owner; //!< tLogFile へのポインタ
 	public:
 		tReceiver(tLogFile & owner) : Owner(owner) {;} //!< コンストラクタ
-		//! @brief ログアイテムを記録するとき
+		/**
+		 * ログアイテムを記録するとき
+		 */
 		void OnLog(const tLogger::tItem & item)
 		{
 			Owner.OnLog(item);
@@ -62,23 +67,33 @@ public:
 	wxFile LogFile; //!< ログファイル
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tLogFile();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tLogFile();
 
 private:
-	//! @brief		行を一行出力する
-	//! @param		str  行 (EOLはこのメソッドが自動的に出力する)
+	/**
+	 * 行を一行出力する
+	 * @param str	行 (EOLはこのメソッドが自動的に出力する)
+	 */
 	void OutputOneLine(const tString & str);
 
-	//! @brief		ログが追加されるとき
-	//! @param		item  ログアイテム
+	/**
+	 * ログが追加されるとき
+	 * @param item	ログアイテム
+	 */
 	void OnLog(const tLogger::tItem & item);
 
 public:
-	//! @brief		ログのファイルへの記録を開始する
+	/**
+	 * ログのファイルへの記録を開始する
+	 */
 	void Begin();
 };
 //---------------------------------------------------------------------------

@@ -22,11 +22,13 @@ class tVariantBlock;
 typedef tVariantBlock tVariant;
 class tStackFrameContext;
 //---------------------------------------------------------------------------
-//! @brief		Operate/Doメソッドへの引数(クラス宣言用)
-//!	@note		Operate/Doメソッドの引数が変わるたびにすべてのOperate/Doメソッドの
-//!				引数を変える気にはなれない。
-//! 			あまりマクロは使いたくないが、それにしても
-//!				インターフェースの仕様が固まるまではこうしたい
+/**
+ * Operate/Doメソッドへの引数(クラス宣言用)
+ * @note	Operate/Doメソッドの引数が変わるたびにすべてのOperate/Doメソッドの
+ *			引数を変える気にはなれない。
+ *			あまりマクロは使いたくないが、それにしても
+ *			インターフェースの仕様が固まるまではこうしたい
+ */
 #define RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG \
 		tOpCode code,                                                 \
 		tVariant * result = NULL,                                     \
@@ -35,7 +37,9 @@ class tStackFrameContext;
 		const tMethodArgument & args = tMethodArgument::Empty(), \
 		const tVariant &This = tVariant::GetNullObject()
 
-//! @brief		Operate/Doメソッドへの引数(実装用)
+/**
+ * Operate/Doメソッドへの引数(実装用)
+ */
 #define RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG \
 		tOpCode code,                     \
 		tVariant * result,                \
@@ -44,7 +48,9 @@ class tStackFrameContext;
 		const tMethodArgument & args,     \
 		const tVariant &This
 
-//! @brief		Operate/Doメソッドの引数一覧
+/**
+ * Operate/Doメソッドの引数一覧
+ */
 #define RISSE_OBJECTINTERFACE_PASS_ARG \
 		code, result, name, flags, args, This
 

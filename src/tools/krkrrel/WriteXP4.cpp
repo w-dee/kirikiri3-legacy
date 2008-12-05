@@ -47,17 +47,18 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		wxFile 同士のコピー
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		src コピー元
-//! @param		dest コピー先
-//! @param		size コピーするバイト数 (wxFileOffset)
-//! @return		コピーされたバイト数
-//! @note		コピー元もコピー先も、現在のファイルポインタからコピーされる。
-//!				また、コピー後に入力ファイルのファイルポインタが正確にコピー
-//!				されたバイト数ぶんだけ進んでいる保証はない (出力ファイル側は
-//!				コピーされた分だけ進んでいる)
-//---------------------------------------------------------------------------
+/**
+ * wxFile 同士のコピー
+ * @param callback	進捗コールバックオブジェクト
+ * @param src		コピー元
+ * @param dest		コピー先
+ * @param size		コピーするバイト数 (wxFileOffset)
+ * @return	コピーされたバイト数
+ * @note	コピー元もコピー先も、現在のファイルポインタからコピーされる。
+ *			また、コピー後に入力ファイルのファイルポインタが正確にコピー
+ *			されたバイト数ぶんだけ進んでいる保証はない (出力ファイル側は
+ *			コピーされた分だけ進んでいる)
+ */
 #define RISA__COPY_BUF_SIZE 65536
 static wxFileOffset CopyFile(iRisaProgressCallback * callback,
 	wxFileEx & src, wxFileEx & dest, wxFileOffset size)
@@ -96,11 +97,12 @@ static wxFileOffset CopyFile(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		offset (非圧縮時の)ストレージ先頭からのオフセット
-//! @param		size  (非圧縮時の)サイズ
-//! @param		iscompressed ZLIB 圧縮の際に真
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param offset		(非圧縮時の)ストレージ先頭からのオフセット
+ * @param size			(非圧縮時の)サイズ
+ * @param iscompressed	ZLIB 圧縮の際に真
+ */
 tXP4WriterSegment::tXP4WriterSegment(
 		wxFileOffset offset,
 		wxFileOffset size,
@@ -115,8 +117,9 @@ tXP4WriterSegment::tXP4WriterSegment(
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tXP4WriterSegment::~tXP4WriterSegment()
 {
 }
@@ -124,11 +127,12 @@ tXP4WriterSegment::~tXP4WriterSegment()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルをアーカイブに書き込む
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		input 入力ファイル
-//! @param		file アーカイブファイル
-//---------------------------------------------------------------------------
+/**
+ * ファイルをアーカイブに書き込む
+ * @param callback	進捗コールバックオブジェクト
+ * @param input		入力ファイル
+ * @param file		アーカイブファイル
+ */
 void tXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 		wxFileEx & input, wxFileEx & file)
 {
@@ -206,9 +210,10 @@ void tXP4WriterSegment::WriteBody(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		メタデータを書き込む
-//! @param		buf 出力メモリバッファ
-//---------------------------------------------------------------------------
+/**
+ * メタデータを書き込む
+ * @param buf	出力メモリバッファ
+ */
 void tXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 {
 	// このセグメントに対応するメタデータをbufに書き込む
@@ -252,10 +257,11 @@ void tXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(他のアイテムを参照しない場合)
-//! @param		inputfile 入力ファイルの情報
-//! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ(他のアイテムを参照しない場合)
+ * @param inputfile		入力ファイルの情報
+ * @param basedirlength	アーカイブ対象ディレクトリのベース部分の長さ
+ */
 #define COMPRESS_SPLIT_UNIT 256*1024 //!< 圧縮時の分割バイト数
 tXP4WriterStorage::tXP4WriterStorage(
 		const tXP4WriterInputFile & inputfile)
@@ -267,11 +273,12 @@ tXP4WriterStorage::tXP4WriterStorage(
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ(他のストレージアイテムを参照する場合)
-//! @param		inputfile 入力ファイルの情報
-//! @param		basedirlength アーカイブ対象ディレクトリのベース部分の長さ
-//! @param		ref 参照アイテム
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ(他のストレージアイテムを参照する場合)
+ * @param inputfile		入力ファイルの情報
+ * @param basedirlength	アーカイブ対象ディレクトリのベース部分の長さ
+ * @param ref			参照アイテム
+ */
 tXP4WriterStorage::tXP4WriterStorage(
 	const tXP4WriterInputFile & inputfile,
 	const tXP4WriterStorage & ref)
@@ -288,8 +295,9 @@ tXP4WriterStorage::tXP4WriterStorage(
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルのハッシュを得る
-//---------------------------------------------------------------------------
+/**
+ * ファイルのハッシュを得る
+ */
 void tXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
 {
 	if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
@@ -305,10 +313,11 @@ void tXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
 
 
 //---------------------------------------------------------------------------
-//! @brief		XP4アーカイブへファイルを格納する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		archive アーカイブファイルオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * XP4アーカイブへファイルを格納する
+ * @param callback	進捗コールバックオブジェクト
+ * @param archive	アーカイブファイルオブジェクト
+ */
 void tXP4WriterStorage::WriteBody(
 	iRisaProgressCallback * callback, wxFileEx & archive)
 {
@@ -365,9 +374,10 @@ void tXP4WriterStorage::WriteBody(
 
 
 //---------------------------------------------------------------------------
-//! @brief		メタデータを書き込む
-//! @param		buf 出力メモリバッファ
-//---------------------------------------------------------------------------
+/**
+ * メタデータを書き込む
+ * @param buf	出力メモリバッファ
+ */
 void tXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 {
 	// メタデータを buf に書き込む
@@ -453,10 +463,11 @@ void tXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filename アーカイブファイルのファイル名
-//! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param filename	アーカイブファイルのファイル名
+ * @param targetdir	アーカイブに格納されるファイルの元となったディレクトリ名
+ */
 tXP4WriterArchive::tXP4WriterArchive(
 	const wxString & filename,
 	const wxString & targetdir) :
@@ -490,8 +501,9 @@ tXP4WriterArchive::tXP4WriterArchive(
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tXP4WriterArchive::~tXP4WriterArchive()
 {
 	if(!ArchiveOk)
@@ -504,11 +516,12 @@ tXP4WriterArchive::~tXP4WriterArchive()
 
 
 //---------------------------------------------------------------------------
-//! @brief		アーカイブにファイルを追加し、書き込む
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		storage 書き込むファイル
-//! @return		格納されたアーカイブ内のストレージのインデックス
-//---------------------------------------------------------------------------
+/**
+ * アーカイブにファイルを追加し、書き込む
+ * @param callback	進捗コールバックオブジェクト
+ * @param storage	書き込むファイル
+ * @return	格納されたアーカイブ内のストレージのインデックス
+ */
 size_t tXP4WriterArchive::AddAndWriteBody(iRisaProgressCallback * callback,
 	const tXP4WriterStorage & storage)
 {
@@ -524,10 +537,11 @@ size_t tXP4WriterArchive::AddAndWriteBody(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		アーカイブにメタデータを書き込む
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		compress インデックスを圧縮するかどうか
-//---------------------------------------------------------------------------
+/**
+ * アーカイブにメタデータを書き込む
+ * @param callback	進捗コールバックオブジェクト
+ * @param compress	インデックスを圧縮するかどうか
+ */
 void tXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 	bool compress)
 {
@@ -657,13 +671,14 @@ void tXP4WriterArchive::WriteMetaData(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		basefilename ベースファイル名(パス付きだが拡張子をのぞく)
-//! @param		splitlimit 分割する際のファイルサイズの上限(バイト単位) 0=分割なし
-//! @param		list 入力ファイルのリスト
-//! @param		targetdir アーカイブに格納されるファイルの元となったディレクトリ名
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param callback		進捗コールバックオブジェクト
+ * @param basefilename	ベースファイル名(パス付きだが拡張子をのぞく)
+ * @param splitlimit	分割する際のファイルサイズの上限(バイト単位) 0=分割なし
+ * @param list			入力ファイルのリスト
+ * @param targetdir		アーカイブに格納されるファイルの元となったディレクトリ名
+ */
 tXP4Writer::tXP4Writer(
 	iRisaProgressCallback * callback,
 	const wxString & basefilename,
@@ -684,8 +699,9 @@ tXP4Writer::tXP4Writer(
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tXP4Writer::~tXP4Writer()
 {
 	for(std::vector<tXP4WriterArchive *>::iterator i = 
@@ -698,9 +714,10 @@ tXP4Writer::~tXP4Writer()
 
 
 //---------------------------------------------------------------------------
-//! @brief		新しいアーカイブボリュームファイルを作成する
-//! @return		新しいアーカイブボリューム番号
-//---------------------------------------------------------------------------
+/**
+ * 新しいアーカイブボリュームファイルを作成する
+ * @return	新しいアーカイブボリューム番号
+ */
 unsigned int tXP4Writer::NewArchive()
 {
 	// アーカイブボリュームファイル名は
@@ -727,8 +744,9 @@ unsigned int tXP4Writer::NewArchive()
 
 
 //---------------------------------------------------------------------------
-//! @brief		アーカイブファイルを作成する
-//---------------------------------------------------------------------------
+/**
+ * アーカイブファイルを作成する
+ */
 void tXP4Writer::MakeArchive()
 {
 	std::vector<tXP4WriterStorage> sorted_list;

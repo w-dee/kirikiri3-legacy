@@ -238,8 +238,9 @@ tVariant tOSNativeStreamClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		OSNativeStream クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * OSNativeStream クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','f','s'>,
 	tOSNativeStreamClass>;

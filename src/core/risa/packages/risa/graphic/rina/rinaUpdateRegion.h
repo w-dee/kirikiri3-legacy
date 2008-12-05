@@ -43,8 +43,9 @@ namespace Risa {
 
 class tQueueNode;
 //---------------------------------------------------------------------------
-//! @brief		更新領域管理クラス
-//---------------------------------------------------------------------------
+/**
+ * 更新領域管理クラス
+ */
 class tUpdateRegion : public tCollectee
 {
 	friend class tIterator;
@@ -69,7 +70,9 @@ private:
 	static const risse_uint16 MaskX1 =  7 << (    5); //!< セル値に対する x1 のマスク
 	static const risse_uint16 MaskY1 = 31           ; //!< セル値に対する y1 のマスク
 
-	//! @brief		座標を16bit値にパックして返す
+	/**
+	 * 座標を16bit値にパックして返す
+	 */
 	static risse_uint16 Pack(
 		unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1)
 	{
@@ -87,10 +90,14 @@ private:
 	static int X1(risse_uint16 v) { return (v & MaskX1) >> (    5); } //!< 16bit値からX1を取り出して返す
 	static int Y1(risse_uint16 v) { return (v & MaskY1)           ; } //!< 16bit値からY1を取り出して返す
 
-	//! @brief		16bit値からY0 Y1だけをマスクした値を返す
+	/**
+	 * 16bit値からY0 Y1だけをマスクした値を返す
+	 */
 	static risse_uint16 Y0Y1(risse_uint16 v) { return v & (MaskY0 + MaskY1); }
 
-	//! @brief		セル内部の矩形をuniteする
+	/**
+	 * セル内部の矩形をuniteする
+	 */
 	static risse_uint16 UniteCell(risse_uint16 v,
 		unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1)
 	{
@@ -109,7 +116,9 @@ private:
 	}
 
 public:
-	//! @brief		イテレータ (STLのイテレータとは使い方がかなり違う)
+	/**
+	 * イテレータ (STLのイテレータとは使い方がかなり違う)
+	 */
 	class tIterator : public tCollectee
 	{
 		const tUpdateRegion & UpdateRegion; //!< 更新領域管理クラスのインスタンス
@@ -117,40 +126,58 @@ public:
 		risse_size CurrentY; //!< 現在イテレーション中のセルのY座標
 
 	public:
-		//! @brief		コンストラクタ
-		//! @param		ur		更新領域管理クラスのインスタンス
+		/**
+		 * コンストラクタ
+		 * @param ur	更新領域管理クラスのインスタンス
+		 */
 		tIterator(const tUpdateRegion & ur);
 
-		//! @brief		次の矩形を得る
-		//! @param		rect		矩形の格納先
-		//! @return		次の矩形がない場合は偽が帰る。偽が帰った場合はrectには何も格納されない。
-		//!				一度偽が帰った後はこのイテレータは無効になるのでアクセスしてはいけない。
+		/**
+		 * 次の矩形を得る
+		 * @param rect	矩形の格納先
+		 * @return	次の矩形がない場合は偽が帰る。偽が帰った場合はrectには何も格納されない。
+		 *			一度偽が帰った後はこのイテレータは無効になるのでアクセスしてはいけない。
+		 */
 		bool GetNext(tRect & rect);
 	};
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tUpdateRegion();
 
-	//! @brief		サイズを設定する
-	//! @param		width		横サイズ
-	//! @param		height		縦サイズ
+	/**
+	 * サイズを設定する
+	 * @param width		横サイズ
+	 * @param height	縦サイズ
+	 */
 	void SetSize(risse_size width, risse_size height);
 
-	//! @brief		横サイズを得る		@return		横サイズ
+	/**
+	 * 横サイズを得る		@return		横サイズ
+	 */
 	risse_size GetWidth() const { return Width; }
 
-	//! @brief		縦サイズを得る		@return		縦サイズ
+	/**
+	 * 縦サイズを得る		@return		縦サイズ
+	 */
 	risse_size GetHeight() const { return Height; }
 
-	//! @brief		領域をすべて空にする
+	/**
+	 * 領域をすべて空にする
+	 */
 	void Clear();
 
-	//! @brief		領域をすべてうめる
+	/**
+	 * 領域をすべてうめる
+	 */
 	void Fill();
 
-	//! @brief		矩形を埋める
-	//! @param		rect		矩形
+	/**
+	 * 矩形を埋める
+	 * @param rect	矩形
+	 */
 	void Fill(const tRect & rect);
 };
 //---------------------------------------------------------------------------

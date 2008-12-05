@@ -25,8 +25,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		Rina widget 用のノード
-//---------------------------------------------------------------------------
+/**
+ * Rina widget 用のノード
+ */
 class tRinaWidgetNodeInstance : public tNodeInstance
 {
 	typedef tNodeInstance inherited; //!< 親クラス
@@ -36,19 +37,27 @@ class tRinaWidgetNodeInstance : public tNodeInstance
 	tImageInputPinInstance * InputPinInstance; //!< 入力ピンインスタンス
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRinaWidgetNodeInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tRinaWidgetNodeInstance() {}
 
 public: // サブクラスで実装すべき物
-	//! @brief		入力ピンの配列を得る
-	//! @return		入力ピンの配列
+	/**
+	 * 入力ピンの配列を得る
+	 * @return	入力ピンの配列
+	 */
 	virtual tInputPinArrayInstance & GetInputPinArrayInstance();
 
-	//! @brief		出力ピンの配列を得る
-	//! @return		出力ピンの配列
+	/**
+	 * 出力ピンの配列を得る
+	 * @return	出力ピンの配列
+	 */
 	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance();
 
 public: // Risse用メソッドなど
@@ -60,21 +69,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"RinaWidgetNode" クラス
-//---------------------------------------------------------------------------
+/**
+ * "RinaWidgetNode" クラス
+ */
 class tRinaWidgetNodeClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tRinaWidgetNodeClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど
@@ -93,8 +109,9 @@ public: // Risse 用メソッドなど
 class tRinaInstance;
 class tImageInstance;
 //---------------------------------------------------------------------------
-//! @brief		Rinaコントロールを表す wcControl 派生クラス
-//---------------------------------------------------------------------------
+/**
+ * Rinaコントロールを表す wcControl 派生クラス
+ */
 class tRina : public wxControl, public tRisaWindowBahavior<tRina, tRinaInstance>
 {
 	typedef wxControl inherited;
@@ -102,21 +119,29 @@ class tRina : public wxControl, public tRisaWindowBahavior<tRina, tRinaInstance>
 	tImageInstance * TestImage; //!< テスト用イメージ
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		instance	Rinaクラスのインスタンスへのポインタ
-	//! @param		parent		親コントロール
+	/**
+	 * コンストラクタ
+	 * @param instance	Rinaクラスのインスタンスへのポインタ
+	 * @param parent	親コントロール
+	 */
 	tRina(tRinaInstance * internal, wxWindow * parent);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tRina();
 
 public:
 private:
-	//! @brief		イベントテーブルの定義
+	/**
+	 * イベントテーブルの定義
+	 */
 	DECLARE_EVENT_TABLE()
 
 protected: // イベント
-	//! @brief		内容をペイントするとき
+	/**
+	 * 内容をペイントするとき
+	 */
 	void OnPaint(wxPaintEvent& event);
 };
 //---------------------------------------------------------------------------
@@ -129,8 +154,9 @@ protected: // イベント
 
 
 //---------------------------------------------------------------------------
-//! @brief		Rinaコントロールクラスのインスタンス
-//---------------------------------------------------------------------------
+/**
+ * Rinaコントロールクラスのインスタンス
+ */
 class tRinaInstance : public tWindowInstance
 {
 private:
@@ -138,10 +164,14 @@ private:
 	tRinaWidgetNodeInstance * RinaWidgetNode; //!< RinaWidgetNode インスタンス
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRinaInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tRinaInstance() {;}
 
 public: // Risse用メソッドなど
@@ -155,21 +185,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Rina" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Rina" クラス
+ */
 class tRinaClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tRinaClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------

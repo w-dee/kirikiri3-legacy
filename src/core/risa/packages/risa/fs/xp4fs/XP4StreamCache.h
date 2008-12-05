@@ -22,8 +22,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//!@brief		ストリームキャッシュクラス
-//---------------------------------------------------------------------------
+/**
+ * ストリームキャッシュクラス
+ */
 class tXP4StreamCache : public singleton_base<tXP4StreamCache>
 {
 	static const int MAX_ITEM = 8; //!< キャッシュするハンドル数
@@ -31,7 +32,9 @@ class tXP4StreamCache : public singleton_base<tXP4StreamCache>
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	risse_uint Age; //!< キャッシュ世代
 
-	//!@brief キャッシュアイテムの構造体
+	/**
+	 * キャッシュアイテムの構造体
+	 */
 	struct tItem
 	{
 		void * Pointer; //!< アーカイブインスタンスへのポインタ
@@ -40,32 +43,46 @@ class tXP4StreamCache : public singleton_base<tXP4StreamCache>
 	} Pool[MAX_ITEM];
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tXP4StreamCache();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tXP4StreamCache();
 
 public:
-	//! @brief		ストリームを取得する
-	//! @param		pointer アーカイブインスタンスへのポインタ (識別に用いられる)
-	//! @param		name アーカイブファイル名
-	//! @return		ストリーム
+	/**
+	 * ストリームを取得する
+	 * @param pointer	アーカイブインスタンスへのポインタ (識別に用いられる)
+	 * @param name		アーカイブファイル名
+	 * @return	ストリーム
+	 */
 	tBinaryStream * GetStream(void * pointer, const tString & name);
 
-	//! @brief		ストリームを解放する
-	//! @param		pointer アーカイブインスタンスへのポインタ
-	//! @param		stream ストリーム
+	/**
+	 * ストリームを解放する
+	 * @param pointer	アーカイブインスタンスへのポインタ
+	 * @param stream	ストリーム
+	 */
 	void ReleaseStream(void * pointer, tBinaryStream * stream);
 
-	//! @brief		指定されたポインタを持つストリームをすべて解放する
-	//! @param		pointer アーカイブインスタンスへのポインタ
+	/**
+	 * 指定されたポインタを持つストリームをすべて解放する
+	 * @param pointer	アーカイブインスタンスへのポインタ
+	 */
 	void ReleaseStreamByPointer(void * pointer);
 
-	//! @brief		すべてのストリームを解放する
+	/**
+	 * すべてのストリームを解放する
+	 */
 	void ReleaseAll();
 
-	//! @brief		内容をクリアする
+	/**
+	 * 内容をクリアする
+	 */
 	void Clear() { ReleaseAll(); }
 };
 //---------------------------------------------------------------------------

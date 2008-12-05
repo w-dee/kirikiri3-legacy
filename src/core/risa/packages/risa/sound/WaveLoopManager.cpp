@@ -30,15 +30,16 @@ RISSE_DEFINE_SOURCE_ID(8592,58083,15398,17259,37009,18155,50172,63359);
 
 
 //---------------------------------------------------------------------------
-//! @brief		クロスフェードを行うためのテンプレート関数
-//! @param		dest		結果格納先
-//! @param		src1		ソース1 (消えていく方)
-//! @param		src2		ソース2 (入ってくる方)
-//! @param		ratiostart	ブレンド率の開始値(%)
-//! @param		ratioend	ブレンド率の終了値(%)
-//! @param		samples		この関数の呼び出しで処理すべきサンプル数
-//! @param		channels	対象PCMのチャンネル数
-//---------------------------------------------------------------------------
+/**
+ * クロスフェードを行うためのテンプレート関数
+ * @param dest			結果格納先
+ * @param src1			ソース1 (消えていく方)
+ * @param src2			ソース2 (入ってくる方)
+ * @param ratiostart	ブレンド率の開始値(%)
+ * @param ratioend		ブレンド率の終了値(%)
+ * @param samples		この関数の呼び出しで処理すべきサンプル数
+ * @param channels		対象PCMのチャンネル数
+ */
 template <typename T>
 static void CrossFadeBlend(void *dest, void *src1, void *src2,
 	risse_int ratiostart, risse_int ratioend,

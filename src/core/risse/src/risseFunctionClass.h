@@ -22,11 +22,12 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Function" クラスのインスタンス用 C++クラス
-//! @note		ネイティブ関数もスクリプトで生成した関数もいったんこのクラスを
-//!				ゲートウェイとして使う。Risseで"Function"クラスのインスタンスである
-//!				と見せかけるための仕掛け。
-//---------------------------------------------------------------------------
+/**
+ * "Function" クラスのインスタンス用 C++クラス
+ * @note	ネイティブ関数もスクリプトで生成した関数もいったんこのクラスを
+ *			ゲートウェイとして使う。Risseで"Function"クラスのインスタンスである
+ *			と見せかけるための仕掛け。
+ */
 class tFunctionInstance : public tObjectBase
 {
 	typedef tObjectBase inherited; //!< 親クラスの typedef
@@ -36,30 +37,44 @@ private:
 	bool Synchronized; //!< synchronized メソッドかどうか
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tFunctionInstance();
 
-	//! @brief		関数のBodyを表すオブジェクトを取得する
-	//! @return		関数のBodyを表すオブジェクト
+	/**
+	 * 関数のBodyを表すオブジェクトを取得する
+	 * @return	関数のBodyを表すオブジェクト
+	 */
 	tVariant & GetBody() { return Body; }
 
-	//! @brief		関数のBodyを表すオブジェクトを設定する
-	//! @param		m		関数のBodyを表すオブジェクト
+	/**
+	 * 関数のBodyを表すオブジェクトを設定する
+	 * @param m	関数のBodyを表すオブジェクト
+	 */
 	void SetBody(const tVariant & m) { Body = m; }
 
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tFunctionInstance() {;}
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
-	//! @brief		synchronized メソッドかどうかを取得する
-	//! @return		synchronized メソッドかどうか
+	/**
+	 * synchronized メソッドかどうかを取得する
+	 * @return	synchronized メソッドかどうか
+	 */
 	bool GetSynchronized() const { return Synchronized; }
 
-	//! @brief		synchronized メソッドかどうかを設定する
-	//! @param		b	synchronized メソッドかどうか
+	/**
+	 * synchronized メソッドかどうかを設定する
+	 * @param b	synchronized メソッドかどうか
+	 */
 	void SetSynchronized(bool b) { Synchronized = b; }
 
 
@@ -73,21 +88,28 @@ public: // Risse用メソッドとか
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Function" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Function" クラス
+ */
 class tFunctionClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tFunctionClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------

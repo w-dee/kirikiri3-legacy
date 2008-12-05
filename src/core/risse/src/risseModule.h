@@ -21,32 +21,43 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		モジュール用クラスの基底クラス(C++用)
-//! @note		初期化の方式はクラスの場合とかなり違うので注意。
-//---------------------------------------------------------------------------
+/**
+ * モジュール用クラスの基底クラス(C++用)
+ * @note	初期化の方式はクラスの場合とかなり違うので注意。
+ */
 class tModuleBase : public tCollectee
 {
 	typedef tModuleBase inherited; //!< 親クラスの typedef
 
 	tObjectBase * Instance; //!< モジュールインスタンス
 public:
-	//! @brief		コンストラクタ
-	//! @param		name		モジュール名
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param name		モジュール名
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tModuleBase(const tString & name, tScriptEngine * engine);
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tModuleBase() {}
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	virtual void RegisterMembers();
 
-	//! @brief		モジュールインスタンスを得る
+	/**
+	 * モジュールインスタンスを得る
+	 */
 	tObjectBase * GetInstance() const { return Instance; }
 
-	//! @brief		モジュールインスタンスを登録するためのユーティリティメソッド
-	//! @param		target		登録先オブジェクト (普通、globalオブジェクト)
-	//! @param		name		登録名
+	/**
+	 * モジュールインスタンスを登録するためのユーティリティメソッド
+	 * @param target	登録先オブジェクト (普通、globalオブジェクト)
+	 * @param name		登録名
+	 */
 	void RegisterInstance(tVariant & target);
 };
 //---------------------------------------------------------------------------

@@ -21,8 +21,9 @@ RISSE_DEFINE_SOURCE_ID(32746,62447,35688,17903,39609,14867,42943,32667);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		iRisseTextReadStream の実装
-//---------------------------------------------------------------------------
+/**
+ * iRisseTextReadStream の実装
+ */
 class tTextReadStream : public iRisseTextReadStream
 {
 	static const size_t BufferSize = 2048; //!< バッファとして確保するコードポイント数
@@ -33,7 +34,9 @@ class tTextReadStream : public iRisseTextReadStream
 	risse_uint BufferReadPos; //!< バッファの読み込み位置
 	risse_uint BufferRemain; //!< 入力バッファの残り
 
-	//! @brief エンコーディング種別
+	/**
+	 * エンコーディング種別
+	 */
 	enum tEncoding
 	{
 		eUnknown,
@@ -57,10 +60,11 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		name		入力ファイル名
-//! @param		modestr		モード文字列
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param name		入力ファイル名
+ * @param modestr	モード文字列
+ */
 tTextReadStream::tTextReadStream(const tString & name, const tString & modestr)
 {
 	// フィールドの初期化
@@ -155,8 +159,9 @@ tTextReadStream::tTextReadStream(const tString & name, const tString & modestr)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tTextReadStream::~tTextReadStream()
 {
 	if(Stream) delete Stream;
@@ -165,11 +170,11 @@ tTextReadStream::~tTextReadStream()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ストリームから読み込む
-//! @param		targ 読み込み先
-//! @param		読み込むサイズ (コードポイント数)  0 = 全部
-//! @return		読み込まれたコードポイント数
-//---------------------------------------------------------------------------
+/**
+ * ストリームから読み込む
+ * @param targ	読み込み先
+ * @return	読み込まれたコードポイント数
+ */
 risse_size tTextReadStream::Read(tString & targ, risse_size size)
 {
 	if(size != 0)
@@ -215,8 +220,9 @@ risse_size tTextReadStream::Read(tString & targ, risse_size size)
 
 
 //---------------------------------------------------------------------------
-//! @brief		バッファにデータを読み込む
-//---------------------------------------------------------------------------
+/**
+ * バッファにデータを読み込む
+ */
 void tTextReadStream::ReadBuffer()
 {
 	// この関数を読み込む時点では BufferRemain は 0 であること
@@ -297,8 +303,9 @@ void tTextReadStream::ReadBuffer()
 
 
 //---------------------------------------------------------------------------
-//! @brief		iRisseTextWriteStream の実装
-//---------------------------------------------------------------------------
+/**
+ * iRisseTextWriteStream の実装
+ */
 class tTextWriteStream : public iRisseTextWriteStream
 {
 	tBinaryStream * Stream; //!< ストリーム
@@ -312,8 +319,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tTextWriteStream::tTextWriteStream(const tString & name, const tString &modestr)
 {
 	Stream = NULL;
@@ -352,8 +360,9 @@ tTextWriteStream::tTextWriteStream(const tString & name, const tString &modestr)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tTextWriteStream::~tTextWriteStream()
 {
 	if(Stream) delete Stream;
@@ -362,9 +371,10 @@ tTextWriteStream::~tTextWriteStream()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ストリームに書き込む
-//! @param		targ		書き込みたい文字列
-//---------------------------------------------------------------------------
+/**
+ * ストリームに書き込む
+ * @param targ	書き込みたい文字列
+ */
 void tTextWriteStream::Write(const tString & targ)
 {
 	for(;;)

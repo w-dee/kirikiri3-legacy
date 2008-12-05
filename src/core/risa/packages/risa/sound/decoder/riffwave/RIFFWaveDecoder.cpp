@@ -323,12 +323,15 @@ bool tRIFFWaveDecoder::FindRIFFChunk(tStreamAdapter stream, const risse_uint8 *c
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコーダファクトリクラス
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリクラス
+ */
 class tRIFFWaveWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
-	//! @brief デコーダを作成する
+	/**
+	 * デコーダを作成する
+	 */
 	tWaveDecoder * Create(const tString & filename)
 	{
 		return new tRIFFWaveDecoder(filename);
@@ -341,20 +344,25 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコーダファクトリレジストラ
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリレジストラ
+ */
 class tRIFFWaveWaveDecoderFactoryRegisterer :
 	public singleton_base<tRIFFWaveWaveDecoderFactoryRegisterer>,
 	protected depends_on<tWaveDecoderFactoryManager>
 {
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
 		tWaveDecoderFactory * factory = new tRIFFWaveWaveDecoderFactory();
 		tWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".wav"), factory);
 	}
-	//! @brief デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tRIFFWaveWaveDecoderFactoryRegisterer()
 	{
 		tWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".wav"));

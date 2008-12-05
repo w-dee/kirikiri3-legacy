@@ -27,32 +27,43 @@ namespace Risa {
 
 class tFrameInstance;
 //---------------------------------------------------------------------------
-//! @brief		Risaのフレームを表す wxFrame 派生クラス
-//---------------------------------------------------------------------------
+/**
+ * Risaのフレームを表す wxFrame 派生クラス
+ */
 class tFrame : public wxFrame, public tRisaWindowBahavior<tFrame, tFrameInstance>
 {
 	typedef wxFrame inherited;
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		instance		Frameクラスのインスタンスへのポインタ
+	/**
+	 * コンストラクタ
+	 * @param instance	Frameクラスのインスタンスへのポインタ
+	 */
 	tFrame(tFrameInstance * instance);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tFrame();
 
 public:
-	//! @brief		フレームが閉じられようとするとき
-	//! @param		event イベントオブジェクト
+	/**
+	 * フレームが閉じられようとするとき
+	 * @param event	イベントオブジェクト
+	 */
 	void OnClose(wxCloseEvent & event);
 
-	//! @brief		フレームを破棄する
-	//! @note		デストラクタをフックしている訳ではないので注意
-	//!				(ただしtRisaWindowBahaviorのデストラクタ内も参照)
+	/**
+	 * フレームを破棄する
+	 * @note	デストラクタをフックしている訳ではないので注意
+	 *			(ただしtRisaWindowBahaviorのデストラクタ内も参照)
+	 */
 	virtual bool Destroy();
 
 private:
-	//! @brief		イベントテーブルの定義
+	/**
+	 * イベントテーブルの定義
+	 */
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------
@@ -65,18 +76,23 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		フレームクラスのインスタンス
-//---------------------------------------------------------------------------
+/**
+ * フレームクラスのインスタンス
+ */
 class tFrameInstance : public tWindowInstance
 {
 private:
 	tFrame::tInternal * Internal; //!< 内部実装クラスへのポインタ
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tFrameInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tFrameInstance() {;}
 
 public: // Risse用メソッドなど
@@ -93,21 +109,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Frame" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Frame" クラス
+ */
 class tFrameClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tFrameClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------

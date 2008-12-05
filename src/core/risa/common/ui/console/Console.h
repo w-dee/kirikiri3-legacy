@@ -22,8 +22,9 @@ namespace Risa {
 class tLogScrollView;
 class tLogViewerStatusBar;
 //---------------------------------------------------------------------------
-//! @brief		コンソールのフレーム
-//---------------------------------------------------------------------------
+/**
+ * コンソールのフレーム
+ */
 class tConsoleFrame : public tUIFrame,
 					 public tEventSystem::tStateListener,
 						depends_on<tEventSystem>
@@ -34,18 +35,26 @@ class tConsoleFrame : public tUIFrame,
 		ID_Event
 	};
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tConsoleFrame();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tConsoleFrame();
 
-	//! @brief		ログビューアにフォーカスを合わせる
+	/**
+	 * ログビューアにフォーカスを合わせる
+	 */
 	void SetFocusToLogViewer();
 
-	//! @brief		テキストコントロールにフォーカスを合わせる
-	//! @param		insert_code		テキストコントロールにフォーカスを合わせた際に
-	//!								押されたキー (必要ならばこれを挿入する)
+	/**
+	 * テキストコントロールにフォーカスを合わせる
+	 * @param insert_code	テキストコントロールにフォーカスを合わせた際に
+	 *						押されたキー (必要ならばこれを挿入する)
+	 */
 	void SetFocusToTextCtrl(int insert_code = 0);
 
 protected: // tEventSystem::tStateListener
@@ -55,15 +64,21 @@ private:
 	tLogScrollView *ScrollView; //!< スクロールエリア
 	tLogViewerStatusBar *StatusBar; //!< ステータスバー
 
-	//! @brief		"Event" ボタンが押された
-	//! @param		event イベントオブジェクト
+	/**
+	 * "Event" ボタンが押された
+	 * @param event	イベントオブジェクト
+	 */
 	void OnEventTool(wxCommandEvent & event);
 
-	//! @brief		イベントの状態が変化した
-	//! @param		event イベントオブジェクト
+	/**
+	 * イベントの状態が変化した
+	 * @param event	イベントオブジェクト
+	 */
 	void OnEventStatusChanged(wxCommandEvent & event);
 
-	//! @brief		イベントテーブルの定義
+	/**
+	 * イベントテーブルの定義
+	 */
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------

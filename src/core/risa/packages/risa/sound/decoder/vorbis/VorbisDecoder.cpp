@@ -291,12 +291,15 @@ long tOggVorbisDecoder::tell_func(void *datasource)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコーダファクトリクラス
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリクラス
+ */
 class tOggVorbisWaveDecoderFactory : public tWaveDecoderFactory
 {
 public:
-	//! @brief デコーダを作成する
+	/**
+	 * デコーダを作成する
+	 */
 	tWaveDecoder * Create(const tString & filename)
 	{
 		return new tOggVorbisDecoder(filename);
@@ -308,20 +311,25 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコーダファクトリレジストラ
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリレジストラ
+ */
 class tOggVorbisWaveDecoderFactoryRegisterer :
 	public singleton_base<tOggVorbisWaveDecoderFactoryRegisterer>,
 	protected depends_on<tWaveDecoderFactoryManager>
 {
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tOggVorbisWaveDecoderFactoryRegisterer()
 	{
 		tWaveDecoderFactory * factory = new tOggVorbisWaveDecoderFactory();
 		tWaveDecoderFactoryManager::instance()->Register(RISSE_WS(".ogg"), factory);
 	}
-	//! @brief デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tOggVorbisWaveDecoderFactoryRegisterer()
 	{
 		tWaveDecoderFactoryManager::instance()->Unregister(RISSE_WS(".ogg"));

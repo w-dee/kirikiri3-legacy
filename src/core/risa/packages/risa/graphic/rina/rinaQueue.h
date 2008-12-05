@@ -36,8 +36,9 @@ namespace Risa {
 
 class tQueueNode;
 //---------------------------------------------------------------------------
-//! @brief		レンダリング要求の基底クラス
-//---------------------------------------------------------------------------
+/**
+ * レンダリング要求の基底クラス
+ */
 class tRenderRequest : public tPolymorphic
 {
 public:
@@ -48,25 +49,32 @@ private:
 	risse_size Index; //!< 親キューノード内でのインデックス
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		parent		親キューノード
-	//! @param		index		親キューノード内でのインデックス
+	/**
+	 * コンストラクタ
+	 * @param parent	親キューノード
+	 * @param index		親キューノード内でのインデックス
+	 */
 	tRenderRequest(tQueueNode * parent, risse_size index) : Parent(parent), Index(index) {;}
 
-	//! @brief		親キューノードを得る
-	//! @return		親キューノード
+	/**
+	 * 親キューノードを得る
+	 * @return	親キューノード
+	 */
 	tQueueNode * GetParent() const { return Parent; }
 
-	//! @brief		親キューノード内でのインデックスを得る
-	//! @return		親キューノード内でのインデックス
+	/**
+	 * 親キューノード内でのインデックスを得る
+	 * @return	親キューノード内でのインデックス
+	 */
 	risse_size GetIndex() const { return Index; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		子ノードの情報
-//---------------------------------------------------------------------------
+/**
+ * 子ノードの情報
+ */
 class tQueueNodeChild : public tCollectee
 {
 	typedef tCollectee inherited;
@@ -75,21 +83,29 @@ class tQueueNodeChild : public tCollectee
 	const tRenderRequest * RenderRequest; //!< 子キューノードが保持していたレンダリング要求の情報
 
 public:
-	//! @brief		デフォルトコンストラクタ
+	/**
+	 * デフォルトコンストラクタ
+	 */
 	tQueueNodeChild() : Child(NULL), RenderRequest(NULL) {;}
 
-	//! @brief		コンストラクタ
-	//! @param		child		子キューノード
-	//! @param		request		子キューノードが保持していたレンダリング要求の情報
+	/**
+	 * コンストラクタ
+	 * @param child		子キューノード
+	 * @param request	子キューノードが保持していたレンダリング要求の情報
+	 */
 	tQueueNodeChild(tQueueNode * child, const tRenderRequest * request = NULL) :
 		Child(child), RenderRequest(request) {;}
 
-	//! @brief		子キューノードを得る
-	//! @return		子キューノード
+	/**
+	 * 子キューノードを得る
+	 * @return	子キューノード
+	 */
 	tQueueNode * GetChild() const { return Child; }
 
-	//! @brief		子キューノードが保持していたレンダリング要求の情報を得る
-	//! @return		子キューノードが保持していたレンダリング要求の情報
+	/**
+	 * 子キューノードが保持していたレンダリング要求の情報を得る
+	 * @return	子キューノードが保持していたレンダリング要求の情報
+	 */
 	const tRenderRequest * GetRenderRequest() const { return RenderRequest; }
 };
 //---------------------------------------------------------------------------
@@ -98,8 +114,9 @@ public:
 
 class tQueue;
 //---------------------------------------------------------------------------
-//! @brief		コマンドキューノード
-//---------------------------------------------------------------------------
+/**
+ * コマンドキューノード
+ */
 class tQueueNode : public tPolymorphic
 {
 public:
@@ -116,34 +133,48 @@ protected:
 	risse_size WaitingParents; //!< 親キューノードを待っているカウント TODO: より効率的な実装
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		request		レンダリング要求
+	/**
+	 * コンストラクタ
+	 * @param request	レンダリング要求
+	 */
 	tQueueNode(const tRenderRequest * request);
 
-	//! @brief		デストラクタ (おそらく呼ばれない)
+	/**
+	 * デストラクタ (おそらく呼ばれない)
+	 */
 	virtual ~tQueueNode() {;}
 
-	//! @brief		ノードの処理を行う
-	//! @param		queue		コマンドキューインスタンス
-	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	/**
+	 * ノードの処理を行う
+	 * @param queue		コマンドキューインスタンス
+	 * @param is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	 */
 	void Process(tQueue * queue, bool is_begin);
 
-	//! @brief		ノードの親とレンダリング要求を追加する
-	//! @param		parent		親
+	/**
+	 * ノードの親とレンダリング要求を追加する
+	 * @param parent	親
+	 */
 	void AddParent(const tRenderRequest * request);
 
 protected:
-	//! @brief		ノードの子を追加する
-	//! @param		child		子
-	//! @param		request		レンダリング要求
+	/**
+	 * ノードの子を追加する
+	 * @param child		子
+	 * @param request	レンダリング要求
+	 */
 	void AddChild(tQueueNode * child, const tRenderRequest * request);
 
 protected: //!< サブクラスでオーバーライドして使う物
 
-	//! @brief		ノードの処理の最初に行う処理
+	/**
+	 * ノードの処理の最初に行う処理
+	 */
 	virtual void BeginProcess() = 0;
 
-	//! @brief		ノードの処理の最後に行う処理
+	/**
+	 * ノードの処理の最後に行う処理
+	 */
 	virtual void EndProcess() = 0;
 
 };
@@ -153,13 +184,16 @@ protected: //!< サブクラスでオーバーライドして使う物
 
 
 //---------------------------------------------------------------------------
-//! @brief		コマンドキュー
-//---------------------------------------------------------------------------
+/**
+ * コマンドキュー
+ */
 class tQueue : public tCollectee
 {
 	typedef tCollectee inherited;
 
-	//! @brief		アイテム構造体
+	/**
+	 * アイテム構造体
+	 */
 	struct tItem
 	{
 		tQueueNode * Node; //!< ノード
@@ -170,16 +204,22 @@ class tQueue : public tCollectee
 	tItems Items; //!< アイテム構造体のキュー
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tQueue();
 
-	//! @brief		処理を実行する
-	//! @param		node		ルートのプロセスノード
+	/**
+	 * 処理を実行する
+	 * @param node	ルートのプロセスノード
+	 */
 	void Process(tQueueNode * node);
 
-	//! @brief		キューにコマンドを積む
-	//! @param		node		キューノード
-	//! @param		is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	/**
+	 * キューにコマンドを積む
+	 * @param node		キューノード
+	 * @param is_begin	BeginProcess を対象とするか(真) EndProcess を対象とするか(偽)
+	 */
 	void Push(tQueueNode * node, bool is_begin);
 
 };
@@ -190,8 +230,9 @@ public:
 class tInputPin;
 class tGraphInstance;
 //---------------------------------------------------------------------------
-//! @brief		コマンドキューを作成するためのオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * コマンドキューを作成するためのオブジェクト
+ */
 class tQueueBuilder : public tCollectee
 {
 	typedef tCollectee inherited;
@@ -200,37 +241,53 @@ class tQueueBuilder : public tCollectee
 
 	tIdRegistry::tRenderGeneration	 RenderGeneration; //!< レンダリングした世代
 
-	//!@brief 最長距離で比較する比較関数を用いたマップのtypedef
+	/**
+	 * 最長距離で比較する比較関数を用いたマップのtypedef
+	 */
 	typedef
 		gc_map<tNodeInstance *, int, tNodeInstance::tLongestDistanceComparator> tBuildQueueMap;
 
-	//!@brief 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
+	/**
+	 * 最長距離で比較する比較関数を用いたマップ (キューの組み立てに使う)
+	 */
 	tBuildQueueMap BuildQueueMap;
 
 	tQueueNode * RootQueueNode; //!< ルートとなるコマンドキューノード
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		graph		グラフインスタンス
+	/**
+	 * コンストラクタ
+	 * @param graph	グラフインスタンス
+	 */
 	tQueueBuilder(tGraphInstance * graph);
 
-	//! @brief		レンダリング世代を得る
-	//! @return		レンダリング世代
+	/**
+	 * レンダリング世代を得る
+	 * @return	レンダリング世代
+	 */
 	tIdRegistry::tRenderGeneration GetRenderGeneration() const { return RenderGeneration; }
 
-	//! @brief		コマンドキューを作成する
-	//! @param		node		ルートのプロセスノード
+	/**
+	 * コマンドキューを作成する
+	 * @param node	ルートのプロセスノード
+	 */
 	void Build(tNodeInstance * node);
 
-	//! @brief		キュー組み立てを行うための次のノードをpushする
-	//! @param		node		ノード
+	/**
+	 * キュー組み立てを行うための次のノードをpushする
+	 * @param node	ノード
+	 */
 	void Push(tNodeInstance * node);
 
-	//! @brief		ルートとなるコマンドキューノードを登録する
-	//! @param		node	ルートとなるコマンドキューノード
+	/**
+	 * ルートとなるコマンドキューノードを登録する
+	 * @param node	ルートとなるコマンドキューノード
+	 */
 	void SetRootQueueNode(tQueueNode * node) { RootQueueNode = node; }
 
-	//! @brief		ルートキューノードを得る
+	/**
+	 * ルートキューノードを得る
+	 */
 	tQueueNode * GetRootQueueNode() const { return RootQueueNode; }
 
 };

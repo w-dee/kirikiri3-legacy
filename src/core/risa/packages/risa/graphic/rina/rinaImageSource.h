@@ -27,8 +27,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラスタ画像用ソースノード
-//---------------------------------------------------------------------------
+/**
+ * ラスタ画像用ソースノード
+ */
 class tImageSourceNodeInstance : public tNodeInstance
 {
 	typedef tNodeInstance inherited; //!< 親クラス
@@ -38,19 +39,27 @@ class tImageSourceNodeInstance : public tNodeInstance
 	tImageOutputPinInstance * OutputPinInstance; //!< 出力ピンインスタンス
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tImageSourceNodeInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tImageSourceNodeInstance() {}
 
 public: // サブクラスで実装すべき物
-	//! @brief		入力ピンの配列を得る
-	//! @return		入力ピンの配列
+	/**
+	 * 入力ピンの配列を得る
+	 * @return	入力ピンの配列
+	 */
 	virtual tInputPinArrayInstance & GetInputPinArrayInstance();
 
-	//! @brief		出力ピンの配列を得る
-	//! @return		出力ピンの配列
+	/**
+	 * 出力ピンの配列を得る
+	 * @return	出力ピンの配列
+	 */
 	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance();
 
 public: // Risse用メソッドなど
@@ -62,21 +71,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"ImageSource" クラス
-//---------------------------------------------------------------------------
+/**
+ * "ImageSource" クラス
+ */
 class tImageSourceNodeClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tImageSourceNodeClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど

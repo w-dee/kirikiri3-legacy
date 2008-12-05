@@ -43,12 +43,15 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		OpenAL管理クラス
-//---------------------------------------------------------------------------
+/**
+ * OpenAL管理クラス
+ */
 class tOpenAL : public singleton_base<tOpenAL>, manual_start<tOpenAL>
 {
 public:
-	//! @brief OpenAL APIを保護するためのクリティカルセクションホルダ
+	/**
+	 * OpenAL APIを保護するためのクリティカルセクションホルダ
+	 */
 	struct tCriticalSectionHolder : protected depends_on<tOpenAL>
 	{
 		tCriticalSection::tLocker holder;
@@ -71,23 +74,33 @@ private:
 
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tOpenAL();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tOpenAL();
 
 private:
-	//! @brief		クリーンアップ処理
+	/**
+	 * クリーンアップ処理
+	 */
 	void Clear();
 
 public:
-	//! @brief		現在のエラーに対応する例外を投げる
-	//! @param		message メッセージ
-	//! @note		エラーが何も発生していない場合は何もしない
+	/**
+	 * 現在のエラーに対応する例外を投げる
+	 * @param message	メッセージ
+	 * @note	エラーが何も発生していない場合は何もしない
+	 */
 	void ThrowIfError(const risse_char * message);
 
-	//! @brief		OpenAL のエラー状態をクリアする
+	/**
+	 * OpenAL のエラー状態をクリアする
+	 */
 	void ClearErrorState();
 
 	tCriticalSection & GetCS() { return CS; } //!< このオブジェクトを保護しているCSを得る

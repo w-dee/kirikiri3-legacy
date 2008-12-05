@@ -23,8 +23,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		一つのアーカイブを現すクラス
-//---------------------------------------------------------------------------
+/**
+ * 一つのアーカイブを現すクラス
+ */
 class tXP4Archive :
 	protected depends_on<tXP4SegmentCache>,
 	protected depends_on<tXP4StreamCache>
@@ -39,12 +40,14 @@ public:
 		wxDateTime Time; //!< タイムスタンプ
 		risse_uint8 Hash[20]; //!< SHA1 ハッシュ
 
-		//! @brief		コンストラクタ
-		//! @param		owner tXP4Archive インスタンスへのポインタ
-		//! @param		meta 入力メタデータ
-		//! @param		metasize 入力メタデータのサイズ
-		//! @param		inarchivename このアーカイブアイテムの名前を格納する先
-		//! @param		deleted ファイルが削除されている時に真に設定される
+		/**
+		 * コンストラクタ
+		 * @param owner			tXP4Archive インスタンスへのポインタ
+		 * @param meta			入力メタデータ
+		 * @param metasize		入力メタデータのサイズ
+		 * @param inarchivename	このアーカイブアイテムの名前を格納する先
+		 * @param deleted		ファイルが削除されている時に真に設定される
+		 */
 		tFile(tXP4Archive *owner, const unsigned char * meta,
 							size_t metasize, tString & inarchivename, bool &deleted);
 	};
@@ -61,7 +64,9 @@ public:
 				RISA__XP4_SEGM_ENCODE_RAW; } //!< セグメントが圧縮されている場合に真
 	};
 
-	//! @brief アーカイブを読み込む際に各アーカイブ内のファイルごとに呼ばれるコールバック
+	/**
+	 * アーカイブを読み込む際に各アーカイブ内のファイルごとに呼ばれるコールバック
+	 */
 	class iMapCallback
 	{
 	public:
@@ -76,24 +81,31 @@ private:
 	tString FileName;
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		filename アーカイブファイル名
-	//! @param		callback ファイル名とアーカイブ内インデックスの対応をpushするコールバック
+	/**
+	 * コンストラクタ
+	 * @param filename	アーカイブファイル名
+	 * @param callback	ファイル名とアーカイブ内インデックスの対応をpushするコールバック
+	 */
 	tXP4Archive(const tString & filename, iMapCallback & callback);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tXP4Archive();
 
-	//! @brief		指定されたファイルの stat を得る
-	//! @param		idx ファイルのインデックス
-	//! @param		struc stat 結果の出力先
+	/**
+	 * 指定されたファイルの stat を得る
+	 * @param idx	ファイルのインデックス
+	 * @param struc	stat 結果の出力先
+	 */
 	void Stat(risse_size idx, tStatStruc & struc);
 
-	//! @brief		指定されたファイルのストリームを得る
-	//! @param		スマートポインタ (ストリームに渡す)
-	//! @param		idx ファイルのインデックス
-	//! @param		flags フラグ
-	//! @return		ストリームオブジェクト
+	/**
+	 * 指定されたファイルのストリームを得る
+	 * @param idx	ファイルのインデックス
+	 * @param flags	フラグ
+	 * @return	ストリームオブジェクト
+	 */
 	tBinaryStream * CreateStream(
 				boost::shared_ptr<tXP4Archive> ptr,
 				risse_size idx, risse_uint32 flags);

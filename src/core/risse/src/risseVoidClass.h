@@ -23,20 +23,27 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Void" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Void" クラス
+ */
 class tVoidClass : public tPrimitiveClassBase
 {
 	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tVoidClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse用メソッドなど

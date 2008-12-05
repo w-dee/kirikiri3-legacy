@@ -22,45 +22,62 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		ガーベジコレクタ用スレッド
-//---------------------------------------------------------------------------
+/**
+ * ガーベジコレクタ用スレッド
+ */
 class tCollectorThread : public singleton_base<tCollectorThread>
 {
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
-	//! @brief	コレクタスレッドのクラス
+	/**
+	 * コレクタスレッドのクラス
+	 */
 	class tThreadImpl : public tThread
 	{
 		tThreadEvent Event; //!< イベントオブジェクト
 		tCollectorThread & Owner;
 	public:
 
-		//! @brief		コンストラクタ
-		//! @param		owner		このオブジェクトを所有する tCollectorThread オブジェクト
+		/**
+		 * コンストラクタ
+		 * @param owner	このオブジェクトを所有する tCollectorThread オブジェクト
+		 */
 		tThreadImpl(tCollectorThread & owner);
 
-		//! @brief		デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~tThreadImpl();
 
-		//! @brief		スレッドのエントリーポイント
+		/**
+		 * スレッドのエントリーポイント
+		 */
 		void Execute();
 
-		//! @brief		スレッドをたたき起こす
+		/**
+		 * スレッドをたたき起こす
+		 */
 		void Wakeup() { Event.Signal(); }
 	};
 
 	tThreadImpl *Thread; //!< コレクタスレッド
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tCollectorThread();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tCollectorThread();
 
 private:
-	//! @brief		ファイナライズすべきオブジェクトがあった場合に
-	//!				GC から呼ばれるコールバック
+	/**
+	 * ファイナライズすべきオブジェクトがあった場合に
+	 * GC から呼ばれるコールバック
+	 */
 	static void FinalizerNotifier();
 };
 //---------------------------------------------------------------------------
@@ -68,8 +85,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持するキュー
-//---------------------------------------------------------------------------
+/**
+ * メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持するキュー
+ */
 class tMainThreadDestructorQueue : public singleton_base<tMainThreadDestructorQueue>
 {
 public:
@@ -84,17 +102,25 @@ private:
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 public:
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tMainThreadDestructorQueue() {;}
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tMainThreadDestructorQueue();
 
-	//! @brief		キューにデストラクタを登録
-	//! @param		dtor		デストラクタ
+	/**
+	 * キューにデストラクタを登録
+	 * @param dtor	デストラクタ
+	 */
 	void Enqueue(tDestructorCaller * dtor);
 
-	//! @brief		デストラクタを呼ぶ
+	/**
+	 * デストラクタを呼ぶ
+	 */
 	void CallDestructors();
 };
 //---------------------------------------------------------------------------
@@ -102,8 +128,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
-//---------------------------------------------------------------------------
+/**
+ * 自分の消滅時に指定クラスのデストラクタを呼ぶだけのテンプレートクラス
+ */
 /*
 	デストラクタの呼び出し規約を想定できないため、いったんこのクラスを挟む。
 */
@@ -120,10 +147,11 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持する自動ポインタ。
-//! @note		tDestructee 派生クラスなので注意(つまりデストラクタによる後処理が必要)。
-//!				あとあんまり効率のよい実装ではない。
-//---------------------------------------------------------------------------
+/**
+ * メインスレッドでデストラクタが走ってほしい非GC対応オブジェクトを保持する自動ポインタ。
+ * @note	tDestructee 派生クラスなので注意(つまりデストラクタによる後処理が必要)。
+ *			あとあんまり効率のよい実装ではない。
+ */
 template <typename T>
 class tMainThreadAutoPtr : public tDestructee, depends_on<tMainThreadDestructorQueue>
 {
@@ -132,33 +160,45 @@ class tMainThreadAutoPtr : public tDestructee, depends_on<tMainThreadDestructorQ
 
 
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tMainThreadAutoPtr()
 	{
 		Pointer = NULL;
 	}
 
-	//! @brief コンストラクタ
-	//! @param	ptr	ポインタ
+	/**
+	 * コンストラクタ
+	 * @param ptr	ポインタ
+	 */
 	tMainThreadAutoPtr(T * ptr)
 	{
 		Pointer = ptr;
 	}
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tMainThreadAutoPtr()
 	{
 		dispose();
 	}
 
-	//! @brief		ポインタを設定する
-	//! @param		ptr		ポインタ
+	/**
+	 * ポインタを設定する
+	 * @param ptr	ポインタ
+	 */
 	void set(T * ptr) { Pointer = ptr; }
 
-	//! @brief		ポインタを設定する
+	/**
+	 * ポインタを設定する
+	 */
 	void operator = (T * ptr) { Pointer = ptr; }
 
-	//! @brief		ポインタで表されている内容を破棄し、ポインタをクリアする
+	/**
+	 * ポインタで表されている内容を破棄し、ポインタをクリアする
+	 */
 	void dispose() { 
 		// キューに Pointer のデストラクタを登録
 		if(Pointer)
@@ -167,22 +207,29 @@ public:
 		// ポインタをクリア
 	}
 
-	//! @brief ポインタへの変換
+	/**
+	 * ポインタへの変換
+	 */
 	T* get() const { return Pointer; }
 
-	//! @brief ポインタへの変換
+	/**
+	 * ポインタへの変換
+	 */
 	operator T* () const { return Pointer; }
 
-	//! @brief ポインタへの変換
+	/**
+	 * ポインタへの変換
+	 */
 	T* operator -> () const { return Pointer; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		参照カウンタ付きオブジェクトを対象にしたポインタ
-//! @note		AddRef() および Release() をメソッドに持つクラスが対象。
-//---------------------------------------------------------------------------
+/**
+ * 参照カウンタ付きオブジェクトを対象にしたポインタ
+ * @note	AddRef() および Release() をメソッドに持つクラスが対象。
+ */
 template <typename T>
 class tGCReferencePtr : public tDestructee
 {
@@ -191,39 +238,51 @@ class tGCReferencePtr : public tDestructee
 
 
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tGCReferencePtr()
 	{
 		Pointer = NULL;
 	}
 
-	//! @brief コンストラクタ
-	//! @param	ptr	ポインタ
+	/**
+	 * コンストラクタ
+	 * @param ptr	ポインタ
+	 */
 	tGCReferencePtr(T * ptr)
 	{
 		Pointer = ptr;
 		if(Pointer) Pointer->AddRef();
 	}
 
-	//! @brief コピーコンストラクタ
-	//! @param	ref	ポインタ
+	/**
+	 * コピーコンストラクタ
+	 * @param ref	ポインタ
+	 */
 	tGCReferencePtr(const tGCReferencePtr & ref)
 	{
 		Pointer = ref.Pointer;
 		if(Pointer) Pointer->AddRef();
 	}
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tGCReferencePtr()
 	{
 		if(Pointer) Pointer->Release();
 	}
 
-	//! @brief		ポインタを破棄する(NULLに設定する)
+	/**
+	 * ポインタを破棄する(NULLに設定する)
+	 */
 	void dispose() { set(NULL); }
 
-	//! @brief		ポインタを設定する
-	//! @param		ptr		ポインタ
+	/**
+	 * ポインタを設定する
+	 * @param ptr	ポインタ
+	 */
 	void set(T * ptr) {
 		if(Pointer != ptr) {
 			if(Pointer) Pointer->Release();
@@ -232,21 +291,31 @@ public:
 		}
 	}
 
-	//! @brief		ポインタを設定する
+	/**
+	 * ポインタを設定する
+	 */
 	void operator = (T * ptr) { set(ptr); }
 
-	//! @brief ポインタへの変換
-	//! @note	注意! AddRef() されます
+	/**
+	 * ポインタへの変換
+	 * @note	注意! AddRef() されます
+	 */
 	T* get() const { if(Pointer) Pointer->AddRef(); return Pointer; }
 
-	//! @brief ポインタへの変換
-	//! @note	注意! AddRef() されません
+	/**
+	 * ポインタへの変換
+	 * @note	注意! AddRef() されません
+	 */
 	T* get_noaddref() const { return Pointer; }
 
-	//! @brief ポインタへの変換
+	/**
+	 * ポインタへの変換
+	 */
 	operator T* () const { return Pointer; }
 
-	//! @brief ポインタへの変換
+	/**
+	 * ポインタへの変換
+	 */
 	T* operator -> () const { return Pointer; }
 };
 //---------------------------------------------------------------------------

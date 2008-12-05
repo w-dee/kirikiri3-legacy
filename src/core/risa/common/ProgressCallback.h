@@ -18,22 +18,29 @@
 namespace Risa
 {
 //---------------------------------------------------------------------------
-//! @brief  進捗コールバック用インターフェース
-//---------------------------------------------------------------------------
+/**
+ * 進捗コールバック用インターフェース
+ */
 class tProgressCallback : public tCollectee
 {
 	int Last; //!< 最後に送った進捗率
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tProgressCallback() : Last(-1) {}
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tProgressCallback() {}
 
-	//! @brief		進捗コールバックを呼ぶ
-	//! @param		total		全体の処理量
-	//! @param		done		終了した処理量
+	/**
+	 * 進捗コールバックを呼ぶ
+	 * @param total	全体の処理量
+	 * @param done	終了した処理量
+	 */
 	void CallOnProgress(risse_size total, risse_size done)
 	{
 		int pct = 100 * done / total;
@@ -42,9 +49,11 @@ public:
 	}
 
 protected:
-	//! @brief		進捗コールバックを行う(下位クラスで実装すること)
-	//! @param		percent		進捗率(%)
-	//! @note		処理を中断したい場合は例外を送出すること。
+	/**
+	 * 進捗コールバックを行う(下位クラスで実装すること)
+	 * @param percent	進捗率(%)
+	 * @note	処理を中断したい場合は例外を送出すること。
+	 */
 	virtual void OnProgress(int percent) = 0;
 };
 //---------------------------------------------------------------------------
@@ -52,26 +61,31 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief  risse メソッドを呼び出すようにした tProgressCallback の実装
-//---------------------------------------------------------------------------
+/**
+ * risse メソッドを呼び出すようにした tProgressCallback の実装
+ */
 class tRisseProgressCallback : public tProgressCallback
 {
 	tScriptEngine * ScriptEngine; //!< Risseスクリプトエンジンインスタンス
 	tVariant Method; //!< 呼び出すメソッド
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		Risseスクリプトエンジンインスタンス
-	//! @param		method		呼び出すメソッド
+	/**
+	 * コンストラクタ
+	 * @param engine	Risseスクリプトエンジンインスタンス
+	 * @param method	呼び出すメソッド
+	 */
 	tRisseProgressCallback(tScriptEngine * engine,
 		const tVariant & method) :
 			ScriptEngine(engine), Method(method)
 	{}
 
 protected:
-	//! @brief		進捗コールバックを行う
-	//! @param		percent		進捗率(%)
-	//! @note		処理を中断したい場合は例外を送出すること。
+	/**
+	 * 進捗コールバックを行う
+	 * @param percent	進捗率(%)
+	 * @note	処理を中断したい場合は例外を送出すること。
+	 */
 	virtual void OnProgress(int percent)
 	{
 		Method.FuncCall(ScriptEngine, NULL, 0, tMethodArgument::New((risse_int64)percent));

@@ -21,8 +21,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		分類を行うためのデフォルトのリスト
-//---------------------------------------------------------------------------
+/**
+ * 分類を行うためのデフォルトのリスト
+ */
 // クラスリストのファイルは以下の形式
 // e:正規表現パターン
 // i:正規表現パターン
@@ -88,9 +89,10 @@ static wxChar const  * const XP4DefaultClassList[] = {
 
 
 //---------------------------------------------------------------------------
-//! @brief		デフォルトの分類リストを配列にして返す
-//! @param		dest 格納先配列(内容はクリアされる)
-//---------------------------------------------------------------------------
+/**
+ * デフォルトの分類リストを配列にして返す
+ * @param dest	格納先配列(内容はクリアされる)
+ */
 void XP4GetDefaultClassList(wxArrayString & dest)
 {
 	dest.clear();
@@ -108,12 +110,13 @@ void XP4GetDefaultClassList(wxArrayString & dest)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		dir 対象ディレクトリ
-//! @param		basedir ベースディレクトリ
-//! @param		dest 格納先配列
-//---------------------------------------------------------------------------
+/**
+ * 指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
+ * @param callback	進捗コールバックオブジェクト
+ * @param dir		対象ディレクトリ
+ * @param basedir	ベースディレクトリ
+ * @param dest		格納先配列
+ */
 static void InternalGetFileListAt(iRisaProgressCallback * callback,
 	const wxString & dir, const wxString & basedir,
 	std::vector<tXP4WriterInputFile> & dest)
@@ -182,11 +185,12 @@ static void InternalGetFileListAt(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		dir 対象ディレクトリ
-//! @param		dest 格納先配列(内容はクリアされる)
-//---------------------------------------------------------------------------
+/**
+ * 指定ディレクトリにあるファイルを再帰的に検索し、リストを取得する
+ * @param callback	進捗コールバックオブジェクト
+ * @param dir		対象ディレクトリ
+ * @param dest		格納先配列(内容はクリアされる)
+ */
 void GetFileListAt(iRisaProgressCallback * callback,
 	const wxString & dir, std::vector<tXP4WriterInputFile> & dest)
 {
@@ -208,11 +212,12 @@ void GetFileListAt(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルをパターンに従って分類する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		pattern パターン
-//! @param		dest 格納先配列
-//---------------------------------------------------------------------------
+/**
+ * ファイルをパターンに従って分類する
+ * @param callback	進捗コールバックオブジェクト
+ * @param pattern	パターン
+ * @param dest		格納先配列
+ */
 void XP4ClassifyFiles(iRisaProgressCallback * callback,
 	const wxArrayString & pattern,
 	std::vector<tXP4WriterInputFile> &  dest
@@ -328,10 +333,11 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 
 
 //---------------------------------------------------------------------------
-//! @brief		アーカイブ内ストレージの名前を正規化する
-//! @param		name 正規化したいストレージ名
-//! @return		正規化したストレージ名
-//---------------------------------------------------------------------------
+/**
+ * アーカイブ内ストレージの名前を正規化する
+ * @param name	正規化したいストレージ名
+ * @return	正規化したストレージ名
+ */
 wxString NormalizeXP4ArchiveStorageName(const wxString & name)
 {
 	// TODO: UNICODE 正規化
@@ -355,13 +361,14 @@ wxString NormalizeXP4ArchiveStorageName(const wxString & name)
 
 
 //---------------------------------------------------------------------------
-//! @brief		tXP4MetadataReaderArchive から得た input 内の項目を map に追加する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		map 追加先map
-//! @param		input 入力配列
-//! @note		すでに追加先に存在していた場合は追加先を書き換える。
-//!				削除すべき場合は削除する。
-//---------------------------------------------------------------------------
+/**
+ * tXP4MetadataReaderArchive から得た input 内の項目を map に追加する
+ * @param callback	進捗コールバックオブジェクト
+ * @param map		追加先map
+ * @param input		入力配列
+ * @note	すでに追加先に存在していた場合は追加先を書き換える。
+ *			削除すべき場合は削除する。
+ */
 void ApplyXP4StorageNameMap(
 	iRisaProgressCallback * callback,
 	std::map<wxString, tXP4MetadataReaderStorageItem> &map,
@@ -397,12 +404,13 @@ void ApplyXP4StorageNameMap(
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを列挙する
-//! @param		archivename アーカイブファイル名
-//! @param		archives 格納先配列(内容はクリアされる)
-//! @note		この関数を呼ぶ時点では archivename に対応するファイルは存在している
-//!				ことが確認できていなければならない
-//---------------------------------------------------------------------------
+/**
+ * 指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを列挙する
+ * @param archivename	アーカイブファイル名
+ * @param archives		格納先配列(内容はクリアされる)
+ * @note	この関数を呼ぶ時点では archivename に対応するファイルは存在している
+ *			ことが確認できていなければならない
+ */
 void EnumerateArchiveFiles(const wxString & archivename,
 	std::vector<wxString> & archives)
 {
@@ -448,9 +456,10 @@ void EnumerateArchiveFiles(const wxString & archivename,
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを削除する
-//! @param		archivename アーカイブファイル名
-//---------------------------------------------------------------------------
+/**
+ * 指定されたアーカイブファイル名をベースとするすべてのアーカイブファイルを削除する
+ * @param archivename	アーカイブファイル名
+ */
 void DeleteArchiveSet(const wxString & archivename)
 {
 	// アーカイブファイルを列挙
@@ -472,12 +481,13 @@ void DeleteArchiveSet(const wxString & archivename)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定されたアーカイブファイルのメタデータを読み込む
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		archivename アーカイブファイル名
-//! @param		dest 格納先マップ(内容はクリアされる)
-//! @param		targetdir このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
-//---------------------------------------------------------------------------
+/**
+ * 指定されたアーカイブファイルのメタデータを読み込む
+ * @param callback		進捗コールバックオブジェクト
+ * @param archivename	アーカイブファイル名
+ * @param dest			格納先マップ(内容はクリアされる)
+ * @param targetdir		このアーカイブセットが元にした対象ディレクトリを格納するポインタ(null可)
+ */
 void ReadXP4Metadata(
 	iRisaProgressCallback * callback,
 	const wxString & archivename,
@@ -518,11 +528,12 @@ void ReadXP4Metadata(
 
 
 //---------------------------------------------------------------------------
-//! @brief		arc(アーカイブ内既存ファイル) と ref(ターゲットディレクトリ)を比較し、ref を更新する
-//! @param		callback 進捗コールバックオブジェクト
-//! @param		arc アーカイブ内の既存ファイルを現すmap
-//! @param		ref ターゲットディレクトリから取得したファイル一覧
-//---------------------------------------------------------------------------
+/**
+ * arc(アーカイブ内既存ファイル) と ref(ターゲットディレクトリ)を比較し、ref を更新する
+ * @param callback	進捗コールバックオブジェクト
+ * @param arc		アーカイブ内の既存ファイルを現すmap
+ * @param ref		ターゲットディレクトリから取得したファイル一覧
+ */
 void CompareXP4StorageNameMap(
 	iRisaProgressCallback * callback,
 	std::map<wxString, tXP4MetadataReaderStorageItem> &arc,
@@ -636,10 +647,11 @@ void CompareXP4StorageNameMap(
 
 
 //---------------------------------------------------------------------------
-//! @brief		tXP4MetadataReaderStorageItem の配列を tXP4WriterInputFile に変換する
-//! @param		input 入力 tXP4MetadataReaderStorageItem の map
-//! @param		output 出力 tXP4WriterInputFile の配列(内容はクリアされる)
-//---------------------------------------------------------------------------
+/**
+ * tXP4MetadataReaderStorageItem の配列を tXP4WriterInputFile に変換する
+ * @param input		入力 tXP4MetadataReaderStorageItem の map
+ * @param output	出力 tXP4WriterInputFile の配列(内容はクリアされる)
+ */
 void XP4MetadataReaderStorageItemToXP4WriterInputFile(
 	const std::map<wxString, tXP4MetadataReaderStorageItem> & input,
 	std::vector<tXP4WriterInputFile> & output)

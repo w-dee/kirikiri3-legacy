@@ -27,8 +27,6 @@ namespace Risa {
 #define RISA__XP4_SEGM_ENCODE_ZLIB      1
 
 #define RISA__XP4_FILE_COMPRESSED 0x80	//!< not a real code; only used in tXP4Writer related
-										//!   (do not trust this flag, the actual
-										//!    compression bit is in each segment flags)
 #define RISA__XP4_FILE_EXCLUDED	0x40	//!< not a real code; only used in tXP4Writer related
 #define RISA__XP4_FILE_MARKED		0x20
 #define RISA__XP4_FILE_STATE_MASK	0x0f

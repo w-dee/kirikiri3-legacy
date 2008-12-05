@@ -38,11 +38,14 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief リンクを表す構造体
-//---------------------------------------------------------------------------
+/**
+ * リンクを表す構造体
+ */
 struct tWaveLoopLink : public tAtomicCollectee
 {
-	//! @brief リンクの条件を表す列挙型
+	/**
+	 * リンクの条件を表す列挙型
+	 */
 	enum tLinkCondition
 	{
 		llcNone,			//!< 無条件リンク
@@ -92,7 +95,9 @@ struct tWaveLoopLink : public tAtomicCollectee
 	};
 #endif
 
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWaveLoopLink()
 	{
 		From = To = 0;
@@ -115,11 +120,12 @@ struct tWaveLoopLink : public tAtomicCollectee
 
 
 //---------------------------------------------------------------------------
-//! @brief		リンクをソートするための比較関数
-//! @param		lhs		演算子の左側
-//! @param		rhs		演算子の右側
-//! @return		lhs < rhs の場合真、それ以外の場合は偽
-//---------------------------------------------------------------------------
+/**
+ * リンクをソートするための比較関数
+ * @param lhs	演算子の左側
+ * @param rhs	演算子の右側
+ * @return	lhs < rhs の場合真、それ以外の場合は偽
+ */
 bool inline operator < (const tWaveLoopLink & lhs, const tWaveLoopLink & rhs)
 {
 	if(lhs.From < rhs.From) return true;
@@ -137,8 +143,9 @@ bool inline operator < (const tWaveLoopLink & lhs, const tWaveLoopLink & rhs)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベルを表す構造体
-//---------------------------------------------------------------------------
+/**
+ * ラベルを表す構造体
+ */
 struct tWaveLabel : public tWaveEvent
 {
 #ifdef RISA_IN_LOOP_TUNER
@@ -169,7 +176,9 @@ struct tWaveLabel : public tWaveEvent
 	};
 #endif
 
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWaveLabel()
 	{
 #ifdef RISA_IN_LOOP_TUNER
@@ -183,11 +192,12 @@ struct tWaveLabel : public tWaveEvent
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベルをソートするための比較関数
-//! @param		lhs		演算子の左側
-//! @param		rhs		演算子の右側
-//! @return		lhs < rhs の場合真、それ以外の場合は偽
-//---------------------------------------------------------------------------
+/**
+ * ラベルをソートするための比較関数
+ * @param lhs	演算子の左側
+ * @param rhs	演算子の右側
+ * @return	lhs < rhs の場合真、それ以外の場合は偽
+ */
 bool inline operator < (const tWaveLabel & lhs, const tWaveLabel & rhs)
 {
 	return lhs.Position < rhs.Position;
@@ -201,8 +211,9 @@ bool inline operator < (const tWaveLabel & lhs, const tWaveLabel & rhs)
 
 
 //---------------------------------------------------------------------------
-//! @brief		Wave ループマネージャ
-//---------------------------------------------------------------------------
+/**
+ * Wave ループマネージャ
+ */
 class tWaveDecoder;
 class tWaveFileInfo;
 class tWaveLoopManager : public tWaveFilter
@@ -233,10 +244,8 @@ private:
 	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか
 
 	risse_int ShortCrossFadeHalfSamples;
-		//!< SmoothTimeHalf in sample unit
 
 	bool Looping; 
-		//!< ループ再生しているときは真 (ただしこれはループ情報を読み込んでいない場合の設定で、
 		//   ループ情報を読み込んでいる場合はこの設定に従わない
 
 	risse_int64 Position; //!< decoding position
@@ -251,71 +260,103 @@ private:
 	bool IgnoreLinks; //!< decode the samples with ignoring links
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWaveLoopManager(tWaveDecoder * decoder);
 
 private:
-	//! @brief		デコーダを設定する
-	//! @param		decoder		デコーダ
+	/**
+	 * デコーダを設定する
+	 * @param decoder	デコーダ
+	 */
 	void SetDecoder(tWaveDecoder * decoder);
 
 public:
-	//! @brief		指定インデックスのフラグを得る
-	//! @param		index    フラグのインデックス
-	//! @return		そのインデックスに対応するフラグの値
+	/**
+	 * 指定インデックスのフラグを得る
+	 * @param index	フラグのインデックス
+	 * @return	そのインデックスに対応するフラグの値
+	 */
 	int GetFlag(risse_int index);
 
-	//! @brief		フラグをすべて一気にコピーする
-	//! @param		dest		コピー先
-	//! @note		この関数を呼ぶと FlagsModifiedByLabelExpression は偽にリセットされる
+	/**
+	 * フラグをすべて一気にコピーする
+	 * @param dest	コピー先
+	 * @note	この関数を呼ぶと FlagsModifiedByLabelExpression は偽にリセットされる
+	 */
 	void CopyFlags(risse_int *dest);
 
-	//! @brief		フラグがラベル式によって変更されたかどうかが返される
-	//! @return		フラグがラベル式によって変更されたかどうか
-	//! @note		このフラグは CopyFlags により偽にリセットされる
+	/**
+	 * フラグがラベル式によって変更されたかどうかが返される
+	 * @return	フラグがラベル式によって変更されたかどうか
+	 * @note	このフラグは CopyFlags により偽にリセットされる
+	 */
 	bool GetFlagsModifiedByLabelExpression();
 
-	//! @brief		指定インデックスのフラグを設定する
-	//! @param		index		フラグのインデックス
-	//! @param		f			フラグの値
+	/**
+	 * 指定インデックスのフラグを設定する
+	 * @param index	フラグのインデックス
+	 * @param f		フラグの値
+	 */
 	void SetFlag(risse_int index, risse_int f);
 
-	//! @brief		フラグをすべて 0 にする
+	/**
+	 * フラグをすべて 0 にする
+	 */
 	void ClearFlags();
 
-	//! @brief		リンクやラベルをすべてクリアする
+	/**
+	 * リンクやラベルをすべてクリアする
+	 */
 	void ClearLinksAndLabels();
 
-	//! @brief		リンクの配列を得る
-	//! @return		リンクの配列への参照
+	/**
+	 * リンクの配列を得る
+	 * @return	リンクの配列への参照
+	 */
 	const gc_vector<tWaveLoopLink> & GetLinks() const;
 
-	//! @brief		ラベルの配列を得る
-	//! @return		ラベルの配列への参照
+	/**
+	 * ラベルの配列を得る
+	 * @return	ラベルの配列への参照
+	 */
 	const gc_vector<tWaveLabel> & GetLabels() const;
 
-	//! @brief		リンクの配列を設定する
-	//! @param		links		設定したい配列
+	/**
+	 * リンクの配列を設定する
+	 * @param links	設定したい配列
+	 */
 	void SetLinks(const gc_vector<tWaveLoopLink> & links);
 
-	//! @brief		ラベルの配列を設定する
-	//! @param		links		設定したい配列
+	/**
+	 * ラベルの配列を設定する
+	 * @param links	設定したい配列
+	 */
 	void SetLabels(const gc_vector<tWaveLabel> & labels);
 
-	//! @brief		リンクを無視しながら再生しているかどうかを返す
-	//! @return		リンクを無視しながら再生しているかどうか
+	/**
+	 * リンクを無視しながら再生しているかどうかを返す
+	 * @return	リンクを無視しながら再生しているかどうか
+	 */
 	bool GetIgnoreLinks() const;
 
-	//! @brief		リンクを無視しながら再生しているかどうかを設定する
-	//! @param		b		リンクを無視しながら再生するかどうか
+	/**
+	 * リンクを無視しながら再生しているかどうかを設定する
+	 * @param b	リンクを無視しながら再生するかどうか
+	 */
 	void SetIgnoreLinks(bool b);
 
-	//! @brief		現在のデコード位置を得る
-	//! @return		現在のデコード位置
+	/**
+	 * 現在のデコード位置を得る
+	 * @return	現在のデコード位置
+	 */
 	risse_int64 GetPosition() const;
 
-	//! @brief		現在のデコード位置を設定する
-	//! @param		pos		現在のデコード位置
+	/**
+	 * 現在のデコード位置を設定する
+	 * @param pos	現在のデコード位置
+	 */
 	void SetPosition(risse_int64 pos);
 
 	bool GetLooping() const { return Looping; } //!< ループ情報を読み込んでいないときにループを行うかどうかを得る
@@ -324,53 +365,66 @@ public:
 	//------- tWaveFilter メソッド  ここから
 	void Reset() {;} //!< @note tWaveLoopManager ではなにもしない
 	void SetInput(tWaveFilter * input) {;}
-		//!< @note tWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
 
-	//! @brief		PCMフォーマットを提案する
-	//! @param		format   PCMフォーマット
+	/**
+	 * PCMフォーマットを提案する
+	 * @param format	PCMフォーマット
+	 */
 	void SuggestFormat(const tWaveFormat & format);
 
-	//! @brief		デコードを行う
-	//! @param		dest		デコード結果を格納するバッファ
-	//! @param		samples		デコードを行いたいサンプル数
-	//! @param		written		実際にデコード出来たサンプル数
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
-	//! @return		まだデコードすべきデータが残っているかどうか
+	/**
+	 * デコードを行う
+	 * @param dest			デコード結果を格納するバッファ
+	 * @param samples		デコードを行いたいサンプル数
+	 * @param written		実際にデコード出来たサンプル数
+	 * @param segmentqueue	再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
+	 * @return	まだデコードすべきデータが残っているかどうか
+	 */
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
 		tWaveSegmentQueue & segmentqueue);
 
-	//! @brief		PCM形式を返す
-	//! @return		PCM形式への参照
+	/**
+	 * PCM形式を返す
+	 * @return	PCM形式への参照
+	 */
 	const tWaveFormat & GetFormat();
 	//------- tWaveFilter メソッド  ここまで
 
 private:
-	//! @brief		指定位置以降で、指定位置にもっとも近いリンクの始点を探す
-	//! @param		current		検索開始位置
-	//! @param		link		見つかったリンクを書き込む先
-	//! @param		ignore_conditions	リンク条件を無視して検索を行うかどうか
-	//! @return		リンクが見つかれば真、見つからなければ偽
+	/**
+	 * 指定位置以降で、指定位置にもっとも近いリンクの始点を探す
+	 * @param current			検索開始位置
+	 * @param link				見つかったリンクを書き込む先
+	 * @param ignore_conditions	リンク条件を無視して検索を行うかどうか
+	 * @return	リンクが見つかれば真、見つからなければ偽
+	 */
 	bool GetNearestLink(risse_int64 current,
 		tWaveLoopLink & link, bool ignore_conditions);
 
-	//! @brief		指定位置以降で指定位置未満の中のイベント(ラベル)を取得する
-	//! @param		from		検索開始位置
-	//! @param		to			検索終了位置
-	//! @param		events		結果を格納する配列
+	/**
+	 * 指定位置以降で指定位置未満の中のイベント(ラベル)を取得する
+	 * @param from		検索開始位置
+	 * @param to		検索終了位置
+	 * @param events	結果を格納する配列
+	 */
 	void GetEventAt(risse_int64 from, risse_int64 to,
 		gc_deque<tWaveEvent> & labels);
 
-	//! @brief		クロスフェードを行う
-	//! @param		dest		結果格納先
-	//! @param		src1		ソース1 (消えていく方)
-	//! @param		src2		ソース2 (入ってくる方)
-	//! @param		ratiostart	ブレンド率の開始値(%)
-	//! @param		ratioend	ブレンド率の終了値(%)
-	//! @param		samples		この関数の呼び出しで処理すべきサンプル数
+	/**
+	 * クロスフェードを行う
+	 * @param dest			結果格納先
+	 * @param src1			ソース1 (消えていく方)
+	 * @param src2			ソース2 (入ってくる方)
+	 * @param ratiostart	ブレンド率の開始値(%)
+	 * @param ratioend		ブレンド率の終了値(%)
+	 * @param samples		この関数の呼び出しで処理すべきサンプル数
+	 */
 	void DoCrossFade(void *dest, void *src1, void *src2, risse_int samples,
 		risse_int ratiostart, risse_int ratioend);
 
-	//! @brief		内部にキャッシュされているクロスフェードの情報をクリアする
+	/**
+	 * 内部にキャッシュされているクロスフェードの情報をクリアする
+	 */
 	void ClearCrossFadeInformation();
 
 //--- flag manupulation by label expression
@@ -389,92 +443,117 @@ private:
 		etDecrement		//!< '--'
 	};
 public:
-	//! @brief		ラベル式を解析する
-	//! @param		label		ラベル式
-	//! @param		ope			演算子
-	//! @param		lv			左辺値
-	//! @param		rv			右辺値
-	//! @param		is_rv_indirect	右辺値が間接参照の場合は真、そうでない場合は偽が格納される
-	//! @param		解析に成功すれば真、式が間違っているなどで失敗したら偽
+	/**
+	 * ラベル式を解析する
+	 * @param label				ラベル式
+	 * @param ope				演算子
+	 * @param lv				左辺値
+	 * @param rv				右辺値
+	 * @param is_rv_indirect	右辺値が間接参照の場合は真、そうでない場合は偽が格納される
+	 */
 	static bool GetLabelExpression(const tLabelStringType &label,
 		tExpressionToken * ope = NULL,
 		risse_int *lv = NULL,
 		risse_int *rv = NULL, bool *is_rv_indirect = NULL);
 private:
-	//! @brief		ラベル式を評価する
-	//! @param		label		ラベル
-	//! @return		評価に成功すれば真、失敗すれば偽
+	/**
+	 * ラベル式を評価する
+	 * @param label	ラベル
+	 * @return	評価に成功すれば真、失敗すれば偽
+	 */
 	bool EvalLabelExpression(const tLabelStringType &label);
 
-	//! @brief		ラベル式のトークンを切り出して返す
-	//! @param		p		切り出し開始位置
-	//! @param		value	トークンの値を格納する変数へのアドレス
-	//! @return		トークンのタイプ
+	/**
+	 * ラベル式のトークンを切り出して返す
+	 * @param p		切り出し開始位置
+	 * @param value	トークンの値を格納する変数へのアドレス
+	 * @return	トークンのタイプ
+	 */
 	static tExpressionToken GetExpressionToken(const tLabelCharType * &  p , risse_int * value);
 
-	//! @brief		ラベル式から整数値を得る
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * ラベル式から整数値を得る
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetLabelCharInt(const tLabelCharType *s, risse_int &v);
 
 
 //--- loop information input/output stuff
 private:
-	//! @brief		文字列から整数値を得る
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * 文字列から整数値を得る
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetInt(char *s, risse_int &v);
 
-	//! @brief		文字列から64bit整数値を得る
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * 文字列から64bit整数値を得る
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetInt64(char *s, risse_int64 &v);
 
-	//! @brief		文字列から真偽値を得る
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * 文字列から真偽値を得る
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetBool(char *s, bool &v);
 
-	//! @brief		文字列からリンク条件を得る
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * 文字列からリンク条件を得る
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetCondition(char *s, tWaveLoopLink::tLinkCondition &v);
 
-	//! @brief		文字列リテラルを取得する
-	//! @param		s		解析開始位置
-	//! @param		v		値を格納する変数
-	//! @return		解析に成功すれば真
+	/**
+	 * 文字列リテラルを取得する
+	 * @param s	解析開始位置
+	 * @param v	値を格納する変数
+	 * @return	解析に成功すれば真
+	 */
 	static bool GetString(char *s, tLabelStringType &v);
 
-	//! @brief		name=value の形式になっている name と value を取得する
-	//! @param		p		解析開始位置
-	//! @param		name	name の部分の最初を表すポインタ
-	//! @param		value   value の部分の最初を表すポインタ
-	//! @return		解析に成功すれば真
-	//! @note		このメソッドは、name および value が終了する位置に \0 を書き込む。
-	//!				つまり、p を破壊する。
+	/**
+	 * name=value の形式になっている name と value を取得する
+	 * @param p		解析開始位置
+	 * @param name	name の部分の最初を表すポインタ
+	 * @param value	value の部分の最初を表すポインタ
+	 * @return	解析に成功すれば真
+	 * @note	このメソッドは、name および value が終了する位置に \0 を書き込む。
+	 *			つまり、p を破壊する。
+	 */
 	static bool GetEntityToken(char * & p, char **name, char **value);
 
-	//! @brief		リンク情報を文字列から読み取る
-	//! @param		p		読み取り開始位置
-	//! @param		link	情報格納先クラス
-	//! @return		読み取りに成功すれば真
+	/**
+	 * リンク情報を文字列から読み取る
+	 * @param p		読み取り開始位置
+	 * @param link	情報格納先クラス
+	 * @return	読み取りに成功すれば真
+	 */
 	static bool ReadLinkInformation(char * & p, tWaveLoopLink &link);
 
-	//! @brief		ラベル情報を文字列から読み取る
-	//! @param		p		読み取り開始位置
-	//! @param		link	情報格納先クラス
-	//! @return		読み取りに成功すれば真
+	/**
+	 * ラベル情報を文字列から読み取る
+	 * @param p		読み取り開始位置
+	 * @param link	情報格納先クラス
+	 * @return	読み取りに成功すれば真
+	 */
 	static bool ReadLabelInformation(char * & p, tWaveLabel &label);
 public:
-	//! @brief		リンク情報やラベル情報を文字列から読み取る
-	//! @param		p		読み取り開始位置
-	//! @return		読み取りに成功すれば真
+	/**
+	 * リンク情報やラベル情報を文字列から読み取る
+	 * @param p	読み取り開始位置
+	 * @return	読み取りに成功すれば真
+	 */
 	bool ReadInformation(char * p);
 
 #ifdef RISA_IN_LOOP_TUNER

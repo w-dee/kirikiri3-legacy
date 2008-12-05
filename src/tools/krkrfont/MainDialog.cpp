@@ -21,8 +21,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		イベントハンドラ定義
-//---------------------------------------------------------------------------
+/**
+ * イベントハンドラ定義
+ */
 BEGIN_EVENT_TABLE(wxMainDialog,wxMainDialog_Base)
 	EVT_CLOSE(wxMainDialog::DialogClose)
 	EVT_CHOICE(XRCID("SelectFontChoice"), wxMainDialog::SelectFontChoiceSelected)
@@ -43,8 +44,9 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 wxMainDialog::wxMainDialog()
 {
 	// フィールドのクリア
@@ -95,8 +97,9 @@ wxMainDialog::wxMainDialog()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 wxMainDialog::~wxMainDialog()
 {
 	DestroyPreviewFrame(); // プレビューウィンドウを閉じる
@@ -106,8 +109,9 @@ wxMainDialog::~wxMainDialog()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Face オブジェクトを、現在選択されているフォント名に従い設定
-//---------------------------------------------------------------------------
+/**
+ * Face オブジェクトを、現在選択されているフォント名に従い設定
+ */
 void wxMainDialog::UpdateFace()
 {
 	// フォント名、Faceインデックスに従ってFaceオブジェクトを設定
@@ -127,8 +131,9 @@ void wxMainDialog::UpdateFace()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Face オブジェクトを、現在選択されているフォント名、Faceインデックスに従い設定
-//---------------------------------------------------------------------------
+/**
+ * Face オブジェクトを、現在選択されているフォント名、Faceインデックスに従い設定
+ */
 void wxMainDialog::UpdateFaceIndex()
 {
 	if(Face) delete Face, Face = NULL;
@@ -169,8 +174,9 @@ void wxMainDialog::UpdateFaceIndex()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Face の高さを、現在ダイアログボックスで指定されているサイズに設定
-//---------------------------------------------------------------------------
+/**
+ * Face の高さを、現在ダイアログボックスで指定されているサイズに設定
+ */
 void wxMainDialog::UpdateFaceHeight()
 {
 	if(Face) Face->SetHeight(SizeSpinEdit->GetValue());
@@ -179,8 +185,9 @@ void wxMainDialog::UpdateFaceHeight()
 
 
 //---------------------------------------------------------------------------
-//! @brief		UpdateFace と UpdateFaceHeight と NotifyPreviewFrameFaceChanged の組み合わせ
-//---------------------------------------------------------------------------
+/**
+ * UpdateFace と UpdateFaceHeight と NotifyPreviewFrameFaceChanged の組み合わせ
+ */
 void wxMainDialog::Update()
 {
 	UpdateFace();
@@ -191,9 +198,10 @@ void wxMainDialog::Update()
 
 
 //---------------------------------------------------------------------------
-//! @brief		SelectFontChoice のアイテムが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * SelectFontChoice のアイテムが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::SelectFontChoiceSelected(wxCommandEvent& event)
 {
 	SelectFontRadioButton->SetValue(true);
@@ -203,9 +211,10 @@ void wxMainDialog::SelectFontChoiceSelected(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フォントサイズのspineditの内容が変更された場合
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * フォントサイズのspineditの内容が変更された場合
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::SizeSpinEditChange(wxSpinEvent& event)
 {
 	UpdateFaceHeight();
@@ -215,9 +224,10 @@ void wxMainDialog::SizeSpinEditChange(wxSpinEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ダイアログが閉じるとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * ダイアログが閉じるとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::DialogClose(wxCloseEvent& event)
 {
 	// Close() は Dialog では使わないこと; 代わりに Destroy を使う
@@ -227,9 +237,10 @@ void wxMainDialog::DialogClose(wxCloseEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「プレビュー」ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「プレビュー」ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::PreviewButtonClick(wxCommandEvent& event)
 {
 	ShowPreviewFrame(this);
@@ -238,9 +249,10 @@ void wxMainDialog::PreviewButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「閉じる」ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「閉じる」ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::CloseButtonClick(wxCommandEvent& event)
 {
 	// Close() は Dialog では使わないこと; 代わりに Destroy を使う
@@ -250,9 +262,10 @@ void wxMainDialog::CloseButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「作成」ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「作成」ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::GenerateButtonClick(wxCommandEvent& event)
 {
 	// BFF ファイルを書き出す
@@ -275,9 +288,10 @@ void wxMainDialog::GenerateButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「フォントファミリ名」の項目が選択された場合
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「フォントファミリ名」の項目が選択された場合
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::FaceNameChoiceSelected(wxCommandEvent& event)
 {
 	UpdateFaceIndex();
@@ -288,9 +302,10 @@ void wxMainDialog::FaceNameChoiceSelected(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「一覧から選択」ラジオボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「一覧から選択」ラジオボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::SelectFontRadioButtonClick(wxCommandEvent& event)
 {
 	Update();
@@ -299,9 +314,10 @@ void wxMainDialog::SelectFontRadioButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「ファイルを指定」ラジオボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「ファイルを指定」ラジオボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::SelectFileRadioButtonClick(wxCommandEvent& event)
 {
 	if(SelectFileEdit->GetLabel().empty())
@@ -319,9 +335,10 @@ void wxMainDialog::SelectFileRadioButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「アンチエイリアス」チェックボックスが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「アンチエイリアス」チェックボックスが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::AntialiasedCheckBoxClicked(wxCommandEvent & event)
 {
 	Update();
@@ -330,9 +347,10 @@ void wxMainDialog::AntialiasedCheckBoxClicked(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「太字」チェックボックスが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「太字」チェックボックスが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::BoldCheckBoxClicked(wxCommandEvent & event)
 {
 	Update();
@@ -341,9 +359,10 @@ void wxMainDialog::BoldCheckBoxClicked(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「ヒンティングを行わない」チェックボックスが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「ヒンティングを行わない」チェックボックスが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::NoHintingCheckBoxClicked(wxCommandEvent & event)
 {
 	Update();
@@ -352,9 +371,10 @@ void wxMainDialog::NoHintingCheckBoxClicked(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「自動ヒンティングを行う」チェックボックスが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「自動ヒンティングを行う」チェックボックスが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::ForceAutoHintingCheckBoxClicked(wxCommandEvent & event)
 {
 	Update();
@@ -363,9 +383,10 @@ void wxMainDialog::ForceAutoHintingCheckBoxClicked(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「Select a file」の横の ... ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「Select a file」の横の ... ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 {
 	wxString filename = ::wxFileSelector(
@@ -399,9 +420,10 @@ void wxMainDialog::SelectFileRefButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「出力ファイル」の横の ... ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「出力ファイル」の横の ... ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxMainDialog::OutputFileNameRefButtonClick(wxCommandEvent& event)
 {
 	wxString filename = ::wxFileSelector(

@@ -22,8 +22,9 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Property" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Property" クラスのインスタンス用 C++クラス
+ */
 class tPropertyInstance : public tObjectBase
 {
 	typedef tObjectBase inherited; //!< 親クラスの typedef
@@ -34,38 +35,56 @@ private:
 	bool Synchronized; //!< synchronized メソッドかどうか
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tPropertyInstance();
 
-	//! @brief		ゲッタメソッドを取得する
-	//! @return		ゲッタメソッド
+	/**
+	 * ゲッタメソッドを取得する
+	 * @return	ゲッタメソッド
+	 */
 	tVariant & GetGetter() { return Getter; }
 
-	//! @brief		ゲッタメソッドを設定する
-	//! @param		m		ゲッタメソッド
+	/**
+	 * ゲッタメソッドを設定する
+	 * @param m	ゲッタメソッド
+	 */
 	void SetGetter(const tVariant & m) { Getter = m; }
 
-	//! @brief		セッタメソッドを取得する
-	//! @return		セッタメソッド
+	/**
+	 * セッタメソッドを取得する
+	 * @return	セッタメソッド
+	 */
 	tVariant & GetSetter() { return Setter; }
 
-	//! @brief		セッタメソッドを設定する
-	//! @param		m		セッタメソッド
+	/**
+	 * セッタメソッドを設定する
+	 * @param m	セッタメソッド
+	 */
 	void SetSetter(const tVariant & m) { Setter = m; }
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tPropertyInstance() {;}
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
-	//! @brief		synchronized メソッドかどうかを取得する
-	//! @return		synchronized メソッドかどうか
+	/**
+	 * synchronized メソッドかどうかを取得する
+	 * @return	synchronized メソッドかどうか
+	 */
 	bool GetSynchronized() const { return Synchronized; }
 
-	//! @brief		synchronized メソッドかどうかを設定する
-	//! @param		b	synchronized メソッドかどうか
+	/**
+	 * synchronized メソッドかどうかを設定する
+	 * @param b	synchronized メソッドかどうか
+	 */
 	void SetSynchronized(bool b) { Synchronized = b; }
 
 
@@ -79,20 +98,27 @@ public: // Risse用オブジェクトなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Property" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Property" クラス
+ */
 class tPropertyClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tPropertyClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------

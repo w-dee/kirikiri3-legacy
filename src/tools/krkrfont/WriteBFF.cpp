@@ -20,16 +20,17 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		グリフビットマップを圧縮する
-//! @param		in 入力データ
-//! @param		in_w 入力ビットマップの横のサイズ
-//! @param		in_h 入力ビットマップの縦のサイズ
-//! @param		in_pitch 入力ビットマップのピッチ
-//! @param		out 出力データ
-//! @param		out_size 出力データのサイズ
-//! @note		このアルゴリズムは最悪の場合で入力データを 2 倍 + 1にする
-//! 			そのため、out には in_size の 2 倍 + 1のデータ領域を確保すること
-//---------------------------------------------------------------------------
+/**
+ * グリフビットマップを圧縮する
+ * @param in		入力データ
+ * @param in_w		入力ビットマップの横のサイズ
+ * @param in_h		入力ビットマップの縦のサイズ
+ * @param in_pitch	入力ビットマップのピッチ
+ * @param out		出力データ
+ * @param out_size	出力データのサイズ
+ * @note	このアルゴリズムは最悪の場合で入力データを 2 倍 + 1にする
+ *			そのため、out には in_size の 2 倍 + 1のデータ領域を確保すること
+ */
 static void CompressGlyphBitmap(const risse_uint8 * in,
 	risse_uint in_w, risse_uint in_h,
 	risse_int in_pitch,
@@ -99,13 +100,14 @@ static void CompressGlyphBitmap(const risse_uint8 * in,
 
 
 //---------------------------------------------------------------------------
-//! @brief		出力ファイルにデータを書き出す
-//! @param		face 書き出すfaceデータ
-//! @param		out_file 出力ファイル
-//! @param		write_bitmap ビットマップデータを出力するかどうか(普通true)
-//! @param		write_kerning_vector カーニング情報を出力するかどうか
-//! @param		parent ダイアログボックスの親ウィンドウ
-//---------------------------------------------------------------------------
+/**
+ * 出力ファイルにデータを書き出す
+ * @param face					書き出すfaceデータ
+ * @param out_file				出力ファイル
+ * @param write_bitmap			ビットマップデータを出力するかどうか(普通true)
+ * @param write_kerning_vector	カーニング情報を出力するかどうか
+ * @param parent				ダイアログボックスの親ウィンドウ
+ */
 void WriteGlyphBitmap(tFreeTypeFace * face, const wxString & out_file,
 	bool write_bitmap,
 	bool write_kerning_vector, wxWindow * parent)

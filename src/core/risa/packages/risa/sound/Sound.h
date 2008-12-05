@@ -28,7 +28,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief	サウンド用例外クラス
+/**
+ * サウンド用例外クラス
+ */
 /*! @note
 	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
 	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
@@ -45,31 +47,42 @@ RISA_DEFINE_EXCEPTION_SUBCLASS(tSoundExceptionClass,
 
 class tSoundInstance;
 //---------------------------------------------------------------------------
-//! @brief		OpenALイベントの発生先を tSoundInstance に固定した OpenAL ソースクラス
-//---------------------------------------------------------------------------
+/**
+ * OpenALイベントの発生先を tSoundInstance に固定した OpenAL ソースクラス
+ */
 class tSoundALSource : public tALSource
 {
 	tSoundInstance * Owner;
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tSoundALSource(tSoundInstance * owner, tALBuffer * buffer,
 		tWaveLoopManager * loopmanager);
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tSoundALSource(tSoundInstance * owner, const tALSource * ref);
 
 protected:
-	//! @brief		ステータスの変更を通知する
-	//! @param		status		ステータス
+	/**
+	 * ステータスの変更を通知する
+	 * @param status	ステータス
+	 */
 	virtual void OnStatusChanged(tStatus status);
 
-	//! @brief		ステータスの変更を非同期に通知する
-	//! @param		status		ステータス
+	/**
+	 * ステータスの変更を非同期に通知する
+	 * @param status	ステータス
+	 */
 	virtual void OnStatusChangedAsync(tStatus status);
 
-	//! @brief		ラベルイベントの発生を通知する
-	//! @param		name		ラベル名
+	/**
+	 * ラベルイベントの発生を通知する
+	 * @param name	ラベル名
+	 */
 	virtual void OnLabel(const tString & name);
 };
 //---------------------------------------------------------------------------
@@ -81,8 +94,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		サウンドクラス
-//---------------------------------------------------------------------------
+/**
+ * サウンドクラス
+ */
 class tSoundInstance :
 	public tEventSourceInstance,
 	public tEventDestination,
@@ -119,71 +133,106 @@ class tSoundInstance :
 	friend class tLabelEventInfo;
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tSoundInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tSoundInstance() {;}
 
 private:
-	//! @brief		内部状態の初期化
+	/**
+	 * 内部状態の初期化
+	 */
 	void Init();
 
 protected:
-	//! @brief		内部状態のクリア
+	/**
+	 * 内部状態のクリア
+	 */
 	void Clear();
 
 public:
-	//! @brief		メディアを開く
-	//! @param		filename	ファイル名
+	/**
+	 * メディアを開く
+	 * @param filename	ファイル名
+	 */
 	void Open(const tString & filename);
 
-	//! @brief		メディアを閉じる
+	/**
+	 * メディアを閉じる
+	 */
 	void Close();
 
-	//! @brief		再生を開始する
+	/**
+	 * 再生を開始する
+	 */
 	void Play();
 
-	//! @brief		再生を停止する
+	/**
+	 * 再生を停止する
+	 */
 	void Stop();
 
-	//! @brief		再生を一時停止する
+	/**
+	 * 再生を一時停止する
+	 */
 	void Pause();
 
-	//! @brief		再生位置をサンプルグラニュール数で取得する
-	//! @return		再生位置(サンプルグラニュール単位)
+	/**
+	 * 再生位置をサンプルグラニュール数で取得する
+	 * @return	再生位置(サンプルグラニュール単位)
+	 */
 	risse_uint64 GetSamplePosition();
 
-	//! @brief		再生位置を時間で取得する
-	//! @return		再生位置(ミリ秒単位)
+	/**
+	 * 再生位置を時間で取得する
+	 * @return	再生位置(ミリ秒単位)
+	 */
 	double GetTimePosition();
 
-	//! @brief		再生位置をサンプルグラニュール数で設定する
-	//! @param		pos		再生位置(サンプルグラニュール単位)
+	/**
+	 * 再生位置をサンプルグラニュール数で設定する
+	 * @param pos	再生位置(サンプルグラニュール単位)
+	 */
 	void SetSamplePosition(risse_uint64 pos);
 
-	//! @brief		再生位置を時間で設定する
-	//! @param		pos		再生位置(ミリ秒単位)
+	/**
+	 * 再生位置を時間で設定する
+	 * @param pos	再生位置(ミリ秒単位)
+	 */
 	void SetTimePosition(double pos);
 
-	//! @brief		フィルタ配列を得る
+	/**
+	 * フィルタ配列を得る
+	 */
 	tVariant & GetFilters();
 
 public:
-	//! @brief		ステータスが変更された
+	/**
+	 * ステータスが変更された
+	 */
 	virtual void OnStatusChanged(tStatus status);
 
-	//! @brief		ステータスが変更された
-	//! @param		このメソッドは非同期に別スレッドから呼ばれることがあるので注意。
+	/**
+	 * ステータスが変更された
+	 */
 	virtual void OnStatusChangedAsync(tStatus status);
 
-	//! @brief		ラベルイベントの発生を通知する
-	//! @param		name		ラベル名
+	/**
+	 * ラベルイベントの発生を通知する
+	 * @param name	ラベル名
+	 */
 	virtual void OnLabel(const tString & name);
 
 protected:
-	//! @brief	イベントが配信されるとき
-	//! @param	info イベント情報
+	/**
+	 * イベントが配信されるとき
+	 * @param info	イベント情報
+	 */
 	virtual void OnEvent(tEventInfo * info); // from tEventDestination
 
 public:

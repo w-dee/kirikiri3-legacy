@@ -81,13 +81,14 @@ namespace Risa {
 		#define RISA_DECLARE_GETTICK tTickCountBasicType GetTick() { return ::timeGetTime(); }
 		#include <mmsystem.h>
 		#define RISA_TICKCOUNT_DEPENDS_ON depends_on<tWinTimerResolutionAdjuster>
-		//! @brief Win32/Win64? でタイマの分解能を1msにするクラス
-		//! @note
-		//! いくつかの環境(おそらく性能の低いコンピュータ)ではタイマの分解能が
-		//! デフォルトで20msぐらいになっている環境がある。
-		//! サウンドなどのサービスの中にはタイマの分解能に敏感な
-		//! 物があるため、1msの精度に合わせる。ちなみにこの分解能を
-		//! 上げると、どうやらコンテキストスイッチングの時間制度も上がる模様。
+		/**
+		 * Win32/Win64? でタイマの分解能を1msにするクラス
+		 * いくつかの環境(おそらく性能の低いコンピュータ)ではタイマの分解能が
+		 * デフォルトで20msぐらいになっている環境がある。
+		 * サウンドなどのサービスの中にはタイマの分解能に敏感な
+		 * 物があるため、1msの精度に合わせる。ちなみにこの分解能を
+		 * 上げると、どうやらコンテキストスイッチングの時間制度も上がる模様。
+		 */
 		class tWinTimerResolutionAdjuster :
 			public singleton_base<tWinTimerResolutionAdjuster>
 		{
@@ -125,8 +126,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		Tickcountを提供するクラス
-//---------------------------------------------------------------------------
+/**
+ * Tickcountを提供するクラス
+ */
 class tTickCount : public singleton_base<tTickCount>
 	#ifdef RISA_TICKCOUNT_DEPENDS_ON
 		, RISA_TICKCOUNT_DEPENDS_ON
@@ -138,21 +140,29 @@ class tTickCount : public singleton_base<tTickCount>
 	RISA_DECLARE_GETTICK
 
 #ifdef RISA_TICKCOUNT_NEED_WRAP_WATCH
-	//! @brief	tickcount の wraparound を検出するためのスレッドのクラス
+	/**
+	 * tickcount の wraparound を検出するためのスレッドのクラス
+	 */
 	class tWatcher : public tThread
 	{
 		tThreadEvent Event; //!< イベントオブジェクト
 		tTickCount & Owner;
 	public:
 
-		//! @brief		コンストラクタ
-		//! @param		owner		このオブジェクトを所有する tTickCount オブジェクト
+		/**
+		 * コンストラクタ
+		 * @param owner	このオブジェクトを所有する tTickCount オブジェクト
+		 */
 		tWatcher(tTickCount & owner);
 
-		//! @brief		デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~tWatcher();
 
-		//! @brief		スレッドのエントリーポイント
+		/**
+		 * スレッドのエントリーポイント
+		 */
 		void Execute();
 	};
 
@@ -164,15 +174,20 @@ class tTickCount : public singleton_base<tTickCount>
 
 public:
 	static const risse_uint64 InvalidTickCount = ~ static_cast<risse_uint64>(0);
-		//!< 無効な tick を表す値
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTickCount();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tTickCount();
 
-	//! @brief		Tick Count を得る
+	/**
+	 * Tick Count を得る
+	 */
 	risse_uint64 Get();
 };
 //---------------------------------------------------------------------------

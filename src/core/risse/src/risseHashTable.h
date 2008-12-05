@@ -25,38 +25,41 @@ namespace Risse
 
 
 //---------------------------------------------------------------------------
-//! @brief		キーおよび値の特性クラス
-//! @note		今のところ、キーおよび値が、メソッド 「Destruct」を持っているかどうかを
-//!				あらわす HasDestruct が定義されているのみ。
-//!				通常、GC 対応クラスではデストラクタを書かないのだが、オブジェクトを破棄
-//!				したいとき、GC によって mark されないようにポインタを破壊したくなる。ただ、
-//!				デストラクタは書きたくないときがある (たとえば、そのような
-//!				オブジェクトをスタック上に置くと、コンパイラが
-//!				スタックの巻き戻しのために例外処理コードを置いてしまうときなど)。
-//!				このような場合、Destruct メソッドを定義し、その中でポインタなどを
-//!				クリアするようなコードを書き、さらに tKeyAndValueTraits::HasDesturct
-//!				が真になるようにこのクラスのテンプレート特化を行えば、デストラクタ
-//!				ではなくて Destruct メソッドを呼んでくれるようになる (デストラクタは
-//!				呼ばれない)。なお、Desturct メソッドが呼ばれるのは、チェーンハッシュのなかでも
-//!				lv1 と呼ばれている領域に対してのみで、すべてのインスタンスの Destruct
-//!				メソッドが呼ばれる保証はない。
-//---------------------------------------------------------------------------
+/**
+ * キーおよび値の特性クラス
+ * @note	今のところ、キーおよび値が、メソッド 「Destruct」を持っているかどうかを
+ *			あらわす HasDestruct が定義されているのみ。
+ *			通常、GC 対応クラスではデストラクタを書かないのだが、オブジェクトを破棄
+ *			したいとき、GC によって mark されないようにポインタを破壊したくなる。ただ、
+ *			デストラクタは書きたくないときがある (たとえば、そのような
+ *			オブジェクトをスタック上に置くと、コンパイラが
+ *			スタックの巻き戻しのために例外処理コードを置いてしまうときなど)。
+ *			このような場合、Destruct メソッドを定義し、その中でポインタなどを
+ *			クリアするようなコードを書き、さらに tKeyAndValueTraits::HasDesturct
+ *			が真になるようにこのクラスのテンプレート特化を行えば、デストラクタ
+ *			ではなくて Destruct メソッドを呼んでくれるようになる (デストラクタは
+ *			呼ばれない)。なお、Desturct メソッドが呼ばれるのは、チェーンハッシュのなかでも
+ *			lv1 と呼ばれている領域に対してのみで、すべてのインスタンスの Destruct
+ *			メソッドが呼ばれる保証はない。
+ */
 template <typename T>
 struct tKeyAndValueTraits
 {
 	enum { HasDestruct = 0 }; //!< Destuct メソッドを持っているかどうか
 };
 //---------------------------------------------------------------------------
-//! @brief		tKeyAndValueTraits の tString 特化
-//---------------------------------------------------------------------------
+/**
+ * tKeyAndValueTraits の tString 特化
+ */
 template <>
 struct tKeyAndValueTraits<tString>
 {
 	enum { HasDestruct = 1 }; //!< Destuct メソッドを持っているかどうか
 };
 //---------------------------------------------------------------------------
-//! @brief		tKeyAndValueTraits の tVariant 特化
-//---------------------------------------------------------------------------
+/**
+ * tKeyAndValueTraits の tVariant 特化
+ */
 template <>
 struct tKeyAndValueTraits<tVariant>
 {
@@ -67,17 +70,18 @@ struct tKeyAndValueTraits<tVariant>
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ関数の特性クラス(汎用)
-//! @note		このクラスのMakeはTのビットレイアウトに対して
-//!				ハッシュを作成するものであり、通常は使うべきではない。@r
-//!				たとえ単純な構造体であっても、この関数オブジェクトはパディングと
-//!				して使われている構造体のなかのゴミビットを拾ってしまう可能性がある。@r
-//!				通常は、tHashTraits のテンプレートを特化させるか、あるいは
-//!				他のハッシュ関数オブジェクトを使うこと。@r
-//!				このクラスは Make() と GetHint() と SetHint() と HasHint を実装
-//!				する必要がある。
-//!				スレッド保護はない
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ関数の特性クラス(汎用)
+ * @note	このクラスのMakeはTのビットレイアウトに対して
+ *			ハッシュを作成するものであり、通常は使うべきではない。@r
+ *			たとえ単純な構造体であっても、この関数オブジェクトはパディングと
+ *			して使われている構造体のなかのゴミビットを拾ってしまう可能性がある。@r
+ *			通常は、tHashTraits のテンプレートを特化させるか、あるいは
+ *			他のハッシュ関数オブジェクトを使うこと。@r
+ *			このクラスは Make() と GetHint() と SetHint() と HasHint を実装
+ *			する必要がある。
+ *			スレッド保護はない
+ */
 template <typename T>
 class tHashTraits
 {
@@ -86,12 +90,14 @@ public:
 	// the hash function used here is similar to one which used in perl 5.8,
 	// see also http://burtleburtle.net/bob/hash/doobs.html (One-at-a-Time Hash)
 
-	//! @brief		ハッシュを作成する
-	//! @param		val		値
-	//! @return		ハッシュ値
-	//! @note		デフォルトのハッシュ値計算メソッドは T の全域のビット列を
-	//!				対象にハッシュを計算する。つまりパディングなどが詰まっていると
-	//!				そこのゴミを拾うことを意味するので注意。
+	/**
+	 * ハッシュを作成する
+	 * @param val	値
+	 * @return	ハッシュ値
+	 * @note	デフォルトのハッシュ値計算メソッドは T の全域のビット列を
+	 *			対象にハッシュを計算する。つまりパディングなどが詰まっていると
+	 *			そこのゴミを拾うことを意味するので注意。
+	 */
 	static risse_uint32 Make(const T &val)
 	{
 		const char *p = (const char*)&val;
@@ -111,25 +117,31 @@ public:
 		return ret;
 	}
 
-	//! @brief		ハッシュのヒントを返す
-	//! @param		val		値
-	//! @return		ハッシュ値(0=ハッシュが無効)
+	/**
+	 * ハッシュのヒントを返す
+	 * @param val	値
+	 * @return	ハッシュ値(0=ハッシュが無効)
+	 */
 	static risse_uint32 GetHint(const T &val)
 	{
 		return 0;
 	}
 
-	//! @brief		ハッシュのヒントを設定する
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
+	/**
+	 * ハッシュのヒントを設定する
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 */
 	static void SetHint(T & val, risse_uint32 hash)
 	{
 	}
 
-	//! @brief		ハッシュのヒントを設定する(const版)
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
-	//! @note		valのSetHintがmutableとして宣言されている向き
+	/**
+	 * ハッシュのヒントを設定する(const版)
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 * @note	valのSetHintがmutableとして宣言されている向き
+	 */
 	static void SetHint(const T & val, risse_uint32 hash)
 	{
 	}
@@ -137,51 +149,62 @@ public:
 
 	enum { HasHint = 0 }; //!< ハッシュのヒントを得る事ができるかどうか
 
-	//! @brief		キー同士の比較
-	//! @param		key1		キーその1
-	//! @param		key2		キーその2
-	//! @return		キーが同一かどうか
+	/**
+	 * キー同士の比較
+	 * @param key1	キーその1
+	 * @param key2	キーその2
+	 * @return	キーが同一かどうか
+	 */
 	static bool Compare(const T & key1, const T & key2) { return key1 == key2; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ関数の特性クラス(tString用)
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ関数の特性クラス(tString用)
+ */
 template <>
 class tHashTraits<tString>
 {
 	typedef tString T;
 public:
-	//! @brief		ハッシュを作成する
-	//! @param		val		値
-	//! @return		ハッシュ値
+	/**
+	 * ハッシュを作成する
+	 * @param val	値
+	 * @return	ハッシュ値
+	 */
 	static risse_uint32 Make(const T &val)
 	{
 		return val.GetHash();
 	}
 
-	//! @brief		ハッシュのヒントを返す
-	//! @param		val		値
-	//! @return		ハッシュ値(0=ハッシュが無効)
+	/**
+	 * ハッシュのヒントを返す
+	 * @param val	値
+	 * @return	ハッシュ値(0=ハッシュが無効)
+	 */
 	static risse_uint32 GetHint(const T &val)
 	{
 		return val.GetHint();
 	}
 
-	//! @brief		ハッシュのヒントを設定する
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
+	/**
+	 * ハッシュのヒントを設定する
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 */
 	static void SetHint(T & val, risse_uint32 hash)
 	{
 		val.SetHint(hash);
 	}
 
-	//! @brief		ハッシュのヒントを設定する(const版)
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
-	//! @note		valのSetHintがmutableとして宣言されている向き
+	/**
+	 * ハッシュのヒントを設定する(const版)
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 * @note	valのSetHintがmutableとして宣言されている向き
+	 */
 	static void SetHint(const T & val, risse_uint32 hash)
 	{
 		val.SetHint(hash);
@@ -189,26 +212,31 @@ public:
 
 	enum { HasHint = 1 }; //!< ハッシュのヒントを得る事ができるかどうか
 
-	//! @brief		キー同士の比較
-	//! @param		key1		キーその1
-	//! @param		key2		キーその2
-	//! @return		キーが同一かどうか
+	/**
+	 * キー同士の比較
+	 * @param key1	キーその1
+	 * @param key2	キーその2
+	 * @return	キーが同一かどうか
+	 */
 	static bool Compare(const T & key1, const T & key2) { return key1 == key2; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ関数の特性クラス(tVariant用)
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ関数の特性クラス(tVariant用)
+ */
 template <>
 class tHashTraits<tVariant>
 {
 	typedef tVariant T;
 public:
-	//! @brief		ハッシュを作成する
-	//! @param		val		値
-	//! @return		ハッシュ値
+	/**
+	 * ハッシュを作成する
+	 * @param val	値
+	 * @return	ハッシュ値
+	 */
 	static risse_uint32 Make(const T &val)
 	{
 		risse_uint32 hash = val.GetHash();
@@ -217,26 +245,32 @@ public:
 		return hash;
 	}
 
-	//! @brief		ハッシュのヒントを返す
-	//! @param		val		値
-	//! @return		ハッシュ値(0=ハッシュが無効)
+	/**
+	 * ハッシュのヒントを返す
+	 * @param val	値
+	 * @return	ハッシュ値(0=ハッシュが無効)
+	 */
 	static risse_uint32 GetHint(const T &val)
 	{
 		return val.GetHint();
 	}
 
-	//! @brief		ハッシュのヒントを設定する
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
+	/**
+	 * ハッシュのヒントを設定する
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 */
 	static void SetHint(T & val, risse_uint32 hash)
 	{
 		val.SetHint(hash);
 	}
 
-	//! @brief		ハッシュのヒントを設定する(const版)
-	//! @param		val		値
-	//! @param		hash	ハッシュ値
-	//! @note		valのSetHintがmutableとして宣言されている向き
+	/**
+	 * ハッシュのヒントを設定する(const版)
+	 * @param val	値
+	 * @param hash	ハッシュ値
+	 * @note	valのSetHintがmutableとして宣言されている向き
+	 */
 	static void SetHint(const T & val, risse_uint32 hash)
 	{
 		val.SetHint(hash);
@@ -244,10 +278,12 @@ public:
 
 	enum { HasHint = 1 }; //!< ハッシュのヒントを得る事ができるかどうか
 
-	//! @brief		キー同士の比較
-	//! @param		key1		キーその1
-	//! @param		key2		キーその2
-	//! @return		キーが同一かどうか
+	/**
+	 * キー同士の比較
+	 * @param key1	キーその1
+	 * @param key2	キーその2
+	 * @return	キーが同一かどうか
+	 */
 	static bool Compare(const T & key1, const T & key2)
 	{
 		// tVariant::Identify を用いる
@@ -261,8 +297,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		キーあるいは値を破壊するためのクラス(Destuctメソッドを持ってない場合)
-//---------------------------------------------------------------------------
+/**
+ * キーあるいは値を破壊するためのクラス(Destuctメソッドを持ってない場合)
+ */
 template <typename T, bool n>
 struct tHashTableKeyAndValueDestructor
 {
@@ -272,8 +309,9 @@ struct tHashTableKeyAndValueDestructor
 	}
 };
 //---------------------------------------------------------------------------
-//! @brief		キーあるいは値を破壊するためのクラス(Destuctメソッドを持っている場合)
-//---------------------------------------------------------------------------
+/**
+ * キーあるいは値を破壊するためのクラス(Destuctメソッドを持っている場合)
+ */
 template <typename T>
 struct tHashTableKeyAndValueDestructor<T, true>
 {
@@ -289,8 +327,9 @@ struct tHashTableKeyAndValueDestructor<T, true>
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ表の要素を表す構造体
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ表の要素を表す構造体
+ */
 template <
 	typename KeyT,
 	typename ValueT
@@ -308,8 +347,9 @@ struct tHashTableElement : public tCollectee
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ表の基本機能の実装
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ表の基本機能の実装
+ */
 template <
 	typename KeyT,
 	typename ValueT,
@@ -333,9 +373,11 @@ protected:
 
 
 public:
-	//! @brief	イテレータクラス
-	//! @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
-	//! 		高速なイテレーションが必要ならば順序付きハッシュ表の仕様を検討すること
+	/**
+	 * イテレータクラス
+	 * @note	非常に限定的かつ非効率的。一方向へのイテレーションしかサポートしない。
+	 *			高速なイテレーションが必要ならば順序付きハッシュ表の仕様を検討すること
+	 */
 	class tDefaultIterator : public tCollectee
 	{
 		const tHashTableBase * Table; //!< ハッシュ表
@@ -411,11 +453,15 @@ public:
 		bool End() const { return Element == NULL; }
 	};
 
-	//! @brief		イテレータのtypedef
+	/**
+	 * イテレータのtypedef
+	 */
 	typedef tDefaultIterator tIterator;
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tHashTableBase()
 	{
 		HashMask = InitialHashMask;
@@ -425,7 +471,9 @@ public:
 	}
 
 protected:
-	//! @brief		(内部関数)内部の要素をすべてクリアする
+	/**
+	 * (内部関数)内部の要素をすべてクリアする
+	 */
 	void InternalClear()
 	{
 		Count = 0;
@@ -442,12 +490,14 @@ protected:
 	}
 
 
-	//! @brief		(内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		value	値
-	//! @return		内部の tElement 型へのポインタ
-	//! @note		すでにキーが存在していた場合は値が上書きされる
+	/**
+	 * (内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @param value	値
+	 * @return	内部の tElement 型へのポインタ
+	 * @note	すでにキーが存在していた場合は値が上書きされる
+	 */
 	tElement * InternalAddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
 	{
 		// add Key ( hash ) and Value
@@ -508,10 +558,12 @@ protected:
 		return newelm;
 	}
 
-	//! @brief		(内部関数)検索を行う
-	//! @param		key		キー
-	//! @param		hash	キーのハッシュ
-	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
+	/**
+	 * (内部関数)検索を行う
+	 * @param key	キー
+	 * @param hash	キーのハッシュ
+	 * @return	見つかった要素へのポインタ (NULL=見つからなかった)
+	 */
 	const tElement * InternalFindWithHash(const KeyT &key, risse_uint32 hash) const
 	{
 		// find key ( hash )
@@ -538,11 +590,13 @@ protected:
 		return NULL; // not found
 	}
 
-	//! @brief		(内部関数)キーを削除する
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		value	削除された値を入れる先(NULL可)
-	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
+	/**
+	 * (内部関数)キーを削除する
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @param value	削除された値を入れる先(NULL可)
+	 * @return	キーが見つかり、削除されれば非NULL、削除されなければNULL
+	 */
 	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash, ValueT * value = NULL)
 	{
 		// delete key ( hash ) and return true if succeeded
@@ -586,8 +640,10 @@ protected:
 		return NULL; // not found
 	}
 
-	//! @brief		(内部関数)キーを削除する(要素による指定)
-	//! @param		elm		削除したい要素
+	/**
+	 * (内部関数)キーを削除する(要素による指定)
+	 * @param elm	削除したい要素
+	 */
 	void InternalDeleteByElement(tElement * elm)
 	{
 		if(elm->Flags & Lv1Flag)
@@ -605,16 +661,20 @@ protected:
 	}
 
 
-	//! @brief		要素数を得る
-	//! @return		要素数
+	/**
+	 * 要素数を得る
+	 * @return	要素数
+	 */
 	risse_size InternalGetCount() const { return Count; }
 
 
 private:
-	//! @brief		要素をコピーコンストラクタで構築する
-	//! @param		elm			要素
-	//! @param		key			キーの値
-	//! @param		value		値
+	/**
+	 * 要素をコピーコンストラクタで構築する
+	 * @param elm	要素
+	 * @param key	キーの値
+	 * @param value	値
+	 */
 	static void Construct(tElement &elm, const KeyT &key, const ValueT &value)
 	{
 		::new (&elm.Key) KeyT(key);
@@ -622,11 +682,13 @@ private:
 		elm.Flags |= UsingFlag;
 	}
 
-	//! @brief		要素を破壊する
-	//! @param		elm		要素
-	//!	@note		このメソッドは強制的に KeyT と ValueT の in-place
-	//!				デストラクタあるいはDestructメソッドを呼ぶ。
-	//!				(どちらが呼ばれるかはtKeyAndValueTraits<T>による)
+	/**
+	 * 要素を破壊する
+	 * @param elm	要素
+	 * @note	このメソッドは強制的に KeyT と ValueT の in-place
+	 *			デストラクタあるいはDestructメソッドを呼ぶ。
+	 *			(どちらが呼ばれるかはtKeyAndValueTraits<T>による)
+	 */
 	static void Destruct(tElement &elm)
 	{
 		tHashTableKeyAndValueDestructor<KeyT,
@@ -662,8 +724,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハッシュ表の要素を表す構造体(順序付き)
-//---------------------------------------------------------------------------
+/**
+ * ハッシュ表の要素を表す構造体(順序付き)
+ */
 template <
 	typename KeyT,
 	typename ValueT
@@ -680,8 +743,9 @@ struct tOrderedHashTableElement : public tHashTableElement<KeyT, ValueT>
 
 
 //---------------------------------------------------------------------------
-//! @brief		順序付きハッシュ表
-//---------------------------------------------------------------------------
+/**
+ * 順序付きハッシュ表
+ */
 template <
 	typename KeyT,
 	typename ValueT,
@@ -702,7 +766,9 @@ protected:
 	tElement *NLast;  //!< 順序付き要素チェーンにおける最後の要素
 
 public:
-	//! @brief	イテレータクラス
+	/**
+	 * イテレータクラス
+	 */
 	class tOrderedIterator : public tCollectee // this differs a bit from STL's iterator
 	{
 		tElement * elm;
@@ -749,11 +815,15 @@ public:
 	};
 
 
-	//! @brief		イテレータのtypedef
+	/**
+	 * イテレータのtypedef
+	 */
 	typedef tOrderedIterator tIterator;
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tOrderedHashTableBase()
 	{
 		NFirst = NLast = NULL;
@@ -761,19 +831,23 @@ public:
 
 
 protected:
-	//! @brief		(内部関数)内部の要素をすべてクリアする
+	/**
+	 * (内部関数)内部の要素をすべてクリアする
+	 */
 	void InternalClear()
 	{
 		inherited::InternalClear();
 		NFirst = NLast = NULL;
 	}
 
-	//! @brief		(内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		value	値
-	//! @return		内部の tElement 型へのポインタ
-	//! @note		すでにキーが存在していた場合は値が上書きされる
+	/**
+	 * (内部関数)要素を追加する(キーのハッシュ値がすでに分かっている場合)
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @param value	値
+	 * @return	内部の tElement 型へのポインタ
+	 * @note	すでにキーが存在していた場合は値が上書きされる
+	 */
 	tElement * InternalAddWithHash(const KeyT &key, risse_uint32 hash, const ValueT &value)
 	{
 		risse_size org_count = inherited::InternalGetCount();
@@ -788,10 +862,12 @@ protected:
 		return added;
 	}
 
-	//! @brief		(内部関数)検索を行い、見つかった要素を順序の先頭に持ってくる
-	//! @param		key		キー
-	//! @param		hash	キーのハッシュ
-	//! @return		見つかった要素へのポインタ (NULL=見つからなかった)
+	/**
+	 * (内部関数)検索を行い、見つかった要素を順序の先頭に持ってくる
+	 * @param key	キー
+	 * @param hash	キーのハッシュ
+	 * @return	見つかった要素へのポインタ (NULL=見つからなかった)
+	 */
 	const tElement * InternalFindAndTouchWithHash(const KeyT &key, risse_uint32 hash)
 	{
 		const tElement * found = static_cast<const tElement*>(inherited::InternalFindWithHash(key, hash));
@@ -800,11 +876,13 @@ protected:
 		return found;
 	}
 
-	//! @brief		(内部関数)キーを削除する(あらかじめハッシュが分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		value	削除された値を入れる先(NULL可)
-	//! @return		キーが見つかり、削除されれば非NULL、削除されなければNULL
+	/**
+	 * (内部関数)キーを削除する(あらかじめハッシュが分かっている場合)
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @param value	削除された値を入れる先(NULL可)
+	 * @return	キーが見つかり、削除されれば非NULL、削除されなければNULL
+	 */
 	tElement * InternalDeleteWithHash(const KeyT &key, risse_uint32 hash, ValueT * value = NULL)
 	{
 		tElement * deleted = inherited::InternalDeleteWithHash(key, hash, value);
@@ -818,8 +896,10 @@ protected:
 		return deleted;
 	}
 
-	//! @brief		(内部関数)キーを削除する(要素による指定)
-	//! @param		elm		削除したい要素
+	/**
+	 * (内部関数)キーを削除する(要素による指定)
+	 * @param elm	削除したい要素
+	 */
 	void InternalDeleteByElement(tElement * elm)
 	{
 		inherited::InternalDeleteByElement(elm);
@@ -828,9 +908,11 @@ protected:
 
 protected:
 
-	//! @brief	順序付き要素チェーンに要素を追加する
-	//! @param	elm		追加する要素
-	//! @note	count をインクリメントしたあとに呼ぶこと
+	/**
+	 * 順序付き要素チェーンに要素を追加する
+	 * @param elm	追加する要素
+	 * @note	count をインクリメントしたあとに呼ぶこと
+	 */
 	void CheckAddingElementOrder(tElement *elm)
 	{
 		if(inherited::InternalGetCount() == 1)
@@ -848,9 +930,11 @@ protected:
 		elm->NPrev = NULL;
 	}
 
-	//! @brief	順序付き要素チェーンから要素を削除する
-	//! @param	elm		削除する要素
-	//! @note	count をデクリメントしたあとに呼ぶこと
+	/**
+	 * 順序付き要素チェーンから要素を削除する
+	 * @param elm	削除する要素
+	 * @note	count をデクリメントしたあとに呼ぶこと
+	 */
 	void CheckDeletingElementOrder(tElement *elm)
 	{
 		if(inherited::InternalGetCount() > 0)
@@ -882,8 +966,10 @@ protected:
 		}
 	}
 
-	//! @brief	順序付き要素を要素チェーンの先頭に持ってくる
-	//! @param	elm		要素
+	/**
+	 * 順序付き要素を要素チェーンの先頭に持ってくる
+	 * @param elm	要素
+	 */
 	void CheckUpdateElementOrder(tElement *elm)
 	{
 		// move elm to the front of addtional order
@@ -917,30 +1003,38 @@ class tHashTable : public BaseClassT
 	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tHashTable()
 	{
 	}
 
-	//! @brief		要素をすべてクリアする
+	/**
+	 * 要素をすべてクリアする
+	 */
 	void Clear()
 	{
 		inherited::InternalClear();
 	}
 
-	//! @brief		要素を追加する
-	//! @param		key		キー
-	//! @param		value	値
-	//! @note		すでにキーが存在していた場合は値が上書きされる
+	/**
+	 * 要素を追加する
+	 * @param key	キー
+	 * @param value	値
+	 * @note	すでにキーが存在していた場合は値が上書きされる
+	 */
 	void Add(const KeyT &key, const ValueT &value)
 	{
 		// add Key and Value
 		inherited::InternalAddWithHash(key, HashTraitsT::Make(key), value);
 	}
 
-	//! @brief		キーを検索する
-	//! @param		key		キー
-	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	/**
+	 * キーを検索する
+	 * @param key	キー
+	 * @return	見つかった要素へのポインタ。null=見つからなかった
+	 */
 	ValueT * Find(const KeyT &key) const
 	{
 		// find key
@@ -976,11 +1070,13 @@ public:
 		return (ValueT*)elm->Value;
 	}
 
-	//! @brief		キーを検索する(見つかったキーと値のペアを返す)
-	//! @param		key		キー
-	//! @param		keyout	見つかったキー
-	//! @param		value	見つかった値
-	//! @return		キーが見つかれば真、見つからなければ偽
+	/**
+	 * キーを検索する(見つかったキーと値のペアを返す)
+	 * @param key		キー
+	 * @param keyout	見つかったキー
+	 * @param value		見つかった値
+	 * @return	キーが見つかれば真、見つからなければ偽
+	 */
 	bool Find(const KeyT &key, const KeyT *& keyout, ValueT *& value) const
 	{
 		// find key
@@ -988,10 +1084,12 @@ public:
 		return Find(key, HashTraitsT::Make(key), keyout, value);
 	}
 
-	//! @brief		キーを検索する(あらかじめハッシュが分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	/**
+	 * キーを検索する(あらかじめハッシュが分かっている場合)
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @return	見つかった要素へのポインタ。null=見つからなかった
+	 */
 	ValueT * FindWithHash(const KeyT &key, risse_uint32 hash) const
 	{
 		// find key ( hash )
@@ -1001,12 +1099,14 @@ public:
 		return (ValueT*)elm->Value;
 	}
 
-	//! @brief		キーを検索する(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		keyout	見つかったキー
-	//! @param		value	見つかった値
-	//! @return		キーが見つかれば真、見つからなければ偽
+	/**
+	 * キーを検索する(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
+	 * @param key		キー
+	 * @param hash		ハッシュ
+	 * @param keyout	見つかったキー
+	 * @param value		見つかった値
+	 * @return	キーが見つかれば真、見つからなければ偽
+	 */
 	bool FindWithHash(const KeyT &key, risse_uint32 hash, const KeyT *& keyout, ValueT *& value) const
 	{
 		// find key
@@ -1021,10 +1121,12 @@ public:
 		return false;
 	}
 
-	//! @brief		キーを削除する
-	//! @param		key		キー
-	//! @param		value	削除された値を入れる先(NULL可)
-	//! @return		キーが見つかり、削除されれば真、削除されなければ偽
+	/**
+	 * キーを削除する
+	 * @param key	キー
+	 * @param value	削除された値を入れる先(NULL可)
+	 * @return	キーが見つかり、削除されれば真、削除されなければ偽
+	 */
 	bool Delete(const KeyT &key, ValueT * value = NULL)
 	{
 		// delete key and return true if successed
@@ -1032,8 +1134,10 @@ public:
 	}
 
 
-	//! @brief		要素数を得る
-	//! @return		要素数
+	/**
+	 * 要素数を得る
+	 * @return	要素数
+	 */
 	risse_size GetCount() const
 	{
 		return inherited::InternalGetCount();
@@ -1057,14 +1161,18 @@ class tOrderedHashTable : public BaseClassT
 	typedef ElementT tElement;  //!< 要素型のtypedef
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tOrderedHashTable()
 	{
 	}
 
-	//! @brief		キーを検索し、要素を先頭に持ってくる
-	//! @param		key		キー
-	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	/**
+	 * キーを検索し、要素を先頭に持ってくる
+	 * @param key	キー
+	 * @return	見つかった要素へのポインタ。null=見つからなかった
+	 */
 	ValueT * FindAndTouch(const KeyT &key)
 	{
 		// find key
@@ -1100,11 +1208,13 @@ public:
 		return (ValueT*)elm->Value;
 	}
 
-	//! @brief		キーを検索し、要素を先頭に持ってくる(見つかったキーと値のペアを返す)
-	//! @param		key		キー
-	//! @param		keyout	見つかったキー
-	//! @param		value	見つかった値
-	//! @return		キーが見つかれば真、見つからなければ偽
+	/**
+	 * キーを検索し、要素を先頭に持ってくる(見つかったキーと値のペアを返す)
+	 * @param key		キー
+	 * @param keyout	見つかったキー
+	 * @param value		見つかった値
+	 * @return	キーが見つかれば真、見つからなければ偽
+	 */
 	bool FindAndTouch(const KeyT &key, const KeyT *& keyout, ValueT *& value)
 	{
 		// find key
@@ -1112,10 +1222,12 @@ public:
 		return FindAndTouch(key, HashTraitsT::Make(key), keyout, value);
 	}
 
-	//! @brief		キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @return		見つかった要素へのポインタ。null=見つからなかった
+	/**
+	 * キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)
+	 * @param key	キー
+	 * @param hash	ハッシュ
+	 * @return	見つかった要素へのポインタ。null=見つからなかった
+	 */
 	ValueT * FindAndTouchWithHash(const KeyT &key, risse_uint32 hash)
 	{
 		// find key ( hash )
@@ -1125,12 +1237,14 @@ public:
 		return (ValueT*)elm->Value;
 	}
 
-	//! @brief		キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
-	//! @param		key		キー
-	//! @param		hash	ハッシュ
-	//! @param		keyout	見つかったキー
-	//! @param		value	見つかった値
-	//! @return		キーが見つかれば真、見つからなければ偽
+	/**
+	 * キーを検索し、要素を先頭に持ってくる(あらかじめハッシュが分かっている場合)(見つかったキーと値のペアを返す)
+	 * @param key		キー
+	 * @param hash		ハッシュ
+	 * @param keyout	見つかったキー
+	 * @param value		見つかった値
+	 * @return	キーが見つかれば真、見つからなければ偽
+	 */
 	bool FindAndTouchWithHash(const KeyT &key, risse_uint32 hash, const KeyT *& keyout, ValueT *& value)
 	{
 		// find key
@@ -1145,10 +1259,12 @@ public:
 		return false;
 	}
 
-	//! @brief		要素数を最大でn個に制限する
-	//! @param		n		制限する数(これより元々要素数が少ない場合は何もしない)
-	//! @note		余分な要素は追加/Touch順の最後の方から切り落とされる。
-	//!				ハッシュ表を使ったキャッシュの実装に用いる
+	/**
+	 * 要素数を最大でn個に制限する
+	 * @param n	制限する数(これより元々要素数が少ない場合は何もしない)
+	 * @note	余分な要素は追加/Touch順の最後の方から切り落とされる。
+	 *			ハッシュ表を使ったキャッシュの実装に用いる
+	 */
 	void Crop(risse_size n)
 	{
 		if(n == 0)  { inherited::Clear(); return; }

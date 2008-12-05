@@ -22,21 +22,24 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		プリミティブ型用クラスの基底クラス
-//---------------------------------------------------------------------------
+/**
+ * プリミティブ型用クラスの基底クラス
+ */
 class tPrimitiveClassBase : public tClassBase
 {
 	tVariant Gateway;
-		//!< ゲートウェイアクセス用の代表オブジェクト(すべてのプリミティブへのアクセスは
-		//!< このオブジェクトを経由して行われる
 public:
-	//! @brief		コンストラクタ
-	//! @param		name			クラス名
-	//! @param		super_class		スーパークラス
+	/**
+	 * コンストラクタ
+	 * @param name			クラス名
+	 * @param super_class	スーパークラス
+	 */
 	tPrimitiveClassBase(const tString & name, tClassBase * super_class);
 
-	//! @brief		ゲートウェイアクセス用の代表オブジェクトを得る
-	//! @return		ゲートウェイアクセス用の代表オブジェクト
+	/**
+	 * ゲートウェイアクセス用の代表オブジェクトを得る
+	 * @return	ゲートウェイアクセス用の代表オブジェクト
+	 */
 	tVariant & GetGateway() { return Gateway; }
 
 
@@ -48,23 +51,30 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		プリミティブ型用クラスの基底クラス(Risse用)
-//! @note		tPrimitiveClassBase と tPrimitiveClass を混同しないこと。
-//!				前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
-//!				後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
-//---------------------------------------------------------------------------
+/**
+ * プリミティブ型用クラスの基底クラス(Risse用)
+ * @note	tPrimitiveClassBase と tPrimitiveClass を混同しないこと。
+ *			前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
+ *			後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
+ */
 class tPrimitiveClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tPrimitiveClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse用メソッドなど

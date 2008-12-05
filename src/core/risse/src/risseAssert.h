@@ -29,10 +29,12 @@
 #endif
 
 namespace Risse{
-	//! @brief		Assert メッセージを表示し、強制終了する
-	//! @param		message		メッセージ
-	//! @param		filename	assertion failed が発生したファイル名
-	//! @param		lineno		assertion failed が発生した行
+	/**
+	 * Assert メッセージを表示し、強制終了する
+	 * @param message	メッセージ
+	 * @param filename	assertion failed が発生したファイル名
+	 * @param lineno	assertion failed が発生した行
+	 */
 	void Assert(const char * message, const char * filename, int lineno);
 }
 

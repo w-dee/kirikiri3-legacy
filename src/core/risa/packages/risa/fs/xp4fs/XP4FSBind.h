@@ -25,19 +25,26 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief XP4FS ネイティブインスタンス
-//---------------------------------------------------------------------------
+/**
+ * XP4FS ネイティブインスタンス
+ */
 class tNI_XP4FS : public tNI_BaseFileSystem
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tNI_XP4FS();
 
-	//! @brief		Risse コンストラクタ
+	/**
+	 * Risse コンストラクタ
+	 */
 	risse_error Construct(risse_int numparams,
 		tVariant **param, iRisseDispatch2 *risse_obj);
 
-	//! @brief		Risse 無効化関数
+	/**
+	 * Risse 無効化関数
+	 */
 	void Invalidate();
 
 	tXP4FS * GetFileSystem() 
@@ -52,20 +59,27 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief XP4FS ネイティブクラス
-//---------------------------------------------------------------------------
+/**
+ * XP4FS ネイティブクラス
+ */
 class tNC_XP4FS : public tNativeClass
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tNC_XP4FS();
 
-	//! @brief		XP4FS クラスID
+	/**
+	 * XP4FS クラスID
+	 */
 	static risse_uint32 ClassID;
 
 private:
-	//! @brief		ネイティブインスタンスを作成して返す
-	//! @return		ネイティブインスタンス
+	/**
+	 * ネイティブインスタンスを作成して返す
+	 * @return	ネイティブインスタンス
+	 */
 	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
@@ -78,15 +92,18 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * クラスレジストラ
+ */
 class tXP4FSRegisterer :
 	public singleton_base<tXP4FSRegisterer>,
 	protected depends_on<tRisseScriptEngine>,
 	protected depends_on<tFileSystemRegisterer>
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tXP4FSRegisterer();
 };
 //---------------------------------------------------------------------------

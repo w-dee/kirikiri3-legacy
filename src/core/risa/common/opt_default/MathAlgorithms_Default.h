@@ -20,32 +20,34 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		窓関数を適用しながらのインターリーブ解除
-//! @param		dest	格納先(複数)
-//! @param		src		ソース
-//! @param		win		窓関数
-//! @param		numch	チャンネル数
-//! @param		destofs	destの処理開始位置
-//! @param		len		処理するサンプル数
-//!						(各チャンネルごとの数; 実際に処理されるサンプル
-//!						数の総計はlen*numchになる)
-//---------------------------------------------------------------------------
+/**
+ * 窓関数を適用しながらのインターリーブ解除
+ * @param dest		格納先(複数)
+ * @param src		ソース
+ * @param win		窓関数
+ * @param numch		チャンネル数
+ * @param destofs	destの処理開始位置
+ * @param len		処理するサンプル数
+ *					(各チャンネルごとの数; 実際に処理されるサンプル
+ *					数の総計はlen*numchになる)
+ */
 void DeinterleaveApplyingWindow(float * RISSE_RESTRICT dest[], const float * RISSE_RESTRICT src,
 					float * RISSE_RESTRICT win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		窓関数を適用しながらのインターリーブ+オーバーラッピング
-//! @param		dest	格納先
-//! @param		src		ソース(複数)
-//! @param		win		窓関数
-//! @param		numch	チャンネル数
-//! @param		srcofs	srcの処理開始位置
-//! @param		len		処理するサンプル数
-//!						(各チャンネルごとの数; 実際に処理されるサンプル
-//!						数の総計はlen*numchになる)
-//---------------------------------------------------------------------------
+/**
+ * 窓関数を適用しながらのインターリーブ+オーバーラッピング
+ * @param dest		格納先
+ * @param src		ソース(複数)
+ * @param win		窓関数
+ * @param numch		チャンネル数
+ * @param srcofs	srcの処理開始位置
+ * @param len		処理するサンプル数
+ *					(各チャンネルごとの数; 実際に処理されるサンプル
+ *					数の総計はlen*numchになる)
+ */
 void  InterleaveOverlappingWindow(float * RISSE_RESTRICT dest,
 	const float * RISSE_RESTRICT const * RISSE_RESTRICT src,
 	float * RISSE_RESTRICT win, int numch, size_t srcofs, size_t len);

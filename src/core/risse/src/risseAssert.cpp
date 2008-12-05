@@ -46,8 +46,9 @@ namespace boost
 {
 using namespace Risse;
 //---------------------------------------------------------------------------
-//! @brief		boost の assertion failure を捕捉する
-//---------------------------------------------------------------------------
+/**
+ * boost の assertion failure を捕捉する
+ */
 void assertion_failed(char const * expr, char const * function, char const * file, long line)
 {
 	// user defined

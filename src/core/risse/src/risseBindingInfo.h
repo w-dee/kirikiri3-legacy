@@ -21,19 +21,16 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		バインディングに関する情報
-//! @note		一度作成されればこのオブジェクト自体は read-only な使い方しかしない
-//!				(もっとも Frames 内の変数へのアクセスは Frames->GetCS() によって得られる
-//!				クリティカルセクションを利用すること。
-//---------------------------------------------------------------------------
+/**
+ * バインディングに関する情報
+ * @note	一度作成されればこのオブジェクト自体は read-only な使い方しかしない
+ *			(もっとも Frames 内の変数へのアクセスは Frames->GetCS() によって得られる
+ *			クリティカルセクションを利用すること。
+ */
 class tBindingInfo : public tCollectee
 {
 public:
 	typedef gc_map<tString, risse_uint32> tBindingMap;
-		//!< ローカル変数のバインディングのマップのtypedef @n
-		//!< second の risse_uint32 には VM コードと同じフォーマットで
-		//!< 共有フレーム内の変数番号が入る; つまり上位16bitがネストレベル、
-		//!< 下位16bitが変数番号。
 
 private:
 	tSharedVariableFrames * Frames; //!< 共有フレーム
@@ -42,10 +39,12 @@ private:
 	tVariant This; //!< このバインディングの "This"
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		global		このバインディングのパッケージグローバル
-	//! @param		This		このバインディングの "This"
-	//! @param		frames		共有フレーム
+	/**
+	 * コンストラクタ
+	 * @param global	このバインディングのパッケージグローバル
+	 * @param This		このバインディングの "This"
+	 * @param frames	共有フレーム
+	 */
 	tBindingInfo(const tVariant & global,
 		const tVariant & This, tSharedVariableFrames * frames)
 	{
@@ -54,9 +53,11 @@ public:
 		Frames = frames;
 	}
 
-	//! @brief		コンストラクタ
-	//! @param		global		このバインディングのパッケージグローバル
-	//! @param		This		このバインディングの "This"
+	/**
+	 * コンストラクタ
+	 * @param global	このバインディングのパッケージグローバル
+	 * @param This		このバインディングの "This"
+	 */
 	tBindingInfo(const tVariant & global, const tVariant & This)
 	{
 		this->Global = global;
@@ -64,33 +65,47 @@ public:
 		Frames = NULL;
 	}
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tBindingInfo() {;}
 
-	//! @brief		共有フレームを得る
-	//! @return		共有フレーム
+	/**
+	 * 共有フレームを得る
+	 * @return	共有フレーム
+	 */
 	tSharedVariableFrames * GetFrames() const { return Frames; }
 
-	//! @brief		ローカル変数のバインディングへの参照を得る
-	//! @return		ローカル変数のバインディングへの参照
+	/**
+	 * ローカル変数のバインディングへの参照を得る
+	 * @return	ローカル変数のバインディングへの参照
+	 */
 	tBindingMap & GetBindingMap() { return BindingMap; }
 
-	//! @brief		ローカル変数のバインディングへの参照を得る
-	//! @return		ローカル変数のバインディングへの参照
+	/**
+	 * ローカル変数のバインディングへの参照を得る
+	 * @return	ローカル変数のバインディングへの参照
+	 */
 	const tBindingMap & GetBindingMap() const { return BindingMap; }
 
-	//! @brief		このバインディングのパッケージグローバルを得る
-	//! @return		このバインディングのパッケージグローバル
+	/**
+	 * このバインディングのパッケージグローバルを得る
+	 * @return	このバインディングのパッケージグローバル
+	 */
 	const tVariant & GetGlobal() const { return Global; }
 
-	//! @brief		このバインディングの "This" を得る
-	//! @return		このバインディングの "This"
+	/**
+	 * このバインディングの "This" を得る
+	 * @return	このバインディングの "This"
+	 */
 	const tVariant & GetThis() const { return This; }
 
-	//! @brief		ローカル変数のバインディングのマップを追加する
-	//! @param		This		Bindingクラスのインスタンス
-	//! @param		name		ローカル変数名
-	//! @param		reg			レジスタ番号
+	/**
+	 * ローカル変数のバインディングのマップを追加する
+	 * @param This	Bindingクラスのインスタンス
+	 * @param name	ローカル変数名
+	 * @param reg	レジスタ番号
+	 */
 	static void AddMap(tVariant &This, const tString &name, risse_uint32 reg);
 };
 //---------------------------------------------------------------------------

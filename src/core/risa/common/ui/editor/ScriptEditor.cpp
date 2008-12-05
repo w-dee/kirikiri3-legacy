@@ -28,8 +28,9 @@ RISSE_DEFINE_SOURCE_ID(45447,29186,11918,17485,47798,28394,33256,47673);
 
 
 //---------------------------------------------------------------------------
-//! @brief		テキストエディタ用のカスタムテキストコントロール
-//---------------------------------------------------------------------------
+/**
+ * テキストエディタ用のカスタムテキストコントロール
+ */
 class tScriptEditorTextCtrl : public wxTextCtrl, depends_on<tConfig>
 {
 	enum
@@ -117,8 +118,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブル
-//---------------------------------------------------------------------------
+/**
+ * イベントテーブル
+ */
 BEGIN_EVENT_TABLE(tScriptEditorTextCtrl, wxTextCtrl)
 #if USE_CONTEXT_MENU
 	EVT_CONTEXT_MENU(					tScriptEditorTextCtrl::OnContextMenu)
@@ -139,9 +141,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		parent 親ウィンドウ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param parent	親ウィンドウ
+ */
 tScriptEditorTextCtrl::tScriptEditorTextCtrl(wxWindow *parent):
 	wxTextCtrl(parent, tScriptEditorFrame::ID_TextCtrl,
 		wxEmptyString, wxDefaultPosition, wxDefaultSize,
@@ -244,8 +247,9 @@ tScriptEditorTextCtrl::tScriptEditorTextCtrl(wxWindow *parent):
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tScriptEditorTextCtrl::~tScriptEditorTextCtrl()
 {
 	// 内容を設定情報に書き出す
@@ -255,8 +259,9 @@ tScriptEditorTextCtrl::~tScriptEditorTextCtrl()
 
 
 //---------------------------------------------------------------------------
-//! @brief		内容を設定情報に書き出す
-//---------------------------------------------------------------------------
+/**
+ * 内容を設定情報に書き出す
+ */
 void tScriptEditorTextCtrl::WriteConfig()
 {
 	// 内容を設定情報に書き出す
@@ -269,9 +274,10 @@ void tScriptEditorTextCtrl::WriteConfig()
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定行に移動する
-//! @param		l		移動したい行
-//---------------------------------------------------------------------------
+/**
+ * 指定行に移動する
+ * @param l	移動したい行
+ */
 void tScriptEditorTextCtrl::GoToLine(long l)
 {
 	long pos = XYToPosition(0, l);
@@ -283,9 +289,10 @@ void tScriptEditorTextCtrl::GoToLine(long l)
 
 #if wxUSE_ACCEL
 //---------------------------------------------------------------------------
-//! @brief		アクセラレータテーブルを返す
-//! @return		アクセラレータテーブル
-//---------------------------------------------------------------------------
+/**
+ * アクセラレータテーブルを返す
+ * @return	アクセラレータテーブル
+ */
 wxAcceleratorTable tScriptEditorTextCtrl::GetMenuAcceleratorTable()
 {
 	// メニューからアクセラレータの一覧を取得し、それをテーブルに格納して返す
@@ -322,9 +329,10 @@ wxAcceleratorTable tScriptEditorTextCtrl::GetMenuAcceleratorTable()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンテキストメニューを表示する
-//! @param		pos  表示位置
-//---------------------------------------------------------------------------
+/**
+ * コンテキストメニューを表示する
+ * @param pos	表示位置
+ */
 void tScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 {
 	ContextMenu.FindItem(ID_Menu_Undo)->Enable(CanUndo());
@@ -341,8 +349,9 @@ void tScriptEditorTextCtrl::ShowContextMenu(const wxPoint & pos)
 
 
 //---------------------------------------------------------------------------
-//! @brief		内容を Risse で実行する
-//---------------------------------------------------------------------------
+/**
+ * 内容を Risse で実行する
+ */
 void tScriptEditorTextCtrl::Execute()
 {
 	// 内容をファイルに保存する
@@ -363,9 +372,10 @@ void tScriptEditorTextCtrl::Execute()
 
 
 //---------------------------------------------------------------------------
-//! @brief		「元に戻す」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「元に戻す」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuUndo(wxCommandEvent & event)
 {
 	Undo();
@@ -374,9 +384,10 @@ void tScriptEditorTextCtrl::OnMenuUndo(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「やり直し」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「やり直し」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuRedo(wxCommandEvent & event)
 {
 	Redo();
@@ -385,9 +396,10 @@ void tScriptEditorTextCtrl::OnMenuRedo(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「切り取り」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「切り取り」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuCut(wxCommandEvent & event)
 {
 	Cut();
@@ -396,9 +408,10 @@ void tScriptEditorTextCtrl::OnMenuCut(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「コピー」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「コピー」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuCopy(wxCommandEvent & event)
 {
 	Copy();
@@ -407,9 +420,10 @@ void tScriptEditorTextCtrl::OnMenuCopy(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「貼り付け」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「貼り付け」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuPaste(wxCommandEvent & event)
 {
 	Paste();
@@ -418,9 +432,10 @@ void tScriptEditorTextCtrl::OnMenuPaste(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「すべて選択」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「すべて選択」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
 {
 	SetSelection(-1, -1);
@@ -429,9 +444,10 @@ void tScriptEditorTextCtrl::OnMenuSelectAll(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「開く」 メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「開く」 メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuOpen(wxCommandEvent & event)
 {
 	wxString filename = ::wxFileSelector(
@@ -458,9 +474,10 @@ void tScriptEditorTextCtrl::OnMenuOpen(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「保存」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「保存」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuSave(wxCommandEvent & event)
 {
 	if(FileName.empty())
@@ -472,9 +489,10 @@ void tScriptEditorTextCtrl::OnMenuSave(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「名前を付けて保存」メニューが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「名前を付けて保存」メニューが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorTextCtrl::OnMenuSaveAs(wxCommandEvent & event)
 {
 	wxString filename = ::wxFileSelector(
@@ -521,8 +539,9 @@ void tScriptEditorTextCtrl::OnMenuSaveAs(wxCommandEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スクリプトエディタ用のカスタムステータスバー
-//---------------------------------------------------------------------------
+/**
+ * スクリプトエディタ用のカスタムステータスバー
+ */
 class tScriptEditorStatusBar : public wxStatusBar
 {
 	enum
@@ -553,8 +572,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ログビューア用のカスタムステータスバー用のイベントテーブル
-//---------------------------------------------------------------------------
+/**
+ * ログビューア用のカスタムステータスバー用のイベントテーブル
+ */
 BEGIN_EVENT_TABLE(tScriptEditorStatusBar, wxStatusBar)
 	EVT_SIZE(					tScriptEditorStatusBar::OnSize)
 END_EVENT_TABLE()
@@ -562,9 +582,10 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		parent 親ウィンドウ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param parent	親ウィンドウ
+ */
 tScriptEditorStatusBar::tScriptEditorStatusBar(wxWindow *parent)
 		   : wxStatusBar(parent, wxID_ANY)
 {
@@ -598,8 +619,9 @@ tScriptEditorStatusBar::tScriptEditorStatusBar(wxWindow *parent)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tScriptEditorStatusBar::~tScriptEditorStatusBar()
 {
 }
@@ -607,8 +629,9 @@ tScriptEditorStatusBar::~tScriptEditorStatusBar()
 
 
 //---------------------------------------------------------------------------
-//! @brief		キャレットの位置を表す文字列を取得する
-//---------------------------------------------------------------------------
+/**
+ * キャレットの位置を表す文字列を取得する
+ */
 wxString tScriptEditorStatusBar::GetCaretPosStatusString(long x, long y)
 {
 	if(x == -1 && y == -1)
@@ -625,10 +648,11 @@ wxString tScriptEditorStatusBar::GetCaretPosStatusString(long x, long y)
 
 
 //---------------------------------------------------------------------------
-//! @brief		キャレットの位置を表示する
-//! @param		x   桁位置
-//! @param		y   行位置
-//---------------------------------------------------------------------------
+/**
+ * キャレットの位置を表示する
+ * @param x	桁位置
+ * @param y	行位置
+ */
 void tScriptEditorStatusBar::SetCaretPosStatus(long x, long y)
 {
 	if(LastX != x || LastY != y)
@@ -642,8 +666,9 @@ void tScriptEditorStatusBar::SetCaretPosStatus(long x, long y)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コントロールのサイズを調整する
-//---------------------------------------------------------------------------
+/**
+ * コントロールのサイズを調整する
+ */
 void tScriptEditorStatusBar::AdjustControlSize()
 {
 	wxRect rect;
@@ -655,9 +680,10 @@ void tScriptEditorStatusBar::AdjustControlSize()
 
 
 //---------------------------------------------------------------------------
-//! @brief		サイズが変更されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * サイズが変更されたとき
+ * @param event	イベントオブジェクト
+ */
 void tScriptEditorStatusBar::OnSize(wxSizeEvent& event)
 {
 	AdjustControlSize();

@@ -23,8 +23,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージエンコーダ
-//---------------------------------------------------------------------------
+/**
+ * TLGイメージエンコーダ
+ */
 class tTLGImageEncoder : public tImageEncoder
 {
 	gc_vector<char> MetaData; //!< メタデータ
@@ -36,7 +37,9 @@ private:
 					tProgressCallback * callback,
 					int compos);
 
-	//! @brief		辞書配列からのコールバックを受け取るためのRisseメソッド
+	/**
+	 * 辞書配列からのコールバックを受け取るためのRisseメソッド
+	 */
 	class tCallback : public tObjectInterface
 	{
 		tTLGImageEncoder & Encoder; //!< TLGイメージエンコーダインスタンス
@@ -47,14 +50,18 @@ private:
 	tCallback DictCallback; //!< 辞書配列からのコールバックを受け取るための Risse メソッド
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTLGImageEncoder();
 
-	//! @brief		エンコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * エンコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict);

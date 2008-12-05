@@ -19,24 +19,29 @@ namespace Risse
 {
 class tScriptEngine;
 //---------------------------------------------------------------------------
-//! @brief		this-proxyクラス (オブジェクトAにメンバがなければオブジェクトBを見に行く特殊なオブジェクト)
-//---------------------------------------------------------------------------
+/**
+ * this-proxyクラス (オブジェクトAにメンバがなければオブジェクトBを見に行く特殊なオブジェクト)
+ */
 class tThisProxy : public tObjectInterface
 {
 	tVariant & A; //!< オブジェクトA
 	tVariant & B; //!< オブジェクトB
 	tScriptEngine * Engine; //!< スクリプトエンジンインスタンス
 public:
-	//! @brief		コンストラクタ
-	//! @param		a		オブジェクトA
-	//! @param		b		オブジェクトB
-	//! @param		engine	スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param a			オブジェクトA
+	 * @param b			オブジェクトB
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tThisProxy(tVariant & a, tVariant & b, tScriptEngine * engine) :
 		A(a), B(b), Engine(engine)
 	{
 	}
 
-	//! @brief		tObjectInterface::Operate() オーバーライド
+	/**
+	 * tObjectInterface::Operate() オーバーライド
+	 */
 	tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG)
 	{
 		// まず A をみる

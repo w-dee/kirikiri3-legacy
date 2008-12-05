@@ -24,8 +24,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief WaveFilterの基本動作の実装
-//---------------------------------------------------------------------------
+/**
+ * WaveFilterの基本動作の実装
+ */
 class tWaveFilterInstance : public tObjectBase, public tWaveFilter
 {
 protected:
@@ -47,56 +48,73 @@ protected:
 	tWaveSegmentQueue SegmentQueue; //!< キューに入っているセグメント
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		desired_output_type    サブクラスが望む PCM 形式
+	/**
+	 * コンストラクタ
+	 * @param desired_output_type	サブクラスが望む PCM 形式
+	 */
 	tWaveFilterInstance(tPCMTypes::tType desired_output_type);
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	~tWaveFilterInstance();
 
-	//! @brief		フィルタをリセットする際に呼ばれる
+	/**
+	 * フィルタをリセットする際に呼ばれる
+	 */
 	void Reset();
 
-	//! @brief		フィルタの入力を設定する
-	//! @param		input  入力となるフィルタ
+	/**
+	 * フィルタの入力を設定する
+	 * @param input	入力となるフィルタ
+	 */
 	void SetInput(tWaveFilter * input);
 
 	void SuggestFormat(const tWaveFormat & format) {;}
-		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。
 
-	//! @brief		デコードを行う
-	//! @param		dest		デコード結果を格納するバッファ
-	//! @param		samples		デコードを行いたいサンプル数
-	//! @param		written		実際にデコード出来たサンプル数
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-	//! @return		まだデコードすべきデータが残っているかどうか
+	/**
+	 * デコードを行う
+	 * @param dest			デコード結果を格納するバッファ
+	 * @param samples		デコードを行いたいサンプル数
+	 * @param written		実際にデコード出来たサンプル数
+	 * @param segmentqueue	再生セグメントキュー情報を書き込む先
+	 * @return	まだデコードすべきデータが残っているかどうか
+	 */
 	bool Render(void *dest, risse_uint samples, risse_uint &written,
 		tWaveSegmentQueue & segmentqueue);
 
-	//! @brief		PCM形式を返す
-	//! @return		PCM形式への参照
+	/**
+	 * PCM形式を返す
+	 * @return	PCM形式への参照
+	 */
 	const tWaveFormat & GetFormat();
 
 protected:
 
-	//! @brief		出力キューを準備する
-	//! @param		numsamplegranules  準備したいサンプルグラニュール数
-	//! @return		出力バッファ
+	/**
+	 * 出力キューを準備する
+	 * @param numsamplegranules	準備したいサンプルグラニュール数
+	 * @return	出力バッファ
+	 */
 	void * PrepareQueue(risse_uint numsamplegranules);
 
-	//! @brief		出力キューにデータをおく
-	//! @param		numsamplegranules	サンプル数
-	//! @param		segmentqueue	再生セグメントキュー情報
+	/**
+	 * 出力キューにデータをおく
+	 * @param numsamplegranules	サンプル数
+	 * @param segmentqueue		再生セグメントキュー情報
+	 */
 	void Queue(risse_uint numsamplegranules,
 		const tWaveSegmentQueue & segmentqueue);
 
-	//! @brief		指定されたバッファに入力フィルタから情報を読み出し、書き込む
-	//! @param		dest				書き込みたいバッファ
-	//! @param		numsamplegranules	欲しいサンプルグラニュール数
-	//! @param		desired_type		欲しいPCM形式
-	//! @param		fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
-	//! @param		segmentqueue		再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
-	//! @return		実際に書き込まれたサンプルグラニュール数
+	/**
+	 * 指定されたバッファに入力フィルタから情報を読み出し、書き込む
+	 * @param dest				書き込みたいバッファ
+	 * @param numsamplegranules	欲しいサンプルグラニュール数
+	 * @param desired_type		欲しいPCM形式
+	 * @param fill_silence		欲しいサンプルグラニュール数に入力が満たないとき、残りを無音で埋めるかどうか
+	 * @param segmentqueue		再生セグメントキュー情報を書き込む先(内容はクリアされずに追加される)
+	 * @return	実際に書き込まれたサンプルグラニュール数
+	 */
 	risse_uint Fill(void * dest, risse_uint numsamplegranules, tPCMTypes::tType desired_type,
 		bool fill_silence,
 		tWaveSegmentQueue & segmentqueue);
@@ -123,21 +141,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"WaveFilter" クラス
-//---------------------------------------------------------------------------
+/**
+ * "WaveFilter" クラス
+ */
 class tWaveFilterClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tWaveFilterClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど

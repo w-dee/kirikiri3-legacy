@@ -111,11 +111,17 @@ void tCodeInterpreter::Execute(
 		*(tVariant*)((risse_uint8*)frame + (num)) のようなマクロに置き換える
 		可能性がある。
 		*/
-		//! @brief		スタックフレームにアクセス
+		/**
+		 * スタックフレームにアクセス
+		 */
 		#define AR(num) (frame[(num)])
-		//! @brief		定数領域にアクセス
+		/**
+		 * 定数領域にアクセス
+		 */
 		#define AC(num) (consts[(num)])
-		//! @brief		レジスタのオペランド -> レジスタ/定数インデックスへの変換
+		/**
+		 * レジスタのオペランド -> レジスタ/定数インデックスへの変換
+		 */
 		#define CI(num) (num)
 
 		// this-proxy 用の領域

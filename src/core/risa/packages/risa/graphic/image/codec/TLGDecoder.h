@@ -32,31 +32,40 @@ extern char TLG6GolombBitLengthTable
 
 
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージデコーダ
-//---------------------------------------------------------------------------
+/**
+ * TLGイメージデコーダ
+ */
 class tTLGImageDecoder : public tImageDecoder
 {
 
 private:
-	//! @brief		(内部関数)TLG5 のデコードを行う
+	/**
+	 * (内部関数)TLG5 のデコードを行う
+	 */
 	void ProcessTLG5(tStreamAdapter & src,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
-	//! @brief		(内部関数)TLG6 のデコードを行う
+	/**
+	 * (内部関数)TLG6 のデコードを行う
+	 */
 	void ProcessTLG6(tStreamAdapter & src,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
-	//! @brief		(内部関数)TLG5/TLG6 のデコードを行う
+	/**
+	 * (内部関数)TLG5/TLG6 のデコードを行う
+	 */
 	void ProcessTLG(tStreamAdapter & src,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
 
 public:
-	//! @brief		デコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * デコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);

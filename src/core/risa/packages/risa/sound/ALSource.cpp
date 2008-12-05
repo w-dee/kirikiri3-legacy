@@ -36,10 +36,11 @@ RISSE_DEFINE_SOURCE_ID(51552,26074,48813,19041,30653,39645,11297,33602);
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコード用スレッド
-//! @note		サウンドソースが再生中の間は、tWaveDecodeThreadPool -> tWaveDecodeThread -> Source
-//!				の参照があるため、Source が GC により回収されることはない。
-//---------------------------------------------------------------------------
+/**
+ * デコード用スレッド
+ * @note	サウンドソースが再生中の間は、tWaveDecodeThreadPool -> tWaveDecodeThread -> Source
+ *			の参照があるため、Source が GC により回収されることはない。
+ */
 class tWaveDecodeThread : public tThread, protected depends_on<tTickCount>
 {
 	tALSource * Source; //!< このスレッドに関連づけられているソース
@@ -60,8 +61,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tWaveDecodeThread::tWaveDecodeThread()
 {
 	Source = NULL;
@@ -71,8 +73,9 @@ tWaveDecodeThread::tWaveDecodeThread()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tWaveDecodeThread::~tWaveDecodeThread()
 {
 	Terminate(); // スレッドの終了を伝える
@@ -82,9 +85,10 @@ tWaveDecodeThread::~tWaveDecodeThread()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ソースを設定する
-//! @param		source ソース
-//---------------------------------------------------------------------------
+/**
+ * ソースを設定する
+ * @param source	ソース
+ */
 void tWaveDecodeThread::SetSource(tALSource * source)
 {
 	volatile tCriticalSection::tLocker cs_holder(CS);
@@ -95,8 +99,9 @@ void tWaveDecodeThread::SetSource(tALSource * source)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スレッドのエントリーポイント
-//---------------------------------------------------------------------------
+/**
+ * スレッドのエントリーポイント
+ */
 void tWaveDecodeThread::Execute(void)
 {
 	while(!ShouldTerminate())
@@ -172,8 +177,9 @@ void tWaveDecodeThread::Execute(void)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デコード用スレッドのプール
-//---------------------------------------------------------------------------
+/**
+ * デコード用スレッドのプール
+ */
 class tWaveDecodeThreadPool :
 								public singleton_base<tWaveDecodeThreadPool>,
 								manual_start<tWaveDecodeThreadPool>,
@@ -201,8 +207,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tWaveDecodeThreadPool::tWaveDecodeThreadPool()
 {
 }
@@ -210,8 +217,9 @@ tWaveDecodeThreadPool::tWaveDecodeThreadPool()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 {
 
@@ -240,8 +248,9 @@ tWaveDecodeThreadPool::~tWaveDecodeThreadPool()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンパクトイベント
-//---------------------------------------------------------------------------
+/**
+ * コンパクトイベント
+ */
 void tWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 {
 	volatile tCriticalSection::tLocker cs_holder(CS);
@@ -256,9 +265,10 @@ void tWaveDecodeThreadPool::OnCompact(tCompactLevel level)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スレッドを一つ得る
-//! @return		スレッド
-//---------------------------------------------------------------------------
+/**
+ * スレッドを一つ得る
+ * @return	スレッド
+ */
 tWaveDecodeThread * tWaveDecodeThreadPool::Acquire(tALSource * source)
 {
 	volatile tCriticalSection::tLocker cs_holder(CS);
@@ -292,9 +302,10 @@ tWaveDecodeThread * tWaveDecodeThreadPool::Acquire(tALSource * source)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スレッドを一つ返す
-//! @param		thread スレッド
-//---------------------------------------------------------------------------
+/**
+ * スレッドを一つ返す
+ * @param thread	スレッド
+ */
 void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 {
 	volatile tCriticalSection::tLocker cs_holder(CS);
@@ -311,9 +322,9 @@ void tWaveDecodeThreadPool::Unacquire(tWaveDecodeThread * thread)
 
 
 //---------------------------------------------------------------------------
-//! @brief		使用中の各スレッドの WatchCallback を呼び出す
-//! @param		一つでも呼び出す物があった場合に true
-//---------------------------------------------------------------------------
+/**
+ * 使用中の各スレッドの WatchCallback を呼び出す
+ */
 bool tWaveDecodeThreadPool::CallWatchCallbacks()
 {
 	// ここで使用している pointer_list は自分でスレッド保護を行うので
@@ -458,8 +469,9 @@ void tWaveWatchThread::Execute(void)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ラベルイベントタイミング発生用スレッド
-//---------------------------------------------------------------------------
+/**
+ * ラベルイベントタイミング発生用スレッド
+ */
 class tWaveLabelTimingThread : public tThread,
 			public singleton_base<tWaveLabelTimingThread>,
 			manual_start<tWaveLabelTimingThread>,
@@ -481,8 +493,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tWaveLabelTimingThread::tWaveLabelTimingThread()
 {
 	Run(); // スレッドの実行を開始
@@ -491,8 +504,9 @@ tWaveLabelTimingThread::tWaveLabelTimingThread()
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tWaveLabelTimingThread::~tWaveLabelTimingThread()
 {
 	Terminate(); // スレッドの終了を伝える
@@ -502,8 +516,9 @@ tWaveLabelTimingThread::~tWaveLabelTimingThread()
 
 
 //---------------------------------------------------------------------------
-//! @brief		リスケジュールを行う
-//---------------------------------------------------------------------------
+/**
+ * リスケジュールを行う
+ */
 void tWaveLabelTimingThread::Reschedule()
 {
 	Event.Signal(); // スレッドをたたき起こす
@@ -513,8 +528,9 @@ void tWaveLabelTimingThread::Reschedule()
 
 
 //---------------------------------------------------------------------------
-//! @brief		スレッドのエントリーポイント
-//---------------------------------------------------------------------------
+/**
+ * スレッドのエントリーポイント
+ */
 void tWaveLabelTimingThread::Execute(void)
 {
 	while(!ShouldTerminate())

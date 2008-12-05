@@ -395,8 +395,9 @@ tVariant tMemoryStreamClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		MemoryStream クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * MemoryStream クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','f','s'>,
 	tMemoryStreamClass>;

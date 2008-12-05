@@ -24,7 +24,9 @@ RISSE_DEFINE_SOURCE_ID(54267,15059,65338,18354,34733,17665,1145,27805);
 
 
 //---------------------------------------------------------------------------
-//! @brief	ファイルシステム用例外クラス
+/**
+ * ファイルシステム用例外クラス
+ */
 /*! @note
 	ファイルシステム関連の例外クラスとしては、ここの FileSystemException
 	(extends RuntimeException) 以外に、IOException がある(Risseエンジン内で定義)。
@@ -38,8 +40,9 @@ RISA_DEFINE_EXCEPTION_SUBCLASS(tFileSystemExceptionClass,
 
 
 //---------------------------------------------------------------------------
-//! @brief		FileSystemException クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * FileSystemException クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','f','s'>,
 	tFileSystemExceptionClass>;
@@ -822,8 +825,9 @@ void tFileSystemManager::SetCurrentDirectory(const tString &dir)
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.fs の static メソッド群
-//---------------------------------------------------------------------------
+/**
+ * risa.fs の static メソッド群
+ */
 struct tRisaFsStaticMethods
 {
 
@@ -997,14 +1001,17 @@ struct tRisaFsStaticMethods
 
 
 //---------------------------------------------------------------------------
-//! @brief		risa.fs のパッケージのメンバを初期化するためのシングルトンインスタンス
-//---------------------------------------------------------------------------
+/**
+ * risa.fs のパッケージのメンバを初期化するためのシングルトンインスタンス
+ */
 class tRisaFsPackageMemberInitializer : public tPackageMemberInitializer,
 	public singleton_base<tRisaFsPackageMemberInitializer>,
 	private tFileOpenModes
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRisaFsPackageMemberInitializer()
 	{
 		tPackageRegisterer<tSS<'r','i','s','a','.','f','s'> >::instance()->AddInitializer(this);
@@ -1074,8 +1081,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		FileSystem クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * FileSystem クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','f','s'>,
 	tFileSystemClass>;

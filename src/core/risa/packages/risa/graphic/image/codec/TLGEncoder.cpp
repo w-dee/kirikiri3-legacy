@@ -26,7 +26,9 @@ RISSE_DEFINE_SOURCE_ID(10011,40455,5786,18693,50305,8218,39140,14309);
 //---------------------------------------------------------------------------
 #define SLIDE_N 4096
 #define SLIDE_M (18+255)
-//! @brief スライド辞書法 圧縮クラス
+/**
+ * スライド辞書法 圧縮クラス
+ */
 class SlideCompressor : public tCollectee
 {
 	// TODO: 誰かこれを高速化してくんね
@@ -1963,14 +1965,17 @@ void tTLGImageEncoder::Process(tStreamInstance * stream,
 
 
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージエンコーダファクトリ
-//---------------------------------------------------------------------------
+/**
+ * TLGイメージエンコーダファクトリ
+ */
 class tTLGImageEncoderFactory : public tImageEncoderFactory,
 								public singleton_base<tTLGImageEncoderFactory>
 {
 	virtual tImageEncoder * CreateEncoder() { return new tTLGImageEncoder; }
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTLGImageEncoderFactory()
 	{
 		tImageCodecFactoryManager::instance()->Register(tSS<'.','t','l','g'>(), (tImageEncoderFactory*)this);

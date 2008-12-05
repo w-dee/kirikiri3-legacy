@@ -23,19 +23,26 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief PathFS ネイティブインスタンス
-//---------------------------------------------------------------------------
+/**
+ * PathFS ネイティブインスタンス
+ */
 class tNI_PathFS : public tNI_BaseFileSystem
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tNI_PathFS();
 
-	//! @brief		Risse コンストラクタ
+	/**
+	 * Risse コンストラクタ
+	 */
 	risse_error Construct(risse_int numparams,
 		tVariant **param, iRisseDispatch2 *risse_obj);
 
-	//! @brief		Risse 無効化関数
+	/**
+	 * Risse 無効化関数
+	 */
 	void Invalidate();
 
 	tPathFS * GetFileSystem() 
@@ -50,20 +57,27 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief PathFS ネイティブクラス
-//---------------------------------------------------------------------------
+/**
+ * PathFS ネイティブクラス
+ */
 class tNC_PathFS : public tNativeClass
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tNC_PathFS();
 
-	//! @brief		PathFS クラスID
+	/**
+	 * PathFS クラスID
+	 */
 	static risse_uint32 ClassID;
 
 private:
-	//! @brief		ネイティブインスタンスを作成して返す
-	//! @return		ネイティブインスタンス
+	/**
+	 * ネイティブインスタンスを作成して返す
+	 * @return	ネイティブインスタンス
+	 */
 	tNativeInstance *CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
@@ -74,15 +88,18 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * クラスレジストラ
+ */
 class tPathFSRegisterer :
 	public singleton_base<tPathFSRegisterer>,
 	protected depends_on<tRisseScriptEngine>,
 	protected depends_on<tFileSystemRegisterer>
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tPathFSRegisterer();
 };
 //---------------------------------------------------------------------------

@@ -24,8 +24,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		イメージインスタンス
-//---------------------------------------------------------------------------
+/**
+ * イメージインスタンス
+ */
 class tImageInstance : public tObjectBase
 {
 public:
@@ -35,64 +36,86 @@ public:
 	tImageInstance(); //!< コンストラクタ
 
 public:
-	//! @brief		明示的にイメージを破棄する
-	//! @note		破棄というか参照カウンタを減じて参照を消すだけ。
-	//!				他でイメージバッファを参照している場合は破棄されないと思う
+	/**
+	 * 明示的にイメージを破棄する
+	 * @note	破棄というか参照カウンタを減じて参照を消すだけ。
+	 *			他でイメージバッファを参照している場合は破棄されないと思う
+	 */
 	void Dispose();
 
-	//! @brief		メモリ上にイメージバッファを新規作成する
-	//! @param		format		ピクセル形式
-	//! @param		w			横幅
-	//! @param		h			縦幅
+	/**
+	 * メモリ上にイメージバッファを新規作成する
+	 * @param format	ピクセル形式
+	 * @param w			横幅
+	 * @param h			縦幅
+	 */
 	void Allocate(tPixel::tFormat format, risse_size w, risse_size h);
 
-	//! @brief		イメージバッファを持っているかどうかを返す
-	//! @return		イメージバッファを持っているかどうか
+	/**
+	 * イメージバッファを持っているかどうかを返す
+	 * @return	イメージバッファを持っているかどうか
+	 */
 	bool HasBuffer() const { /* TODO: RESSE_ASSERT_CS_LOCKED */ return * ImageBuffer != NULL; }
 
-	//! @brief		イメージバッファを返す
-	//! @note		注意！返されるイメージバッファの参照カウンタはここでインクリメントされる。
+	/**
+	 * イメージバッファを返す
+	 * @note	注意！返されるイメージバッファの参照カウンタはここでインクリメントされる。
+	 */
 	tImageBuffer * GetBuffer() const { return ImageBuffer->get(); }
 
-	//! @brief		イメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
-	//! @return		イメージバッファのデスクリプタ
+	/**
+	 * イメージバッファのデスクリプタを返す(イメージバッファを持っている場合のみに呼ぶこと)
+	 * @return	イメージバッファのデスクリプタ
+	 */
 	const tImageBuffer::tDescriptor & GetDescriptor() const {
 		return (*ImageBuffer)->GetDescriptor(); }
 
-	//! @brief		イメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
-	//! @return		イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	/**
+	 * イメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
+	 * @return	イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	 */
 	const tImageBuffer::tBufferPointer & GetBufferPointer() const {
 		return (*ImageBuffer)->GetBufferPointer(); }
 
-	//! @brief		書き込み用のイメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
-	//! @return		イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	/**
+	 * 書き込み用のイメージバッファのバッファポインタ構造体を返す(イメージバッファを持っている場合のみに呼ぶこと)
+	 * @return	イメージバッファのバッファポインタ構造体(使い終わったらRelease()を呼ぶこと)
+	 */
 	const tImageBuffer::tBufferPointer & GetBufferPointerForWrite();
 
-	//! @brief		イメージバッファを独立する
-	//! @param		clone		独立する際、内容をコピーするかどうか
-	//!							(偽を指定すると内容は不定になる)
-	//! @note		イメージバッファが他と共有されている場合は内容をクローンして独立させる
+	/**
+	 * イメージバッファを独立する
+	 * @param clone	独立する際、内容をコピーするかどうか
+	 *				(偽を指定すると内容は不定になる)
+	 * @note	イメージバッファが他と共有されている場合は内容をクローンして独立させる
+	 */
 	void Independ(bool clone = true);
 
-	//! @brief		指定位置のピクセルを ARGB32 形式の整数で得る
-	//! @note		きわめて低速。
-	//! @param		x			X位置
-	//! @param		y			Y位置
-	//! @return		0xAARRGGBB 形式のピクセル値
+	/**
+	 * 指定位置のピクセルを ARGB32 形式の整数で得る
+	 * @note	きわめて低速。
+	 * @param x	X位置
+	 * @param y	Y位置
+	 * @return	0xAARRGGBB 形式のピクセル値
+	 */
 	risse_uint32 GetARGB32(risse_size x, risse_size y);
 
-	//! @brief		指定位置のピクセルを ARGB32 形式の整数で設定する
-	//! @note		きわめて低速。
-	//! @param		x			X位置
-	//! @param		y			Y位置
-	//! @param		v			0xAARRGGBB 形式のピクセル値
+	/**
+	 * 指定位置のピクセルを ARGB32 形式の整数で設定する
+	 * @note	きわめて低速。
+	 * @param x	X位置
+	 * @param y	Y位置
+	 * @param v	0xAARRGGBB 形式のピクセル値
+	 */
 	void SetARGB32(risse_size x, risse_size y, risse_uint32 v);
 
-	//! @brief		画像をロードする
-	//! @param		filename		ファイル名
-	//! @param		format			読み込みたいフォーマット
-	//! @param		dict			ロードするパラメータの入った辞書配列(NULL=指定なし)
-	//! @param		cbfunc			コールバック(void = 指定なし)
+	/**
+	 * 画像をロードする
+	 * @param filename	ファイル名
+	 * @param format	読み込みたいフォーマット
+	 * @param dict		ロードするパラメータの入った辞書配列(NULL=指定なし)
+	 * @param cbfunc	コールバック(void = 指定なし)
+	 */
 	void Load(const tString & filename,
 			tPixel::tFormat format = tPixel::pfARGB32,
 			tDictionaryInstance * dict = NULL,
@@ -118,21 +141,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Image" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Image" クラス
+ */
 class tImageClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tImageClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど

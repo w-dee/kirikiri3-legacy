@@ -24,8 +24,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		コマンドラインオプションの定義を返す
-//---------------------------------------------------------------------------
+/**
+ * コマンドラインオプションの定義を返す
+ */
 static wxCmdLineEntryDesc * GetCmdLineEntryDesc()
 {
 	static wxCmdLineEntryDesc cmdlinedesc[] =
@@ -64,8 +65,9 @@ static wxCmdLineEntryDesc * GetCmdLineEntryDesc()
 
 
 //---------------------------------------------------------------------------
-//! @brief		アプリケーションクラス
-//---------------------------------------------------------------------------
+/**
+ * アプリケーションクラス
+ */
 class wxKrkrReleaserConsoleApp : public wxAppConsole
 {
 public:
@@ -96,8 +98,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		シグナルハンドラ
-//---------------------------------------------------------------------------
+/**
+ * シグナルハンドラ
+ */
 static volatile sig_atomic_t Interrupted = false;
 static void SigInt(int sig)
 {
@@ -112,8 +115,9 @@ static void SigInt(int sig)
 
 
 //---------------------------------------------------------------------------
-//! @brief		進捗を表示するクラス
-//---------------------------------------------------------------------------
+/**
+ * 進捗を表示するクラス
+ */
 class tProgressCallback : public iRisaProgressCallback
 {
 	bool Show;
@@ -149,9 +153,10 @@ void tProgressCallback::OnProgress(int percent)
 
 
 //---------------------------------------------------------------------------
-//! @brief		アプリケーションが開始するとき
-//! @return		成功すれば真
-//---------------------------------------------------------------------------
+/**
+ * アプリケーションが開始するとき
+ * @return	成功すれば真
+ */
 bool wxKrkrReleaserConsoleApp::OnInit()
 {
 	// アプリケーションのディレクトリを得て、その下にある locale か、
@@ -176,9 +181,10 @@ bool wxKrkrReleaserConsoleApp::OnInit()
 
 
 //---------------------------------------------------------------------------
-//! @brief		アプリケーションメインルーチン
-//! @return		終了コード
-//---------------------------------------------------------------------------
+/**
+ * アプリケーションメインルーチン
+ * @return	終了コード
+ */
 int wxKrkrReleaserConsoleApp::OnRun()
 {
 	try
@@ -415,10 +421,11 @@ int wxKrkrReleaserConsoleApp::OnRun()
 
 
 //---------------------------------------------------------------------------
-//! @brief		分類用ルールの書かれたファイルを読み込む
-//! @param		filename ルールの書かれたファイルのファイル名
-//! @param		pattern 格納先配列(内容はクリアされない)
-//---------------------------------------------------------------------------
+/**
+ * 分類用ルールの書かれたファイルを読み込む
+ * @param filename	ルールの書かれたファイルのファイル名
+ * @param pattern	格納先配列(内容はクリアされない)
+ */
 void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 	wxArrayString &pattern)
 {
@@ -439,9 +446,10 @@ void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 
 
 //---------------------------------------------------------------------------
-//! @brief		アーカイブ内のファイルをリスト表示する
-//! @param		files ファイルリスト
-//---------------------------------------------------------------------------
+/**
+ * アーカイブ内のファイルをリスト表示する
+ * @param files	ファイルリスト
+ */
 void wxKrkrReleaserConsoleApp::ListArchiveItems(
 	const std::vector<tXP4WriterInputFile> & files)
 {

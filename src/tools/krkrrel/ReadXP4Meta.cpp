@@ -20,8 +20,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから16bit LE整数を読み込む
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから16bit LE整数を読み込む
+ */
 static inline wxUint16 ReadI16LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint16>(mem[0]) + (static_cast<wxUint16>(mem[1]) << 8);
@@ -30,8 +31,9 @@ static inline wxUint16 ReadI16LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから32bit LE整数を読み込む
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから32bit LE整数を読み込む
+ */
 static inline wxUint32 ReadI32LEFromMem(const unsigned char *mem)
 {
 	return static_cast<wxUint32>(mem[0]) + (static_cast<wxUint32>(mem[1]) << 8) +
@@ -41,8 +43,9 @@ static inline wxUint32 ReadI32LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定された位置のメモリから64bit LE整数を読み込む
-//---------------------------------------------------------------------------
+/**
+ * 指定された位置のメモリから64bit LE整数を読み込む
+ */
 static inline wxUint64 ReadI64LEFromMem(const unsigned char *mem)
 {
 	wxUint32 low  = ReadI32LEFromMem(mem);
@@ -53,14 +56,15 @@ static inline wxUint64 ReadI64LEFromMem(const unsigned char *mem)
 
 
 //---------------------------------------------------------------------------
-//! @brief		チャンクを探す
-//! @param		chunkname チャンク名
-//! @param		mem 検索を行うメモリ領域の先頭位置
-//! @param		limit 検索を行うメモリ領域のサイズ
-//! @param		chunkcontent チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
-//! @param		chunksize チャンクが見つかった場合、そのチャンクのサイズが入る
-//! @return		チャンクが見つかった場合に 真、見つからなかった場合は偽
-//---------------------------------------------------------------------------
+/**
+ * チャンクを探す
+ * @param chunkname		チャンク名
+ * @param mem			検索を行うメモリ領域の先頭位置
+ * @param limit			検索を行うメモリ領域のサイズ
+ * @param chunkcontent	チャンクが見つかった場合、そのチャンクの内容の先頭を指すポインタが入る
+ * @param chunksize		チャンクが見つかった場合、そのチャンクのサイズが入る
+ * @return	チャンクが見つかった場合に 真、見つからなかった場合は偽
+ */
 static bool FindChunk(const unsigned char * chunkname,
 	const unsigned char *mem, size_t memsize,
 	const unsigned char ** chunkcontent, size_t * chunksize)
@@ -93,10 +97,11 @@ static bool FindChunk(const unsigned char * chunkname,
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		meta 入力メタデータ
-//! @param		metasize 入力メタデータのサイズ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param meta		入力メタデータ
+ * @param metasize	入力メタデータのサイズ
+ */
 tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 										const unsigned char * meta, size_t metasize)
 {
@@ -188,9 +193,10 @@ tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		filename アーカイブファイル名
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param filename	アーカイブファイル名
+ */
 tXP4MetadataReaderArchive::tXP4MetadataReaderArchive(const wxString & filename)
 {
 	// アーカイブファイルを読み込む

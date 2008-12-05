@@ -54,8 +54,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief  ダミーのクリティカルセクションの実装
-//---------------------------------------------------------------------------
+/**
+ * ダミーのクリティカルセクションの実装
+ */
 class tDummyCriticalSection : public tCollectee
 {
 public:
@@ -83,8 +84,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief  void * オブジェクトポインタリスト
-//---------------------------------------------------------------------------
+/**
+ * void * オブジェクトポインタリスト
+ */
 template <typename CST>
 class void_pointer_list : public tDestructee
 {
@@ -96,7 +98,9 @@ class void_pointer_list : public tDestructee
 	bool m_has_null; //!< NULL を含んだポインタが存在するかどうか
 
 public:
-	//! @brief 配列のロックを行うための scoped_lock
+	/**
+	 * 配列のロックを行うための scoped_lock
+	 */
 	class scoped_lock
 	{
 		void_pointer_list<CST> & m_list;
@@ -108,8 +112,10 @@ public:
 	};
 
 public:
-	//! @brief		デフォルトコンストラクタ
-	//! @note		このデストラクタはメインスレッド以外から非同期に呼ばれる
+	/**
+	 * デフォルトコンストラクタ
+	 * @note	このデストラクタはメインスレッド以外から非同期に呼ばれる
+	 */
 	void_pointer_list()
 	{
 		volatile typename CST::tLocker lock(CST);
@@ -119,7 +125,9 @@ public:
 		m_has_null = false;
 	}
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	virtual ~void_pointer_list()
 	{
 		volatile typename CST::tLocker lock(CST);
@@ -132,23 +140,29 @@ private:
 	void operator = (const void_pointer_list<CST> & ref);
 
 public:
-	//! @brief		クリティカルセクションオブジェクトを得る
+	/**
+	 * クリティカルセクションオブジェクトを得る
+	 */
 	CST & GetCS() const { return CS; }
 
 public:
-	//! @brief		配列のサイズを得る
-	//! @note		配列は NULL を含む場合があるが、ここではそれは考慮せず
-	//!				NULL を含んだサイズを返す
+	/**
+	 * 配列のサイズを得る
+	 * @note	配列は NULL を含む場合があるが、ここではそれは考慮せず
+	 *			NULL を含んだサイズを返す
+	 */
 	size_t get_count() const
 	{
 		volatile typename CST::tLocker lock(CST);
 		return m_list.size();
 	}
 
-	//! @brief		配列のロックされたサイズを得る
-	//! @note		ロックされていない状態で呼び出さないこと
-	//! @note		配列は NULL を含む場合があるが、ここではそれは考慮せず
-	//!				NULL を含んだサイズを返す
+	/**
+	 * 配列のロックされたサイズを得る
+	 * @note	ロックされていない状態で呼び出さないこと
+	 * @note	配列は NULL を含む場合があるが、ここではそれは考慮せず
+	 *			NULL を含んだサイズを返す
+	 */
 	size_t get_locked_count() const
 	{
 		assert(m_lock_count > 0);
@@ -156,17 +170,21 @@ public:
 		return m_locked_item_count;
 	}
 
-	//! @brief		指定位置の要素を得る
-	//! @param		index インデックス
+	/**
+	 * 指定位置の要素を得る
+	 * @param index	インデックス
+	 */
 	void * get(size_t index) const
 	{
 		volatile typename CST::tLocker lock(CST);
 		return m_list[index];
 	}
 
-	//! @brief		指定位置のロックされた要素を得る
-	//! @param		index インデックス
-	//! @note		ロックされていない状態で呼び出さないこと
+	/**
+	 * 指定位置のロックされた要素を得る
+	 * @param index	インデックス
+	 * @note	ロックされていない状態で呼び出さないこと
+	 */
 	void * get_locked(size_t index) const
 	{
 		assert(m_lock_count > 0);
@@ -176,9 +194,11 @@ public:
 		return m_list[index];
 	}
 
-	//! @brief		指定位置の要素をセットする
-	//! @param		index インデックス
-	//! @param		item 要素
+	/**
+	 * 指定位置の要素をセットする
+	 * @param index	インデックス
+	 * @param item	要素
+	 */
 	void set(size_t index, void *item)
 	{
 		if(item == NULL) m_has_null = true;
@@ -186,8 +206,10 @@ public:
 		m_list[index] = item;
 	}
 
-	//! @brief		配列に要素を追加する
-	//! @param		item 要素
+	/**
+	 * 配列に要素を追加する
+	 * @param item	要素
+	 */
 	void add(void * item)
 	{
 		if(item == NULL) return; // NULL は add できない
@@ -195,11 +217,13 @@ public:
 		m_list.push_back(item);
 	}
 
-	//! @brief		配列から要素を削除する
-	//! @param		item 要素
-	//! @note		実際には要素の削除はその要素にNULLを代入すること
-	//!				になる。NULL を含んだ状態の配列の NULL を削除するには
-	//!				compact() を呼ぶこと
+	/**
+	 * 配列から要素を削除する
+	 * @param item	要素
+	 * @note	実際には要素の削除はその要素にNULLを代入すること
+	 *			になる。NULL を含んだ状態の配列の NULL を削除するには
+	 *			compact() を呼ぶこと
+	 */
 	void remove(void * item)
 	{
 		if(item == NULL) return;
@@ -215,10 +239,12 @@ public:
 		}
 	}
 
-	//! @brief		配列に要素を挿入する
-	//! @param		index 挿入位置を表すインデックス
-	//! @param		item 要素
-	//! @note		挿入は一般的に高価な操作なので使用には気をつけること
+	/**
+	 * 配列に要素を挿入する
+	 * @param index	挿入位置を表すインデックス
+	 * @param item	要素
+	 * @note	挿入は一般的に高価な操作なので使用には気をつけること
+	 */
 	void insert(size_t index, void * item)
 	{
 		if(item == NULL) return; // NULL は insert できない
@@ -227,7 +253,9 @@ public:
 		m_list.insert(m_list.begin() + index, item);
 	}
 
-	//! @brief		配列中の NULL 要素を削除する
+	/**
+	 * 配列中の NULL 要素を削除する
+	 */
 	void compact()
 	{
 		volatile typename CST::tLocker lock(CST);
@@ -248,9 +276,11 @@ public:
 		m_has_null = false;
 	}
 
-	//! @brief		要素を検索する
-	//! @param		item 検索したい要素
-	//! @return		要素のインデックス (static_cast<size_t>(-1L) の場合は要素が見つからなかった)
+	/**
+	 * 要素を検索する
+	 * @param item	検索したい要素
+	 * @return	要素のインデックス (static_cast<size_t>(-1L) の場合は要素が見つからなかった)
+	 */
 	size_t find(void * item) const
 	{
 		if(item == NULL) return static_cast<size_t>(-1L); // null は探せない
@@ -262,7 +292,9 @@ public:
 	}
 
 private:
-	//! @brief		配列のロックを行う
+	/**
+	 * 配列のロックを行う
+	 */
 	void lock()
 	{
 		volatile typename CST::tLocker lock(CST);
@@ -273,7 +305,9 @@ private:
 		}
 	}
 
-	//! @brief		配列のロックの解除をする
+	/**
+	 * 配列のロックの解除をする
+	 */
 	void unlock()
 	{
 		volatile typename CST::tLocker lock(CST);
@@ -286,7 +320,9 @@ private:
 		}
 	}
 
-	//! @brief		配列のシャドー化
+	/**
+	 * 配列のシャドー化
+	 */
 	void make_shadow()
 	{
 		if(m_lock_count == 0) return; // ロック中でない場合はなにもしない
@@ -300,15 +336,18 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief  任意型のオブジェクトポインタリスト
-//---------------------------------------------------------------------------
+/**
+ * 任意型のオブジェクトポインタリスト
+ */
 template <typename T>
 class pointer_list : public tCollectee
 {
 	void_pointer_list<tCriticalSection> m_list;
 
 public:
-	//! @brief 配列のロックを行うための scoped_lock
+	/**
+	 * 配列のロックを行うための scoped_lock
+	 */
 	class scoped_lock
 	{
 		void_pointer_list<tCriticalSection>::scoped_lock m_lock;
@@ -317,11 +356,15 @@ public:
 	};
 
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	pointer_list() {;}
 
 public:
-	//! @brief		クリティカルセクションオブジェクトを得る
+	/**
+	 * クリティカルセクションオブジェクトを得る
+	 */
 	tCriticalSection & GetCS() const { return m_list.GetCS(); }
 
 private:
@@ -330,80 +373,100 @@ private:
 	void operator = (const pointer_list<T> & ref);
 
 public:
-	//! @brief		配列のサイズを得る
-	//! @note		配列は NULL を含む場合があるが、ここではそれは考慮せず
-	//!				NULL を含んだサイズを返す
+	/**
+	 * 配列のサイズを得る
+	 * @note	配列は NULL を含む場合があるが、ここではそれは考慮せず
+	 *			NULL を含んだサイズを返す
+	 */
 	size_t get_count() const
 	{
 		return m_list.get_count();
 	}
 
-	//! @brief		配列のロックされたサイズを得る
-	//! @note		ロックされていない状態で呼び出さないこと
+	/**
+	 * 配列のロックされたサイズを得る
+	 * @note	ロックされていない状態で呼び出さないこと
+	 */
 	size_t get_locked_count() const
 	{
 		return m_list.get_locked_count();
 	}
 
-	//! @brief		指定位置の要素を得る
-	//! @param		index インデックス
+	/**
+	 * 指定位置の要素を得る
+	 * @param index	インデックス
+	 */
 	T * get(size_t index) const
 	{
 		return static_cast<T*>(m_list.get(index));
 	}
 
-	//! @brief		指定位置のロックされた要素を得る
-	//! @param		index インデックス
-	//! @note		ロックされていない状態で呼び出さないこと
+	/**
+	 * 指定位置のロックされた要素を得る
+	 * @param index	インデックス
+	 * @note	ロックされていない状態で呼び出さないこと
+	 */
 	T * get_locked(size_t index) const
 	{
 		return static_cast<T*>(m_list.get_locked(index));
 	}
 
-	//! @brief		指定位置の要素をセットする
-	//! @param		index インデックス
-	//! @param		item 要素
+	/**
+	 * 指定位置の要素をセットする
+	 * @param index	インデックス
+	 * @param item	要素
+	 */
 	void set(size_t index, T * item)
 	{
 		m_list.set(index, static_cast<void*>(item));
 	}
 
-	//! @brief		配列に要素を追加する
-	//! @param		item 要素
+	/**
+	 * 配列に要素を追加する
+	 * @param item	要素
+	 */
 	void add(T * item)
 	{
 		m_list.add(static_cast<void*>(item));
 	}
 
-	//! @brief		配列から要素を削除する
-	//! @param		item 要素
-	//! @note		実際には要素の削除はその要素にNULLを代入すること
-	//!				になる。NULL を含んだ状態の配列の NULL を削除するには
-	//!				compact() を呼ぶこと(compact() は scoped_lock を抜ける
-	//!				際には暗黙的に呼び出される)。
+	/**
+	 * 配列から要素を削除する
+	 * @param item	要素
+	 * @note	実際には要素の削除はその要素にNULLを代入すること
+	 *			になる。NULL を含んだ状態の配列の NULL を削除するには
+	 *			compact() を呼ぶこと(compact() は scoped_lock を抜ける
+	 *			際には暗黙的に呼び出される)。
+	 */
 	void remove(T * item)
 	{
 		m_list.remove(static_cast<void*>(item));
 	}
 
-	//! @brief		配列に要素を挿入する
-	//! @param		index 挿入位置を表すインデックス
-	//! @param		item 要素
-	//! @note		挿入は一般的に高価な操作なので使用には気をつけること
+	/**
+	 * 配列に要素を挿入する
+	 * @param index	挿入位置を表すインデックス
+	 * @param item	要素
+	 * @note	挿入は一般的に高価な操作なので使用には気をつけること
+	 */
 	void insert(size_t index, T * item)
 	{
 		m_list.insert(index, static_cast<void*>(item));
 	}
 
-	//! @brief		配列中の NULL 要素を削除する
+	/**
+	 * 配列中の NULL 要素を削除する
+	 */
 	void compact()
 	{
 		m_list.compact();
 	}
 
-	//! @brief		要素を検索する
-	//! @param		item 検索したい要素
-	//! @return		要素のインデックス (static_cast<size_t>(-1L) の場合は要素が見つからなかった)
+	/**
+	 * 要素を検索する
+	 * @param item	検索したい要素
+	 * @return	要素のインデックス (static_cast<size_t>(-1L) の場合は要素が見つからなかった)
+	 */
 	size_t find(T * item) const
 	{
 		return m_list.find(static_cast<void*>(item));

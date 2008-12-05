@@ -25,38 +25,53 @@ namespace Risse
 {
 class tScriptEngine;
 //---------------------------------------------------------------------------
-//! @brief		"Binding" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Binding" クラスのインスタンス用 C++クラス
+ */
 class tBindingInstance : public tObjectBase
 {
 	tBindingInfo * Info; //!< バインディングに関する情報
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tBindingInstance() : tObjectBase() { Info = NULL; }
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tBindingInstance() {;}
 
-	//! @brief		ローカル変数のバインディングへの参照を得る
-	//! @return		ローカル変数のバインディングへの参照
+	/**
+	 * ローカル変数のバインディングへの参照を得る
+	 * @return	ローカル変数のバインディングへの参照
+	 */
 	tBindingInfo::tBindingMap & GetBindingMap() const { RISSE_ASSERT(Info != NULL); return Info->GetBindingMap(); }
 
-	//! @brief		共有フレームを得る
-	//! @return		共有フレーム
+	/**
+	 * 共有フレームを得る
+	 * @return	共有フレーム
+	 */
 	tSharedVariableFrames * GetFrames() const { RISSE_ASSERT(Info != NULL); return Info->GetFrames(); }
 
-	//! @brief		ローカル変数のバインディングのマップを追加する
-	//! @param		This		Bindingクラスのインスタンス
-	//! @param		name		ローカル変数名
-	//! @param		reg			レジスタ番号
+	/**
+	 * ローカル変数のバインディングのマップを追加する
+	 * @param This	Bindingクラスのインスタンス
+	 * @param name	ローカル変数名
+	 * @param reg	レジスタ番号
+	 */
 	static void AddMap(tVariant &This, const tString &name, risse_uint32 reg);
 
-	//! @brief		バインディングに関する情報を設定する
-	//! @param		info		バインディングに関する情報
+	/**
+	 * バインディングに関する情報を設定する
+	 * @param info	バインディングに関する情報
+	 */
 	void SetInfo(tBindingInfo * info) { Info = info; }
 
-	//! @brief		バインディングに関する情報を取得する
-	//! @return		バインディングに関する情報
+	/**
+	 * バインディングに関する情報を取得する
+	 * @return	バインディングに関する情報
+	 */
 	tBindingInfo * GetInfo() const { return Info; }
 
 public: // Risse用メソッドなど
@@ -70,21 +85,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Binding" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Binding" クラス
+ */
 class tBindingClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tBindingClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:

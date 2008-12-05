@@ -27,10 +27,11 @@ namespace Risse
 {
 
 //---------------------------------------------------------------------------
-//! @brief  シングルトンオブジェクト用クラス
-//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス
-//!			(デフォルトコンストラクタがprotectedで利用可能でなければならない)
-//---------------------------------------------------------------------------
+/**
+ * シングルトンオブジェクト用クラス
+ * @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス
+ *			(デフォルトコンストラクタがprotectedで利用可能でなければならない)
+ */
 template <typename T>
 class tSingleton
 {
@@ -43,15 +44,21 @@ class tSingleton
 public:
 	tSingleton(){;} //!< デフォルトコンストラクタ(何もしない)
 
-	//! @brief		インスタンスを得る
-	//! @note		インスタンスが作成されていなければ作成を行う
+	/**
+	 * インスタンスを得る
+	 * @note	インスタンスが作成されていなければ作成を行う
+	 */
 	static T & GetInstance() {if(!_instance) { printf("%s\n", typeid(T).name()); _instance = new T();}  return *_instance; }
 
-	//! @brief		インスタンスへのポインタを獲る
-	//! @note		インスタンスが作成されていなければ作成を行う
+	/**
+	 * インスタンスへのポインタを獲る
+	 * @note	インスタンスが作成されていなければ作成を行う
+	 */
 	static T * GetPointer() { if(!_instance) { printf("%s\n", typeid(T).name()); _instance = new T();} return _instance; }
 
-	//! @brief		インスタンスがすでに作成されているかどうかを得る
+	/**
+	 * インスタンスがすでに作成されているかどうかを得る
+	 */
 	static bool GetInstanceAlive() { return _instance != NULL; }
 };
 template <typename T>

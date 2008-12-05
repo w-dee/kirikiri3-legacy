@@ -30,8 +30,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief Risa用ArtProvider
-//---------------------------------------------------------------------------
+/**
+ * Risa用ArtProvider
+ */
 class tArtProvider : public wxArtProvider
 {
 protected:
@@ -42,8 +43,9 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief ビットマップを作成して返す
-//---------------------------------------------------------------------------
+/**
+ * ビットマップを作成して返す
+ */
 wxBitmap tArtProvider::CreateBitmap(const wxArtID& id,
 									 const wxArtClient& client,
 									 const wxSize& size)
@@ -65,13 +67,16 @@ wxBitmap tArtProvider::CreateBitmap(const wxArtID& id,
 
 
 //---------------------------------------------------------------------------
-//! @brief		tArtProvider を登録するためのシングルトン
-//---------------------------------------------------------------------------
+/**
+ * tArtProvider を登録するためのシングルトン
+ */
 class tArtProviderRegisterer : public singleton_base<tArtProviderRegisterer>
 {
 	tArtProvider * Provider;
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tArtProviderRegisterer()
 	{
 		Provider = new tArtProvider;

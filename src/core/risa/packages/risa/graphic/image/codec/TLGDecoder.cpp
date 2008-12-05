@@ -98,8 +98,9 @@ static void TLG5ComposeColors4To4(
 
 
 //---------------------------------------------------------------------------
-//! @brief		スライド辞書法(変形)の展開ルーチン
-//---------------------------------------------------------------------------
+/**
+ * スライド辞書法(変形)の展開ルーチン
+ */
 static risse_int TLG5DecompressSlide(
 	RISSE_RESTRICT risse_uint8 *out,
 	RISSE_RESTRICT const risse_uint8 *in,
@@ -415,8 +416,9 @@ static void TLG6MakeTable()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ゴロム・ライス符号展開ルーチン
-//---------------------------------------------------------------------------
+/**
+ * ゴロム・ライス符号展開ルーチン
+ */
 template <typename ACCECSS_TYPE>
 static RISSE_FORCEINLINE void DecodeGolombValues(
 	RISSE_RESTRICT risse_int8 *pixelbuf,
@@ -1503,14 +1505,17 @@ void tTLGImageDecoder::Process(tStreamInstance * stream,
 
 
 //---------------------------------------------------------------------------
-//! @brief		TLGイメージデコーダファクトリ
-//---------------------------------------------------------------------------
+/**
+ * TLGイメージデコーダファクトリ
+ */
 class tTLGImageDecoderFactory : public tImageDecoderFactory,
 								public singleton_base<tTLGImageDecoderFactory>
 {
 	virtual tImageDecoder * CreateDecoder() { return new tTLGImageDecoder; }
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTLGImageDecoderFactory()
 	{
 		TLG6MakeTable(); // テーブルを作成

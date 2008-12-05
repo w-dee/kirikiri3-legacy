@@ -143,8 +143,9 @@ tVariant tImageSourceNodeClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ImageSourceNode クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * ImageSourceNode クラスレジストラ
+ */
 template class tClassRegisterer<
 tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
 	tImageSourceNodeClass>;

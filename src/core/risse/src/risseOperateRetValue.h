@@ -21,7 +21,9 @@ namespace Risse
 class tOperateRetValue
 {
 public:
-	//! @brief		Operateメソッドの戻り値
+	/**
+	 * Operateメソッドの戻り値
+	 */
 	enum tRetValue
 	{
 		rvNoError,					//!< エラー無し
@@ -32,16 +34,18 @@ public:
 		rvPropertyCannotBeWritten,	//!< プロパティは読み込み専用
 	};
 
-	//! @brief		例外を発生させる
-	//! @param		エラーコード
-	//! @param		name	操作を行うメンバ名
-	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	/**
+	 * 例外を発生させる
+	 * @param name	操作を行うメンバ名
+	 *				(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	 */
 	static void RaiseError(tRetValue ret, const tString & name);
 
-	//! @brief		もし指定された値がエラーならば例外を発生させる
-	//! @param		エラーコード
-	//! @param		name	操作を行うメンバ名
-	//!						(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	/**
+	 * もし指定された値がエラーならば例外を発生させる
+	 * @param name	操作を行うメンバ名
+	 *				(空文字列の場合はこのオブジェクトそのものに対しての操作)
+	 */
 	static void RaiseIfError(tRetValue ret, const tString & name)
 	{
 		if(ret != rvNoError) RaiseError(ret, name);

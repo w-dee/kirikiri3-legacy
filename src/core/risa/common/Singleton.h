@@ -72,15 +72,17 @@ using namespace Risse;
 
 
 //---------------------------------------------------------------------------
-//! @brief  型名のデマングルを行う
-//! @param		name		マングルされた名前
-//! @return		デマングルされた名前(GC管理下あるいはstaticなので明示的に開放しなくてよい)
-//---------------------------------------------------------------------------
+/**
+ * 型名のデマングルを行う
+ * @param name	マングルされた名前
+ * @return	デマングルされた名前(GC管理下あるいはstaticなので明示的に開放しなくてよい)
+ */
 const char * Demangle(const char * name);
 
 //---------------------------------------------------------------------------
-//! @brief  シングルトンオブジェクト管理用クラス
-//---------------------------------------------------------------------------
+/**
+ * シングルトンオブジェクト管理用クラス
+ */
 class singleton_manager : public tCollectee
 {
 	typedef void (*handler_t)(); //!< ensure/disconnect 関数のtypedef
@@ -100,84 +102,106 @@ class singleton_manager : public tCollectee
 	static tCriticalSection * DummyCS; //!< メモリバリアを行うためのダミーのCS
 
 public:
-	//! @brief		シングルトン情報を登録する
+	/**
+	 * シングルトン情報を登録する
+	 */
 	static void register_info(const register_info_t & info);
 
-	//! @brief		手動起動を表すシングルトンの情報を登録する
+	/**
+	 * 手動起動を表すシングルトンの情報を登録する
+	 */
 	static void register_manual_start(handler_t func);
 
-	//! @brief		disconnect 関数を登録する
+	/**
+	 * disconnect 関数を登録する
+	 */
 	static void register_disconnector(handler_t func);
 
-	//! @brief		シングルトン情報の登録を解除する
-	//! @note		とはなっているが実際にはなにもしない。
-	//!				昔はここに参照カウンタをデクリメントし、0になれば
-	//!				情報をすべて破棄するようなコードが書かれていたが、
-	//!				GC を利用するようになってからそれは無くなった。
+	/**
+	 * シングルトン情報の登録を解除する
+	 * @note	とはなっているが実際にはなにもしない。
+	 *			昔はここに参照カウンタをデクリメントし、0になれば
+	 *			情報をすべて破棄するようなコードが書かれていたが、
+	 *			GC を利用するようになってからそれは無くなった。
+	 */
 	static void unregister_info();
 
-	//! @brief		全てのシングルトンを初期化する
-	//! @note		この間に発生した例外は呼び出し元で捕捉できる
+	/**
+	 * 全てのシングルトンを初期化する
+	 * @note	この間に発生した例外は呼び出し元で捕捉できる
+	 */
 	static void init_all();
 
-	//! @brief		全てのシングルトンへの参照を切る
-	//! @note		これによりすべてのシングルトンが消滅する保証はない。
-	//!				他の場所でこのシングルトンオブジェクトへの参照が残っていた場合は
-	//!				その参照が無くなるまでそのシングルトンオブジェクトおよびそれが
-	//!				依存しているシングルトンオブジェクトは消滅しないままとなる。
-	//!				disconnect関数の呼び出しは、register_disconnector を呼び出した順とは
-	//!				逆順となる。
+	/**
+	 * 全てのシングルトンへの参照を切る
+	 * @note	これによりすべてのシングルトンが消滅する保証はない。
+	 *			他の場所でこのシングルトンオブジェクトへの参照が残っていた場合は
+	 *			その参照が無くなるまでそのシングルトンオブジェクトおよびそれが
+	 *			依存しているシングルトンオブジェクトは消滅しないままとなる。
+	 *			disconnect関数の呼び出しは、register_disconnector を呼び出した順とは
+	 *			逆順となる。
+	 */
 	static void disconnect_all();
 
-	//! @brief		削除されずに残っているオブジェクトを標準エラー出力に表示する
+	/**
+	 * 削除されずに残っているオブジェクトを標準エラー出力に表示する
+	 */
 	static void report_alive_objects();
 
-	//! @brief		クリティカルセクションオブジェクトを得る
+	/**
+	 * クリティカルセクションオブジェクトを得る
+	 */
 	static tCriticalSection & GetCS() { return *CS; }
 
-	//! @brief		ダミーのクリティカルセクションオブジェクトを得る
+	/**
+	 * ダミーのクリティカルセクションオブジェクトを得る
+	 */
 	static tCriticalSection & GetDummyCS() { return *DummyCS; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief  シングルトンオブジェクト用クラス
-//! @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
-//!			すべてのシングルトンクラスは同時に tCollectee のサブクラスとなり、
-//!			つまり GC reachable である。
-//!			destruct という仮想関数があり、これが
-//!			singleton_manager::disconnect_all の時点で呼ばれる事になっているので
-//!			必要な終了処理などはこのタイミングで行うこと。destruct の規定の動作は
-//!			delete this である。つまり、一応 singleton_manager::disconnect_all
-//!			が呼ばれる以上はデストラクタが呼ばれると仮定して良い。
-//!			ただし、instance() で得たポインタが有効なのは
-//!			singleton_manager::disconnect_all が呼ばれるまでの間であることには
-//!			注意しなければならない。
-//---------------------------------------------------------------------------
+/**
+ * シングルトンオブジェクト用クラス
+ * @note	テンプレート引数の最初の引数はシングルトンとなるべきクラス。
+ *			すべてのシングルトンクラスは同時に tCollectee のサブクラスとなり、
+ *			つまり GC reachable である。
+ *			destruct という仮想関数があり、これが
+ *			singleton_manager::disconnect_all の時点で呼ばれる事になっているので
+ *			必要な終了処理などはこのタイミングで行うこと。destruct の規定の動作は
+ *			delete this である。つまり、一応 singleton_manager::disconnect_all
+ *			が呼ばれる以上はデストラクタが呼ばれると仮定して良い。
+ *			ただし、instance() で得たポインタが有効なのは
+ *			singleton_manager::disconnect_all が呼ばれるまでの間であることには
+ *			注意しなければならない。
+ */
 template <typename T>
 class singleton_base : public tCollectee
 {
 	singleton_base(const singleton_base &); //!< non-copyable
 	void operator = (const singleton_base &); //!< non-copyable
 
-	//! @brief シングルトンクラスをマネージャに登録するための構造体
-	//! @note
-	//! この構造体は static 領域に配置され、main 関数よりも前に作成される。
-	//! コンストラクタでは singleton_manager::register_info() が呼ばれ、
-	//! シングルトンクラスに関する情報が singleton_manager の vector に登録される。
-	//! この中にはシングルトンインスタンスを作成するための関数へのポインタも
-	//! 含まれており、singleton_manager::init_all() の呼び出しで全ての
-	//! シングルトンインスタンスが作成されることを保証する。
-	//! もしシングルトンインスタンスの構築時に発生する例外を捕捉したいならば、
-	//! init_all() を呼び出す際に捕捉することができる。
-	//! manual_start クラスを作成すると、そのシングルトン
-	//! クラスが singleton_manager::init_all() の呼び出しではなく、実際に必要と
-	//! なったとき (初回の instance() が呼ばれたときあるいは depends_on クラスの
-	//! オブジェクトが作成されたとき) に初めて作成される。
+	/**
+	 * シングルトンクラスをマネージャに登録するための構造体
+	 * この構造体は static 領域に配置され、main 関数よりも前に作成される。
+	 * コンストラクタでは singleton_manager::register_info() が呼ばれ、
+	 * シングルトンクラスに関する情報が singleton_manager の vector に登録される。
+	 * この中にはシングルトンインスタンスを作成するための関数へのポインタも
+	 * 含まれており、singleton_manager::init_all() の呼び出しで全ての
+	 * シングルトンインスタンスが作成されることを保証する。
+	 * もしシングルトンインスタンスの構築時に発生する例外を捕捉したいならば、
+	 * init_all() を呼び出す際に捕捉することができる。
+	 * manual_start クラスを作成すると、そのシングルトン
+	 * クラスが singleton_manager::init_all() の呼び出しではなく、実際に必要と
+	 * なったとき (初回の instance() が呼ばれたときあるいは depends_on クラスの
+	 * オブジェクトが作成されたとき) に初めて作成される。
+	 */
 	struct object_registerer
 	{
-		//! @brief コンストラクタ
+		/**
+		 * コンストラクタ
+		 */
 		object_registerer()
 		{
 			singleton_manager::register_info_t info;
@@ -187,21 +211,31 @@ class singleton_base : public tCollectee
 
 			singleton_manager::register_info(info);
 		}
-		//! @brief デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~object_registerer() { singleton_manager::unregister_info(); }
-		//! @brief このクラスが最適化で消されないようにするためのダミー
+		/**
+		 * このクラスが最適化で消されないようにするためのダミー
+		 */
 		inline void do_nothing() const { }
 	};
 	static object_registerer register_object; //!< object_registerer のstatic変数
 
 
-	//! @brief オブジェクトインスタンス
+	/**
+	 * オブジェクトインスタンス
+	 */
 	static T * volatile object_instance;
 
-	//! @brief	オブジェクトが消滅したかどうか
+	/**
+	 * オブジェクトが消滅したかどうか
+	 */
 	static bool object_shutdown;
 
-	//! @brief オブジェクトへの参照を切る
+	/**
+	 * オブジェクトへの参照を切る
+	 */
 	static void disconnect()
 	{
 		fprintf(stderr, "disconnecting %s\n", get_name());
@@ -216,18 +250,24 @@ class singleton_base : public tCollectee
 		}
 	}
 
-	//! @brief	オブジェクトの消滅を行う仮想関数(下位クラスでオーバーライドすること)
-	//! @note	デフォルトでは delete this する
+	/**
+	 * オブジェクトの消滅を行う仮想関数(下位クラスでオーバーライドすること)
+	 * @note	デフォルトでは delete this する
+	 */
 	virtual void destruct() {delete this;}
 
-	//! @brief クラス名を得る
+	/**
+	 * クラス名を得る
+	 */
 	static const char * get_name()
 	{
 		return Demangle(typeid(T).name());
 	}
 
 protected:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	singleton_base()
 	{
 		register_object.do_nothing();
@@ -235,17 +275,23 @@ protected:
 			// register_object が作成されることを確実にする
 	}
 
-	//! @brief	デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	virtual ~singleton_base() {;}
 
 private:
-	//! @brief	object_instance に対して値を書き込む
+	/**
+	 * object_instance に対して値を書き込む
+	 */
 	RISSE_NOINLINE static void set_object_instance(T * v)
 	{
 		object_instance = v;
 	}
 
-	//! @brief	オブジェクトが存在することを確かにする (内部関数)
+	/**
+	 * オブジェクトが存在することを確かにする (内部関数)
+	 */
 	RISSE_NOINLINE static void make_instance()
 	{
 		/*
@@ -298,13 +344,14 @@ private:
 	}
 
 public:
-	//! @brief オブジェクトが存在することを確かにする
-	//! @note
-	//! このクラスのコンストラクタははじめて ensure() が呼ばれる際に作成される。
-	//! この際、マネージャに disconnect メソッドを登録する。
-	//! この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
-	//! disconnect をこれとは逆順に呼ぶことで依存関係を保ったまま destruct の
-	//! 呼び出しを行おうとする。
+	/**
+	 * オブジェクトが存在することを確かにする
+	 * このクラスのコンストラクタははじめて ensure() が呼ばれる際に作成される。
+	 * この際、マネージャに disconnect メソッドを登録する。
+	 * この関数が呼ばれるのは必ず依存先→依存元の順番となるため、マネージャは
+	 * disconnect をこれとは逆順に呼ぶことで依存関係を保ったまま destruct の
+	 * 呼び出しを行おうとする。
+	 */
 	static void ensure()
 	{
 		if(!object_instance)
@@ -313,33 +360,38 @@ public:
 		}
 	}
 
-	//! @brief シングルトンオブジェクトのインスタンスを返す
-	//! @note	シングルトンインスタンスがすでに消滅している場合は NULL が帰るので注意
+	/**
+	 * シングルトンオブジェクトのインスタンスを返す
+	 * @note	シングルトンインスタンスがすでに消滅している場合は NULL が帰るので注意
+	 */
 	static T* instance()
 	{
 		ensure();
 		return object_instance;
 	}
 
-	//! @brief オブジェクトが有効かどうかを得る
-	//! @note
-	//! 当然ながらこの関数が呼ばれた時点の状態を返す。
-	//! 次の瞬間にオブジェクトがいまだ有効かどうかは保証がない。
-	//! 次の瞬間にオブジェクトが無効になる可能性があるのは、
-	//! 次の瞬間までに singleton_manager::disconnect_all が
-	//! 呼ばれた場合だけなのであまり考えなくてよいかもしれない
+	/**
+	 * オブジェクトが有効かどうかを得る
+	 * 当然ながらこの関数が呼ばれた時点の状態を返す。
+	 * 次の瞬間にオブジェクトがいまだ有効かどうかは保証がない。
+	 * 次の瞬間にオブジェクトが無効になる可能性があるのは、
+	 * 次の瞬間までに singleton_manager::disconnect_all が
+	 * 呼ばれた場合だけなのであまり考えなくてよいかもしれない
+	 */
 	static bool alive()
 	{
 		return object_instance;
 	}
 
-	//! @brief	シングルトン機構のロック
-	//! @note	これが存在する限りは、このシングルトンに関する
-	//!			生成や消滅が行われないことを保証する。
-	//!			この中で instance() を用いて得たインスタンスは
-	//!			これを抜けるまで消滅しない。ただし、現バージョンでは
-	//!			このシングルトンに対してのみではなく、すべてのシングルトン
-	//!			インスタンスに対してロックを行ってしまうので注意。
+	/**
+	 * シングルトン機構のロック
+	 * @note	これが存在する限りは、このシングルトンに関する
+	 *			生成や消滅が行われないことを保証する。
+	 *			この中で instance() を用いて得たインスタンスは
+	 *			これを抜けるまで消滅しない。ただし、現バージョンでは
+	 *			このシングルトンに対してのみではなく、すべてのシングルトン
+	 *			インスタンスに対してロックを行ってしまうので注意。
+	 */
 	class tLocker
 	{
 		tCriticalSection::tLocker lock;
@@ -358,10 +410,10 @@ bool singleton_base<T>::object_shutdown = false;
 
 
 //---------------------------------------------------------------------------
-//! @brief  シングルトン用依存関係定義テンプレート
-//! @note
-//! 特定のシングルトンクラスに依存していることを表すためにこれを継承させる。例を参照。
-//---------------------------------------------------------------------------
+/**
+ * シングルトン用依存関係定義テンプレート
+ * 特定のシングルトンクラスに依存していることを表すためにこれを継承させる。例を参照。
+ */
 template <typename T>
 class depends_on
 {
@@ -369,28 +421,34 @@ class depends_on
 public:
 	depends_on() : __referrer_object(singleton_base<T>::instance()) {;}
 
-	//! @brief オブジェクトのインスタンスを得る
+	/**
+	 * オブジェクトのインスタンスを得る
+	 */
 	T* depend_instance() { return __referrer_object; }
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief  手動起動のシングルトンを表すためのテンプレートクラス
-//! @note
-//! このシングルトンは手動起動であることを表すためにこれを継承させる。例を参照。
-//---------------------------------------------------------------------------
+/**
+ * 手動起動のシングルトンを表すためのテンプレートクラス
+ * このシングルトンは手動起動であることを表すためにこれを継承させる。例を参照。
+ */
 template <typename T>
 class manual_start
 {
 	struct manual_object_registerer
 	{
-		//! @brief コンストラクタ
+		/**
+		 * コンストラクタ
+		 */
 		manual_object_registerer()
 		{
 			singleton_manager::register_manual_start(&singleton_base<T>::ensure);
 		}
-		//! @brief このクラスが最適化で消されないようにするためのダミー
+		/**
+		 * このクラスが最適化で消されないようにするためのダミー
+		 */
 		inline void do_nothing() const { }
 	};
 	static manual_object_registerer manual_register_object; //!< manual_object_registerer のstatic変数

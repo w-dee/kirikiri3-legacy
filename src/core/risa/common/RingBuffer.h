@@ -29,10 +29,11 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		固定長リングバッファの実装
-//! @note		T のコンストラクタやデストラクタは呼び出されない。
-//!				コンストラクタやデストラクタが必要な物は扱うことが出来ない
-//---------------------------------------------------------------------------
+/**
+ * 固定長リングバッファの実装
+ * @note	T のコンストラクタやデストラクタは呼び出されない。
+ *			コンストラクタやデストラクタが必要な物は扱うことが出来ない
+ */
 template <typename T>
 class tRingBuffer
 #ifndef RISA_RINGBUFFER_NO_GC
@@ -46,7 +47,9 @@ class tRingBuffer
 	size_t DataSize; //!< バッファに入っているデータのサイズ
 
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tRingBuffer(size_t size)
 	{
 		Size = size;
@@ -66,41 +69,55 @@ public:
 	}
 
 #ifdef RISA_RINGBUFFER_NO_GC
-	//! @brief デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tRingBuffer()
 	{
 		free(Buffer);
 	}
 #endif
 
-	//! @brief	サイズを得る
+	/**
+	 * サイズを得る
+	 */
 	size_t GetSize() { return Size; }
 
-	//! @brief	書き込み位置を得る
+	/**
+	 * 書き込み位置を得る
+	 */
 	size_t GetWritePos() { return WritePos; }
 
-	//! @brief	読み込み位置を得る
+	/**
+	 * 読み込み位置を得る
+	 */
 	size_t GetReadPos() { return ReadPos; }
 
-	//! @brief	バッファに入っているデータのサイズを得る
+	/**
+	 * バッファに入っているデータのサイズを得る
+	 */
 	size_t GetDataSize() { return DataSize; }
 
-	//! @brief	バッファの空き容量を得る
+	/**
+	 * バッファの空き容量を得る
+	 */
 	size_t GetFreeSize() { return Size - DataSize; }
 
-	//! @brief	バッファから読み込むためのポインタを得る
-	//! @param	readsize 読み込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
-	//! @param	p1		ブロック1の先頭へのポインタを格納するための変数
-	//! @param	p1size	p1の表すブロックのサイズ
-	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
-	//! @param	p2size	p2の表すブロックのサイズ(0があり得る)
-	//! @param	offset	ReadPos に加算されるオフセット
-	//! @note	環状バッファといっても、実際はリニアな領域にバッファが確保されている。
-	//!			そのため、 ReadPos + readsize がバッファの終端を超えている場合、得たい
-	//!			ブロックは２つに分断されることになる。
-	//!			このメソッドは、readsizeが実際にバッファに入っているデータのサイズ以下であるか
-	//!			などのチェックはいっさい行わない。事前に GetDataSize を調べ、読み込みたい
-	//!			サイズが実際にバッファにあるかどうかをチェックすること。
+	/**
+	 * バッファから読み込むためのポインタを得る
+	 * @param readsize	読み込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
+	 * @param p1		ブロック1の先頭へのポインタを格納するための変数
+	 * @param p1size	p1の表すブロックのサイズ
+	 * @param p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
+	 * @param p2size	p2の表すブロックのサイズ(0があり得る)
+	 * @param offset	ReadPos に加算されるオフセット
+	 * @note	環状バッファといっても、実際はリニアな領域にバッファが確保されている。
+	 *			そのため、 ReadPos + readsize がバッファの終端を超えている場合、得たい
+	 *			ブロックは２つに分断されることになる。
+	 *			このメソッドは、readsizeが実際にバッファに入っているデータのサイズ以下であるか
+	 *			などのチェックはいっさい行わない。事前に GetDataSize を調べ、読み込みたい
+	 *			サイズが実際にバッファにあるかどうかをチェックすること。
+	 */
 	void GetReadPointer(size_t readsize,
 						const T * & p1, size_t &p1size,
 						const T * & p2, size_t &p2size,
@@ -128,10 +145,12 @@ public:
 		}
 	}
 
-	//! @brief	読み込みポインタを進める
-	//! @param	advance		進める要素数
-	//! @note	このメソッドは実際に advance < GetDataSize() であることを確認しない。
-	//!			必要ならば呼び出し側でチェックすること。
+	/**
+	 * 読み込みポインタを進める
+	 * @param advance	進める要素数
+	 * @note	このメソッドは実際に advance < GetDataSize() であることを確認しない。
+	 *			必要ならば呼び出し側でチェックすること。
+	 */
 	void AdvanceReadPos(size_t advance = 1)
 	{
 		ReadPos += advance;
@@ -139,21 +158,25 @@ public:
 		DataSize -= advance;
 	}
 
-	//! @brief	最初の要素を返す
-	//! @return	最初の要素への参照
-	//! @note	最初の要素への参照が帰ってくる。要素がバッファ内に無いときは無効な要素
-	//!			(アクセスできない要素)が帰ってくるので、事前にバッファ内に要素が1つ以上
-	//!			存在することを確認すること。このメソッドは読み込みポインタを移動しない。
+	/**
+	 * 最初の要素を返す
+	 * @return	最初の要素への参照
+	 * @note	最初の要素への参照が帰ってくる。要素がバッファ内に無いときは無効な要素
+	 *			(アクセスできない要素)が帰ってくるので、事前にバッファ内に要素が1つ以上
+	 *			存在することを確認すること。このメソッドは読み込みポインタを移動しない。
+	 */
 	const T & GetFirst() const
 	{
 		size_t pos = ReadPos;
 		return Buffer[pos];
 	}
 
-	//! @brief	n番目の要素を返す
-	//! @return	n番目の要素への参照
-	//! @note	n番目の要素への参照が帰ってくる。要素がバッファ内に無いときや範囲外の時
-	//!			の動作は未定義である。このメソッドは読み込みポインタを移動しない。
+	/**
+	 * n番目の要素を返す
+	 * @return	n番目の要素への参照
+	 * @note	n番目の要素への参照が帰ってくる。要素がバッファ内に無いときや範囲外の時
+	 *			の動作は未定義である。このメソッドは読み込みポインタを移動しない。
+	 */
 	const T & GetAt(size_t n) const
 	{
 		size_t pos = ReadPos + n;
@@ -161,14 +184,16 @@ public:
 		return Buffer[pos];
 	}
 
-	//! @brief	バッファに書き込むためのポインタを得る
-	//! @param	writesize 書き込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
-	//! @param	p1		ブロック1の先頭へのポインタを格納するための変数
-	//! @param	p1size	p1の表すブロックのサイズ
-	//! @param	p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
-	//! @param	p2size	p2の表すブロックのサイズ(0があり得る)
-	//! @param	offset	WritePos に加算されるオフセット
-	//! @note	GetReadPointerの説明も参照のこと
+	/**
+	 * バッファに書き込むためのポインタを得る
+	 * @param writesize	書き込みたいデータ数 ( 1 以上の整数; 0 を渡さないこと )
+	 * @param p1		ブロック1の先頭へのポインタを格納するための変数
+	 * @param p1size	p1の表すブロックのサイズ
+	 * @param p2		ブロック2の先頭へのポインタを格納するための変数(NULLがあり得る)
+	 * @param p2size	p2の表すブロックのサイズ(0があり得る)
+	 * @param offset	WritePos に加算されるオフセット
+	 * @note	GetReadPointerの説明も参照のこと
+	 */
 	void GetWritePointer(size_t writesize,
 						T * & p1, size_t &p1size,
 						T * & p2, size_t &p2size,
@@ -196,10 +221,12 @@ public:
 		}
 	}
 
-	//! @brief	書き込みポインタを進める
-	//! @param	advance		進める要素数
-	//! @note	このメソッドは実際に advance < GetFreeSize() であることを確認しない。
-	//!			必要ならば呼び出し側でチェックすること。
+	/**
+	 * 書き込みポインタを進める
+	 * @param advance	進める要素数
+	 * @note	このメソッドは実際に advance < GetFreeSize() であることを確認しない。
+	 *			必要ならば呼び出し側でチェックすること。
+	 */
 	void AdvanceWritePos(size_t advance = 1)
 	{
 		WritePos += advance;
@@ -207,9 +234,11 @@ public:
 		DataSize += advance;
 	}
 
-	//! @brief	書き込みポインタを進め、バッファがあふれたら先頭を捨てる
-	//! @param	advance		進める要素数
-	//! @note	AdvanceWritePos と異なり、バッファがあふれたら、データの先頭を捨てる。
+	/**
+	 * 書き込みポインタを進め、バッファがあふれたら先頭を捨てる
+	 * @param advance	進める要素数
+	 * @note	AdvanceWritePos と異なり、バッファがあふれたら、データの先頭を捨てる。
+	 */
 	void AdvanceWritePosWithDiscard(size_t advance = 1)
 	{
 		WritePos += advance;
@@ -221,11 +250,13 @@ public:
 		}
 	}
 
-	//! @brief	書き込み位置の要素を返す
-	//! @return	書き込み位置の要素への参照
-	//! @note	書き込み位置の要素への参照が帰ってくる。このメソッドはバッファに空き
-	//!			があるかどうかのチェックは行わないので注意すること。
-	//!			このメソッドはバッファの書き込み位置を移動しない。
+	/**
+	 * 書き込み位置の要素を返す
+	 * @return	書き込み位置の要素への参照
+	 * @note	書き込み位置の要素への参照が帰ってくる。このメソッドはバッファに空き
+	 *			があるかどうかのチェックは行わないので注意すること。
+	 *			このメソッドはバッファの書き込み位置を移動しない。
+	 */
 	T & GetLast()
 	{
 		return Buffer[WritePos];

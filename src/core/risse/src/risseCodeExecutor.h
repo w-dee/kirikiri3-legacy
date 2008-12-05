@@ -23,33 +23,40 @@ namespace Risse
 class tCodeBlock;
 class tScriptEngine;
 //---------------------------------------------------------------------------
-//! @brief		バイトコード実行クラスの基底クラス
-//---------------------------------------------------------------------------
+/**
+ * バイトコード実行クラスの基底クラス
+ */
 class tCodeExecutor : public tCollectee
 {
 protected:
 	tCodeBlock * CodeBlock; //!< コードブロック
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		cb		コードブロック
+	/**
+	 * コンストラクタ
+	 * @param cb	コードブロック
+	 */
 	tCodeExecutor(tCodeBlock *cb) { CodeBlock = cb; }
 
-	//! @brief		デストラクタ
-	//! @note		このデストラクタは呼ばれないかもしれない
+	/**
+	 * デストラクタ
+	 * @note	このデストラクタは呼ばれないかもしれない
+	 */
 	virtual ~tCodeExecutor() {;}
 
-	//! @brief		コードを実行する
-	//! @brief		args	引数
-	//! @param		global	メソッドが実行されるべきパッケージグローバル
-	//!						(NULL=パッケージグローバルを指定しない場合)
-	//! @param		This	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		frame	メソッドが実行されるべきスタックフレーム
-	//!						(NULL=スタックフレームを指定しない場合)
-	//! @param		shared	メソッドが実行されるべき共有フレーム
-	//!						(NULL=共有フレームを指定しない場合)
-	//! @param		result		戻りの値を格納する先
+	/**
+	 * コードを実行する
+	 * args	引数
+	 * @param global	メソッドが実行されるべきパッケージグローバル
+	 *					(NULL=パッケージグローバルを指定しない場合)
+	 * @param This		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @param frame		メソッドが実行されるべきスタックフレーム
+	 *					(NULL=スタックフレームを指定しない場合)
+	 * @param shared	メソッドが実行されるべき共有フレーム
+	 *					(NULL=共有フレームを指定しない場合)
+	 * @param result	戻りの値を格納する先
+	 */
 	virtual void Execute(
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & global = tVariant::GetNullObject(),
@@ -62,13 +69,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		バイトコードインタプリタ
-//---------------------------------------------------------------------------
+/**
+ * バイトコードインタプリタ
+ */
 class tCodeInterpreter : public tCodeExecutor
 {
 public:
-	//! @brief		コンストラクタ
-	//! @param		cb		コードブロック
+	/**
+	 * コンストラクタ
+	 * @param cb	コードブロック
+	 */
 	tCodeInterpreter(tCodeBlock *cb);
 
 
@@ -84,11 +94,12 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ocTryFuncCall の戻り用オブジェクト
-//! @note		このオブジェクトはocTryFuncCallとocCatchBranchの間のみ存在する
-//!				(ocCatchBranchはこのオブジェクトが入ったレジスタをocTryFuncCall
-//!				の戻り値で置き換えてしまう)
-//---------------------------------------------------------------------------
+/**
+ * ocTryFuncCall の戻り用オブジェクト
+ * @note	このオブジェクトはocTryFuncCallとocCatchBranchの間のみ存在する
+ *			(ocCatchBranchはこのオブジェクトが入ったレジスタをocTryFuncCall
+ *			の戻り値で置き換えてしまう)
+ */
 class tTryFuncCallReturnObject : public tObjectInterface
 {
 private:
@@ -96,22 +107,30 @@ private:
 	bool Raised; // 例外が発生したかどうか
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		value		例外/戻り値の値
-	//! @param		raised		例外が発生したかどうか
+	/**
+	 * コンストラクタ
+	 * @param value		例外/戻り値の値
+	 * @param raised	例外が発生したかどうか
+	 */
 	tTryFuncCallReturnObject(const tVariant &value, bool raised)
 		{ Value = value; Raised = raised; }
 
-	//! @brief		デストラクタ
-	//! @note		このデストラクタは呼ばれないかもしれない
+	/**
+	 * デストラクタ
+	 * @note	このデストラクタは呼ばれないかもしれない
+	 */
 	virtual ~tTryFuncCallReturnObject() {;}
 
-	//! @brief		例外/戻り値の値を得る
-	//! @return		例外/戻り値の値
+	/**
+	 * 例外/戻り値の値を得る
+	 * @return	例外/戻り値の値
+	 */
 	const tVariant & GetValue() const { return Value; }
 
-	//! @brief		例外が発生したかどうかを得る
-	//! @return		例外が発生したかどうか
+	/**
+	 * 例外が発生したかどうかを得る
+	 * @return	例外が発生したかどうか
+	 */
 	bool GetRaised() const { return Raised; }
 
 private:

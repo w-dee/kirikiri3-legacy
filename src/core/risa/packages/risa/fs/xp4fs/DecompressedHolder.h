@@ -21,8 +21,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//!@brief		圧縮ストリームを展開された状態で保持するオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 圧縮ストリームを展開された状態で保持するオブジェクト
+ */
 class tDecompressedHolder
 {
 private:
@@ -37,34 +38,42 @@ public:
 		dhmZLib // zlib 圧縮
 	};
 
-	//! @brief		コンストラクタ(メモリ上のデータを展開する場合)
-	//! @param		method 圧縮メソッド
-	//! @param		indata 入力データ
-	//! @param		insize 入力データのサイズ
-	//! @param		uncomp_size 入力データを展開した際のサイズ
+	/**
+	 * コンストラクタ(メモリ上のデータを展開する場合)
+	 * @param method		圧縮メソッド
+	 * @param indata		入力データ
+	 * @param insize		入力データのサイズ
+	 * @param uncomp_size	入力データを展開した際のサイズ
+	 */
 	tDecompressedHolder(tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size);
 
-	//! @brief		コンストラクタ(ストリーム上のデータを展開する場合)
-	//! @param		method 圧縮メソッド
-	//! @param		indata 入力ストリーム
-	//! @param		insize 入力データのサイズ
-	//! @param		uncomp_size 入力データを展開した際のサイズ
+	/**
+	 * コンストラクタ(ストリーム上のデータを展開する場合)
+	 * @param method		圧縮メソッド
+	 * @param indata		入力ストリーム
+	 * @param insize		入力データのサイズ
+	 * @param uncomp_size	入力データを展開した際のサイズ
+	 */
 	tDecompressedHolder(tMethod method, tBinaryStream * instream, risse_size insize, 
 		risse_size uncomp_size);
 
-	//!@brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tDecompressedHolder();
 
 	risse_size GetSize() const { return Size; } //!< サイズを返す
 	risse_uint8 * GetData() const { return Data; } //!< データブロックを返す
 
 private:
-	//! @brief		メモリ上のデータを展開する
-	//! @param		method 圧縮メソッド
-	//! @param		indata 入力データ
-	//! @param		insize 入力データのサイズ
-	//! @param		uncomp_size 入力データを展開した際のサイズ
+	/**
+	 * メモリ上のデータを展開する
+	 * @param method		圧縮メソッド
+	 * @param indata		入力データ
+	 * @param insize		入力データのサイズ
+	 * @param uncomp_size	入力データを展開した際のサイズ
+	 */
 	void Decompress(tMethod method, const risse_uint8 * indata, risse_size insize, 
 		risse_size uncomp_size);
 };

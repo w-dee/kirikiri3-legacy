@@ -24,18 +24,23 @@ namespace Risse
 {
 class tCoroutine;
 //---------------------------------------------------------------------------
-//! @brief		"Coroutine" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Coroutine" クラスのインスタンス用 C++クラス
+ */
 class tCoroutineInstance : public tObjectBase
 {
 private:
 	tCoroutine * Coroutine; //!< コルーチンの実装
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tCoroutineInstance();
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tCoroutineInstance() {;}
 
 public: // Risse用メソッドなど
@@ -51,21 +56,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Coroutine" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Coroutine" クラス
+ */
 class tCoroutineClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tCoroutineClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:
@@ -74,18 +86,23 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"CoroutineException" クラス
-//---------------------------------------------------------------------------
+/**
+ * "CoroutineException" クラス
+ */
 class tCoroutineExceptionClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tCoroutineExceptionClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
 public: // Risse用メソッドなど
@@ -93,35 +110,51 @@ public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 
 public:
-	//! @brief		「コルーチンは既に終了している」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは既に終了している」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineHasAlreadyExited(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは既に終了している」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは既に終了している」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineHasAlreadyExited() RISSE_NORETURN
 		{ ThrowCoroutineHasAlreadyExited(NULL); }
 
-	//! @brief		「コルーチンはまだ開始していない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンはまだ開始していない」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineHasNotStartedYet(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンはまだ開始していない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンはまだ開始していない」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineHasNotStartedYet() RISSE_NORETURN
 		{ ThrowCoroutineHasNotStartedYet(NULL); }
 
-	//! @brief		「コルーチンは実行中でない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは実行中でない」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineIsNotRunning(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは実行中でない」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは実行中でない」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineIsNotRunning() RISSE_NORETURN
 		{ ThrowCoroutineIsNotRunning(NULL); }
 
-	//! @brief		「コルーチンは実行中」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは実行中」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineIsRunning(tScriptEngine * engine) RISSE_NORETURN;
-	//! @brief		「コルーチンは実行中」例外を発生
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * 「コルーチンは実行中」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	static void ThrowCoroutineIsRunning() RISSE_NORETURN
 		{ ThrowCoroutineIsRunning(NULL); }
 
@@ -131,21 +164,26 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"coroutine" パッケージイニシャライザ
-//---------------------------------------------------------------------------
+/**
+ * "coroutine" パッケージイニシャライザ
+ */
 class tCoroutinePackageInitializer : public tBuiltinPackageInitializer
 {
 public:
 	tCoroutineClass * CoroutineClass;
 	tCoroutineExceptionClass * CoroutineExceptionClass;
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tCoroutinePackageInitializer();
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	virtual void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global);
 };

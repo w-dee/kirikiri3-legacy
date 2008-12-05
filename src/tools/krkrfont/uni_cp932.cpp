@@ -19,8 +19,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		UNICODEとShiftJISコードの組を表す型
-//---------------------------------------------------------------------------
+/**
+ * UNICODEとShiftJISコードの組を表す型
+ */
 struct tUnicodeAndSJISPair
 {
 	risse_uint16 Unicode;
@@ -29,8 +30,9 @@ struct tUnicodeAndSJISPair
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		UNICODEとShiftJISコードの組(UNICODEでソート済み)
-//---------------------------------------------------------------------------
+/**
+ * UNICODEとShiftJISコードの組(UNICODEでソート済み)
+ */
 static const tUnicodeAndSJISPair UnicodeAndSJISPair[] = {
 { 0x0000U, 0x0000U },{ 0x0001U, 0x0001U },{ 0x0002U, 0x0002U },
 { 0x0003U, 0x0003U },{ 0x0004U, 0x0004U },{ 0x0005U, 0x0005U },
@@ -2540,20 +2542,22 @@ static const tUnicodeAndSJISPair UnicodeAndSJISPair[] = {
 { 0xFFE4U, 0xFA55U },{ 0xFFE5U, 0x818FU },};
 
 //---------------------------------------------------------------------------
-//! @brief		UNICODEとShiftJISコードの組の数
-//---------------------------------------------------------------------------
+/**
+ * UNICODEとShiftJISコードの組の数
+ */
 #define NumUnicodeAndSJISPair \
 	(sizeof(UnicodeAndSJISPair) / sizeof(UnicodeAndSJISPair[0]))
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		UNICODEをShiftJIS(CP932)に変換する
-//! @param		in 変換したい文字
-//! @return	変換されたShiftJIS文字(0=変換失敗)
-//! @note		ShiftJIS 文字は 16bit 数値で返される(実際の戻り値の型はrisse_uint)
-//! @note		が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は
-//! @note		ShiftJISコードがそのまま入る。
-//---------------------------------------------------------------------------
+/**
+ * UNICODEをShiftJIS(CP932)に変換する
+ * @param in	変換したい文字
+ * @return	変換されたShiftJIS文字(0=変換失敗)
+ * @note	ShiftJIS 文字は 16bit 数値で返される(実際の戻り値の型はrisse_uint)
+ * @note	が、いわゆる半角文字の場合は上位8ビットは0、いわゆる全角文字は
+ * @note	ShiftJISコードがそのまま入る。
+ */
 risse_uint UnicodeToSJIS(risse_char in)
 {
 	// UnicodeAndSJISPair に対して二分検索を行う

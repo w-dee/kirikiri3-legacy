@@ -42,8 +42,9 @@ namespace Risa {
 class tTimerConsumer;
 
 //---------------------------------------------------------------------------
-//! @brief		タイマーのタイミングを管理するクラス(スケジューラ)
-//---------------------------------------------------------------------------
+/**
+ * タイマーのタイミングを管理するクラス(スケジューラ)
+ */
 class tTimerScheduler : protected depends_on<tTickCount>,
 							public tThread
 {
@@ -56,42 +57,56 @@ class tTimerScheduler : protected depends_on<tTickCount>,
 	size_t NearestIndex; //!< もっとも時間的に近い位置にある Consumer のConsumers内におけるインデックス
 	volatile bool NearestInfoValid; //!< Nearest* のメンバの情報が有効かどうか
 	volatile bool NeedRescheduleOnPeriodChange;
-		//!< tTimerConsumer::SetNextTick内でReschedule()が呼ばれたときに
-		//!< 本当にRescheduleする必要があるかどうか
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTimerScheduler();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tTimerScheduler();
 
-	//! @brief		このオブジェクトを保護するクリティカルセクションを得る
-	//! @return		このオブジェクトを保護するクリティカルセクション
+	/**
+	 * このオブジェクトを保護するクリティカルセクションを得る
+	 * @return	このオブジェクトを保護するクリティカルセクション
+	 */
 	tCriticalSection & GetCS() { return CS; }
 
 private:
 	friend class tTimerConsumer;
 
-	//! @brief		consumerを登録する
-	//! @param		consumer コールバックを発生させるコンシューマオブジェクト
-	//! @note		すでにそのconsumerが登録されてるかどうかなどはチェックしない
+	/**
+	 * consumerを登録する
+	 * @param consumer	コールバックを発生させるコンシューマオブジェクト
+	 * @note	すでにそのconsumerが登録されてるかどうかなどはチェックしない
+	 */
 	void Register(tTimerConsumer * consumer);
 
-	//! @brief		consumerの登録を解除する
-	//! @param		consumer コールバックを発生させるコンシューマオブジェクト
-	//! @note		そのconsumerが見つからない場合は何もしない
+	/**
+	 * consumerの登録を解除する
+	 * @param consumer	コールバックを発生させるコンシューマオブジェクト
+	 * @note	そのconsumerが見つからない場合は何もしない
+	 */
 	void Unregister(tTimerConsumer * consumer);
 
-	//! @brief		スケジュールをやり直す
+	/**
+	 * スケジュールをやり直す
+	 */
 	void Reschedule();
 
-	//! @brief		もっとも近い位置にあるTickをもつConsumerを探す
+	/**
+	 * もっとも近い位置にあるTickをもつConsumerを探す
+	 */
 	void GetNearestInfo();
 
 protected:
-	//! @brief		スレッドのエントリーポイント
-	//! @return		スレッドの終了コード
+	/**
+	 * スレッドのエントリーポイント
+	 * @return	スレッドの終了コード
+	 */
 	void Execute();
 };
 //---------------------------------------------------------------------------
@@ -105,22 +120,27 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		タイマーのタイミング発生先となるクラス
-//! @note		SetEnabled(true) を行うと、このオブジェクトは tTimerScheduler
-//!				に登録され、OnPeriod が実行されるようになる。
-//!				SetEnabled(false) を行わない限り、tTimerScheduler がこのオブジェクトを
-//!				参照し続けるので開放されないので注意。
-//---------------------------------------------------------------------------
+/**
+ * タイマーのタイミング発生先となるクラス
+ * @note	SetEnabled(true) を行うと、このオブジェクトは tTimerScheduler
+ *			に登録され、OnPeriod が実行されるようになる。
+ *			SetEnabled(false) を行わない限り、tTimerScheduler がこのオブジェクトを
+ *			参照し続けるので開放されないので注意。
+ */
 class tTimerConsumer : public tCollectee
 {
 	tTimerScheduler * Owner;
 	risse_uint64 NextTick; // 次に OnPeriod を呼ぶべき絶対Tick
 	bool Enabled; //!< タイマーが有効かどうか
 protected:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTimerConsumer(tTimerScheduler * owner);
 
-	//! @brief		デストラクタ (おそらく呼ばれない)
+	/**
+	 * デストラクタ (おそらく呼ばれない)
+	 */
 	virtual ~tTimerConsumer() {;}
 public:
 	bool GetEnabled() const { return Enabled; } //!< タイマーが有効かどうかを返す
@@ -130,25 +150,29 @@ public:
 
 	tTimerScheduler * GetOwner() const { return Owner; } //!< Owner を得る
 
-	//! @brief		次にOnPeriodをコールバックすべき絶対tickを設定する
-	//! @param		nexttick 絶対TickCount (呼んで欲しくない場合はtTickCount::InvalidTickCount)
-	//! @note		nexttick が現在あるいはすでに過去だった場合は即座に OnPeriodが呼ばれる。
-	//! @note		ここでいう「絶対TickCount」とは tTickCount が返すようなTickCountのことである。
-	//!				たとえば5秒後にOnPeriodを呼びたいならば、
-	//!				SetNextTick(tTickCount::instance()->Get() + 5000) とする。
+	/**
+	 * 次にOnPeriodをコールバックすべき絶対tickを設定する
+	 * @param nexttick	絶対TickCount (呼んで欲しくない場合はtTickCount::InvalidTickCount)
+	 * @note	nexttick が現在あるいはすでに過去だった場合は即座に OnPeriodが呼ばれる。
+	 * @note	ここでいう「絶対TickCount」とは tTickCount が返すようなTickCountのことである。
+	 *			たとえば5秒後にOnPeriodを呼びたいならば、
+	 *			SetNextTick(tTickCount::instance()->Get() + 5000) とする。
+	 */
 	void SetNextTick(risse_uint64 nexttick);
 
-	//! @brief	指定されたTickCountに達したときに呼び出される
-	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
-	//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
-	//! @note	このメソッドはなるべくすぐに帰ること。
-	//!			このメソッドの実行中はスケジューラがlockされているので
-	//!			長時間の処理を行ってはならない。
-	//!			また、このメソッド内でこのオブジェクトを削除しないこと。
-	//! @note	OnPeriod内ではSetNextTickを使って次の絶対Tickを設定すること。
-	//!			さもないと、その絶対Tickに対して何度も(不特定回数) OnPeriod が呼ばれることになる。
-	//! @note	このメソッドはタイマ用スレッドから呼ばれる。必要であれば
-	//!			スレッド保護を行うこと
+	/**
+	 * 指定されたTickCountに達したときに呼び出される
+	 * @param scheduled_tick	GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
+	 * @param current_tick		この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
+	 * @note	このメソッドはなるべくすぐに帰ること。
+	 *			このメソッドの実行中はスケジューラがlockされているので
+	 *			長時間の処理を行ってはならない。
+	 *			また、このメソッド内でこのオブジェクトを削除しないこと。
+	 * @note	OnPeriod内ではSetNextTickを使って次の絶対Tickを設定すること。
+	 *			さもないと、その絶対Tickに対して何度も(不特定回数) OnPeriod が呼ばれることになる。
+	 * @note	このメソッドはタイマ用スレッドから呼ばれる。必要であれば
+	 *			スレッド保護を行うこと
+	 */
 	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick) = 0;
 };
 //---------------------------------------------------------------------------
@@ -158,46 +182,61 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		周期的なタイマーのタイミング発生先となるクラス
-//---------------------------------------------------------------------------
+/**
+ * 周期的なタイマーのタイミング発生先となるクラス
+ */
 class tPeriodicTimerConsumer : public tTimerConsumer
 {
 	risse_uint64 Interval; //!< タイマー周期
 	risse_uint64 ReferenceTick; //!< 周期の基準となるTick
 
 protected:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tPeriodicTimerConsumer(tTimerScheduler * owner);
 
-	//! @brief		デストラクタ (おそらく呼ばれない)
+	/**
+	 * デストラクタ (おそらく呼ばれない)
+	 */
 	virtual ~tPeriodicTimerConsumer() {;}
 
 public:
-	//! @brief		有効か無効かを設定する(オーバーライド)
-	//! @param		enabled 有効か無効か
+	/**
+	 * 有効か無効かを設定する(オーバーライド)
+	 * @param enabled	有効か無効か
+	 */
 	void SetEnabled(bool enabled);
 
 	risse_uint64 GetInterval() const { return Interval; } //!< タイマー周期を得る
 
-	//! @brief		タイマー周期を設定する
-	//! @param		interval タイマー周期
+	/**
+	 * タイマー周期を設定する
+	 * @param interval	タイマー周期
+	 */
 	void SetInterval(risse_uint64 interval);
 
-	//! @brief		タイマーをリセットする
+	/**
+	 * タイマーをリセットする
+	 */
 	void Reset();
 
 private:
-	//! @brief		時間原点をリセットし、このメソッドが呼ばれた時点に設定する
-	//! @param		force	通常、このメソッドはタイマが有効かどうかをチェックするが、force
-	//!						を指定すると強制的に有効である物と見なされる
+	/**
+	 * 時間原点をリセットし、このメソッドが呼ばれた時点に設定する
+	 * @param force	通常、このメソッドはタイマが有効かどうかをチェックするが、force
+	 *				を指定すると強制的に有効である物と見なされる
+	 */
 	void ResetInterval(bool force = false);
 
 public:
 
-	//! @brief		指定されたTickCountに達したときに呼び出される
-	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
-	//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
-	//! @note	このメソッドをオーバーライドしたら、このクラスのメソッドも呼ぶこと(そうしないと次のtickが設定されない)
+	/**
+	 * 指定されたTickCountに達したときに呼び出される
+	 * @param scheduled_tick	GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
+	 * @param current_tick		この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
+	 * @note	このメソッドをオーバーライドしたら、このクラスのメソッドも呼ぶこと(そうしないと次のtickが設定されない)
+	 */
 	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tScriptTimerConsumer
 
 };
@@ -220,14 +259,15 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントタイマースケジューラ
-//! @note		Risaのイベントシステムと協調して動作するスケジューラ。
-//!				素の tTimerScheduler/tTimerConsumer は マルチスレッド
-//!				で動作するので少々扱いづらいが、
-//!				イベントタイマーはイベントシステムを使って、イベントハンドラが
-//!				メインスレッドから呼ばれることを確実にするほか、いくつかの機能
-//!				のカプセル化も行う。
-//---------------------------------------------------------------------------
+/**
+ * イベントタイマースケジューラ
+ * @note	Risaのイベントシステムと協調して動作するスケジューラ。
+ *			素の tTimerScheduler/tTimerConsumer は マルチスレッド
+ *			で動作するので少々扱いづらいが、
+ *			イベントタイマーはイベントシステムを使って、イベントハンドラが
+ *			メインスレッドから呼ばれることを確実にするほか、いくつかの機能
+ *			のカプセル化も行う。
+ */
 class tEventTimerScheduler :
 				public tTimerScheduler,
 				public singleton_base<tEventTimerScheduler>, // このクラスはシングルトンオブジェクト
@@ -242,8 +282,9 @@ class tEventTimerScheduler :
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントタイマー(Risseの"Timer"クラスのインスタンス)
-//---------------------------------------------------------------------------
+/**
+ * イベントタイマー(Risseの"Timer"クラスのインスタンス)
+ */
 class tEventTimerConsumer :
 	public tEventSourceInstance,
 	public tPeriodicTimerConsumer,
@@ -258,37 +299,53 @@ class tEventTimerConsumer :
 	size_t QueueCount; //!< キューにたまっているイベントの数
 
 protected:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tEventTimerConsumer();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tEventTimerConsumer() {;}
 
 public:
-	//! @brief		有効か無効かを設定する(オーバーライド)
-	//! @param		enabled 有効か無効か
+	/**
+	 * 有効か無効かを設定する(オーバーライド)
+	 * @param enabled	有効か無効か
+	 */
 	void SetEnabled(bool enabled);
 
-	//! @brief		タイマー周期を設定する(オーバーライド)
-	//! @param		interval タイマー周期
+	/**
+	 * タイマー周期を設定する(オーバーライド)
+	 * @param interval	タイマー周期
+	 */
 	void SetInterval(risse_uint64 interval);
 
-	//! @brief		容量(一度にイベントキューにためることのできるイベントの数)を設定する
+	/**
+	 * 容量(一度にイベントキューにためることのできるイベントの数)を設定する
+	 */
 	void SetCapacity(size_t capa);
 
 	size_t GetCapacity() const { return Capacity; } //!< 容量を得る
 
 protected:
-	//! @brief		キューをクリアする
+	/**
+	 * キューをクリアする
+	 */
 	void ClearQueue();
 
-	//! @brief		指定されたTickCountに達したときに呼び出される
-	//! @param	scheduled_tick GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
-	//! @param	current_tick この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
+	/**
+	 * 指定されたTickCountに達したときに呼び出される
+	 * @param scheduled_tick	GetNextTick() が返した Tick (本来呼ばれるべき時点の絶対TickCount)
+	 * @param current_tick		この OnPeriod が呼ばれた時点でのtick カウント(実際に呼ばれた時点での絶対TickCount)
+	 */
 	virtual void OnPeriod(risse_uint64 scheduled_tick, risse_uint64 current_tick); // from tScriptTimerConsumer
 
-	//! @brief	イベントが配信されるとき
-	//! @param	info イベント情報
+	/**
+	 * イベントが配信されるとき
+	 * @param info	イベント情報
+	 */
 	virtual void OnEvent(tEventInfo * info); // from tEventDestination
 
 public:

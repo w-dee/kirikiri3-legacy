@@ -9,9 +9,10 @@
 //---------------------------------------------------------------------------
 //! @file
 //! @brief Win32 GDI 経由でのFreeType Face
-//! @note フォント名からフォントファイル名を得る動作がOSごとに異なるため、
-//! tFreeTypeFace もプラットフォームごとに異なった実装となる。
-//---------------------------------------------------------------------------
+/**
+ * @note	フォント名からフォントファイル名を得る動作がOSごとに異なるため、
+ *			tFreeTypeFace もプラットフォームごとに異なった実装となる。
+ */
 #include "../prec.h"
 #include "NativeFreeTypeDriver.h"
 
@@ -40,8 +41,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		tBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
-//---------------------------------------------------------------------------
+/**
+ * tBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
+ */
 class tFreeTypeFontEnumeraterHelper
 {
 private:
@@ -71,11 +73,12 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		flags	列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
-//! @param		encoding	エンコーディング (wxFontEncoding)
-//! @param		dest	格納先配列 (配列はクリアされる)
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param flags		列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
+ * @param encoding	エンコーディング (wxFontEncoding)
+ * @param dest		格納先配列 (配列はクリアされる)
+ */
 tFreeTypeFontEnumeraterHelper::tFreeTypeFontEnumeraterHelper(wxArrayString & dest,
 	risse_uint32 flags, wxFontEncoding encoding ) :
 		 Dest(dest), Flags(flags), Encoding(encoding)
@@ -85,8 +88,9 @@ tFreeTypeFontEnumeraterHelper::tFreeTypeFontEnumeraterHelper(wxArrayString & des
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tFreeTypeFontEnumeraterHelper::~tFreeTypeFontEnumeraterHelper()
 {
 }
@@ -94,8 +98,9 @@ tFreeTypeFontEnumeraterHelper::~tFreeTypeFontEnumeraterHelper()
 
 
 //---------------------------------------------------------------------------
-//! @brief		フォントを列挙する
-//---------------------------------------------------------------------------
+/**
+ * フォントを列挙する
+ */
 void tFreeTypeFontEnumeraterHelper::DoEnumerate()
 {
 	HDC refdc = GetDC(NULL); // ディスプレイの DC を参照元 DC として取得
@@ -133,12 +138,13 @@ void tFreeTypeFontEnumeraterHelper::DoEnumerate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		フォント列挙コールバック
-//! @param		lplf	LPLOGFONT
-//! @param		lptm	LPTEXTMETRIC
-//! @param		dwStyle	DWORD style
-//! @param		lParam	User-defined data
-//---------------------------------------------------------------------------
+/**
+ * フォント列挙コールバック
+ * @param lplf		LPLOGFONT
+ * @param lptm		LPTEXTMETRIC
+ * @param dwStyle	DWORD style
+ * @param lParam	User-defined data
+ */
 int CALLBACK tFreeTypeFontEnumeraterHelper::CallbackProc(
 			ENUMLOGFONTEX *lpelfe,    // pointer to logical-font data
 			NEWTEXTMETRICEX *lpntme,  // pointer to physical-font data
@@ -192,30 +198,33 @@ int CALLBACK tFreeTypeFontEnumeraterHelper::CallbackProc(
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tBaseFreeTypeFontDriver::tBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tBaseFreeTypeFontDriver::~tBaseFreeTypeFontDriver()
 {
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType フォントドライバで使用可能なフォントを列挙する
-//! @param		dest	格納先配列 (配列はクリアされる)
-//! @param		flags	列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
-//! @param		encoding	エンコーディング (wxFontEncoding)
-//! @note		encoding を文字列から変換するには wxFontMapper::CharsetToEncoding を
-//!				使うことができる。
-//!				flags に指定できるのは、RISA__FSF_FIXEDPITCH 、 RISA__FSF_NOVERTICAL のみ。
-//---------------------------------------------------------------------------
+/**
+ * FreeType フォントドライバで使用可能なフォントを列挙する
+ * @param dest		格納先配列 (配列はクリアされる)
+ * @param flags		列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
+ * @param encoding	エンコーディング (wxFontEncoding)
+ * @note	encoding を文字列から変換するには wxFontMapper::CharsetToEncoding を
+ *			使うことができる。
+ *			flags に指定できるのは、RISA__FSF_FIXEDPITCH 、 RISA__FSF_NOVERTICAL のみ。
+ */
 void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 		risse_uint32 flags, wxFontEncoding encoding)
 {

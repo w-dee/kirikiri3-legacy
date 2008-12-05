@@ -22,7 +22,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief	 デコーダインターフェース
+/**
+ * デコーダインターフェース
+ */
 /*! @note
 	一般的なデコーダの使用方法の流れは、
 	1. インスタンスを作成する
@@ -75,10 +77,11 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	 	デコーダファクトリ
-//! @note		Risa は 拡張子で音楽形式を判断する。ファクトリの登録は
-//!				tWaveDecoderFactoryManager を通して行うこと。
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリ
+ * @note	Risa は 拡張子で音楽形式を判断する。ファクトリの登録は
+ *			tWaveDecoderFactoryManager を通して行うこと。
+ */
 class tWaveDecoderFactory : public tCollectee
 {
 public:
@@ -90,32 +93,43 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	 	デコーダファクトリーマネージャ
-//---------------------------------------------------------------------------
+/**
+ * デコーダファクトリーマネージャ
+ */
 class tWaveDecoderFactoryManager : public singleton_base<tWaveDecoderFactoryManager>
 {
 	typedef gc_map<tString, tWaveDecoderFactory *>  tMap; //!< 拡張子→ファクトリのマップの型のtypedef
 	tMap Map; //!< 拡張子→ファクトリのマップ
 
 public:
-	//! @brief	 	コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWaveDecoderFactoryManager();
 
-	//! @brief	 	デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tWaveDecoderFactoryManager();
 
-	//! @brief	 	ファクトリを登録する
-	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
-	//! @param		factory		ファクトリ
+	/**
+	 * ファクトリを登録する
+	 * @param extension	拡張子 (小文字を使うこと;ドットも含む)
+	 * @param factory	ファクトリ
+	 */
 	void Register(const tString & extension, tWaveDecoderFactory * factory);
 
-	//! @brief	 	ファクトリの登録を解除する
-	//! @param		extension	拡張子 (小文字を使うこと;ドットも含む)
+	/**
+	 * ファクトリの登録を解除する
+	 * @param extension	拡張子 (小文字を使うこと;ドットも含む)
+	 */
 	void Unregister(const tString & extension);
 
-	//! @brief	 	デコーダを作成する
-	//! @param		filename ファイル名
-	//! @return		作成されたデコーダ
+	/**
+	 * デコーダを作成する
+	 * @param filename	ファイル名
+	 * @return	作成されたデコーダ
+	 */
 	tWaveDecoder * Create(const tString & filename);
 };
 //---------------------------------------------------------------------------

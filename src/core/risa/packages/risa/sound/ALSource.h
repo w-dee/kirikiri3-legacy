@@ -29,11 +29,12 @@ namespace Risa {
 
 class tALSource;
 //---------------------------------------------------------------------------
-//! @brief		監視用スレッド
-//! @note		監視用スレッドは、約50ms周期のコールバックをすべての
-//!				ソースに発生させる。ソースではいくつかポーリングを
-//!				行わなければならない場面でこのコールバックを利用する。
-//---------------------------------------------------------------------------
+/**
+ * 監視用スレッド
+ * @note	監視用スレッドは、約50ms周期のコールバックをすべての
+ *			ソースに発生させる。ソースではいくつかポーリングを
+ *			行わなければならない場面でこのコールバックを利用する。
+ */
 class tWaveWatchThread :
 	public singleton_base<tWaveWatchThread>,
 	manual_start<tWaveWatchThread>,
@@ -42,17 +43,25 @@ class tWaveWatchThread :
 	tThreadEvent Event; //!< スレッドをたたき起こすため/スレッドを眠らせるためのイベント
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWaveWatchThread();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tWaveWatchThread();
 
-	//! @brief		眠っているスレッドを叩き起こす
+	/**
+	 * 眠っているスレッドを叩き起こす
+	 */
 	void Wakeup();
 
 protected:
-	//! @brief		スレッドのエントリーポイント
+	/**
+	 * スレッドのエントリーポイント
+	 */
 	void Execute(void);
 };
 //---------------------------------------------------------------------------
@@ -63,12 +72,15 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		tALSourceのステータスを含むクラス
-//---------------------------------------------------------------------------
+/**
+ * tALSourceのステータスを含むクラス
+ */
 class tALSourceStatus
 {
 public:
-	//! @brief	サウンドソースの状態
+	/**
+	 * サウンドソースの状態
+	 */
 	enum tStatus
 	{
 		ssUnload, //!< data is not specified (tALSourceではこの状態は存在しない)
@@ -83,8 +95,9 @@ public:
 }
 namespace Risse {
 //---------------------------------------------------------------------------
-//! @brief		NativeBinder 用の Variant -> tALSourceStatus::tStatus 変換定義
-//---------------------------------------------------------------------------
+/**
+ * NativeBinder 用の Variant -> tALSourceStatus::tStatus 変換定義
+ */
 template <>
 inline Risa::tALSourceStatus::tStatus FromVariant<Risa::tALSourceStatus::tStatus>(const tVariant & v)
 {
@@ -94,8 +107,9 @@ inline Risa::tALSourceStatus::tStatus FromVariant<Risa::tALSourceStatus::tStatus
 
 
 //---------------------------------------------------------------------------
-//! @brief		NativeBinder 用の tALSourceStatus::tStatus -> Variant 変換定義
-//---------------------------------------------------------------------------
+/**
+ * NativeBinder 用の tALSourceStatus::tStatus -> Variant 変換定義
+ */
 template <>
 inline tVariant ToVariant<Risa::tALSourceStatus::tStatus>(Risa::tALSourceStatus::tStatus s)
 {
@@ -110,8 +124,9 @@ namespace Risa {
 
 class tWaveDecodeThread;
 //---------------------------------------------------------------------------
-//! @brief		OpenALソース
-//---------------------------------------------------------------------------
+/**
+ * OpenALソース
+ */
 class tALSource :
 				public tCollectee,
 				protected depends_on<tOpenAL>,
@@ -127,7 +142,6 @@ public:
 	static const risse_uint STREAMING_PREPARE_BUFFERS = 4; //!< 再生開始前にソースにキューしておくバッファの数
 
 private:
-	//! OpenAL Source を保持するための構造体
 	struct tInternalSource : public tDestructee
 	{
 		ALuint Source; //!< OpenAL ソース
@@ -146,7 +160,9 @@ private:
 	tStatus Status; //!< サウンドステータス
 	tStatus PrevStatus; //!< 直前のサウンドステータス
 
-	//! @brief		一つの OpenAL バッファに対応するセグメントの情報
+	/**
+	 * 一つの OpenAL バッファに対応するセグメントの情報
+	 */
 	struct tSegmentInfo
 	{
 		tWaveSegmentQueue SegmentQueue; //!< セグメントキュー
@@ -158,137 +174,187 @@ private:
 	risse_uint64 DecodePosition; //!< デコードした総サンプル数
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
+	/**
+	 * コンストラクタ
+	 * @param buffer	OpenAL バッファを管理する tALBuffer インスタンス
+	 */
 	tALSource(tALBuffer * buffer,
 		tWaveLoopManager * loopmanager = NULL);
 
-	//! @brief		コンストラクタ(ほかのtALSourceとバッファを共有する場合)
-	//! @param		ref		コピー元ソース
+	/**
+	 * コンストラクタ(ほかのtALSourceとバッファを共有する場合)
+	 * @param ref	コピー元ソース
+	 */
 	tALSource(const tALSource * ref);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	virtual ~tALSource() {;}
 
 private:
-	//! @brief		オブジェクトを初期化する
-	//! @param		buffer		OpenAL バッファを管理する tALBuffer インスタンス
+	/**
+	 * オブジェクトを初期化する
+	 * @param buffer	OpenAL バッファを管理する tALBuffer インスタンス
+	 */
 	void Init(tALBuffer * buffer);
 
-	//! @brief		Source の存在を確実にする
+	/**
+	 * Source の存在を確実にする
+	 */
 	void EnsureSource();
 
-	//! @brief		Source を強制的に削除する
+	/**
+	 * Source を強制的に削除する
+	 */
 	void DeleteSource();
 
 public:
 	ALuint GetSource() const { if(Source) return Source->Source; else return 0; } //!< Source を得る
 
 private: //---- queue/buffer management
-	//! @brief		レンダリング(デコード)を行う
-	//! @note		残り容量が少ないと偽を返す
+	/**
+	 * レンダリング(デコード)を行う
+	 * @note	残り容量が少ないと偽を返す
+	 */
 	bool Render();
 
-	//! @brief		バッファのデータを埋める
+	/**
+	 * バッファのデータを埋める
+	 */
 	void FillBuffer();
 
-	//! @brief		すべてのバッファをアンキューする
+	/**
+	 * すべてのバッファをアンキューする
+	 */
 	void UnqueueAllBuffers();
 
-	//! @brief		バッファをソースにキューする
-	//! @note		キューできない場合は何もしない
+	/**
+	 * バッファをソースにキューする
+	 * @note	キューできない場合は何もしない
+	 */
 	void QueueBuffer();
 
-	//! @brief		状態をチェックする
-	//! @note		OpenAL による実際の再生状況と、このクラス内の管理情報が
-	//!				異なる場合がある(特に再生停止時)ため、その状態を再度チェックするためにある。
-	//!				クリティカルセクションによる保護は別の場所で行うこと。
+	/**
+	 * 状態をチェックする
+	 * @note	OpenAL による実際の再生状況と、このクラス内の管理情報が
+	 *			異なる場合がある(特に再生停止時)ため、その状態を再度チェックするためにある。
+	 *			クリティカルセクションによる保護は別の場所で行うこと。
+	 */
 	void RecheckStatus();
 
 public:
-	//! @brief		監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
+	/**
+	 * 監視用コールバック(tWaveWatchThreadから約50msごとに呼ばれる)
+	 */
 	void WatchCallback();
 
-	//! @brief		現在再生位置までに発生したイベントをすべて発生させる
-	//! @return		もっとも近い次のラベルイベントまでの時間を ms で返す
+	/**
+	 * 現在再生位置までに発生したイベントをすべて発生させる
+	 * @return	もっとも近い次のラベルイベントまでの時間を ms で返す
+	 */
 	
 
 private:
-	//! @brief		前回とステータスが変わっていたら OnStatusChanged を呼ぶ
-	//! @param		async		非同期イベントかどうか
-	//! @note		このメソッド内でロックは行わないので、呼び出し元が
-	//!				ちゃんとロックを行っているかどうかを確認すること。
+	/**
+	 * 前回とステータスが変わっていたら OnStatusChanged を呼ぶ
+	 * @param async	非同期イベントかどうか
+	 * @note	このメソッド内でロックは行わないので、呼び出し元が
+	 *			ちゃんとロックを行っているかどうかを確認すること。
+	 */
 	void CallStatusChanged(bool async);
 
 public:
-	//! @brief		再生の開始
+	/**
+	 * 再生の開始
+	 */
 	void Play();
 
 protected:
-	//! @brief		再生の停止(内部関数)
-	//! @param		notify		OnStatusChanged で通知をするかどうか
-	//!				0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
+	/**
+	 * 再生の停止(内部関数)
+	 * @param notify	OnStatusChanged で通知をするかどうか
+	 *					0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
+	 */
 	void InternalStop(int notify);
 
 public:
-	//! @brief		再生の停止
-	//! @param		notify		OnStatusChanged で通知をするかどうか
-	//!				0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
+	/**
+	 * 再生の停止
+	 * @param notify	OnStatusChanged で通知をするかどうか
+	 *					0=通知しない 1=同期イベントとして通知 2=非同期イベントとして通知
+	 */
 	void Stop(int notify = 1);
 
-	//! @brief		再生の一時停止
+	/**
+	 * 再生の一時停止
+	 */
 	void Pause();
 
 private:
-	//! @brief		再生中のバッファ内の位置を得る
-	//! @return		再生中のバッファ内の位置 (キューの先頭からのサンプルグラニュール数単位)
-	//! @note		現在位置を得られなかった場合は risse_size_max が帰る。このメソッドは
-	//!				スレッド保護を行わないので注意
+	/**
+	 * 再生中のバッファ内の位置を得る
+	 * @return	再生中のバッファ内の位置 (キューの先頭からのサンプルグラニュール数単位)
+	 * @note	現在位置を得られなかった場合は risse_size_max が帰る。このメソッドは
+	 *			スレッド保護を行わないので注意
+	 */
 	risse_size GetBufferPlayingPosition();
 
 public:
-	//! @brief		再生位置を得る
-	//! @return		再生位置   (デコーダ出力時におけるサンプルグラニュール数単位)
-	//! @note		返される値は、デコーダ上(つまり元のメディア上での)サンプルグラニュール数
-	//!				単位となる。これは、フィルタとして時間の拡縮を行うようなフィルタが
-	//!				挟まっていた場合は、実際に再生されたサンプルグラニュール数とは
-	//!				異なる場合があるということである。
+	/**
+	 * 再生位置を得る
+	 * @return	再生位置   (デコーダ出力時におけるサンプルグラニュール数単位)
+	 * @note	返される値は、デコーダ上(つまり元のメディア上での)サンプルグラニュール数
+	 *			単位となる。これは、フィルタとして時間の拡縮を行うようなフィルタが
+	 *			挟まっていた場合は、実際に再生されたサンプルグラニュール数とは
+	 *			異なる場合があるということである。
+	 */
 	risse_uint64 GetPosition();
 
-	//! @brief		再生位置を設定する
-	//! @param		pos  再生位置 (デコーダ出力におけるサンプルグラニュール数単位)
+	/**
+	 * 再生位置を設定する
+	 * @param pos	再生位置 (デコーダ出力におけるサンプルグラニュール数単位)
+	 */
 	void SetPosition(risse_uint64 pos);
 
 public:
-	//! @brief		現在の再生位置までのラベルイベントを発生させ、次のラベルイベントまでの時間を帰す
-	//! @return		次のラベルイベントまでの時間(ms) ラベルイベントが見つからない場合は -1 を帰す
+	/**
+	 * 現在の再生位置までのラベルイベントを発生させ、次のラベルイベントまでの時間を帰す
+	 * @return	次のラベルイベントまでの時間(ms) ラベルイベントが見つからない場合は -1 を帰す
+	 */
 	risse_int32 FireLabelEvents();
 
 public:
-	//! @brief		ステータスの変更を通知する
-	//! @param		status		ステータス
-	//! @note		OnStatusChangedAsync は非同期イベント用。
-	//!				OnStatusChanged 同士や OnStatusChangedAsync 同士、
-	//!				あるいはそれぞれ同士の呼び出しが重ならないことは
-	//!				このクラスが保証している。
-	//!				OnStatusChangedAsync は OnStatusChanged を呼んだ
-	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	/**
+	 * ステータスの変更を通知する
+	 * @param status	ステータス
+	 * @note	OnStatusChangedAsync は非同期イベント用。
+	 *			OnStatusChanged 同士や OnStatusChangedAsync 同士、
+	 *			あるいはそれぞれ同士の呼び出しが重ならないことは
+	 *			このクラスが保証している。
+	 *			OnStatusChangedAsync は OnStatusChanged を呼んだ
+	 *			スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	 */
 	virtual void OnStatusChanged(tStatus status) {;}
 
-	//! @brief		ステータスの変更を非同期に通知する
-	//! @param		status		ステータス
-	//! @note		OnStatusChangedAsync は非同期イベント用。
-	//!				OnStatusChanged 同士や OnStatusChangedAsync 同士、
-	//!				あるいはそれぞれ同士の呼び出しが重ならないことは
-	//!				このクラスが保証している。
-	//!				OnStatusChangedAsync は OnStatusChanged を呼んだ
-	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	/**
+	 * ステータスの変更を非同期に通知する
+	 * @param status	ステータス
+	 * @note	OnStatusChangedAsync は非同期イベント用。
+	 *			OnStatusChanged 同士や OnStatusChangedAsync 同士、
+	 *			あるいはそれぞれ同士の呼び出しが重ならないことは
+	 *			このクラスが保証している。
+	 *			OnStatusChangedAsync は OnStatusChanged を呼んだ
+	 *			スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	 */
 	virtual void OnStatusChangedAsync(tStatus status) {;}
 
-	//! @brief		ラベルイベントの発生を通知する
-	//! @param		name		ラベル名
-	//! @note		このイベントは常に非同期イベントとなるはず。
-	//!				スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	/**
+	 * ラベルイベントの発生を通知する
+	 * @param name	ラベル名
+	 * @note	このイベントは常に非同期イベントとなるはず。
+	 *			スレッドとは別のスレッドが呼ぶ可能性があるので注意すること。
+	 */
 	virtual void OnLabel(const tString & name) {;}
 };
 //---------------------------------------------------------------------------

@@ -38,29 +38,35 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウリストを表すクラス
-//! @param		ウィンドウは dispose() されない限りこのリストに登録されたままになる。
-//!				つまり ウィンドウは明示的に dispose() しないと、
-//!				たとえインタプリタからの変数参照が亡くなったとしても永遠にメモリ上に残るので注意。
-//---------------------------------------------------------------------------
+/**
+ * ウィンドウリストを表すクラス
+ */
 class tWindowList : public singleton_base<tWindowList>
 {
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 	gc_vector<void *> List; //!< リスト
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWindowList();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tWindowList();
 
-	//! @brief		ウィンドウリストにウィンドウを登録する
-	//! @param		instance		なんらかのインスタンス
+	/**
+	 * ウィンドウリストにウィンドウを登録する
+	 * @param instance	なんらかのインスタンス
+	 */
 	void Add(void * instance);
 
-	//! @brief		ウィンドウリストからウィンドウを登録削除する
-	//! @param		instance		なんらかのインスタンス
+	/**
+	 * ウィンドウリストからウィンドウを登録削除する
+	 * @param instance	なんらかのインスタンス
+	 */
 	void Remove(void * instance);
 };
 //---------------------------------------------------------------------------
@@ -69,8 +75,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief	wxWindow 派生クラスは delete ではなくて Destroy メソッドを呼ばないとならない
-//---------------------------------------------------------------------------
+/**
+ * wxWindow 派生クラスは delete ではなくて Destroy メソッドを呼ばないとならない
+ */
 template <>
 class tDestructorCaller_Impl<wxWindow *> : public tMainThreadDestructorQueue::tDestructorCaller
 {
@@ -89,19 +96,20 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risaのウィンドウを表す wxWindow のサブクラスを作成するときに
-//!				一緒に継承させるクラス
-//---------------------------------------------------------------------------
+/**
+ * Risaのウィンドウを表す wxWindow のサブクラスを作成するときに
+ * 一緒に継承させるクラス
+ */
 template <typename WX_WINDOW_CLASS, typename RISSE_INSTANCE_CLASS>
 class tRisaWindowBahavior
 {
 public:
 	typedef tRisaWindowBahavior<WX_WINDOW_CLASS, RISSE_INSTANCE_CLASS> tBehavior;
-		//!< 自分自身のクラスのエイリアス
 
 	//-----------------------------------------------------------------------
-	//! @brief		ウィンドウの内部実装クラス
-	//-----------------------------------------------------------------------
+	/**
+	 * ウィンドウの内部実装クラス
+	 */
 	class tInternal : public tDestructee
 	{
 		RISSE_INSTANCE_CLASS * Instance; //!< tWindowInstance へのポインタ
@@ -110,9 +118,11 @@ public:
 		tMainThreadAutoPtr<tRisaWindowBahavior> Window; //!< ウィンドウへのポインタ
 
 	public:
-		//! @brief		コンストラクタ
-		//! @param		wx_isntance		wxWindow 派生クラスのインスタンス
-		//! @param		instance		RISSE_INSTANCE_CLASS へのポインタ
+		/**
+		 * コンストラクタ
+		 * @param wx_isntance	wxWindow 派生クラスのインスタンス
+		 * @param instance		RISSE_INSTANCE_CLASS へのポインタ
+		 */
 		tInternal(WX_WINDOW_CLASS * wx_instance, RISSE_INSTANCE_CLASS * instance)
 		{
 			Window = wx_instance;
@@ -120,20 +130,28 @@ public:
 			tWindowList::instance()->Add(this);
 		}
 
-		//! @brief		デストラクタ
+		/**
+		 * デストラクタ
+		 */
 		~tInternal()
 		{
 			if(Instance)
 				tWindowList::instance()->Remove(this);
 		}
 
-		//! @brief		インスタンスを得る
+		/**
+		 * インスタンスを得る
+		 */
 		RISSE_INSTANCE_CLASS * GetInstance() const { return Instance; }
 
-		//! @brief		ウィンドウへのポインタを得る
+		/**
+		 * ウィンドウへのポインタを得る
+		 */
 		tMainThreadAutoPtr<tRisaWindowBahavior> & GetWindow() { return Window; }
 
-		//! @brief		ウィンドウが破棄されたことを通知する(tRisaWindowBahaviorから呼ばれる)
+		/**
+		 * ウィンドウが破棄されたことを通知する(tRisaWindowBahaviorから呼ばれる)
+		 */
 		void NotifyDestroy()
 		{
 			if(Instance)
@@ -152,21 +170,27 @@ private:
 	tInternal * Internal; //!< 内部実装クラス
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		wx_isntance		wxWindow 派生クラスのインスタンス
-	//! @param		internal	RISSE_INSTANCE_CLASS のインスタンスへのポインタ
+	/**
+	 * コンストラクタ
+	 * @param wx_isntance	wxWindow 派生クラスのインスタンス
+	 * @param internal		RISSE_INSTANCE_CLASS のインスタンスへのポインタ
+	 */
 	tRisaWindowBahavior(WX_WINDOW_CLASS * wx_instance, RISSE_INSTANCE_CLASS * instance)
 	{
 		Internal = new tInternal(wx_instance, instance);
 	}
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tRisaWindowBahavior()
 	{
 		NotifyDestroy();
 	}
 
-	//! @brief		内容が破棄されたことを通知する
+	/**
+	 * 内容が破棄されたことを通知する
+	 */
 	void NotifyDestroy()
 	{
 		if(Internal)
@@ -176,13 +200,17 @@ public:
 		}
 	}
 
-	//! @brief		ウィンドウの内部実装クラスを得る
-	//! @return		ウィンドウの内部実装クラス
+	/**
+	 * ウィンドウの内部実装クラスを得る
+	 * @return	ウィンドウの内部実装クラス
+	 */
 	tInternal * GetInternal() const { return Internal; }
 
 protected:
-	//! @brief		Risseインスタンスを得る
-	//! @return		Risseインスタンス
+	/**
+	 * Risseインスタンスを得る
+	 * @return	Risseインスタンス
+	 */
 	RISSE_INSTANCE_CLASS * GetInstance() const
 	{
 		RISSE_ASSERT(Internal != NULL);
@@ -203,32 +231,43 @@ protected:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウクラスのインスタンス
-//---------------------------------------------------------------------------
+/**
+ * ウィンドウクラスのインスタンス
+ */
 class tWindowInstance : public tObjectBase
 {
 private:
 	wxWindow * WxWindow; //!< wxWindow へのポインタ
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tWindowInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tWindowInstance() {;}
 
-	//! @brief		ウィンドウが破棄されたことを通知する(tWindowInternalから呼ばれる)
+	/**
+	 * ウィンドウが破棄されたことを通知する(tWindowInternalから呼ばれる)
+	 */
 	void NotifyDestroy();
 
 protected:
-	//! @brief		wxWindow へのポインタを設定する
-	//! @param		window		wxWindow へのポインタ
-	//! @note		サブクラスで wxWindow へのポインタを作成したらこれを設定すること
+	/**
+	 * wxWindow へのポインタを設定する
+	 * @param window	wxWindow へのポインタ
+	 * @note	サブクラスで wxWindow へのポインタを作成したらこれを設定すること
+	 */
 	void SetWxWindow(wxWindow * window) { WxWindow = window; }
 
 public:
-	//! @brief		wxWindow へのポインタを取得する
-	//! @return		wxWindow へのポインタ
+	/**
+	 * wxWindow へのポインタを取得する
+	 * @return	wxWindow へのポインタ
+	 */
 	wxWindow * GetWxWindow() const;
 
 public: // Risse用メソッドなど
@@ -267,21 +306,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Window" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Window" クラス
+ */
 class tWindowClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tWindowClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------

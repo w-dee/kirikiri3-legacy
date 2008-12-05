@@ -18,8 +18,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		int16→float32変換
-//---------------------------------------------------------------------------
+/**
+ * int16→float32変換
+ */
 void PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
 	float * d = static_cast<float*>(dest);
@@ -36,8 +37,9 @@ void PCMConvertLoopInt16ToFloat32(void * RISSE_RESTRICT dest, const void * RISSE
 
 
 //---------------------------------------------------------------------------
-//! @brief		float32→int16変換
-//---------------------------------------------------------------------------
+/**
+ * float32→int16変換
+ */
 void PCMConvertLoopFloat32ToInt16(void * RISSE_RESTRICT dest, const void * RISSE_RESTRICT src, size_t numsamples)
 {
 	risse_uint16 * d = static_cast<risse_uint16*>(dest);

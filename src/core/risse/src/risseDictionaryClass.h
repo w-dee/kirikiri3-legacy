@@ -23,8 +23,9 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Dictionary" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Dictionary" クラスのインスタンス用 C++クラス
+ */
 class tDictionaryInstance : public tObjectBase
 {
 public:
@@ -34,11 +35,15 @@ private:
 	tMemberHashTable HashTable; //!< 辞書配列の中身
 
 public:
-	//! @brief		HashTableへの参照を得る
-	//! @return		HashTableへの参照
+	/**
+	 * HashTableへの参照を得る
+	 * @return	HashTableへの参照
+	 */
 	tMemberHashTable & GetHashTable() { return HashTable; }
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tDictionaryInstance() {;}
 
 public: // Risse用メソッドなど
@@ -56,21 +61,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Dictionary" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Dictionary" クラス
+ */
 class tDictionaryClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tDictionaryClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:

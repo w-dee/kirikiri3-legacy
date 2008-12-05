@@ -23,8 +23,9 @@ namespace Risse
 {
 class tScriptThread;
 //---------------------------------------------------------------------------
-//! @brief		"Thread" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Thread" クラスのインスタンス用 C++クラス
+ */
 class tThreadInstance : public tObjectBase
 {
 private:
@@ -36,10 +37,14 @@ private:
 	const tVariant *Exception; //!< 例外が発生した場合の例外オブジェクト
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tThreadInstance();
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tThreadInstance() {;}
 
 public: // Risse用メソッドなど
@@ -58,21 +63,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Thread" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Thread" クラス
+ */
 class tThreadClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tThreadClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:
@@ -86,20 +98,25 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"thread" パッケージイニシャライザ
-//---------------------------------------------------------------------------
+/**
+ * "thread" パッケージイニシャライザ
+ */
 class tThreadPackageInitializer : public tBuiltinPackageInitializer
 {
 public:
 	tThreadClass * ThreadClass;
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tThreadPackageInitializer();
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	virtual void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global);
 };

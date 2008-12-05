@@ -178,13 +178,17 @@ namespace Risse
 
 
 
-//! @brief risse_size の最大値
+/**
+ * risse_size の最大値
+ */
 // std::numeric_limits<risse_size>::max() を使おうかと思ったがstatic constではない
 // 可能性がある
 // char サイズが 8bit なのは下にある sanity checking で保証する
 static const risse_size risse_size_max = ((((1UL << ((sizeof(risse_size) * 8) -1))-1)<<1)+1);
 
-//! @brief risse_uint64 の最大値
+/**
+ * risse_uint64 の最大値
+ */
 static const risse_uint64 risse_uint64_max = ((((RISSE_UI64_VAL(1) << ((sizeof(risse_uint64) * 8) -1))-1)<<1)+1);
 
 typedef risse_int32 risse_error;
@@ -267,22 +271,28 @@ s = sign,  negative if this is 1, otherwise positive.
 #define RISSE_FC_IS_POSITIVE(x) (!RISSE_FC_IS_NEGATIVE(x)) //!< 正?
 
 
-//! @brief	浮動小数点数のクラスを得る
-//! @param	r	調べたい値
-//! @return	クラス
+/**
+ * 浮動小数点数のクラスを得る
+ * @param r	調べたい値
+ * @return	クラス
+ */
 risse_uint32 GetFPClass(risse_real r);
 
 
-//! @brief		正の quiet 型 NaN の値を得る
-//! @return		正の quiet 型 NaN
+/**
+ * 正の quiet 型 NaN の値を得る
+ * @return	正の quiet 型 NaN
+ */
 static inline risse_real GetNaN()
 {
 	risse_uint64 tmp = RISSE_IEEE_D_P_NaN;
 	return *reinterpret_cast<risse_real*>(&tmp);
 }
 
-//! @brief		正の無限大 の値を得る
-//! @return		正の無限大
+/**
+ * 正の無限大 の値を得る
+ * @return	正の無限大
+ */
 static inline risse_real GetInf()
 {
 	risse_uint64 tmp = RISSE_IEEE_D_P_INF;
@@ -308,9 +318,13 @@ struct tPointerSizedInteger<4>
 	typedef risse_uint32 utype;
 };
 
-//! @brief risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号付き整数型
+/**
+ * risse_ptrint は、ポインタと同じサイズを持つことが保証されている符号付き整数型
+ */
 typedef tPointerSizedInteger<sizeof(void*)>::type risse_ptrint;
-//! @brief risse_ptruint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
+/**
+ * risse_ptruint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
+ */
 typedef tPointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
 
 

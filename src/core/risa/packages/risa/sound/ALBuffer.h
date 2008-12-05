@@ -22,8 +22,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		OpenALバッファ
-//---------------------------------------------------------------------------
+/**
+ * OpenALバッファ
+ */
 class tALBuffer : public tCollectee, protected depends_on<tOpenAL>
 {
 public:
@@ -55,7 +56,9 @@ private:
 	risse_uint ALSampleGranuleBytes; //!< OpenAL バッファのbytes/sg
 	risse_uint ALOneBufferRenderUnit; //!< ストリーミング時の一つのバッファのサンプル数
 
-	//! @brief		デコードしたPCMを一時的に格納するための構造体
+	/**
+	 * デコードしたPCMを一時的に格納するための構造体
+	 */
 	struct tRenderBuffer
 	{
 		risse_uint8 * Buffer; //!< レンダリング用のテンポラリバッファ
@@ -73,75 +76,101 @@ private:
 	size_t ConvertBufferSize; //!< ConvertBuffer に割り当てられたサイズ(バイト単位)
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		filter 入力フィルタ
-	//! @param		streaming	ストリーミング再生を行うかどうか
+	/**
+	 * コンストラクタ
+	 * @param filter	入力フィルタ
+	 * @param streaming	ストリーミング再生を行うかどうか
+	 */
 	tALBuffer(tWaveFilter * Filter, bool streaming);
 
 	tWaveFilter * GetFilter() { return Filter; } //!< 入力フィルタを得る
 
 private:
-	//! @brief		バッファに関するオブジェクトの解放などのクリーンアップ処理
+	/**
+	 * バッファに関するオブジェクトの解放などのクリーンアップ処理
+	 */
 	void Clear();
 
-	//! @brief		一時的に割り当てられたバッファの解放
+	/**
+	 * 一時的に割り当てられたバッファの解放
+	 */
 	void FreeTempBuffers();
 
-	//! @brief		レンダリング(デコード)を行う
-	//! @param		render_buffer	レンダリング用のテンポラリバッファ
-	//! @param		render_buffer_size	レンダリング用のテンポラリバッファのサイズ
-	//! @param		samples		最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
-	//!							戻り値trueで関数が戻ればここには実際にデコードされたサンプル数が入っている
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-	//! @return		バッファにデータが入ったら真
+	/**
+	 * レンダリング(デコード)を行う
+	 * @param render_buffer			レンダリング用のテンポラリバッファ
+	 * @param render_buffer_size	レンダリング用のテンポラリバッファのサイズ
+	 * @param samples				最低でもこのサンプル数分詰めたい (0=デコードが終わるまで詰めたい)
+	 *								戻り値trueで関数が戻ればここには実際にデコードされたサンプル数が入っている
+	 * @param segmentqueue			再生セグメントキュー情報を書き込む先
+	 * @return	バッファにデータが入ったら真
+	 */
 	bool Render(
 		risse_uint8 * & render_buffer, size_t & render_buffer_size,
 		risse_uint & samples,
 		tWaveSegmentQueue & segmentqueue);
 
 public:
-	//! @brief		RenderBuffer の現在の残りバッファ個数を得る
-	//! @note		まれに負の数が帰ることがあるので注意。この数値は参考値程度にみるべき。
+	/**
+	 * RenderBuffer の現在の残りバッファ個数を得る
+	 * @note	まれに負の数が帰ることがあるので注意。この数値は参考値程度にみるべき。
+	 */
 	long GetRenderBufferRemain() const { return (long) RenderBufferRemain; }
 
-	//! @brief		RenderBuffers を一つ埋める
-	//! @return		バッファがいっぱいで埋まらなかった、あるいはデコードする物がないなどの理由で
-	//!				デコードに失敗した場合は偽、埋まった場合は真
+	/**
+	 * RenderBuffers を一つ埋める
+	 * @return	バッファがいっぱいで埋まらなかった、あるいはデコードする物がないなどの理由で
+	 *			デコードに失敗した場合は偽、埋まった場合は真
+	 */
 	bool FillRenderBuffer();
 
 private:
-	//! @brief		RenderBuffers からバッファを一つ盗ってくる
-	//! @return		バッファが埋まればそのバッファへのポインタ、
-	//!				埋まらなければリトライして、それでも駄目ならば NULL を返す
+	/**
+	 * RenderBuffers からバッファを一つ盗ってくる
+	 * @return	バッファが埋まればそのバッファへのポインタ、
+	 *			埋まらなければリトライして、それでも駄目ならば NULL を返す
+	 */
 	tRenderBuffer * GetRenderBuffer();
 
-	//! @brief		OpenALバッファにデータを詰める
-	//! @param		buffer		対象とする OpenAL バッファ
-	//! @param		segmentqueue	再生セグメントキュー情報を書き込む先
-	//! @param		samples		書き込まれたサンプルグラニュール数
-	//! @return		バッファにデータが入ったら真
+	/**
+	 * OpenALバッファにデータを詰める
+	 * @param buffer		対象とする OpenAL バッファ
+	 * @param segmentqueue	再生セグメントキュー情報を書き込む先
+	 * @param samples		書き込まれたサンプルグラニュール数
+	 * @return	バッファにデータが入ったら真
+	 */
 	bool FillALBuffer(ALuint buffer,
 		tWaveSegmentQueue & segmentqueue, risse_uint & samples);
 
 public:
-	//! @brief		フリーになったバッファを FreeBuffers に push する
+	/**
+	 * フリーになったバッファを FreeBuffers に push する
+	 */
 	void PushFreeBuffer(ALuint buffer);
 
-	//! @brief		フリーのバッファがあるかどうかを返す
-	//! @return 	フリーのバッファがあるかどうか
+	/**
+	 * フリーのバッファがあるかどうかを返す
+	 * @return	フリーのバッファがあるかどうか
+	 */
 	bool HasFreeBuffer();
 
-	//! @brief		空きバッファにデータをfillして返す
-	//! @param		buffer バッファ番号を格納する変数
-	//! @param		segmentqueue セグメントキュー
-	//! @param		samples		書き込まれたサンプルグラニュール数
-	//! @return		fill に成功したか
+	/**
+	 * 空きバッファにデータをfillして返す
+	 * @param buffer		バッファ番号を格納する変数
+	 * @param segmentqueue	セグメントキュー
+	 * @param samples		書き込まれたサンプルグラニュール数
+	 * @return	fill に成功したか
+	 */
 	bool PopFilledBuffer(ALuint & buffer, tWaveSegmentQueue & segmentqueue, risse_uint & samples);
 
-	//! @brief		全てのバッファを解放する
+	/**
+	 * 全てのバッファを解放する
+	 */
 	void FreeAllBuffers();
 
-	//! @brief		OpenALバッファにサウンドをデコードしてコピーする
+	/**
+	 * OpenALバッファにサウンドをデコードしてコピーする
+	 */
 	void Load();
 
 	bool GetStreaming() const { return Streaming; }

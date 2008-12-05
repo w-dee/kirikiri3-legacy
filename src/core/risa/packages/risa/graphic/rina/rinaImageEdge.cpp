@@ -9,8 +9,10 @@
 	Rina stands for "Rina is an Imaging Network Assembler"
 */
 //---------------------------------------------------------------------------
-//! @file
-//! @brief RINA ラスタ画像用のピンなど
+/**
+ * @file	
+ * RINA ラスタ画像用のピンなど
+ */
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaImageEdge.h"
@@ -133,7 +135,9 @@ tVariant tImageInputPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ImageInputPin クラスレジストラ
+/**
+ * ImageInputPin クラスレジストラ
+ */
 //---------------------------------------------------------------------------
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
@@ -222,7 +226,9 @@ tVariant tImageMixerInputPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ImageMixerInputPin クラスレジストラ
+/**
+ * ImageMixerInputPin クラスレジストラ
+ */
 //---------------------------------------------------------------------------
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
@@ -346,7 +352,9 @@ tVariant tImageOutputPinClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ImageInputPin クラスレジストラ
+/**
+ * ImageInputPin クラスレジストラ
+ */
 //---------------------------------------------------------------------------
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,

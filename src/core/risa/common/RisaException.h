@@ -20,47 +20,59 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		Risa用の汎用例外クラス
-//! @note		暫定的な利用。最終的にはこれは無くす。
-//---------------------------------------------------------------------------
+/**
+ * Risa用の汎用例外クラス
+ * @note	暫定的な利用。最終的にはこれは無くす。
+ */
 class eRisaException
 {
-	//! このクラスはインスタンスを生成できない
 	eRisaException();
 
 public:
-	//! @brief		eRisaException型の例外を投げる
+	/**
+	 * eRisaException型の例外を投げる
+	 */
 	static void Throw(const tString &msg);
 
-	//! @brief		eRisaException型の例外を投げる
-	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-	//! @param		s1   文字列中の %1 と置き換えたい文字列
+	/**
+	 * eRisaException型の例外を投げる
+	 * @param str	文字列 (中に %1 などの指令を埋め込む)
+	 * @param s1	文字列中の %1 と置き換えたい文字列
+	 */
 	static void Throw(const tString &msg, const tString & s1);
 
-	//! @brief		eRisaException型の例外を投げる
-	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-	//! @param		s1   文字列中の %1 と置き換えたい文字列
-	//! @param		s2   文字列中の %2 と置き換えたい文字列
+	/**
+	 * eRisaException型の例外を投げる
+	 * @param str	文字列 (中に %1 などの指令を埋め込む)
+	 * @param s1	文字列中の %1 と置き換えたい文字列
+	 * @param s2	文字列中の %2 と置き換えたい文字列
+	 */
 	static void Throw(const tString &msg, const tString & s1, const tString & s2);
 
-	//! @brief		eRisaException型の例外を投げる
-	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-	//! @param		s1   文字列中の %1 と置き換えたい文字列
-	//! @param		s2   文字列中の %2 と置き換えたい文字列
-	//! @param		s3   文字列中の %3 と置き換えたい文字列
+	/**
+	 * eRisaException型の例外を投げる
+	 * @param str	文字列 (中に %1 などの指令を埋め込む)
+	 * @param s1	文字列中の %1 と置き換えたい文字列
+	 * @param s2	文字列中の %2 と置き換えたい文字列
+	 * @param s3	文字列中の %3 と置き換えたい文字列
+	 */
 	static void Throw(const tString &msg, const tString & s1, const tString & s2, const tString & s3);
 
-	//! @brief		eRisaException型の例外を投げる
-	//! @param		str  文字列 (中に %1 などの指令を埋め込む)
-	//! @param		s1   文字列中の %1 と置き換えたい文字列
-	//! @param		s2   文字列中の %2 と置き換えたい文字列
-	//! @param		s3   文字列中の %3 と置き換えたい文字列
-	//! @param		s4   文字列中の %4 と置き換えたい文字列
+	/**
+	 * eRisaException型の例外を投げる
+	 * @param str	文字列 (中に %1 などの指令を埋め込む)
+	 * @param s1	文字列中の %1 と置き換えたい文字列
+	 * @param s2	文字列中の %2 と置き換えたい文字列
+	 * @param s3	文字列中の %3 と置き換えたい文字列
+	 * @param s4	文字列中の %4 と置き換えたい文字列
+	 */
 	static void Throw(const tString &msg, const tString & s1, const tString & s2, const tString & s3, const tString & s4);
 
-	//! @brief		内部エラー例外を発生させる
-	//! @param		line     エラーの起こった行
-	//! @param		filename エラーの起こったファイル名
+	/**
+	 * 内部エラー例外を発生させる
+	 * @param line		エラーの起こった行
+	 * @param filename	エラーの起こったファイル名
+	 */
 	static void ThrowInternalErrorException(int line, const char * filename);
 };
 //---------------------------------------------------------------------------
@@ -69,8 +81,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		内部エラーをthrowするマクロ
-//---------------------------------------------------------------------------
+/**
+ * 内部エラーをthrowするマクロ
+ */
 #define ThrowInternalError eRisaException::ThrowInternalErrorException(__LINE__, __FILE__)
 //---------------------------------------------------------------------------
 
@@ -81,8 +94,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		例外を捕捉し、必要ならばエラー表示を行うマクロ
-//---------------------------------------------------------------------------
+/**
+ * 例外を捕捉し、必要ならばエラー表示を行うマクロ
+ */
 #define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION(origin) \
 	catch(const tVariant * e) \
 	{ \
@@ -114,8 +128,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		例外を捕捉し、強制的にエラー表示を行うマクロ
-//---------------------------------------------------------------------------
+/**
+ * 例外を捕捉し、強制的にエラー表示を行うマクロ
+ */
 #define RISA_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(origin) \
 	catch(...) { throw; }
 
@@ -138,8 +153,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		既存の例外クラスから新しい例外クラスを派生させるためのマクロ
-//---------------------------------------------------------------------------
+/**
+ * 既存の例外クラスから新しい例外クラスを派生させるためのマクロ
+ */
 #define RISA_DEFINE_EXCEPTION_SUBCLASS(CPP_CLASSNAME, RISSE_PACKAGENAME_STRING, RISSE_CLASSNAME_STRING, PARENT_CLASS) \
 class CPP_CLASSNAME : public tClassBase       {                                   \
 	typedef tClassBase inherited;                                                 \
@@ -170,8 +186,9 @@ public:                                                                         
 
 
 //---------------------------------------------------------------------------
-//! @brief		例外を捕捉し、例外メッセージの先頭に指定のメッセージを追加するためのマクロ
-//---------------------------------------------------------------------------
+/**
+ * 例外を捕捉し、例外メッセージの先頭に指定のメッセージを追加するためのマクロ
+ */
 #define RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN() try{try{
 
 #define RISA_PREPEND_EXCEPTION_MESSAGE_END(ENGINE, MESSAGE) \

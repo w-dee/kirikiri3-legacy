@@ -24,8 +24,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		XP4 In-Archive Stream Implmentation
-//---------------------------------------------------------------------------
+/**
+ * XP4 In-Archive Stream Implmentation
+ */
 class tXP4ArchiveStream : public tBinaryStream,
 	protected depends_on<tXP4StreamCache>,
 	protected depends_on<tXP4SegmentCache>
@@ -47,53 +48,73 @@ class tXP4ArchiveStream : public tBinaryStream,
 	tXP4SegmentCache::tDataBlock DecompressedData; // decompressed segment data
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		ptr tArchive インスタンスへのスマートポインタ
-	//! @param		idx アーカイブ内でのファイルのインデックス
-	//! @param		flags アクセスフラグ
+	/**
+	 * コンストラクタ
+	 * @param ptr	tArchive インスタンスへのスマートポインタ
+	 * @param idx	アーカイブ内でのファイルのインデックス
+	 * @param flags	アクセスフラグ
+	 */
 	tXP4ArchiveStream(
 			boost::shared_ptr<tXP4Archive> ptr,
 			risse_size idx, risse_uint32 flags);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tXP4ArchiveStream();
 
 private:
-	//! @brief		現在のセグメントが開かれていることを確実にする
+	/**
+	 * 現在のセグメントが開かれていることを確実にする
+	 */
 	void EnsureSegment(); // ensure accessing to current segment
 
-	//! @brief		指定位置にシークする
-	//! @param		pos シーク先の位置
-	//! @note		この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
+	/**
+	 * 指定位置にシークする
+	 * @param pos	シーク先の位置
+	 * @note	この関数は内部状態を変えるだけであり、実際にセグメントを開くなどはしない
+	 */
 	void SeekToPosition(risse_uint64 pos); // open segment at 'pos' and seek
 
-	//! @brief		次のセグメントを開く
+	/**
+	 * 次のセグメントを開く
+	 */
 	bool OpenNextSegment();
 
 public:
-	//! @brief		シーク
-	//! @param		offset 移動オフセット
-	//! @param		whence 移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
-	//! @return		移動後のファイルポインタ
+	/**
+	 * シーク
+	 * @param offset	移動オフセット
+	 * @param whence	移動オフセットの基準 (RISSE_BS_SEEK_* 定数)
+	 * @return	移動後のファイルポインタ
+	 */
 	risse_uint64 Seek(risse_int64 offset, risse_int whence);
 
-	//! @brief		読み込み
-	//! @param		buffer 読み込み先バッファ
-	//! @param		read_size 読み込むバイト数
-	//! @return		実際に読み込まれたバイト数
+	/**
+	 * 読み込み
+	 * @param buffer	読み込み先バッファ
+	 * @param read_size	読み込むバイト数
+	 * @return	実際に読み込まれたバイト数
+	 */
 	risse_size Read(void *buffer, risse_size read_size);
 
-	//! @brief		書き込み
-	//! @param		buffer 書き込むバッファ
-	//! @param		read_size 書き込みたいバイト数
-	//! @return		実際に書き込まれたバイト数
+	/**
+	 * 書き込み
+	 * @param buffer	書き込むバッファ
+	 * @param read_size	書き込みたいバイト数
+	 * @return	実際に書き込まれたバイト数
+	 */
 	risse_size Write(const void *buffer, risse_size write_size);
 
-	//! @brief		ファイルの終わりを現在のポインタに設定する
+	/**
+	 * ファイルの終わりを現在のポインタに設定する
+	 */
 	void SetEndOfFile();
 
-	//! @brief		サイズを得る
-	//! @return		このストリームのサイズ
+	/**
+	 * サイズを得る
+	 * @return	このストリームのサイズ
+	 */
 	risse_uint64 GetSize();
 };
 //---------------------------------------------------------------------------

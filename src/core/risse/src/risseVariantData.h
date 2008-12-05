@@ -29,7 +29,9 @@ class tPrimitiveClassBase;
 class tClassBase;
 class tVariantBlock;
 //---------------------------------------------------------------------------
-//! @brief	バリアント型のデータ部
+/**
+ * バリアント型のデータ部
+ */
 /*! @note
 
 tStringData, tVariantBlock::tObject, tOctetData の各先頭
@@ -77,14 +79,18 @@ class tVariantData : public tCollectee
 {
 protected:
 
-	//! @brief void ストレージ型
+	/**
+	 * void ストレージ型
+	 */
 	struct tVoid
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 0 固定
 		risse_ptruint Ptr; //!< 何らかのポインタ
 	};
 
-	//! @brief integer ストレージ型
+	/**
+	 * integer ストレージ型
+	 */
 	struct tInteger
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 1 固定
@@ -92,7 +98,9 @@ protected:
 		risse_int64  Value; //!< 値
 	};
 
-	//! @brief real ストレージ型
+	/**
+	 * real ストレージ型
+	 */
 	struct tReal
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 2 固定
@@ -100,38 +108,48 @@ protected:
 		risse_real Value; //!< 値
 	};
 
-	//! @brief boolean ストレージ型
+	/**
+	 * boolean ストレージ型
+	 */
 	struct tBoolean
 	{
 		risse_ptruint Type; //!< バリアントタイプ
 		bool Value; //!< 値
 	};
 
-	//! @brief null ストレージ型
+	/**
+	 * null ストレージ型
+	 */
 	struct tNull
 	{
 		risse_ptruint Type; //!< バリアントタイプ: 3 固定
 		risse_ptruint Ptr; //!< 何らかのポインタ
 	};
 
-	//! @brief data ストレージ型
+	/**
+	 * data ストレージ型
+	 */
 	struct tData
 	{
 		tPrimitiveClassBase * Class; //!< クラスインスタンスへのポインタ(下位の2ビットは常にDataPointerBias)
 		void * Data; //!< データ(なんでもよい。何を表しているかは Class が決める)
-		//! @brief		厳密に同一かどうかを返す
+		/**
+		 * 厳密に同一かどうかを返す
+		 */
 		bool StrictEqual(const tData & rhs) const
 		{	return Class == rhs.Class && Data == rhs.Data; }
 	};
 
-	//! @brief object ストレージ型
+	/**
+	 * object ストレージ型
+	 */
 	struct tObject
 	{
 		tObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
 		const tVariantBlock * Context;
-						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
-						//!< 指しているとして)メソッドが動作するコンテキスト
-		//! @brief		厳密に同一かどうかを返す
+		/**
+		 * 厳密に同一かどうかを返す
+		 */
 		bool StrictEqual(const tObject & rhs) const
 		{	return Intf == rhs.Intf && Context == rhs.Context; }
 	};
@@ -140,45 +158,75 @@ public:
 	static const int ObjectPointerBias = 3; //!< Variantに格納される際の Object 型のポインタのバイアス値
 
 protected:
-	//! @brief Integer型への参照を取得 @return Integer型フィールドへの参照
+	/**
+	 * Integer型への参照を取得 @return Integer型フィールドへの参照
+	 */
 	risse_int64 & AsInteger() { return reinterpret_cast<tInteger*>(Storage)->Value; }
-	//! @brief Integer型へのconst参照を取得 @return Integer型フィールドへのconst参照
+	/**
+	 * Integer型へのconst参照を取得 @return Integer型フィールドへのconst参照
+	 */
 	const risse_int64 & AsInteger() const { RISSE_ASSERT(GetType() == vtInteger); return reinterpret_cast<const tInteger*>(Storage)->Value; }
 
-	//! @brief Real型への参照を取得 @return Real型フィールドへの参照
+	/**
+	 * Real型への参照を取得 @return Real型フィールドへの参照
+	 */
 	risse_real & AsReal() { return reinterpret_cast<tReal*>(Storage)->Value; }
-	//! @brief Real型へのconst参照を取得 @return Real型フィールドへのconst参照
+	/**
+	 * Real型へのconst参照を取得 @return Real型フィールドへのconst参照
+	 */
 	const risse_real & AsReal() const { RISSE_ASSERT(GetType() == vtReal); return reinterpret_cast<const tReal*>(Storage)->Value; }
 
-	//! @brief String型への参照を取得 @return String型フィールドへの参照
+	/**
+	 * String型への参照を取得 @return String型フィールドへの参照
+	 */
 	tString & AsString() { return *reinterpret_cast<tString*>(Storage); }
-	//! @brief String型へのconst参照を取得 @return String型フィールドへのconst参照
+	/**
+	 * String型へのconst参照を取得 @return String型フィールドへのconst参照
+	 */
 	const tString & AsString() const { RISSE_ASSERT(GetType() == vtString); return *reinterpret_cast<const tString*>(Storage); }
 
-	//! @brief Octet型への参照を取得 @return Octet型フィールドへの参照
+	/**
+	 * Octet型への参照を取得 @return Octet型フィールドへの参照
+	 */
 	tOctet & AsOctet() { return *reinterpret_cast<tOctet*>(Storage); }
-	//! @brief Octet型へのconst参照を取得 @return Octet型フィールドへのconst参照
+	/**
+	 * Octet型へのconst参照を取得 @return Octet型フィールドへのconst参照
+	 */
 	const tOctet & AsOctet() const { RISSE_ASSERT(GetType() == vtOctet); return *reinterpret_cast<const tOctet*>(Storage); }
 
-	//! @brief Data型への参照を取得 @return Data型フィールドへの参照
+	/**
+	 * Data型への参照を取得 @return Data型フィールドへの参照
+	 */
 	tData & AsData() { return *reinterpret_cast<tData*>(Storage); }
-	//! @brief Data型へのconst参照を取得 @return Data型フィールドへのconst参照
+	/**
+	 * Data型へのconst参照を取得 @return Data型フィールドへのconst参照
+	 */
 	const tData & AsData() const { RISSE_ASSERT(GetType() == vtData); return *reinterpret_cast<const tData*>(Storage); }
 
-	//! @brief Object型への参照を取得 @return Object型フィールドへの参照
+	/**
+	 * Object型への参照を取得 @return Object型フィールドへの参照
+	 */
 	tObject & AsObject() { return *reinterpret_cast<tObject*>(Storage); }
-	//! @brief Object型へのconst参照を取得 @return Object型フィールドへのconst参照
+	/**
+	 * Object型へのconst参照を取得 @return Object型フィールドへのconst参照
+	 */
 	const tObject & AsObject() const { RISSE_ASSERT(GetType() == vtObject); return *reinterpret_cast<const tObject*>(Storage); }
 
-	//! @brief Boolean型への参照を取得 @return Boolean型フィールドへの参照
+	/**
+	 * Boolean型への参照を取得 @return Boolean型フィールドへの参照
+	 */
 	tBoolean & AsBoolean() { return *reinterpret_cast<tBoolean*>(Storage); }
-	//! @brief Boolean型へのconst参照を取得 @return Boolean型フィールドへのconst参照
+	/**
+	 * Boolean型へのconst参照を取得 @return Boolean型フィールドへのconst参照
+	 */
 	const tBoolean & AsBoolean() const { RISSE_ASSERT(GetType() == vtBoolean); return *reinterpret_cast<const tBoolean*>(Storage); }
 
 
 public:
-	//! @brief vtDataのクラスインスタンスへのポインタを取得 @return クラスインスタンスへのポインタ
-	//! @note Classをいじる場合は常にこのメソッドを使うこと
+	/**
+	 * vtDataのクラスインスタンスへのポインタを取得 @return クラスインスタンスへのポインタ
+	 * @note	Classをいじる場合は常にこのメソッドを使うこと
+	 */
 	tPrimitiveClassBase * GetDataClassInstance() const
 	{
 		RISSE_ASSERT(GetType() == vtData);
@@ -190,8 +238,10 @@ public:
 	}
 
 protected:
-	//! @brief vtDataのクラスインスタンスへのポインタを設定 @param Class vtDataのクラスインスタンスへのポインタ
-	//! @note Classをいじる場合は常にこのメソッドを使うこと
+	/**
+	 * vtDataのクラスインスタンスへのポインタを設定 @param Class vtDataのクラスインスタンスへのポインタ
+	 * @note	Classをいじる場合は常にこのメソッドを使うこと
+	 */
 	void SetDataClassInstance(tPrimitiveClassBase * Class)
 	{
 		RISSE_ASSERT(GetType() == vtData);
@@ -202,8 +252,10 @@ protected:
 	}
 
 public:
-	//! @brief tObjectInterfaceへのポインタを取得 @return tObjectInterfaceへのポインタ
-	//! @note Intfをいじる場合は常にこのメソッドを使うこと
+	/**
+	 * tObjectInterfaceへのポインタを取得 @return tObjectInterfaceへのポインタ
+	 * @note	Intfをいじる場合は常にこのメソッドを使うこと
+	 */
 	tObjectInterface * GetObjectInterface() const
 	{
 		RISSE_ASSERT(GetType() == vtObject);
@@ -215,8 +267,10 @@ public:
 	}
 
 protected:
-	//! @brief tObjectInterfaceへのポインタを設定 @param intf tObjectInterfaceへのポインタ
-	//! @note Intfをいじる場合は常にこのメソッドを使うこと
+	/**
+	 * tObjectInterfaceへのポインタを設定 @param intf tObjectInterfaceへのポインタ
+	 * @note	Intfをいじる場合は常にこのメソッドを使うこと
+	 */
 	void SetObjectIntf(tObjectInterface * intf)
 	{
 		RISSE_ASSERT(GetType() == vtObject);
@@ -246,7 +300,9 @@ protected:
 			// ↑ 4 はダミー
 
 
-	//! @brief 各バリアントの内部型の union
+	/**
+	 * 各バリアントの内部型の union
+	 */
 	union
 	{
 		struct
@@ -255,17 +311,20 @@ protected:
 			risse_ptruint Ptr; //!< なんらかのポインタ
 		};
 
-		//! @brief	データストレージ
-		//! @note
-		//! わざわざマクロで各構造体のサイズの最大値を得て、その要素数を
-		//! もった char 配列を確保しているが(RV_STORAGE_SIZEの宣言を参照)、
-		//! これは gcc など union で構造体を配置する際に、望ましくないパッキングを
-		//! 行ってしまう可能性があるため。
+		/**
+		 * データストレージ
+		 * わざわざマクロで各構造体のサイズの最大値を得て、その要素数を
+		 * もった char 配列を確保しているが(RV_STORAGE_SIZEの宣言を参照)、
+		 * これは gcc など union で構造体を配置する際に、望ましくないパッキングを
+		 * 行ってしまう可能性があるため。
+		 */
 		char Storage[RV_STORAGE_SIZE];
 	};
 
 public:
-	//! @brief バリアントのタイプ
+	/**
+	 * バリアントのタイプ
+	 */
 	enum tType
 	{
 		vtVoid			= 4,
@@ -279,15 +338,19 @@ public:
 		vtObject		= 3,
 	};
 
-	//! @brief バリアントのタイプを得る
-	//! @return バリアントのタイプ
+	/**
+	 * バリアントのタイプを得る
+	 * @return	バリアントのタイプ
+	 */
 	tType GetType() const
 	{
 		return static_cast<tType>(Type < 9 ? Type : (Type & 3));
 	}
 
-	//! @brief バリアントがvoidかどうかを得る
-	//! @return バリアントがvoidかどうか
+	/**
+	 * バリアントがvoidかどうかを得る
+	 * @return	バリアントがvoidかどうか
+	 */
 	bool IsVoid() const
 	{
 		return Type == static_cast<risse_ptruint>(vtVoid);
@@ -295,8 +358,10 @@ public:
 		// return GetType() == vtVoid;
 	}
 
-	//! @brief バリアントがnullかどうかを得る
-	//! @return バリアントがnullかどうか
+	/**
+	 * バリアントがnullかどうかを得る
+	 * @return	バリアントがnullかどうか
+	 */
 	bool IsNull() const
 	{
 		return Type == static_cast<risse_ptruint>(vtNull);
@@ -304,22 +369,28 @@ public:
 		// return GetType() == vtNull;
 	}
 
-	//! @brief		ポインタ部分を破壊する
-	//! @note		GCがポインタに指された先を回収しないと困る場合は、
-	//!				これを呼んでポインタ部分を破壊し、参照を破棄する
+	/**
+	 * ポインタ部分を破壊する
+	 * @note	GCがポインタに指された先を回収しないと困る場合は、
+	 *			これを呼んでポインタ部分を破壊し、参照を破棄する
+	 */
 	void DestructPointer()
 	{
 		Ptr = 0;
 	}
 
-	//! @brief		内容を初期化する (void にする)
+	/**
+	 * 内容を初期化する (void にする)
+	 */
 	void Clear()
 	{
 		Type = vtVoid;
 		Ptr = 0; // ポインタをクリア
 	}
 
-	//! @brief		内容をNULLにする
+	/**
+	 * 内容をNULLにする
+	 */
 	void Nullize()
 	{
 		Type = vtNull;

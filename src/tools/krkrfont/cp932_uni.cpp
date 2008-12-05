@@ -1198,8 +1198,9 @@ static const risse_uint16 SJIS2UNICODE_Submap_map_FC[12]={
 
 
 //---------------------------------------------------------------------------
-//! @brief		CP932 ( = Shift-JIS) -> UNICODE table lookup structure
-//---------------------------------------------------------------------------
+/**
+ * CP932 ( = Shift-JIS) -> UNICODE table lookup structure
+ */
 struct tSJIS2UNICODE_Submap
 {
 	risse_uint8	low;
@@ -1210,8 +1211,9 @@ struct tSJIS2UNICODE_Submap
 
 
 //---------------------------------------------------------------------------
-//! @brief		CP932 ( = Shift-JIS) -> UNICODE table
-//---------------------------------------------------------------------------
+/**
+ * CP932 ( = Shift-JIS) -> UNICODE table
+ */
 static const tSJIS2UNICODE_Submap SJIS2UNICODE_Submap[128] = {
 /*0x80*/ { 0x00, 0x00, NULL },
 /*0x81*/ { 0x40, 0xFC, SJIS2UNICODE_Submap_map_81 },
@@ -1347,11 +1349,12 @@ static const tSJIS2UNICODE_Submap SJIS2UNICODE_Submap[128] = {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		CP932一文字をUNICODEに変換する
-//! @param		in 入力 MBCS
-//! @param		out 出力 UNICODE (wchar_t)
-//! @return		変換に成功すれば真、失敗すれば偽
-//---------------------------------------------------------------------------
+/**
+ * CP932一文字をUNICODEに変換する
+ * @param in	入力 MBCS
+ * @param out	出力 UNICODE (wchar_t)
+ * @return	変換に成功すれば真、失敗すれば偽
+ */
 static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 {
 	const unsigned char * & p = (const unsigned char * &)in;
@@ -1390,10 +1393,11 @@ static bool inline _RisaSJISToUnicode(const char * & in, risse_char *out)
 
 
 //---------------------------------------------------------------------------
-//! @brief		CP932一文字をUNICODEに変換する
-//! @param		in 入力 sjisコード  例: '漢' = 0x8abf  '0' = 0x0030
-//! @return		出力 UNICODE (wchar_t) 変換に失敗すれば 0
-//---------------------------------------------------------------------------
+/**
+ * CP932一文字をUNICODEに変換する
+ * @param in	入力 sjisコード  例: '漢' = 0x8abf  '0' = 0x0030
+ * @return	出力 UNICODE (wchar_t) 変換に失敗すれば 0
+ */
 risse_char SJISToUnicode(risse_uint sjis)
 {
 	char buf[3];
@@ -1418,13 +1422,14 @@ risse_char SJISToUnicode(risse_uint sjis)
 
 
 //---------------------------------------------------------------------------
-//! @brief		CP932文字列をUNICODEに変換する
-//! @param		in 入力 MBCS 文字列
-//! @param		out 出力 UNICODE (wchar_t) 文字列 (NULLの場合は書き込まれない)
-//! @return		出力された文字数
-//!				(最後に\0は書き込まれないしその文字数も含まれないので注意)
-//!				(risse_size)-1 = 異常な文字が見つかった
-//---------------------------------------------------------------------------
+/**
+ * CP932文字列をUNICODEに変換する
+ * @param in	入力 MBCS 文字列
+ * @param out	出力 UNICODE (wchar_t) 文字列 (NULLの場合は書き込まれない)
+ * @return	出力された文字数
+ *			(最後に\0は書き込まれないしその文字数も含まれないので注意)
+ *			(risse_size)-1 = 異常な文字が見つかった
+ */
 risse_size SJISToUnicodeString(const char * in, risse_char *out)
 {
 	// convert input Shift-JIS (CP932) string to output wide string

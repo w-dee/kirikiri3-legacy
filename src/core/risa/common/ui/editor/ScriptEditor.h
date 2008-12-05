@@ -21,8 +21,9 @@ namespace Risa {
 class tScriptEditorTextCtrl;
 class tScriptEditorStatusBar;
 //---------------------------------------------------------------------------
-//! @brief		スクリプトエディタのフレーム
-//---------------------------------------------------------------------------
+/**
+ * スクリプトエディタのフレーム
+ */
 class tScriptEditorFrame : public tUIFrame
 {
 public:
@@ -35,39 +36,55 @@ public:
 	};
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tScriptEditorFrame();
 
 public:
-	//! @brief		編集内容を設定する
-	//! @param		content		編集内容
+	/**
+	 * 編集内容を設定する
+	 * @param content	編集内容
+	 */
 	void SetContent(const wxString & content);
 
-	//! @brief		書き込み禁止かどうかを設定する
-	//! @param		b		書き込み禁止かどうか
+	/**
+	 * 書き込み禁止かどうかを設定する
+	 * @param b	書き込み禁止かどうか
+	 */
 	void SetReadOnly(bool b);
 
-	//! @brief		キャレットを指定行に移動する
-	//! @param		pos		論理行
+	/**
+	 * キャレットを指定行に移動する
+	 * @param pos	論理行
+	 */
 	void SetLinePosition(unsigned long pos);
 
-	//! @brief		ステータスバーの文字列を設定する
-	//! @param		status	ステータスバーに表示したい文字列
+	/**
+	 * ステータスバーの文字列を設定する
+	 * @param status	ステータスバーに表示したい文字列
+	 */
 	void SetStatusString(const wxString & status);
 
 private:
-	//! @brief		「実行」メニューや実行ボタンが選択されたとき
-	//! @param		event イベントオブジェクト
+	/**
+	 * 「実行」メニューや実行ボタンが選択されたとき
+	 * @param event	イベントオブジェクト
+	 */
 	tScriptEditorTextCtrl *TextCtrl;
 
-	//! @brief		TextCtrl の UI アップデートイベントが発生したとき
-	//! @param		event イベントオブジェクト
+	/**
+	 * TextCtrl の UI アップデートイベントが発生したとき
+	 * @param event	イベントオブジェクト
+	 */
 	tScriptEditorStatusBar *StatusBar;
 
 	void OnCommandExecute(wxCommandEvent & event);
 	void OnTextCtrlUpdateUI(wxUpdateUIEvent & event);
 
-	//! @brief		イベントテーブルの定義
+	/**
+	 * イベントテーブルの定義
+	 */
 	DECLARE_EVENT_TABLE()
 };
 //---------------------------------------------------------------------------

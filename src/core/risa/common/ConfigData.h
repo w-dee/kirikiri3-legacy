@@ -41,20 +41,25 @@ namespace Risa {
 
 class tConfig;
 //---------------------------------------------------------------------------
-//! @brief		設定情報のデータを管理するクラス
-//! @note		このクラスは GC 管理下ではないのでインスタンスを明示的にdeleteする必要あり
-//---------------------------------------------------------------------------
+/**
+ * 設定情報のデータを管理するクラス
+ * @note	このクラスは GC 管理下ではないのでインスタンスを明示的にdeleteする必要あり
+ */
 class tConfigData : public wxFileConfig
 {
 	friend class tConfig;
 
 protected:
 
-	//! @brief		コンストラクタ
-	//! @param		filename ファイル名
+	/**
+	 * コンストラクタ
+	 * @param filename	ファイル名
+	 */
 	tConfigData(const wxString & filename);
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tConfigData();
 
 private:
@@ -64,18 +69,23 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		設定情報管理クラス
-//---------------------------------------------------------------------------
+/**
+ * 設定情報管理クラス
+ */
 class tConfig : public singleton_base<tConfig>
 {
 	tConfigData Variable; //!< Variable設定情報
 	tConfigData System; //!< System設定情報
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tConfig();
 
-	//! @brief		デストラクタ
+	/**
+	 * デストラクタ
+	 */
 	~tConfig();
 
 public:
@@ -83,9 +93,11 @@ public:
 	tConfigData & GetSystemConfig()   { return System;   } //!< System設定情報を返す
 
 private:
-	//! @brief		設定ファイルのファイル名を得る
-	//! @param		realm		レルム ( "system" か "variable" )
-	//! @return		ファイル名
+	/**
+	 * 設定ファイルのファイル名を得る
+	 * @param realm	レルム ( "system" か "variable" )
+	 * @return	ファイル名
+	 */
 	static wxString GetConfigFileName(const wxString &realm);
 };
 //---------------------------------------------------------------------------

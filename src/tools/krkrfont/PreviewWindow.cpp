@@ -23,8 +23,9 @@ namespace Risa {
 #define RISA__PREVIEW_MARGIN_MIN   1
 
 //---------------------------------------------------------------------------
-//! @brief		プレビューウィンドウのクライアントとなるスクロールウィンドウクラス
-//---------------------------------------------------------------------------
+/**
+ * プレビューウィンドウのクライアントとなるスクロールウィンドウクラス
+ */
 class wxPreviewScrolledWindow : public wxVScrolledWindow
 {
 public:
@@ -63,8 +64,9 @@ private:
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブルの定義
-//---------------------------------------------------------------------------
+/**
+ * イベントテーブルの定義
+ */
 BEGIN_EVENT_TABLE(wxPreviewScrolledWindow, wxVScrolledWindow)
 	EVT_IDLE(wxPreviewScrolledWindow::OnIdle)
 	EVT_PAINT(wxPreviewScrolledWindow::OnPaint)
@@ -77,8 +79,9 @@ END_EVENT_TABLE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 wxPreviewScrolledWindow::wxPreviewScrolledWindow(wxWindow * parent)	:
 	wxVScrolledWindow(parent)
 {
@@ -93,8 +96,9 @@ wxPreviewScrolledWindow::wxPreviewScrolledWindow(wxWindow * parent)	:
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 wxPreviewScrolledWindow::~wxPreviewScrolledWindow()
 {
 }
@@ -105,9 +109,10 @@ wxPreviewScrolledWindow::~wxPreviewScrolledWindow()
 
 
 //---------------------------------------------------------------------------
-//! @brief		一行に何文字はいるかを現在のクライアントサイズから計算する
-//! @return		一行に入る文字数
-//---------------------------------------------------------------------------
+/**
+ * 一行に何文字はいるかを現在のクライアントサイズから計算する
+ * @return	一行に入る文字数
+ */
 risse_int wxPreviewScrolledWindow::GetNCharsInLine() const
 {
 	// 横に何文字入るかを計算
@@ -125,9 +130,10 @@ risse_int wxPreviewScrolledWindow::GetNCharsInLine() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		LastTopLeftIndex を更新する
-//! @note		この情報は UpdateDisplayInfoで利用される
-//---------------------------------------------------------------------------
+/**
+ * LastTopLeftIndex を更新する
+ * @note	この情報は UpdateDisplayInfoで利用される
+ */
 void wxPreviewScrolledWindow::PushTopLeftIndex()
 {
 	risse_int nw = GetNCharsInLine();
@@ -138,8 +144,9 @@ void wxPreviewScrolledWindow::PushTopLeftIndex()
 
 
 //---------------------------------------------------------------------------
-//! @brief		表示情報を更新する
-//---------------------------------------------------------------------------
+/**
+ * 表示情報を更新する
+ */
 void wxPreviewScrolledWindow::UpdateDisplayInfo()
 {
 	// 横に何文字入るかを計算
@@ -168,9 +175,10 @@ void wxPreviewScrolledWindow::UpdateDisplayInfo()
 
 
 //---------------------------------------------------------------------------
-//! @brief		倍率を設定する
-//! @param		maginify 倍率
-//---------------------------------------------------------------------------
+/**
+ * 倍率を設定する
+ * @param maginify	倍率
+ */
 void wxPreviewScrolledWindow::SetMagnify(risse_int magnify)
 {
 	PushTopLeftIndex();
@@ -181,10 +189,11 @@ void wxPreviewScrolledWindow::SetMagnify(risse_int magnify)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定行の高さを得る(基底クラスのオーバーライド)
-//! @param		n   行
-//! @return		その行の高さ (この実装では固定値を返す)
-//---------------------------------------------------------------------------
+/**
+ * 指定行の高さを得る(基底クラスのオーバーライド)
+ * @param n	行
+ * @return	その行の高さ (この実装では固定値を返す)
+ */
 wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
 {
 	if(!FACE) return 12; // FACE が NULL の場合は特に意味のない値を返す
@@ -194,9 +203,10 @@ wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
 
 
 //---------------------------------------------------------------------------
-//! @brief		文字のセルの周りのマージンを得る
-//! @return		マージン(ピクセル単位)
-//---------------------------------------------------------------------------
+/**
+ * 文字のセルの周りのマージンを得る
+ * @return	マージン(ピクセル単位)
+ */
 risse_uint wxPreviewScrolledWindow::GetMargin() const
 {
 	if(!FACE) return RISA__PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
@@ -211,11 +221,12 @@ risse_uint wxPreviewScrolledWindow::GetMargin() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定位置にFreeTypeでレンダリングした文字を表示する
-//! @param		ch 表示したい文字
-//! @param		x 表示したいx位置
-//! @param		y 表示したいy位置
-//---------------------------------------------------------------------------
+/**
+ * 指定位置にFreeTypeでレンダリングした文字を表示する
+ * @param ch	表示したい文字
+ * @param x		表示したいx位置
+ * @param y		表示したいy位置
+ */
 void wxPreviewScrolledWindow::PrintCharacter(risse_char ch, int x, int y)
 {
 	// 文字のグリフイメージを取得する
@@ -289,9 +300,10 @@ void wxPreviewScrolledWindow::PrintCharacter(risse_char ch, int x, int y)
 
 
 //---------------------------------------------------------------------------
-//! @brief		システムがアイドルなとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * システムがアイドルなとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 {
 	// IndexToUpdate から一文字を取り出し、それをクライアントに描画する
@@ -346,9 +358,10 @@ void wxPreviewScrolledWindow::OnIdle(wxIdleEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		描画が必要なとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 描画が必要なとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 {
 	if(!FACE)
@@ -418,9 +431,10 @@ void wxPreviewScrolledWindow::OnPaint(wxPaintEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		スクロールされるとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * スクロールされるとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnScroll(wxScrollWinEvent& event)
 {
 	event.Skip();
@@ -430,9 +444,10 @@ void wxPreviewScrolledWindow::OnScroll(wxScrollWinEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		サイズが変更されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * サイズが変更されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnSize(wxSizeEvent& event)
 {
 	UpdateDisplayInfo();
@@ -442,9 +457,10 @@ void wxPreviewScrolledWindow::OnSize(wxSizeEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		マウスカーソルが移動したとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * マウスカーソルが移動したとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 {
 	// マウスカーソル下の文字をステータスバーに表示
@@ -479,9 +495,10 @@ void wxPreviewScrolledWindow::OnMotion(wxMouseEvent & event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		マウスカーソルがウィンドウから退出したとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * マウスカーソルがウィンドウから退出したとき
+ * @param event	イベントオブジェクト
+ */
 void wxPreviewScrolledWindow::OnLeaveWindow(wxMouseEvent & event)
 {
 	// ステータスバーの文字を消去
@@ -504,11 +521,12 @@ wxFontPreviewFrame * PreviewFrame = NULL;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		プレビューウィンドウを表示する
-//! @param		maindialog メインダイアログオブジェクトへのポインタ
-//! @note		まだプレビューウィンドウが作成されていなければ作成し、
-//!				既に作成されていたら最前面に表示する
-//---------------------------------------------------------------------------
+/**
+ * プレビューウィンドウを表示する
+ * @param maindialog	メインダイアログオブジェクトへのポインタ
+ * @note	まだプレビューウィンドウが作成されていなければ作成し、
+ *			既に作成されていたら最前面に表示する
+ */
 void ShowPreviewFrame(wxMainDialog *maindialog)
 {
 	if(!PreviewFrame)
@@ -522,8 +540,9 @@ void ShowPreviewFrame(wxMainDialog *maindialog)
 
 
 //---------------------------------------------------------------------------
-//! @brief		プレビューウィンドウにFaceやそのプロパティの変更を通知する
-//---------------------------------------------------------------------------
+/**
+ * プレビューウィンドウにFaceやそのプロパティの変更を通知する
+ */
 void NotifyPreviewFrameFaceChanged()
 {
 	if(PreviewFrame)
@@ -535,8 +554,9 @@ void NotifyPreviewFrameFaceChanged()
 
 
 //---------------------------------------------------------------------------
-//! @brief		プレビューウィンドウを破棄する
-//---------------------------------------------------------------------------
+/**
+ * プレビューウィンドウを破棄する
+ */
 void DestroyPreviewFrame()
 {
 	if(PreviewFrame) PreviewFrame->Destroy();
@@ -552,8 +572,9 @@ void DestroyPreviewFrame()
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントテーブル定義
-//---------------------------------------------------------------------------
+/**
+ * イベントテーブル定義
+ */
 BEGIN_EVENT_TABLE(wxFontPreviewFrame, wxPreviewFrame_Base)
 	EVT_CLOSE(wxFontPreviewFrame::FrameClose)
 	EVT_TOOL(XRCID("CloseButton"), wxFontPreviewFrame::CloseButtonClick)
@@ -562,8 +583,9 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 wxFontPreviewFrame::wxFontPreviewFrame(wxMainDialog * maindialog) : MainDialog(maindialog)
 {
 	PreviewScrolledWindow = NULL;
@@ -577,8 +599,9 @@ wxFontPreviewFrame::wxFontPreviewFrame(wxMainDialog * maindialog) : MainDialog(m
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 wxFontPreviewFrame::~wxFontPreviewFrame()
 {
 	PreviewFrame = NULL;
@@ -587,8 +610,9 @@ wxFontPreviewFrame::~wxFontPreviewFrame()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Faceやそのプロパティが変わったときにMainDialogから呼ばれる
-//---------------------------------------------------------------------------
+/**
+ * Faceやそのプロパティが変わったときにMainDialogから呼ばれる
+ */
 void wxFontPreviewFrame::FaceChanged()
 {
 	wxString status2;
@@ -603,9 +627,10 @@ void wxFontPreviewFrame::FaceChanged()
 
 
 //---------------------------------------------------------------------------
-//! @brief		ウィンドウが閉じるとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * ウィンドウが閉じるとき
+ * @param event	イベントオブジェクト
+ */
 void wxFontPreviewFrame::FrameClose(wxCloseEvent& event)
 {
 	Destroy();
@@ -613,9 +638,10 @@ void wxFontPreviewFrame::FrameClose(wxCloseEvent& event)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		「閉じる」ボタンが押されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「閉じる」ボタンが押されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxFontPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 {
 	Destroy();
@@ -625,9 +651,10 @@ void wxFontPreviewFrame::CloseButtonClick(wxCommandEvent& event)
 
 
 //---------------------------------------------------------------------------
-//! @brief		「倍率」リストボックスが選択されたとき
-//! @param		event イベントオブジェクト
-//---------------------------------------------------------------------------
+/**
+ * 「倍率」リストボックスが選択されたとき
+ * @param event	イベントオブジェクト
+ */
 void wxFontPreviewFrame::MagnifyChoiceSelected(wxCommandEvent& event)
 {
 	const static char itemindextomag[] =

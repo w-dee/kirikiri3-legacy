@@ -23,8 +23,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		４つの文字から 32bit id を生成するためのテンプレートクラス
-//---------------------------------------------------------------------------
+/**
+ * ４つの文字から 32bit id を生成するためのテンプレートクラス
+ */
 template <int a, int b, int c, int d>
 struct tFourCharId
 {
@@ -39,8 +40,9 @@ struct tFourCharId
 
 
 //---------------------------------------------------------------------------
-//! @brief		IDレジストリ
-//---------------------------------------------------------------------------
+/**
+ * IDレジストリ
+ */
 class tIdRegistry : public singleton_base<tIdRegistry>, manual_start<tIdRegistry>
 {
 	typedef singleton_base<tIdRegistry> inherited;
@@ -48,7 +50,9 @@ class tIdRegistry : public singleton_base<tIdRegistry>, manual_start<tIdRegistry
 	tCriticalSection CS; //!< このオブジェクトを保護するクリティカルセクション
 
 public:
-	//! @brief		エッジを流れるデータの型の情報
+	/**
+	 * エッジを流れるデータの型の情報
+	 */
 	struct tEdgeData
 	{
 		risse_uint32 Id;	//!< ID
@@ -61,7 +65,9 @@ public:
 	static const tRenderGeneration UndefinedRenderGeneration = 0;
 
 private:
-	//! @brief		エッジを流れるデータの型のマップ
+	/**
+	 * エッジを流れるデータの型のマップ
+	 */
 	typedef gc_map<risse_uint32, tEdgeData> tEdgeDataMap;
 
 	tEdgeDataMap EdgeDataMap; //!< エッジを流れるデータの型のマップ
@@ -69,16 +75,22 @@ private:
 	risse_uint32 RenderGeneration; //!< レンダリングの世代(普通1ずつふえ、前のレンダリングと次のレンダリングを区別する) @note グラフごとではなくてシステムワイドな値
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tIdRegistry();
 
-	//! @brief		エッジを流れるデータの型を追加する
-	//! @param		data		エッジを流れるデータの型の情報
-	//! @return		登録に成功したかどうか(真=成功,偽=すでにデータがあった)
+	/**
+	 * エッジを流れるデータの型を追加する
+	 * @param data	エッジを流れるデータの型の情報
+	 * @return	登録に成功したかどうか(真=成功,偽=すでにデータがあった)
+	 */
 	bool RegisterEdgeData(const tEdgeData & data);
 
-	//! @brief		レンダリング世代をインクリメントして得る
-	//! @return		新しいレンダリング世代
+	/**
+	 * レンダリング世代をインクリメントして得る
+	 * @return	新しいレンダリング世代
+	 */
 	risse_uint32 GetNewRenderGeneration();
 
 };

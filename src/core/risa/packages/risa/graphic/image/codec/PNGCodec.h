@@ -23,45 +23,55 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		PNGイメージデコーダ
-//---------------------------------------------------------------------------
+/**
+ * PNGイメージデコーダ
+ */
 class tPNGImageDecoder : public tImageDecoder
 {
 	tDictionaryInstance * Dictionary; //!< メタデータ用辞書配列
 
 public:
-	//! @brief		デコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * デコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 						tPixel::tFormat pixel_format, tProgressCallback * callback,
 						tDictionaryInstance * dict);
 
-	//! @brief		メタデータ用辞書配列が存在するかどうかを得る
-	//! @return		メタデータ用辞書配列
+	/**
+	 * メタデータ用辞書配列が存在するかどうかを得る
+	 * @return	メタデータ用辞書配列
+	 */
 	bool HasDictionary() const { return Dictionary != NULL; }
 
-	//! @brief		メタデータ用辞書配列に値をpushする
-	//! @param		key		キー(文字列)
-	//! @param		value	値
+	/**
+	 * メタデータ用辞書配列に値をpushする
+	 * @param key	キー(文字列)
+	 * @param value	値
+	 */
 	void PushMetadata(const tString & key, const tVariant & value);
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		PNGイメージエンコーダ
-//---------------------------------------------------------------------------
+/**
+ * PNGイメージエンコーダ
+ */
 class tPNGImageEncoder : public tImageEncoder
 {
 public:
-	//! @brief		エンコードを行う
-	//! @param		stream		入力ストリーム
-	//! @param		pixel_format	要求するピクセル形式
-	//! @param		callback	進捗コールバック(NULL=イラナイ)
-	//! @param		dict		メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	/**
+	 * エンコードを行う
+	 * @param stream		入力ストリーム
+	 * @param pixel_format	要求するピクセル形式
+	 * @param callback		進捗コールバック(NULL=イラナイ)
+	 * @param dict			メタデータ用の辞書配列(NULL=メタデータ要らない場合)
+	 */
 	virtual void Process(tStreamInstance * stream,
 					tProgressCallback * callback,
 					tDictionaryInstance * dict);

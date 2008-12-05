@@ -25,42 +25,55 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		標準入出力ストリーム
-//---------------------------------------------------------------------------
+/**
+ * 標準入出力ストリーム
+ */
 class tStandardIOStreamInstance : public tStreamInstance
 {
 protected:
 	FILE * Stream; //!< ストリーム
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		flags アクセスフラグ
+	/**
+	 * コンストラクタ
+	 * @param flags	アクセスフラグ
+	 */
 	tStandardIOStreamInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	~tStandardIOStreamInstance() {;}
 
 public: // risse 用メソッドとか
 	void construct() {;}
 	void initialize(int index, const tNativeCallInfo &info);
 
-	//! @brief		ストリームを閉じる
-	//! @note		基本的にはこれでストリームを閉じること。
-	//!				このメソッドでストリームを閉じなかった場合の動作は
-	//!				「未定義」である
+	/**
+	 * ストリームを閉じる
+	 * @note	基本的にはこれでストリームを閉じること。
+	 *			このメソッドでストリームを閉じなかった場合の動作は
+	 *			「未定義」である
+	 */
 	void dispose();
 
-	//! @brief		ストリームから読み込む
-	//! @param		buf		読み込んだデータを書き込む先
-	//! @return		実際に読み込まれたサイズ
+	/**
+	 * ストリームから読み込む
+	 * @param buf	読み込んだデータを書き込む先
+	 * @return	実際に読み込まれたサイズ
+	 */
 	risse_size get(const tOctet & buf);
 
-	//! @brief		ストリームに書き込む
-	//! @param		buf		書き込むデータ
-	//! @return		実際に書き込まれたサイズ
+	/**
+	 * ストリームに書き込む
+	 * @param buf	書き込むデータ
+	 * @return	実際に書き込まれたサイズ
+	 */
 	risse_size put(const tOctet & buf);
 
-	//! @brief		ストリームをフラッシュする(書き込みバッファをフラッシュする)
+	/**
+	 * ストリームをフラッシュする(書き込みバッファをフラッシュする)
+	 */
 	void flush();
 };
 //---------------------------------------------------------------------------
@@ -69,21 +82,28 @@ public: // risse 用メソッドとか
 
 
 //---------------------------------------------------------------------------
-//! @brief		"StandardIOStream" クラス
-//---------------------------------------------------------------------------
+/**
+ * "StandardIOStream" クラス
+ */
 class tStandardIOStreamClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tStandardIOStreamClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:

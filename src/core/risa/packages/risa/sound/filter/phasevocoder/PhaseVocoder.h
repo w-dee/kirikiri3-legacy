@@ -21,8 +21,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief フェーズボコーダフィルタクラス
-//---------------------------------------------------------------------------
+/**
+ * フェーズボコーダフィルタクラス
+ */
 class tPhaseVocoderInstance : public tWaveFilterInstance
 {
 	static const int DEFAULT_FRAME_SIZE = 4096; //!< default frame size
@@ -38,58 +39,88 @@ class tPhaseVocoderInstance : public tWaveFilterInstance
 	tWaveSegmentQueue SegmentQueue;
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tPhaseVocoderInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	~tPhaseVocoderInstance() {;}
 
-	//! @brief		FFTフレームサイズ(ウィンドウサイズ)を得る
-	//! @return		FFTフレームサイズ(ウィンドウサイズ)
+	/**
+	 * FFTフレームサイズ(ウィンドウサイズ)を得る
+	 * @return	FFTフレームサイズ(ウィンドウサイズ)
+	 */
 	int GetFrameSize() const;
 
-	//! @brief		FFTフレームサイズ(ウィンドウサイズ)を設定する
-	//! @param		v FFTフレームサイズ(ウィンドウサイズ)
+	/**
+	 * FFTフレームサイズ(ウィンドウサイズ)を設定する
+	 * @param v	FFTフレームサイズ(ウィンドウサイズ)
+	 */
 	void SetFrameSize(int v);
 
-	//! @brief		オーバーサンプリング係数(オーバーラップ)を得る
-	//! @return		オーバーサンプリング係数(オーバーラップ)
+	/**
+	 * オーバーサンプリング係数(オーバーラップ)を得る
+	 * @return	オーバーサンプリング係数(オーバーラップ)
+	 */
 	int GetOverSampling() const;
 
-	//! @brief		オーバーサンプリング係数(オーバーラップ)を設定する
-	//! @param		v オーバーサンプリング係数(オーバーラップ)
+	/**
+	 * オーバーサンプリング係数(オーバーラップ)を設定する
+	 * @param v	オーバーサンプリング係数(オーバーラップ)
+	 */
 	void SetOverSampling(int v);
 
-	//! @brief		時間軸方向のスケールを得る
-	//! @return		時間軸方向のスケール
+	/**
+	 * 時間軸方向のスケールを得る
+	 * @return	時間軸方向のスケール
+	 */
 	float GetTimeScale() const;
 
-	//! @brief		時間軸方向のスケールを設定する
-	//! @param		v 時間軸方向のスケール
+	/**
+	 * 時間軸方向のスケールを設定する
+	 * @param v	時間軸方向のスケール
+	 */
 	void SetTimeScale(float v);
 
-	//! @brief		周波数軸方向のスケールを得る
-	//! @return		周波数軸方向のスケール
+	/**
+	 * 周波数軸方向のスケールを得る
+	 * @return	周波数軸方向のスケール
+	 */
 	float GetFrequencyScale() const;
 
-	//! @brief		周波数軸方向のスケールを設定する
-	//! @param		v 周波数軸方向のスケール
+	/**
+	 * 周波数軸方向のスケールを設定する
+	 * @param v	周波数軸方向のスケール
+	 */
 	void SetFrequencyScale(float v);
 
 private:
-	//! @brief		内容のクリア
+	/**
+	 * 内容のクリア
+	 */
 	void Clear();
 
-	//! @brief		DSPオブジェクトを作り直す
+	/**
+	 * DSPオブジェクトを作り直す
+	 */
 	void RebuildDSP();
 
-	//! @brief		DSPオブジェクトの存在を確かにする
+	/**
+	 * DSPオブジェクトの存在を確かにする
+	 */
 	void EnsureDSP();
 
-	//! @brief		入力となるフィルタが変わったとき、あるいはリセットされるとき
+	/**
+	 * 入力となるフィルタが変わったとき、あるいはリセットされるとき
+	 */
 	void InputChanged();
 
-	//! @brief		フィルタ動作を行うとき
+	/**
+	 * フィルタ動作を行うとき
+	 */
 	void Filter();
 
 public: // Risse用メソッドなど
@@ -115,21 +146,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"PhaseVocoder" クラス
-//---------------------------------------------------------------------------
+/**
+ * "PhaseVocoder" クラス
+ */
 class tPhaseVocoderClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tPhaseVocoderClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど

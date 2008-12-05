@@ -30,10 +30,11 @@ namespace Risa {
 // 共通
 
 //---------------------------------------------------------------------------
-//! @brief		atan2 の高速版 (1x float, C言語版)
-//! @note		精度はあまり良くない。10bitぐらい。 @r
-//!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
-//---------------------------------------------------------------------------
+/**
+ * atan2 の高速版 (1x float, C言語版)
+ * @note	精度はあまり良くない。10bitぐらい。 @r
+ *			原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
+ */
 static inline float VFast_arctan2(float y, float x)
 {
    static const float coeff_1 = M_PI/4;
@@ -60,9 +61,10 @@ static inline float VFast_arctan2(float y, float x)
 
 
 //---------------------------------------------------------------------------
-//! @brief		sincos の高速版 (1x float, C言語版)
-//! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf 
-//---------------------------------------------------------------------------
+/**
+ * sincos の高速版 (1x float, C言語版)
+ * @note	原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf 
+ */
 static inline float VFast_atan2_madd(float a, float b, float c) { return a*b+c; }
 static inline float VFast_atan2_nmsub(float a, float b, float c) { return -(a*b-c); }
 static inline float VFast_atan2_round(float a) { return (a>0)?(int)(a+0.5):(int)(a-0.5); }
@@ -123,8 +125,9 @@ static inline void VFast_sincos(float v, float &sin, float &cos)
 
 
 //---------------------------------------------------------------------------
-//! @brief		Phase Wrapping(radianを-PI～PIにラップする) (1x float, C言語版)
-//---------------------------------------------------------------------------
+/**
+ * Phase Wrapping(radianを-PI～PIにラップする) (1x float, C言語版)
+ */
 static inline float WrapPi_F1(float v)
 {
 	int rad_unit = static_cast<int>(v*(1.0/M_PI));

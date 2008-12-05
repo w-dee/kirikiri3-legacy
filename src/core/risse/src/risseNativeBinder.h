@@ -142,8 +142,9 @@ namespace Risse
 {
 class tClassBase;
 //---------------------------------------------------------------------------
-//! @brief		ネイティブ関数呼び出し情報
-//---------------------------------------------------------------------------
+/**
+ * ネイティブ関数呼び出し情報
+ */
 class tNativeCallInfo : public tCollectee
 {
 public:
@@ -152,17 +153,18 @@ public:
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tMethodArgument & args;	//!< 引数
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
-										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
-	//! @brief		コンストラクタ
-	//! @param		engine_	スクリプトエンジンインスタンス
-	//! @param		result_	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		flags_	オペレーションフラグ
-	//! @param		args_	引数
-	//! @param		This_	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		Class_	クラスインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine_	スクリプトエンジンインスタンス
+	 * @param result_	結果の格納先 (NULLの場合は結果が要らない場合)
+	 * @param flags_	オペレーションフラグ
+	 * @param args_		引数
+	 * @param This_		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @param Class_	クラスインスタンス
+	 */
 	tNativeCallInfo(
 		tScriptEngine * engine_,
 		tVariant * result_,
@@ -172,56 +174,73 @@ public:
 		tClassBase * Class_):
 		engine(engine_), result(result_), flags(flags_), args(args_), This(This_), Class(Class_) {;}
 
-	//! @brief		親クラスの initialize を呼ぶ(ユーティリティメソッド)
-	//! @param		args		引数 (空の引数で呼び出したい場合は指定しない.
-	//!							与えられた引数をそのまま渡したい場合はこのオブジェクトの args を渡す)
+	/**
+	 * 親クラスの initialize を呼ぶ(ユーティリティメソッド)
+	 * @param args	引数 (空の引数で呼び出したい場合は指定しない.
+	 *				与えられた引数をそのまま渡したい場合はこのオブジェクトの args を渡す)
+	 */
 	void InitializeSuperClass(const tMethodArgument & args = tMethodArgument::Empty()) const;
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risseネイティブ関数
-//---------------------------------------------------------------------------
+/**
+ * Risseネイティブ関数
+ */
 template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindFunction : public tObjectInterface
 {
 protected:
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
-	//! @param		f			呼び出し先オブジェクト
-	//! @param		info		呼び出し情報
+	/**
+	 * Risseメソッド呼び出し時に呼ばれるメソッドのtypedef
+	 * @param f		呼び出し先オブジェクト
+	 * @param info	呼び出し情報
+	 */
 	typedef void (*tCallee)(TT f, const tNativeCallInfo & info);
 
-	//! @brief		Risseクラスインスタンス
+	/**
+	 * Risseクラスインスタンス
+	 */
 	tClassBase * Class;
 
-	//! @brief		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
+	/**
+	 * Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
+	 */
 	TT TargetFunction;
 
-	//! @brief		Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)
+	/**
+	 * Risseメソッド呼び出し時に呼ばれるメソッド(インスタンス作成時に指定)
+	 */
 	tCallee Callee;
 
 protected:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param class_	Risseクラスインスタンス
+	 * @param target	Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
+	 * @param callee	Risseメソッド呼び出し時に呼ばれるメソッド
+	 */
 	tNativeBindFunction(tScriptEngine * engine,
 		tClassBase * class_, TT target, tCallee callee) :
 		tObjectInterface(new tRTTI(engine))
 		{ Class = class_; TargetFunction = target; Callee = callee; }
 
 public:
-	//! @brief		新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
-	//! @param		callee		Risseメソッド呼び出し時に呼ばれるメソッド
+	/**
+	 * 新しい関数インスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param class_	Risseクラスインスタンス
+	 * @param target	Risseメソッド呼び出し時に本当に呼ばれるネイティブな関数
+	 * @param callee	Risseメソッド呼び出し時に呼ばれるメソッド
+	 */
 	static tObjectInterface * New(tScriptEngine * engine,
 		tClassBase * class_, TT target, tCallee callee);
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
@@ -229,8 +248,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ネイティブプロパティゲッター呼び出し情報
-//---------------------------------------------------------------------------
+/**
+ * ネイティブプロパティゲッター呼び出し情報
+ */
 class tNativePropGetInfo : public tCollectee
 {
 public:
@@ -238,17 +258,18 @@ public:
 	tVariant * result;				//!< 結果の格納先 (NULLの場合は結果が要らない場合)
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
-										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
 
-	//! @brief		コンストラクタ
-	//! @param		engine_	スクリプトエンジンインスタンス
-	//! @param		result_	結果の格納先 (NULLの場合は結果が要らない場合)
-	//! @param		flags_	オペレーションフラグ
-	//! @param		This_	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		Class_	クラスインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine_	スクリプトエンジンインスタンス
+	 * @param result_	結果の格納先 (NULLの場合は結果が要らない場合)
+	 * @param flags_	オペレーションフラグ
+	 * @param This_		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @param Class_	クラスインスタンス
+	 */
 	tNativePropGetInfo(
 		tScriptEngine * engine_,
 		tVariant * result_,
@@ -262,8 +283,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		ネイティブプロパティセッター呼び出し情報
-//---------------------------------------------------------------------------
+/**
+ * ネイティブプロパティセッター呼び出し情報
+ */
 class tNativePropSetInfo : public tCollectee
 {
 public:
@@ -271,17 +293,18 @@ public:
 	const tVariant & value;		//!< 値
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
-										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
 
-	//! @brief		コンストラクタ
-	//! @param		engine_	スクリプトエンジンインスタンス
-	//! @param		value_	値
-	//! @param		flags_	オペレーションフラグ
-	//! @param		This_	メソッドが実行されるべき"Thisオブジェクト"
-	//!						(NULL="Thisオブジェクト"を指定しない場合)
-	//! @param		Class_	クラスインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine_	スクリプトエンジンインスタンス
+	 * @param value_	値
+	 * @param flags_	オペレーションフラグ
+	 * @param This_		メソッドが実行されるべき"Thisオブジェクト"
+	 *					(NULL="Thisオブジェクト"を指定しない場合)
+	 * @param Class_	クラスインスタンス
+	 */
 	tNativePropSetInfo(
 		tScriptEngine * engine_,
 		const tVariant & value_,
@@ -298,85 +321,115 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		RisseネイティブプロパティのGetterの実装
-//---------------------------------------------------------------------------
+/**
+ * RisseネイティブプロパティのGetterの実装
+ */
 template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindPropertyGetter : public tObjectInterface
 {
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tNativeBindPropertyGetter() {}
 
-	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッドのtypedef
-	//! @param		f			呼び出し先オブジェクト
-	//! @param		info		呼び出し情報
+	/**
+	 * Risseプロパティが読み込まれる際に呼ばれるメソッドのtypedef
+	 * @param f		呼び出し先オブジェクト
+	 * @param info	呼び出し情報
+	 */
 	typedef void (*tGetter)(TT f, const tNativePropGetInfo & info);
 
 private:
-	//! @brief		Risseクラスインスタンス
+	/**
+	 * Risseクラスインスタンス
+	 */
 	tClassBase * Class;
 
-	//! @brief		Risseプロパティが読み込まれる際に本当に呼ばれるネイティブな関数
+	/**
+	 * Risseプロパティが読み込まれる際に本当に呼ばれるネイティブな関数
+	 */
 	TT TargetFunction;
 
-	//! @brief		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	/**
+	 * Risseプロパティが読み込まれる際に呼ばれるメソッド
+	 */
 	tGetter Getter;
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseプロパティ読み込み時に本当に呼ばれるネイティブな関数
-	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param class_	Risseクラスインスタンス
+	 * @param target	Risseプロパティ読み込み時に本当に呼ばれるネイティブな関数
+	 * @param getter	Risseプロパティが読み込まれる際に呼ばれるメソッド
+	 */
 	tNativeBindPropertyGetter(tScriptEngine * engine,
 		tClassBase * class_, TT target, tGetter getter) :
 		tObjectInterface(new tRTTI(engine))
 	{ Class = class_; TargetFunction = target; Getter = getter; }
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		RisseネイティブプロパティのSetterの実装
-//---------------------------------------------------------------------------
+/**
+ * RisseネイティブプロパティのSetterの実装
+ */
 template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindPropertySetter : public tObjectInterface
 {
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tNativeBindPropertySetter() {}
 
-	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
-	//! @param		f			呼び出し先オブジェクト
-	//! @param		info		呼び出し情報
+	/**
+	 * Risseプロパティが書き込まれる際に呼ばれるメソッドのtypedef
+	 * @param f		呼び出し先オブジェクト
+	 * @param info	呼び出し情報
+	 */
 	typedef void (*tSetter)(TT f, const tNativePropSetInfo & info);
 
 
 private:
-	//! @brief		Risseクラスインスタンス
+	/**
+	 * Risseクラスインスタンス
+	 */
 	tClassBase * Class;
 
-	//! @brief		Risseプロパティが書き込まれる際に本当に呼ばれるネイティブな関数
+	/**
+	 * Risseプロパティが書き込まれる際に本当に呼ばれるネイティブな関数
+	 */
 	TT TargetFunction;
 
-	//! @brief		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	/**
+	 * Risseプロパティが書き込まれる際に呼ばれるメソッド
+	 */
 	tSetter Setter;
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		class_		Risseクラスインスタンス
-	//! @param		target		Risseプロパティ書き込み時に本当に呼ばれるネイティブな関数
-	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param class_	Risseクラスインスタンス
+	 * @param target	Risseプロパティ書き込み時に本当に呼ばれるネイティブな関数
+	 * @param setter	Risseプロパティが書き込まれる際に呼ばれるメソッド
+	 */
 	tNativeBindPropertySetter(tScriptEngine * engine,
 		tClassBase * class_, TT target, tSetter setter) :
 		tObjectInterface(new tRTTI(engine))
 	{ Class = class_; TargetFunction = target; Setter = setter; }
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------
@@ -385,27 +438,34 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		Risseネイティブプロパティ
-//---------------------------------------------------------------------------
+/**
+ * Risseネイティブプロパティ
+ */
 template <typename TT> // target-type, void (tObjectBase::*)() とか
 class tNativeBindProperty : public tObjectInterface
 {
-	//! @brief		親クラスのtypedef
+	/**
+	 * 親クラスのtypedef
+	 */
 	typedef tObjectInterface inherited;
 
 	tObjectInterface * Getter; //!< Risseプロパティが読み込まれる際に呼ばれるメソッド
 	tObjectInterface * Setter; //!< Risseプロパティが書き込まれる際に呼ばれるメソッド
 
 public:
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tNativeBindProperty() {}
 
 protected:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		Class		クラスインスタンス
-	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
-	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param Class		クラスインスタンス
+	 * @param getter	Risseプロパティが読み込まれる際に呼ばれるメソッド
+	 * @param setter	Risseプロパティが書き込まれる際に呼ばれるメソッド
+	 */
 	tNativeBindProperty(tScriptEngine * engine, tClassBase * Class,
 		TT gettertarget, typename tNativeBindPropertyGetter<TT>::tGetter getter,
 		TT settertarget, typename tNativeBindPropertySetter<TT>::tSetter setter)
@@ -414,17 +474,21 @@ protected:
 		Setter(new tNativeBindPropertySetter<TT>(engine, Class, settertarget, setter)) {}
 
 public:
-	//! @brief		新しいプロパティインスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		Class		クラスインスタンス
-	//! @param		getter		Risseプロパティが読み込まれる際に呼ばれるメソッド
-	//! @param		setter		Risseプロパティが書き込まれる際に呼ばれるメソッド
+	/**
+	 * 新しいプロパティインスタンスを生成して返す(コンストラクタではなくてこちらを呼ぶこと)
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param Class		クラスインスタンス
+	 * @param getter	Risseプロパティが読み込まれる際に呼ばれるメソッド
+	 * @param setter	Risseプロパティが書き込まれる際に呼ばれるメソッド
+	 */
 	static tObjectInterface * New(tScriptEngine * engine,
 		tClassBase * Class,
 		TT gettertarget, typename tNativeBindPropertyGetter<TT>::tGetter getter,
 		TT settertarget, typename tNativeBindPropertySetter<TT>::tSetter setter);
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------

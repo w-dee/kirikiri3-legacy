@@ -22,8 +22,9 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Array" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Array" クラスのインスタンス用 C++クラス
+ */
 class tArrayInstance : public tObjectBase
 {
 public:
@@ -33,11 +34,15 @@ private:
 	tArray Array; //!< 配列の中身
 
 public:
-	//! @brief		Arrayへの参照を得る
-	//! @return		Arrayへの参照
+	/**
+	 * Arrayへの参照を得る
+	 * @return	Arrayへの参照
+	 */
 	tArray & GetArray() { return Array; }
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tArrayInstance() {;}
 
 public: // Risse用メソッドなど
@@ -61,21 +66,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Array" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Array" クラス
+ */
 class tArrayClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tArrayClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:
@@ -84,7 +96,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Enumerable" クラス状の物を簡単にイテレートするためのクラス
+/**
+ * "Enumerable" クラス状の物を簡単にイテレートするためのクラス
+ */
 // TODO: Array ではなくて enumerable への対応？
 //---------------------------------------------------------------------------
 class tEnumerableIterator : public tCollectee
@@ -95,26 +109,36 @@ class tEnumerableIterator : public tCollectee
 	risse_size Index; //!< 現在のイテレーションのインデックス
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		array		Enumerable なオブジェクト(vtObjectあるいはvtDataであること)
+	/**
+	 * コンストラクタ
+	 * @param array	Enumerable なオブジェクト(vtObjectあるいはvtDataであること)
+	 */
 	tEnumerableIterator(const tVariant & array);
 
-	//! @brief		配列から次の要素を取り出す
-	//! @return		配列にすでに要素がない場合は false
-	//! @note		Index と Value にそれぞれインデックスとそれに対応した値が格納されるので
-	//!				GetIndex() や GetValue() で取得すること
+	/**
+	 * 配列から次の要素を取り出す
+	 * @return	配列にすでに要素がない場合は false
+	 * @note	Index と Value にそれぞれインデックスとそれに対応した値が格納されるので
+	 *			GetIndex() や GetValue() で取得すること
+	 */
 	bool Next();
 
-	//! @brief		配列の要素数を取り出す
-	//! @return		配列の要素数
+	/**
+	 * 配列の要素数を取り出す
+	 * @return	配列の要素数
+	 */
 	risse_size GetCount() const { return Count; }
 
-	//! @brief		現在のインデックスを取得する
-	//! @return		現在のインデックス
+	/**
+	 * 現在のインデックスを取得する
+	 * @return	現在のインデックス
+	 */
 	risse_size GetIndex() const { return Index; }
 
-	//! @brief		現在の値を取得する
-	//! @return		現在の値
+	/**
+	 * 現在の値を取得する
+	 * @return	現在の値
+	 */
 	const tVariant & GetValue() const { return Value; }
 
 

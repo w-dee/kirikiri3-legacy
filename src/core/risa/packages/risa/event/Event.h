@@ -79,8 +79,9 @@ namespace Risa {
 
 class tEventInfo;
 //---------------------------------------------------------------------------
-//! @brief		イベントの発生先インターフェース
-//---------------------------------------------------------------------------
+/**
+ * イベントの発生先インターフェース
+ */
 class tEventDestination : public tCollectee
 {
 public:
@@ -96,13 +97,16 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベント情報クラス
-//---------------------------------------------------------------------------
+/**
+ * イベント情報クラス
+ */
 class tEventInfo : public tCollectee
 {
 	friend class tEventQueueInstance;
 public:
-	//! @brief  イベントの優先度
+	/**
+	 * イベントの優先度
+	 */
 	enum tPriority
 	{
 		epExclusive, //!< 排他的イベント
@@ -113,7 +117,6 @@ public:
 		epMax = epLow //!< イベント優先度の最大値
 	};
 	static bool IsPriorityValid(tPriority prio) { return prio >= epMin && prio <= epMax; }
-		//!< 優先度が有効な値の範囲であるかどうか
 
 private:
 	int Id; //!< イベントID (Source固有)
@@ -128,7 +131,9 @@ protected:
 	virtual void Deliver() { if(Destination) Destination->OnEvent(this); } //!< イベントを配信先に配信する
 
 public:
-	//! @brief コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tEventInfo(
 		int id,
 		void * source = NULL,
@@ -141,7 +146,9 @@ public:
 	{
 	}
 
-	//! @brief	デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tEventInfo() {}
 
 	int GetId() const { return Id; } //!< IDを得る
@@ -158,26 +165,33 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントシステム
-//! @note		イベントシステム共通の設定を保持したり、共通の設定を行ったりする
-//---------------------------------------------------------------------------
+/**
+ * イベントシステム
+ * @note	イベントシステム共通の設定を保持したり、共通の設定を行ったりする
+ */
 class tEventSystem : public singleton_base<tEventSystem>
 {
 	bool CanDeliverEvents; //!< イベントを配信可能かどうか
 	mutable tCriticalSection CS; //!< このインスタンスを保護するためのCS
 
 public:
-	//! @brief	イベントシステムの状態が変わった場合に呼び出されるコールバック
+	/**
+	 * イベントシステムの状態が変わった場合に呼び出されるコールバック
+	 */
 	class tStateListener
 	{
 	public:
-		//! @brief		デストラクタ(おそらく呼ばれない)
+		/**
+		 * デストラクタ(おそらく呼ばれない)
+		 */
 		virtual ~tStateListener() {}
 
-		//! @brief		イベントを配信可能かどうかのステータスが変わった際に
-		//!				呼ばれる
-		//! @param		b		イベントを配信可能かどうか
-		//! @note		様々なスレッドから呼ばれる可能性があるので注意すること
+		/**
+		 * イベントを配信可能かどうかのステータスが変わった際に
+		 * 呼ばれる
+		 * @param b	イベントを配信可能かどうか
+		 * @note	様々なスレッドから呼ばれる可能性があるので注意すること
+		 */
 		virtual void OnCanDeliverEventsChanged(bool b) {;}
 	};
 
@@ -185,10 +199,14 @@ private:
 	pointer_list<tStateListener> StateListeners; //!< イベント状態リスナ
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tEventSystem() { CanDeliverEvents = true; }
 
-	//! @brief	デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tEventSystem() {}
 
 	bool GetCanDeliverEvents() const
@@ -205,12 +223,15 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		"EventQueue" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "EventQueue" クラスのインスタンス用 C++クラス
+ */
 class tEventQueueInstance : public tObjectBase, depends_on<tEventSystem>
 {
 public:
-	//! @brief イベントのタイプ
+	/**
+	 * イベントのタイプ
+	 */
 	enum tEventType
 	{
 		etDefault = 0, //!< デフォルトのイベントタイプ
@@ -228,83 +249,111 @@ private:
 	tThreadEvent * EventNotifier; //!< イベントが到着したことを知らせる ThreadEvent (メインスレッド用でないキュー用)
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tEventQueueInstance();
 
-	//! @brief		デストラクタ(呼ばれることはない)
+	/**
+	 * デストラクタ(呼ばれることはない)
+	 */
 	virtual ~tEventQueueInstance() {;}
 
 private:
-	//! @brief		指定された優先度のキューの中のイベントを配信する
-	//! @param		prio		優先度
-	//! @note		prio!=tEventInfo::epExclusiveの場合、epExclusiveのイベントが
-	//!				ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
+	/**
+	 * 指定された優先度のキューの中のイベントを配信する
+	 * @param prio	優先度
+	 * @note	prio!=tEventInfo::epExclusiveの場合、epExclusiveのイベントが
+	 *			ポストされたり、CanDeliverEvents が偽になった場合は即座に戻る。
+	 */
 	void DeliverQueue(tEventInfo::tPriority prio, risse_uint64 mastertick);
 
-	//! @brief		すべてのイベントを配信する
-	//! @param		mastertick	マスタ・ティックカウント
+	/**
+	 * すべてのイベントを配信する
+	 * @param mastertick	マスタ・ティックカウント
+	 */
 	void DeliverEvents(risse_uint64 mastertick);
 
-	//! @brief		指定キュー中のイベントをすべて破棄する
-	//! @param		queue		キュー
+	/**
+	 * 指定キュー中のイベントをすべて破棄する
+	 * @param queue	キュー
+	 */
 	void DiscardQueue(tQueue & queue);
 
-	//! @brief		メインスレッド用のキューかどうかを設定する
-	//! @param		b	メインスレッド用のキューかどうか
-	//! @note		メインのイベントキューにのみ用いる。通常はこのメソッドを利用しないこと。
+	/**
+	 * メインスレッド用のキューかどうかを設定する
+	 * @param b	メインスレッド用のキューかどうか
+	 * @note	メインのイベントキューにのみ用いる。通常はこのメソッドを利用しないこと。
+	 */
 	void SetIsMainThreadQueue(bool b) { IsMainThreadQueue = b; }
 
 	friend class tMainEventQueue;
 public:
 
-	//! @brief		イベントの配信処理を行う
-	//! @param		mastertick	マスタ・ティックカウント
-	//! @return		まだ処理すべきイベントがあるかどうか
-	//! @note		wxApp::ProcessIdle から呼ばれる
+	/**
+	 * イベントの配信処理を行う
+	 * @param mastertick	マスタ・ティックカウント
+	 * @return	まだ処理すべきイベントがあるかどうか
+	 * @note	wxApp::ProcessIdle から呼ばれる
+	 */
 	bool ProcessEvents(risse_uint64 mastertick);
 
-	//! @brief		イベントをポストする
-	//! @param		event		イベント
-	//! @param		type		イベントタイプ
+	/**
+	 * イベントをポストする
+	 * @param event	イベント
+	 * @param type	イベントタイプ
+	 */
 	void PostEvent(tEventInfo * event, tEventType type = etDefault);
 
 
-	//! @brief		指定されたイベントがすでにキューに入っている数を数える
-	//! @param		id			イベントID
-	//! @param		source		イベント発生元
-	//! @param		prio		優先度
-	//! @param		limit		数え上げる最大値(0=全部数える)
-	//! @return		name と source と prio が一致するイベントがすでにキューにあるかどうか
+	/**
+	 * 指定されたイベントがすでにキューに入っている数を数える
+	 * @param id		イベントID
+	 * @param source	イベント発生元
+	 * @param prio		優先度
+	 * @param limit		数え上げる最大値(0=全部数える)
+	 * @return	name と source と prio が一致するイベントがすでにキューにあるかどうか
+	 */
 	size_t CountEventsInQueue(int id,
 		void * source, tEventInfo::tPriority prio, size_t limit = 1);
 
 private:
-	//! @brief		イベントをキャンセルし、かつキャンセルしたイベントを得る(内部関数)
-	//! @param		source		キャンセルしたいイベントの発生元
-	//! @param		dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	/**
+	 * イベントをキャンセルし、かつキャンセルしたイベントを得る(内部関数)
+	 * @param source	キャンセルしたいイベントの発生元
+	 * @param dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	 */
 	void InternalCancelEvents(void * source, tQueue * dest);
 
 public:
-	//! @brief		イベントをキャンセルする
-	//! @param		source		キャンセルしたいイベントの発生元
+	/**
+	 * イベントをキャンセルする
+	 * @param source	キャンセルしたいイベントの発生元
+	 */
 	void CancelEvents(void * source) { InternalCancelEvents(source, NULL); }
 
-	//! @brief		イベントをキャンセルし、かつキャンセルしたイベントを得る
-	//! @param		source		キャンセルしたいイベントの発生元
-	//! @param		dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	/**
+	 * イベントをキャンセルし、かつキャンセルしたイベントを得る
+	 * @param source	キャンセルしたいイベントの発生元
+	 * @param dest		キャンセルしたイベントの格納先(内容はクリアされないので注意)
+	 */
 	void CancelEvents(void * source, tQueue & dest) { InternalCancelEvents(source, &dest); }
 
-	//! @brief		イベントループに入る
-	//! @note		メインのイベントキューの場合は例外が発生する。
+	/**
+	 * イベントループに入る
+	 * @note	メインのイベントキューの場合は例外が発生する。
+	 */
 	void Loop();
 
-	//! @brief		イベントループから抜ける
-	//! @note		イベントループから抜けるための特殊なイベントが自分自身に追加される。
-	//!				通常、それ以前にポストされたすべてのイベントを処理し終わってから
-	//!				イベントループから抜ける。それ以降にポストされたイベントは
-	//!				無視される。メインのイベントキューに対して呼ばれた場合は例外が発生する。
-	//!				このメソッドを実行したからと言ってすぐにイベントループから抜ける
-	//!				保証はない。
+	/**
+	 * イベントループから抜ける
+	 * @note	イベントループから抜けるための特殊なイベントが自分自身に追加される。
+	 *			通常、それ以前にポストされたすべてのイベントを処理し終わってから
+	 *			イベントループから抜ける。それ以降にポストされたイベントは
+	 *			無視される。メインのイベントキューに対して呼ばれた場合は例外が発生する。
+	 *			このメソッドを実行したからと言ってすぐにイベントループから抜ける
+	 *			保証はない。
+	 */
 	void QuitLoop();
 
 public: // Risse用メソッドなど
@@ -320,21 +369,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"EventQueue" クラス
-//---------------------------------------------------------------------------
+/**
+ * "EventQueue" クラス
+ */
 class tEventQueueClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tEventQueueClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:
@@ -347,8 +403,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		メインスレッドの(デフォルトの)イベントキューを作成するシングルトンクラス
-//---------------------------------------------------------------------------
+/**
+ * メインスレッドの(デフォルトの)イベントキューを作成するシングルトンクラス
+ */
 class tMainEventQueue : public singleton_base<tMainEventQueue>,
 	depends_on<tRisseScriptEngine>,
 	manual_start<tMainEventQueue>
@@ -356,13 +413,19 @@ class tMainEventQueue : public singleton_base<tMainEventQueue>,
 	tVariant EventQueue; //!< Risseインスタンス
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tMainEventQueue();
 
-	//! @brief		メインのイベントキューを取得する
+	/**
+	 * メインのイベントキューを取得する
+	 */
 	tVariant & GetEventQueue() { return EventQueue; }
 
-	//! @brief		メインのイベントキューインスタンスを得る
+	/**
+	 * メインのイベントキューインスタンスを得る
+	 */
 	tEventQueueInstance * GetEventQueueInstance() const
 	{
 		return (tEventQueueInstance*)EventQueue.GetObjectInterface();
@@ -379,8 +442,9 @@ public:
 
 
 //---------------------------------------------------------------------------
-//! @brief		イベントの発生となるRisseインスタンスの共通クラス
-//---------------------------------------------------------------------------
+/**
+ * イベントの発生となるRisseインスタンスの共通クラス
+ */
 class tEventSourceInstance : public tObjectBase
 {
 	tVariant DestEventQueue; //!< 配信先のイベントキュー
@@ -388,15 +452,21 @@ public:
 	tEventSourceInstance(); // コンストラクタ
 	virtual ~tEventSourceInstance() {;} // デストラクタ (おそらく呼ばれない)
 
-	//! @brief		配送先のイベントキューを得る
-	//! @return		配送先のイベントキュー
+	/**
+	 * 配送先のイベントキューを得る
+	 * @return	配送先のイベントキュー
+	 */
 	tVariant & GetDestEventQueue() { return DestEventQueue; }
 
-	//! @brief		配送先のイベントキューを設定する
-	//! @param		queue		配送先のイベントキュー
+	/**
+	 * 配送先のイベントキューを設定する
+	 * @param queue	配送先のイベントキュー
+	 */
 	void SetDestEventQueue(const tVariant & queue);
 
-	//! @brief		配送先のイベントキューインスタンスを得る
+	/**
+	 * 配送先のイベントキューインスタンスを得る
+	 */
 	tEventQueueInstance * GetDestEventQueueInstance() const
 	{
 		// DestEventQueue が tEventQueueInstance を表しているということは
@@ -419,21 +489,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"EventSource" クラス
-//---------------------------------------------------------------------------
+/**
+ * "EventSource" クラス
+ */
 class tEventSourceClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tEventSourceClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public:

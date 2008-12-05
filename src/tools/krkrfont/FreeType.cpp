@@ -31,8 +31,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		ファイルシステム経由でのFreeType Face クラス
-//---------------------------------------------------------------------------
+/**
+ * ファイルシステム経由でのFreeType Face クラス
+ */
 class tGenericFreeTypeFace : public tBaseFreeTypeFace
 {
 protected:
@@ -65,10 +66,11 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		fontname フォント名
-//! @param		options オプション(RISA__TF_XXXX 定数かRISA__FACE_OPTIONS_XXXX定数の組み合わせ)
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param fontname	フォント名
+ * @param options	オプション(RISA__TF_XXXX 定数かRISA__FACE_OPTIONS_XXXX定数の組み合わせ)
+ */
 tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options)
 {
 	// フィールドの初期化
@@ -143,8 +145,9 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, risse_uint32 o
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tGenericFreeTypeFace::~tGenericFreeTypeFace()
 {
 	if(Face) FT_Done_Face(Face), Face = NULL;
@@ -154,8 +157,9 @@ tGenericFreeTypeFace::~tGenericFreeTypeFace()
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType の Face オブジェクトを返す
-//---------------------------------------------------------------------------
+/**
+ * FreeType の Face オブジェクトを返す
+ */
 FT_Face tGenericFreeTypeFace::GetFTFace() const
 {
 	return Face;
@@ -164,8 +168,9 @@ FT_Face tGenericFreeTypeFace::GetFTFace() const
 
 
 //---------------------------------------------------------------------------
-//! @brief		このフォントファイルが持っているフォントを配列として返す
-//---------------------------------------------------------------------------
+/**
+ * このフォントファイルが持っているフォントを配列として返す
+ */
 void tGenericFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 {
 	dest = FaceNames;
@@ -175,8 +180,9 @@ void tGenericFreeTypeFace::GetFaceNameList(wxArrayString & dest) const
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType 用 ストリーム読み込み関数
-//---------------------------------------------------------------------------
+/**
+ * FreeType 用 ストリーム読み込み関数
+ */
 unsigned long tGenericFreeTypeFace::IoFunc(
 			FT_Stream stream,
 			unsigned long   offset,
@@ -205,8 +211,9 @@ unsigned long tGenericFreeTypeFace::IoFunc(
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType 用 ストリーム削除関数
-//---------------------------------------------------------------------------
+/**
+ * FreeType 用 ストリーム削除関数
+ */
 void tGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
 	// 何もしない
@@ -215,12 +222,13 @@ void tGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定インデックスのFaceを開く
-//! @param		index 開くindex
-//! @param		face FT_Face 変数への参照
-//! @return		Faceを開ければ true そうでなければ false
-//! @note		初めて Face を開く場合は face で指定する変数には null を入れておくこと
-//---------------------------------------------------------------------------
+/**
+ * 指定インデックスのFaceを開く
+ * @param index	開くindex
+ * @param face	FT_Face 変数への参照
+ * @return	Faceを開ければ true そうでなければ false
+ * @note	初めて Face を開く場合は face で指定する変数には null を入れておくこと
+ */
 bool tGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 {
 	if(face) FT_Done_Face(face), face = NULL;
@@ -248,10 +256,11 @@ bool tGenericFreeTypeFace::OpenFaceByIndex(risse_uint index, FT_Face & face)
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//! @param		fontname フォント名
-//! @param		options オプション
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ * @param fontname	フォント名
+ * @param options	オプション
+ */
 tFreeTypeFace::tFreeTypeFace(const wxString &fontname, risse_uint32 options)
 	: FontName(fontname)
 {
@@ -301,8 +310,9 @@ tFreeTypeFace::tFreeTypeFace(const wxString &fontname, risse_uint32 options)
 
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tFreeTypeFace::~tFreeTypeFace()
 {
 	if(GlyphIndexToCharcodeVector) delete GlyphIndexToCharcodeVector;
@@ -312,9 +322,10 @@ tFreeTypeFace::~tFreeTypeFace()
 
 
 //---------------------------------------------------------------------------
-//! @brief		このFaceが保持しているglyphの数を得る
-//! @return		このFaceが保持しているglyphの数
-//---------------------------------------------------------------------------
+/**
+ * このFaceが保持しているglyphの数を得る
+ * @return	このFaceが保持しているglyphの数
+ */
 risse_uint tFreeTypeFace::GetGlyphCount()
 {
 	if(!FTFace) return 0;
@@ -352,10 +363,11 @@ risse_uint tFreeTypeFace::GetGlyphCount()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Glyph インデックスから対応する文字コードを得る
-//! @param		index インデックス(FreeTypeの管理している文字indexとは違うので注意)
-//! @return		対応する文字コード(対応するコードが無い場合は 0)
-//---------------------------------------------------------------------------
+/**
+ * Glyph インデックスから対応する文字コードを得る
+ * @param index	インデックス(FreeTypeの管理している文字indexとは違うので注意)
+ * @return	対応する文字コード(対応するコードが無い場合は 0)
+ */
 risse_char tFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
 {
 	risse_uint size = GetGlyphCount(); // グリフ数を得るついでにマップを作成する
@@ -369,9 +381,10 @@ risse_char tFreeTypeFace::GetCharcodeFromGlyphIndex(risse_uint index)
 
 
 //---------------------------------------------------------------------------
-//! @brief		このフォントに含まれるFace名のリストを得る
-//! @param		dest 格納先配列
-//---------------------------------------------------------------------------
+/**
+ * このフォントに含まれるFace名のリストを得る
+ * @param dest	格納先配列
+ */
 void tFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 {
 	Face->GetFaceNameList(dest);
@@ -380,9 +393,10 @@ void tFreeTypeFace::GetFaceNameList(wxArrayString &dest)
 
 
 //---------------------------------------------------------------------------
-//! @brief		フォントの高さを設定する
-//! @param		height フォントの高さ(ピクセル単位)
-//---------------------------------------------------------------------------
+/**
+ * フォントの高さを設定する
+ * @param height	フォントの高さ(ピクセル単位)
+ */
 void tFreeTypeFace::SetHeight(int height)
 {
 	Height = height;
@@ -396,11 +410,12 @@ void tFreeTypeFace::SetHeight(int height)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定した文字コードに対するグリフビットマップを得る
-//! @param		code 文字コード
-//! @return		新規作成されたグリフビットマップオブジェクトへのポインタ
-//!				NULL の場合は変換に失敗した場合
-//---------------------------------------------------------------------------
+/**
+ * 指定した文字コードに対するグリフビットマップを得る
+ * @param code	文字コード
+ * @return	新規作成されたグリフビットマップオブジェクトへのポインタ
+ *			NULL の場合は変換に失敗した場合
+ */
 tGlyphBitmap * tFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 {
 	// グリフスロットにグリフを読み込み、寸法を取得する
@@ -495,11 +510,12 @@ tGlyphBitmap * tFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定した文字コードに対するグリフの寸法を得る
-//! @param		code 文字コード
-//! @param		metrics 寸法
-//! @return		成功の場合真、失敗の場合偽
-//---------------------------------------------------------------------------
+/**
+ * 指定した文字コードに対するグリフの寸法を得る
+ * @param code		文字コード
+ * @param metrics	寸法
+ * @return	成功の場合真、失敗の場合偽
+ */
 bool tFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
 	tGlyphMetrics & metrics)
 {
@@ -519,10 +535,11 @@ bool tFreeTypeFace::GetGlyphMetricsFromCharcode(risse_char code,
 
 
 //---------------------------------------------------------------------------
-//! @brief		指定した文字コードに対するグリフをグリフスロットに設定する
-//! @param		code 文字コード
-//! @return		成功の場合真、失敗の場合偽
-//---------------------------------------------------------------------------
+/**
+ * 指定した文字コードに対するグリフをグリフスロットに設定する
+ * @param code	文字コード
+ * @return	成功の場合真、失敗の場合偽
+ */
 bool tFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 {
 	// TODO: スレッド保護
@@ -574,8 +591,9 @@ tFreeTypeLibrary * tFreeTypeLibrary::GlobalLibrary = NULL;
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		参照カウンタを増やす
-//---------------------------------------------------------------------------
+/**
+ * 参照カウンタを増やす
+ */
 void tFreeTypeLibrary::AddRef()
 {
 	if(!GlobalLibrary)
@@ -591,8 +609,9 @@ void tFreeTypeLibrary::AddRef()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		参照カウンタを減らす
-//---------------------------------------------------------------------------
+/**
+ * 参照カウンタを減らす
+ */
 void tFreeTypeLibrary::Release()
 {
 	if(!GlobalLibrary)
@@ -611,8 +630,9 @@ void tFreeTypeLibrary::Release()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tFreeTypeLibrary::tFreeTypeLibrary()
 {
 	RefCount = 1;
@@ -627,8 +647,9 @@ tFreeTypeLibrary::tFreeTypeLibrary()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		デストラクタ
-//---------------------------------------------------------------------------
+/**
+ * デストラクタ
+ */
 tFreeTypeLibrary::~tFreeTypeLibrary()
 {
 	FT_Done_FreeType(Library);
@@ -636,8 +657,9 @@ tFreeTypeLibrary::~tFreeTypeLibrary()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		参照カウンタを増やす
-//---------------------------------------------------------------------------
+/**
+ * 参照カウンタを増やす
+ */
 void tFreeTypeLibrary::Hook()
 {
 	RefCount ++;
@@ -645,9 +667,10 @@ void tFreeTypeLibrary::Hook()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		参照カウンタを減らす
-//! @return		参照カウンタを減らした後の参照カウンタの値
-//---------------------------------------------------------------------------
+/**
+ * 参照カウンタを減らす
+ * @return	参照カウンタを減らした後の参照カウンタの値
+ */
 risse_int tFreeTypeLibrary::Unhook()
 {
 	return --RefCount;
@@ -659,8 +682,9 @@ risse_int tFreeTypeLibrary::Unhook()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コンストラクタ
-//---------------------------------------------------------------------------
+/**
+ * コンストラクタ
+ */
 tFreeTypeFontDriver::tFreeTypeFontDriver()
 {
 	// コンストラクタ

@@ -23,28 +23,37 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		クラス用クラスの基底クラス(Risse用)
-//! @note		tClassBase と tClassClass を混同しないこと。
-//!				前者はC++のクラス階層において各クラスの親クラスになり、
-//!				後者はRisseスクリプトで各クラスインスタンスを生成するための
-//!				クラスになる。
-//---------------------------------------------------------------------------
+/**
+ * クラス用クラスの基底クラス(Risse用)
+ * @note	tClassBase と tClassClass を混同しないこと。
+ *			前者はC++のクラス階層において各クラスの親クラスになり、
+ *			後者はRisseスクリプトで各クラスインスタンスを生成するための
+ *			クラスになる。
+ */
 class tClassClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tClassClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate(const tNativeCallInfo &info);
 
 public: // Risse用メソッドなど
@@ -55,22 +64,29 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		クラスインスタンス用クラス(Risse用)
-//! @note		tClassInstance と tClassClass を混同しないこと。
-//---------------------------------------------------------------------------
+/**
+ * クラスインスタンス用クラス(Risse用)
+ * @note	tClassInstance と tClassClass を混同しないこと。
+ */
 class tClassInstance : public tClassClass
 {
 	typedef tClassClass inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tClassInstance(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		オブジェクトに対して操作を行う
+	/**
+	 * オブジェクトに対して操作を行う
+	 */
 	virtual tRetValue Operate(RISSE_OBJECTINTERFACE_OPERATE_DECL_ARG);
 };
 //---------------------------------------------------------------------------

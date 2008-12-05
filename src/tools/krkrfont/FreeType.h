@@ -25,8 +25,9 @@ namespace Risa {
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType フォント face
-//---------------------------------------------------------------------------
+/**
+ * FreeType フォント face
+ */
 class tFreeTypeFace
 {
 	wxString FontName;		//!< フォント名
@@ -66,8 +67,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType ライブラリラッパー(singleton)
-//---------------------------------------------------------------------------
+/**
+ * FreeType ライブラリラッパー(singleton)
+ */
 class tFreeTypeLibrary
 {
 	static tFreeTypeLibrary * GlobalLibrary;	//!< FreeType ライブラリ
@@ -79,8 +81,10 @@ public:
 	static void AddRef();
 	static void Release();
 
-	//! @brief	FreeType ライブラリを返す
-	//! @return	ライブラリインスタンス
+	/**
+	 * FreeType ライブラリを返す
+	 * @return	ライブラリインスタンス
+	 */
 	static FT_Library Get() { if(!GlobalLibrary) return NULL;
 								return GlobalLibrary->Library; }
 
@@ -100,8 +104,9 @@ private:
 
 
 //---------------------------------------------------------------------------
-//! @brief		FreeType フォントドライバ
-//---------------------------------------------------------------------------
+/**
+ * FreeType フォントドライバ
+ */
 class tFreeTypeFontDriver : public tBaseFreeTypeFontDriver
 {
 public:

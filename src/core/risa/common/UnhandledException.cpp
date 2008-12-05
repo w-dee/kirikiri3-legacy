@@ -26,9 +26,10 @@ RISSE_DEFINE_SOURCE_ID(28545,30194,3434,19984,56458,2209,37707,53134);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//! @brief		スクリプト例外を表示する
-//! @param		e		例外オブジェクト
-//---------------------------------------------------------------------------
+/**
+ * スクリプト例外を表示する
+ * @param e	例外オブジェクト
+ */
 void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 {
 	// イベント配信を無効に
@@ -81,12 +82,13 @@ void tUnhandledExceptionHandler::ShowScriptException(const tVariant * e)
 
 #if 0
 //---------------------------------------------------------------------------
-//! @brief		ハンドルされなかった例外を処理する
-//! @param		e		例外オブジェクト
-//! @note		Process は 3つ同じような内容が並ぶが、
-//!				例外オブジェクトを取得するstart～例外オブジェクトを取得するend
-//!				間の記述内容が違うだけである。
-//---------------------------------------------------------------------------
+/**
+ * ハンドルされなかった例外を処理する
+ * @param e	例外オブジェクト
+ * @note	Process は 3つ同じような内容が並ぶが、
+ *			例外オブジェクトを取得するstart～例外オブジェクトを取得するend
+ *			間の記述内容が違うだけである。
+ */
 void tUnhandledExceptionHandler::Process(eRisseScriptException &e)
 {
 	bool result = false;
@@ -151,9 +153,10 @@ void tUnhandledExceptionHandler::Process(eRisseScriptException &e)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハンドルされなかった例外を処理する
-//! @param		e		例外オブジェクト
-//---------------------------------------------------------------------------
+/**
+ * ハンドルされなかった例外を処理する
+ * @param e	例外オブジェクト
+ */
 void tUnhandledExceptionHandler::Process(eRisseScriptError &e)
 {
 	bool result = false;
@@ -218,9 +221,10 @@ void tUnhandledExceptionHandler::Process(eRisseScriptError &e)
 
 
 //---------------------------------------------------------------------------
-//! @brief		ハンドルされなかった例外を処理する
-//! @param		e		例外オブジェクト
-//---------------------------------------------------------------------------
+/**
+ * ハンドルされなかった例外を処理する
+ * @param e	例外オブジェクト
+ */
 void tUnhandledExceptionHandler::Process(eRisse &e)
 {
 	bool result = false;

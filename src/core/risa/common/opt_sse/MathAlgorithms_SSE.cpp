@@ -7,8 +7,10 @@
 	See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
-//! @file
-//! @brief 数学関数群
+/**
+ * @file	
+ * 数学関数群
+ */
 //---------------------------------------------------------------------------
 #include "risse/include/risseTypes.h"
 using namespace Risse;

@@ -22,20 +22,27 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		数値型用クラスの基底クラス(Risse用)
-//---------------------------------------------------------------------------
+/**
+ * 数値型用クラスの基底クラス(Risse用)
+ */
 class tNumberClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tNumberClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse用メソッドなど

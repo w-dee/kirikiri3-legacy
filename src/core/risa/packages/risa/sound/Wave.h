@@ -36,7 +36,9 @@ namespace Risa {
 	加算していくこと (TODO:イテレータでも作ろうか)
 */
 
-//! @brief  PCMサンプル型
+/**
+ * PCMサンプル型
+ */
 struct tPCMTypes
 {
 	enum tType
@@ -50,7 +52,9 @@ struct tPCMTypes
 		tnum			//!< 有効な型の数
 	};
 
-	//! @brief type に必要なバイト数を返す
+	/**
+	 * type に必要なバイト数を返す
+	 */
 	static size_t TypeToSampleBytes(tType type)
 	{
 		switch(type)
@@ -64,7 +68,9 @@ struct tPCMTypes
 		}
 	}
 
-	//! @brief type の無音を作るときにfillすべき値を返す
+	/**
+	 * type の無音を作るときにfillすべき値を返す
+	 */
 	static int GetSilenceValueFromType(tType type)
 	{
 		// ti8 が 0x80 、それ以外は 0
@@ -75,7 +81,9 @@ struct tPCMTypes
 		}
 	}
 
-	//! @brief  8bit integer linear PCM type
+	/**
+	 * 8bit integer linear PCM type
+	 */
 	struct i8
 	{
 		static const int id = ti8;
@@ -92,7 +100,9 @@ struct tPCMTypes
 		void seti32(risse_int32 v) { value = (risse_uint8)((v >> 24) + 0x80); }
 	};
 
-	//! @brief  16bit integer linear PCM type
+	/**
+	 * 16bit integer linear PCM type
+	 */
 	struct i16
 	{
 		static const int id = ti16;
@@ -109,7 +119,9 @@ struct tPCMTypes
 		void seti32(risse_int32 v) { value = (risse_uint16)(v >> 16); }
 	};
 
-	//! @brief  24bit integer linear PCM type
+	/**
+	 * 24bit integer linear PCM type
+	 */
 	struct i24
 	{
 		static const int id = ti24;
@@ -149,7 +161,9 @@ struct tPCMTypes
 		void seti32(risse_int32 v) { *this = (risse_uint32)(v >> 8); }
 	};
 
-	//! @brief  32bit integer linear PCM type
+	/**
+	 * 32bit integer linear PCM type
+	 */
 	struct i32
 	{
 		static const int id = ti32;
@@ -166,7 +180,9 @@ struct tPCMTypes
 		void seti32(risse_int32 v) { value = v; }
 	};
 
-	//! @brief  32bit float linear PCM type
+	/**
+	 * 32bit float linear PCM type
+	 */
 	struct f32
 	{
 		static const int id = tf32;
@@ -197,8 +213,9 @@ struct tPCMTypes
 
 
 //---------------------------------------------------------------------------
-//! @brief		スピーカー定義
-//---------------------------------------------------------------------------
+/**
+ * スピーカー定義
+ */
 #ifndef SPEAKER_FRONT_LEFT
 // from Windows ksmedia.h
 // speaker config
@@ -229,8 +246,9 @@ struct tPCMTypes
 
 
 //---------------------------------------------------------------------------
-//! @brief		PCM データフォーマット (内部用)
-//---------------------------------------------------------------------------
+/**
+ * PCM データフォーマット (内部用)
+ */
 struct tWaveFormat : public tAtomicCollectee
 {
 	risse_uint Frequency;				//!< sample granule per sec
@@ -248,7 +266,9 @@ struct tWaveFormat : public tAtomicCollectee
 		  tPCMTypes::tunknown にする
 	*/
 
-	//! @brief		構造体のメンバを「特に指定しない」状態にする
+	/**
+	 * 構造体のメンバを「特に指定しない」状態にする
+	 */
 	void Reset()
 	{
 		Frequency = 0;
@@ -257,7 +277,9 @@ struct tWaveFormat : public tAtomicCollectee
 		PCMType = tPCMTypes::tunknown;
 	}
 
-	//! @brief 1サンプルグラニュールあたりのバイト数を得る
+	/**
+	 * 1サンプルグラニュールあたりのバイト数を得る
+	 */
 	size_t GetSampleGranuleSize() const
 	{
 		return tPCMTypes::TypeToSampleBytes(PCMType) * Channels;
@@ -268,8 +290,9 @@ struct tWaveFormat : public tAtomicCollectee
 
 
 //---------------------------------------------------------------------------
-//! @brief		Wave入力ファイルの情報
-//---------------------------------------------------------------------------
+/**
+ * Wave入力ファイルの情報
+ */
 struct tWaveFileInfo : public tWaveFormat
 {
 	risse_uint64 TotalSampleGranules;	//!< total samples in sample granule; unknown for zero

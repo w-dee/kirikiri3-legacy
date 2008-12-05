@@ -46,7 +46,9 @@ using namespace ::Risse;
 //---------------------------------------------------------------------------
 //	(暫定) ピクセル形式の変換(risa_glのpixel_convertの特殊化)
 //---------------------------------------------------------------------------
-//! @brief		pixelからrisse_uint8へ
+/**
+ * pixelからrisse_uint8へ
+ */
 template <>
 risse_uint8 pixel_convert<pixel, risse_uint8>(const pixel & src)
 {
@@ -59,7 +61,9 @@ risse_uint8 pixel_convert<pixel, risse_uint8>(const pixel & src)
 		) >> 8);
 }
 //---------------------------------------------------------------------------
-//! @brief		risse_uint8からpixelへ
+/**
+ * risse_uint8からpixelへ
+ */
 template <>
 pixel pixel_convert<risse_uint8, pixel>(const risse_uint8 & src)
 {
@@ -74,8 +78,9 @@ namespace Risa {
 
 
 //---------------------------------------------------------------------------
-//! @brief		変換ループ(汎用)
-//---------------------------------------------------------------------------
+/**
+ * 変換ループ(汎用)
+ */
 template <typename src_type, typename dest_type>
 static void ConvertLoop(void * RISSE_RESTRICT dest, risse_size dest_size,
 	const void * RISSE_RESTRICT src, risse_size src_size, risse_size length)

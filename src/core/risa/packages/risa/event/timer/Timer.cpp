@@ -447,15 +447,20 @@ void tEventTimerConsumer::OnEvent(tEventInfo * info)
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Timer" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Timer" クラスのインスタンス用 C++クラス
+ */
 class tTimerInstance : public tEventTimerConsumer
 {
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tTimerInstance();
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tTimerInstance() {;}
 
 	// tEventTimerConsumer::OnTimer 実装
@@ -518,21 +523,28 @@ void tTimerInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Timer" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Timer" クラス
+ */
 class tTimerClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tTimerClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドとか
@@ -595,8 +607,9 @@ tVariant tTimerClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		Timer クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * Timer クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','e','v','e','n','t'>,
 	tTimerClass>;

@@ -156,10 +156,14 @@ class tCoroutine;
 */
 #include <ucontext.h>
 
-//! @brief		一番最後に作成されたコルーチンコンテキストを表す変数
+/**
+ * 一番最後に作成されたコルーチンコンテキストを表す変数
+ */
 static ::ucontext_t * LastMadeContext = NULL;
 
-//! @brief		makecontext をフックする関数
+/**
+ * makecontext をフックする関数
+ */
 static void risse_makecontext(::ucontext_t *ucp, void (*func)(),
        int argc, void *f)
 {
@@ -209,7 +213,9 @@ public:
 };
 
 
-//! @brief 現在実行中のコルーチンコンテキストを得る
+/**
+ * 現在実行中のコルーチンコンテキストを得る
+ */
 tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
 {
 	return coro->GetContext();
@@ -297,7 +303,9 @@ typedef coro::coroutine<
 	tVariant (tCoroutineImpl * coroimpl, tCoroutine * coro, tVariant)> risse_coroutine_type;
 
 
-//! @brief 現在実行中のコルーチンコンテキストを得る
+/**
+ * 現在実行中のコルーチンコンテキストを得る
+ */
 tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
 {
 	return NULL;
@@ -470,7 +478,9 @@ WINBASEAPI void WINAPI RISSE_NEW_DeleteFiber(PVOID arg1)
 typedef fiber_data tCoroutineContext;
 
 
-//! @brief コルーチンコンテキストの内容をGCに対してプッシュする
+/**
+ * コルーチンコンテキストの内容をGCに対してプッシュする
+ */
 struct GC_ms_entry *MarkCoroutineContext(
 									tCoroutineContext * co_context,
 									struct GC_ms_entry *mark_sp,
@@ -576,7 +586,9 @@ typedef coro::coroutine<
 
 
 namespace Risse {
-//! @brief 現在実行中のコルーチンコンテキストを得る
+/**
+ * 現在実行中のコルーチンコンテキストを得る
+ */
 tCoroutineContext * GetCurrentCoroutineContext(risse_coroutine_type * coro)
 {
 	(void)impl; // not used
@@ -627,10 +639,11 @@ void InitCoroutine()
 
 
 //---------------------------------------------------------------------------
-//! @brief		コルーチンの本当の実装クラス
-//! @note		注意: このクラスのデストラクタはメインスレッド以外から非同期
-//!				に呼ばれる可能性があることに注意
-//---------------------------------------------------------------------------
+/**
+ * コルーチンの本当の実装クラス
+ * @note	注意: このクラスのデストラクタはメインスレッド以外から非同期
+ *			に呼ばれる可能性があることに注意
+ */
 class tCoroutineImpl : public tDestructee /* デストラクタが呼ばれなければならない */
 {
 public:
@@ -760,7 +773,9 @@ struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
 						struct GC_ms_entry *mark_sp_limit,
 						GC_word env);
 
-//! @brief	GC用kind情報を保持する構造体
+/**
+ * GC用kind情報を保持する構造体
+ */
 struct tCoroutineGCKind : public tCollectee
 {
 	void ** FreeList;
@@ -776,19 +791,25 @@ struct tCoroutineGCKind : public tCollectee
 	}
 };
 
-//! @brief tCoroutineImpl へのポインタを含む特殊な構造体
+/**
+ * tCoroutineImpl へのポインタを含む特殊な構造体
+ */
 struct tCoroutinePtr
 {
 	static tCoroutineGCKind * Kind;
 	tCoroutineImpl * Impl; //!< tCoroutineImpl へのポインタ
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tCoroutinePtr()
 	{
 		Impl = new tCoroutineImpl();
 	}
 
-	//! @brief		new 演算子
+	/**
+	 * new 演算子
+	 */
 	void * operator new(size_t size)
 	{
 		// GC_generic_malloc を使用してメモリを割り当てる
@@ -810,7 +831,9 @@ struct tCoroutinePtr
 tCoroutineGCKind * tCoroutinePtr::Kind = NULL;
 
 
-//! @brief		tCoroutinePtr 用のマーク関数
+/**
+ * tCoroutinePtr 用のマーク関数
+ */
 struct GC_ms_entry *MarkCoroutinePtr(GC_word *addr,
                                   struct GC_ms_entry *mark_sp,
                                   struct GC_ms_entry *mark_sp_limit,

@@ -27,8 +27,9 @@ class tQueueNode;
 class tQueueBuilder;
 class tGraphInstance;
 //---------------------------------------------------------------------------
-//! @brief		プロセスノードインスタンス
-//---------------------------------------------------------------------------
+/**
+ * プロセスノードインスタンス
+ */
 class tNodeInstance : public tObjectBase
 {
 public:
@@ -38,13 +39,13 @@ private:
 	tGraphInstance * GraphInstance; //!< グラフインスタンス
 
 	risse_size	LongestDistance;
-			//!< ルートノードからの最長距離(ステップ数)。
-			//!< 依存関係のクイックなチェックに用いる
 
 	risse_size	BuildQueueWaitingOutputPin; //!< BuildQueue にて待つべき出力/入力ピンの数
 
 public:
-	//! @brief		グラフをロックするためのクラス
+	/**
+	 * グラフをロックするためのクラス
+	 */
 	class tGraphLocker : public tObjectInterface::tSynchronizer
 	{
 	public:
@@ -53,7 +54,9 @@ public:
 	};
 
 public:
-	//! @brief		プロセスノードを LongestDistance で比較する関数
+	/**
+	 * プロセスノードを LongestDistance で比較する関数
+	 */
 	struct tLongestDistanceComparator :
 		public std::binary_function<bool, tNodeInstance*, tNodeInstance*>
 	{
@@ -68,45 +71,63 @@ public:
 
 
 public:
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tNodeInstance();
 
-	//! @brief		デストラクタ(おそらく呼ばれない)
+	/**
+	 * デストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tNodeInstance() {}
 
 protected:
-	//! @brief		グラフインスタンスを設定する
-	//! @param		graph		グラフインスタンス
-	//! @note		initialize Risse関数から呼ぶこと
+	/**
+	 * グラフインスタンスを設定する
+	 * @param graph	グラフインスタンス
+	 * @note	initialize Risse関数から呼ぶこと
+	 */
 	void SetGraphInstance(tGraphInstance * graph)
 		{ RISSE_ASSERT(!GraphInstance); GraphInstance = graph; }
 
 public:
-	//! @brief		グラフインスタンスを得る
+	/**
+	 * グラフインスタンスを得る
+	 */
 	tGraphInstance * GetGraphInstance() const { RISSE_ASSERT(GraphInstance); return GraphInstance; }
 
 public:
-	//! @brief		ルートノードからの最長距離を得る
-	//! @return		ルートノードからの最長距離 (ルートノード = 0)
-	//! @note		どの出力ピンも接続されていない状態では返される値の内容は不定
+	/**
+	 * ルートノードからの最長距離を得る
+	 * @return	ルートノードからの最長距離 (ルートノード = 0)
+	 * @note	どの出力ピンも接続されていない状態では返される値の内容は不定
+	 */
 	risse_size GetLongestDistance() const { return LongestDistance; }
 
-	//! @brief		ルートノードからの最長距離を設定する
-	//! @note		このメソッドは入力ピン(子ノード)に再帰して、子すべての最長距離を更新する
+	/**
+	 * ルートノードからの最長距離を設定する
+	 * @note	このメソッドは入力ピン(子ノード)に再帰して、子すべての最長距離を更新する
+	 */
 	void CalcLongestDistance();
 
 public: // サブクラスで実装すべき物
-	//! @brief		入力ピンの配列を得る
-	//! @return		入力ピンの配列
+	/**
+	 * 入力ピンの配列を得る
+	 * @return	入力ピンの配列
+	 */
 	virtual tInputPinArrayInstance & GetInputPinArrayInstance() = 0;
 
-	//! @brief		出力ピンの配列を得る
-	//! @return		出力ピンの配列
+	/**
+	 * 出力ピンの配列を得る
+	 * @return	出力ピンの配列
+	 */
 	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance() = 0;
 
 public:
-	//! @brief		コマンドキューの組み立てを行う
-	//! @param		builder			キュービルダーオブジェクト
+	/**
+	 * コマンドキューの組み立てを行う
+	 * @param builder	キュービルダーオブジェクト
+	 */
 	virtual void BuildQueue(tQueueBuilder & builder) { return ; }
 
 public: // Risse用メソッドなど
@@ -119,21 +140,28 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Node" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Node" クラス
+ */
 class tNodeClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tNodeClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 
 public: // Risse 用メソッドなど

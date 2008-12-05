@@ -31,28 +31,37 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-//! @brief		"Date" クラスのインスタンス用 C++クラス
-//---------------------------------------------------------------------------
+/**
+ * "Date" クラスのインスタンス用 C++クラス
+ */
 class tDateInstance : public tObjectBase
 {
 private:
 	wxDateTime DateTime; //!< DateTime オブジェクト
 
 public:
-	//! @brief		DateTimeへの参照を得る
-	//! @return		DateTimeへの参照
+	/**
+	 * DateTimeへの参照を得る
+	 * @return	DateTimeへの参照
+	 */
 	wxDateTime & GetDateTime() { return DateTime; }
 
-	//! @brief		ダミーのデストラクタ(おそらく呼ばれない)
+	/**
+	 * ダミーのデストラクタ(おそらく呼ばれない)
+	 */
 	virtual ~tDateInstance() {;}
 
 
 private:
-	//! @brief		日付を RFC 822 フォーマットして帰す
+	/**
+	 * 日付を RFC 822 フォーマットして帰す
+	 */
 	static tString Format(wxDateTime::Tm & tm, int tzofs);
 
-	//! @brief		日付文字列を parse する
-	//! @param		str		parser する文字列
+	/**
+	 * 日付文字列を parse する
+	 * @param str	parser する文字列
+	 */
 	void Parse(const tString & str);
 
 public: // Risse用メソッドなど
@@ -89,41 +98,53 @@ public: // Risse用メソッドなど
 
 
 //---------------------------------------------------------------------------
-//! @brief		"Date" クラス
-//---------------------------------------------------------------------------
+/**
+ * "Date" クラス
+ */
 class tDateClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 
 public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
+	/**
+	 * コンストラクタ
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
 	tDateClass(tScriptEngine * engine);
 
-	//! @brief		各メンバをインスタンスに追加する
+	/**
+	 * 各メンバをインスタンスに追加する
+	 */
 	void RegisterMembers();
 
-	//! @brief		newの際の新しいオブジェクトを作成して返す
+	/**
+	 * newの際の新しいオブジェクトを作成して返す
+	 */
 	static tVariant ovulate();
 };
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		"date" パッケージイニシャライザ
-//---------------------------------------------------------------------------
+/**
+ * "date" パッケージイニシャライザ
+ */
 class tDatePackageInitializer : public tBuiltinPackageInitializer
 {
 public:
 	tDateClass * DateClass;
 
-	//! @brief		コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	tDatePackageInitializer();
 
-	//! @brief		パッケージを初期化する
-	//! @param		engine		スクリプトエンジンインスタンス
-	//! @param		name		パッケージ名
-	//! @param		global		パッケージグローバル
+	/**
+	 * パッケージを初期化する
+	 * @param engine	スクリプトエンジンインスタンス
+	 * @param name		パッケージ名
+	 * @param global	パッケージグローバル
+	 */
 	virtual void Initialize(tScriptEngine * engine, const tString & name,
 		const tVariant & global);
 };

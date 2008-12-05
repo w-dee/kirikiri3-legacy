@@ -326,8 +326,9 @@ tVariant tPhaseVocoderClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-//! @brief		PhaseVocoder クラスレジストラ
-//---------------------------------------------------------------------------
+/**
+ * PhaseVocoder クラスレジストラ
+ */
 template class tClassRegisterer<
 	tSS<'r','i','s','a','.','s','o','u','n','d','.','f','i','l','t','e','r'>,
 	tPhaseVocoderClass>;

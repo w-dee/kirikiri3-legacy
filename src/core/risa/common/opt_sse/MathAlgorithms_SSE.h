@@ -46,10 +46,11 @@ extern const risse_uint32 RISA_V_I32_1[4];
 
 
 //---------------------------------------------------------------------------
-//! @brief		atan2 の高速版 (4x float, SSE版)
-//! @note		精度はあまり良くない。10bitぐらい。 @r
-//!				原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
-//---------------------------------------------------------------------------
+/**
+ * atan2 の高速版 (4x float, SSE版)
+ * @note	精度はあまり良くない。10bitぐらい。 @r
+ *			原典: http://www.dspguru.com/comp.dsp/tricks/alg/fxdatan2.htm
+ */
 static inline __m128 VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 {
 	__m128 abs_y = _mm_add_ps(_mm_and_ps(y, PM128(PABSMASK)), PM128(RISA_VFASTATAN2_E));
@@ -95,13 +96,14 @@ static inline __m128 VFast_arctan2_F4_SSE(__m128 y, __m128 x)
 
 
 //---------------------------------------------------------------------------
-//! @brief		SSEの丸めモードを最近値に設定する
-//! @note		このメソッドは SSE で使用する丸めモード
-//!				を設定する。これを必要とする各館数を呼び出す前に１回呼び出すこと。
-//!				他のSSEを使用している関数が間に挟まると丸めモードが変わる可能性
-//!				があるので注意すること。そのような場合は再びこれを呼び出して
-//!				丸めモードを再設定すること。
-//---------------------------------------------------------------------------
+/**
+ * SSEの丸めモードを最近値に設定する
+ * @note	このメソッドは SSE で使用する丸めモード
+ *			を設定する。これを必要とする各館数を呼び出す前に１回呼び出すこと。
+ *			他のSSEを使用している関数が間に挟まると丸めモードが変わる可能性
+ *			があるので注意すること。そのような場合は再びこれを呼び出して
+ *			丸めモードを再設定すること。
+ */
 STIN void SetRoundingModeToNearest_SSE()
 {
 	_MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
@@ -110,10 +112,11 @@ STIN void SetRoundingModeToNearest_SSE()
 
 
 //---------------------------------------------------------------------------
-//! @brief		sincos の高速版 (4x float, SSE版)
-//! @note		原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
-//!				呼び出しに先立って Risa_SetRoundingModeToNearest_SSE を呼ぶこと。
-//---------------------------------------------------------------------------
+/**
+ * sincos の高速版 (4x float, SSE版)
+ * @note	原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf  @r
+ *			呼び出しに先立って Risa_SetRoundingModeToNearest_SSE を呼ぶこと。
+ */
 STIN void VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 {
 	__m128 s1, s2, c1, c2, fixmag1;
@@ -202,8 +205,9 @@ STIN void VFast_sincos_F4_SSE(__m128 v, __m128 &sin, __m128 &cos)
 
 
 //---------------------------------------------------------------------------
-//! @brief		Phase Wrapping(radianを-PI～PIにラップする) (4x float, SSE版)
-//---------------------------------------------------------------------------
+/**
+ * Phase Wrapping(radianを-PI～PIにラップする) (4x float, SSE版)
+ */
 STIN __m128 Wrap_Pi_F4_SSE(__m128 v)
 {
 	// v を M_PI で割る
@@ -264,32 +268,34 @@ STIN __m128 Wrap_Pi_F4_SSE(__m128 v)
 
 
 //---------------------------------------------------------------------------
-//! @brief		窓関数を適用しながらのインターリーブ解除
-//! @param		dest	格納先(複数)
-//! @param		src		ソース
-//! @param		win		窓関数
-//! @param		numch	チャンネル数
-//! @param		destofs	destの処理開始位置
-//! @param		len		処理するサンプル数
-//!						(各チャンネルごとの数; 実際に処理されるサンプル
-//!						数の総計はlen*numchになる)
-//---------------------------------------------------------------------------
+/**
+ * 窓関数を適用しながらのインターリーブ解除
+ * @param dest		格納先(複数)
+ * @param src		ソース
+ * @param win		窓関数
+ * @param numch		チャンネル数
+ * @param destofs	destの処理開始位置
+ * @param len		処理するサンプル数
+ *					(各チャンネルごとの数; 実際に処理されるサンプル
+ *					数の総計はlen*numchになる)
+ */
 void DeinterleaveApplyingWindow(float * RISSE_RESTRICT dest[], const float * RISSE_RESTRICT src,
 					float * RISSE_RESTRICT win, int numch, size_t destofs, size_t len);
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-//! @brief		窓関数を適用しながらのインターリーブ+オーバーラッピング
-//! @param		dest	格納先
-//! @param		src		ソース(複数)
-//! @param		win		窓関数
-//! @param		numch	チャンネル数
-//! @param		srcofs	srcの処理開始位置
-//! @param		len		処理するサンプル数
-//!						(各チャンネルごとの数; 実際に処理されるサンプル
-//!						数の総計はlen*numchになる)
-//---------------------------------------------------------------------------
+/**
+ * 窓関数を適用しながらのインターリーブ+オーバーラッピング
+ * @param dest		格納先
+ * @param src		ソース(複数)
+ * @param win		窓関数
+ * @param numch		チャンネル数
+ * @param srcofs	srcの処理開始位置
+ * @param len		処理するサンプル数
+ *					(各チャンネルごとの数; 実際に処理されるサンプル
+ *					数の総計はlen*numchになる)
+ */
 void  InterleaveOverlappingWindow(float * RISSE_RESTRICT dest, const float * RISSE_RESTRICT const * RISSE_RESTRICT src,
 					float * RISSE_RESTRICT win, int numch, size_t srcofs, size_t len);
 //---------------------------------------------------------------------------

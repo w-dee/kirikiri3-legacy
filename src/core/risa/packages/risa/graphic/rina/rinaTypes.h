@@ -79,7 +79,7 @@ typedef gc_vector<tPolygonXform> tPolygonXformList;
 //---------------------------------------------------------------------------
 //! @brief		テクスチャ上のポリゴン(UV座標系)
 //---------------------------------------------------------------------------
-struct tTexturePolygon
+struct tTexturePolygon : public tCollectee
 {
 	t2DPointF Vertices[3]; //!< 頂点
 	bool IsTriangle; //!< 真の場合3角形、偽の場合4角形

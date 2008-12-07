@@ -71,6 +71,7 @@ public:
 	void SetInput(tWaveFilter * input);
 
 	void SuggestFormat(const tWaveFormat & format) {;}
+		//!< @note ここではなにもしない。必要ならばサブクラスで実装すること。
 
 	/**
 	 * デコードを行う

@@ -31,6 +31,10 @@ class tBindingInfo : public tCollectee
 {
 public:
 	typedef gc_map<tString, risse_uint32> tBindingMap;
+		//!< ローカル変数のバインディングのマップのtypedef @n
+		//!< second の risse_uint32 には VM コードと同じフォーマットで
+		//!< 共有フレーム内の変数番号が入る; つまり上位16bitがネストレベル、
+		//!< 下位16bitが変数番号。
 
 private:
 	tSharedVariableFrames * Frames; //!< 共有フレーム

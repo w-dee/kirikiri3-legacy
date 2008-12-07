@@ -72,8 +72,11 @@ protected:
 		tMemberHashTable; //!< ハッシュ表の型
 	tMemberHashTable HashTable; //!< ハッシュ表
 	const tString & PrototypeName;
+		//!< プロトタイプ名; このインスタンスにメンバが無かったときに読みに行く先のオブジェクトの名前
 	const tString & MembersName;
+		//!< Members名; ofUseMembersRule が指定された場合に読みに行く先のオブジェクトの名前
 	const tVariant * DefaultMethodContext;
+		//!< メンバを読み出すときにコンテキストがnullだった場合のデフォルトのコンテキスト(デフォルトのThis)
 
 public:
 	/**

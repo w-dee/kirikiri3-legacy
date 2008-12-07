@@ -45,10 +45,12 @@ class tCompilerFunction : public tCollectee
 	gc_vector<tSSAForm *> SSAForms; //!< この関数が保持しているSSA形式のリスト
 	risse_size NestLevel; //!< 関数のネストレベル
 	typedef gc_map<tString, tSSAVariable *> tSharedVariableMap;
+		//!< 子関数により共有されている変数のマップのtypedef (tSharedVariableMap::value_type::second は常に null)
 	tSharedVariableMap SharedVariableMap; //!< 子関数(あるいはbinding)により共有されている変数のマップ
 
 public:
 	typedef gc_map<tString, tSSABlock *> tLabelMap;
+		//!< ラベルのマップのtypedef
 
 	/**
 	 * バインドがまだされていないラベルへのジャンプ
@@ -67,6 +69,7 @@ public:
 	};
 
 	typedef gc_vector<tPendingLabelJump> tPendingLabelJumps;
+		//!< バインドがまだされていないラベルへのジャンプのリストのtypedef
 
 private:
 	tLabelMap LabelMap; //!< ラベルのマップ
@@ -262,6 +265,7 @@ class tCompiler : public tCollectee
 {
 	tScriptBlockInstance * ScriptBlockInstance; //!< このコンパイラを保有しているスクリプトブロック
 	gc_vector<tCompilerFunctionGroup *> FunctionGroups;
+		//!< この関数グループが保持している関数グループインスタンスのリスト
 
 	risse_int UniqueNumber; //!< ユニークな番号 (変数などのバージョン付けに用いる)
 

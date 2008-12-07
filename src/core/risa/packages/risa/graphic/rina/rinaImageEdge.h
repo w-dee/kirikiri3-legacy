@@ -26,6 +26,7 @@ namespace Risa {
 
 
 static const risse_uint32 ImageEdgeType = tFourCharId<'i','m','a','g'>::value;
+	//!< ラスタ画像データのエッジタイプ
 
 //---------------------------------------------------------------------------
 /**

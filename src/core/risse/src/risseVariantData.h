@@ -147,6 +147,8 @@ protected:
 	{
 		tObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
 		const tVariantBlock * Context;
+						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+						//!< 指しているとして)メソッドが動作するコンテキスト
 		/**
 		 * 厳密に同一かどうかを返す
 		 */

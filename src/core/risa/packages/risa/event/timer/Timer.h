@@ -57,6 +57,8 @@ class tTimerScheduler : protected depends_on<tTickCount>,
 	size_t NearestIndex; //!< もっとも時間的に近い位置にある Consumer のConsumers内におけるインデックス
 	volatile bool NearestInfoValid; //!< Nearest* のメンバの情報が有効かどうか
 	volatile bool NeedRescheduleOnPeriodChange;
+		//!< tTimerConsumer::SetNextTick内でReschedule()が呼ばれたときに
+		//!< 本当にRescheduleする必要があるかどうか
 
 public:
 	/**

@@ -42,7 +42,7 @@ File.open(ARGV[0]).readlines.each do |line|
 
 
 	# //! で始まってる行を探す
-	if line=~ /^(\s*)\/\/!\s*(.*)/
+	if line=~ /^(\s*)\/\/!\s*([^<].*)/
 		ws = $1
 		directive = $2
 

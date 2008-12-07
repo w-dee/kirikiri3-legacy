@@ -1308,6 +1308,7 @@ class tASTNode_MemberSel : public tASTNode
 	tASTMemberAccessType AccessType ; //!< 演算子の種類
 	tOperateFlags Flags; //!< メンバの操作フラグ(tObjectInterface::Opeate() に渡す物)
 	tDeclAttribute Attribute; //!< メンバの書き込み時の属性設定値 @r
+		//!< メンバへの書き込みのついでに属性を設定する場合のメンバの属性
 
 private:
 	/**
@@ -1468,6 +1469,8 @@ class tASTNode_Id : public tASTNode
 	struct tPrepareSSA : public tCollectee
 	{
 		const tASTNode_MemberSel * MemberSel;
+			//!< ローカル変数ではなかったときには生成された tASTNode_MemberSel のインスタンス
+			//!< ローカル変数の場合は NULL
 		void * MemberSelParam; //!< tASTNode_MemberSel::PrepareSSA() が生成した情報
 	};
 

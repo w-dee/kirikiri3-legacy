@@ -42,7 +42,9 @@ class tBreakInfo : public tCollectee
 	typedef gc_vector<tSSABlock *> tPendingJumpSourceBlocks;
 	tPendingJumpSourceBlocks PendingJumpSourceBlocks;
 	bool IsBlock; //!< この break/continue が block に対する物か
+				//!< (block に対する breakやcontinueは他と意味が異なるため)
 	bool NonValueBreakShouldSetVoidToLastEvalValue;
+		//!< 値なし break が _ に void をセットすべきかどうか(デフォルトでtrueなので注意)
 	tString JumpTargetLabel; //!< ジャンプ先のラベル名
 
 public:
@@ -189,7 +191,9 @@ class tSSAForm : public tCollectee
 
 	bool CanReturn; //!< このSSA形式からはreturn文で戻ることが可能
 	typedef gc_map<tString, risse_size> tExitTryBranchTargetLabels;
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)のtypedef
 	tExitTryBranchTargetLabels *ExitTryBranchTargetLabels;
+		//!< このSSA形式が受け取る可能性のあるラベルジャンプ先とその分岐インデックス(0～)
 	risse_size TryIdentifierIndex; //!< このSSA形式がtryブロックなどの場合、親SSA形式内の該当tryブロックのtry識別子を表す
 
 	/**
@@ -212,7 +216,11 @@ class tSSAForm : public tCollectee
 		tExitTryBranchTargetLabels * ExitTryBranchTargetLabels;
 	};
 	typedef gc_map<risse_size, tCatchBranchAndExceptionValue *> tCatchBranchAndExceptionMap;
+		//!< このSSA形式が保持しているTri識別子と、
+		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリストのtypedef
 	tCatchBranchAndExceptionMap CatchBranchAndExceptionMap;
+		//!< このSSA形式が保持しているTri識別子と、
+		//!< TryCallしたあとのCatchBranch文/そのTryCallの戻り値の情報のリスト
 
 	tString Name; //!< このSSA形式インスタンスの名前
 	tSSALocalNamespace * LocalNamespace; //!< ローカル名前空間

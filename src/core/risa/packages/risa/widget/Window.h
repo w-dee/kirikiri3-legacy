@@ -105,6 +105,7 @@ class tRisaWindowBahavior
 {
 public:
 	typedef tRisaWindowBahavior<WX_WINDOW_CLASS, RISSE_INSTANCE_CLASS> tBehavior;
+		//!< 自分自身のクラスのエイリアス
 
 	//-----------------------------------------------------------------------
 	/**

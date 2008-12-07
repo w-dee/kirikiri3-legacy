@@ -39,6 +39,8 @@ private:
 	tGraphInstance * GraphInstance; //!< グラフインスタンス
 
 	risse_size	LongestDistance;
+			//!< ルートノードからの最長距離(ステップ数)。
+			//!< 依存関係のクイックなチェックに用いる
 
 	risse_size	BuildQueueWaitingOutputPin; //!< BuildQueue にて待つべき出力/入力ピンの数
 

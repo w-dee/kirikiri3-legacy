@@ -50,6 +50,7 @@ class tLexer : public tLexerUtility
 	gc_deque<tTokenIdAndValue> TokenFIFO; //!< トークン用の FIFO バッファ (先読みを行う場合に使う)
 
 	risse_char ContinueEmbeddableString;
+		//!< 「埋め込み可能な」文字列の解析を次のトークン読み込み
 
 	bool NextIsRegularExpression; //!< 次の解析は正規表現パターン
 	bool FuncCallReduced; //!< 関数の呼び出しが還元し終わったか

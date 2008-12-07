@@ -26,9 +26,13 @@ namespace Risse
 // 各種定数
 //---------------------------------------------------------------------------
 static const int MaxVMInsnOperand = 6;
+	//!< 命令のオペランドの最大数(ただし可変オペランド部分をのぞく)
 static const risse_uint32 FuncCallFlag_Omitted = 0x80000000L;
+	//!< call などのフラグの定数 - 関数呼び出しは ... を伴っているか (引数省略されているか)
 static const risse_uint32 InvalidRegNum = (risse_uint32)0xffffffff;
+	//!< 無効なレジスタを表す値
 static const risse_size MaxArgCount = 30;
+	//!< 引数の最大個数
 //---------------------------------------------------------------------------
 
 
@@ -51,6 +55,7 @@ struct tVMInsnInfo
 		vifRegister,	//!< R このオペランドはレジスタを表している
 		vifConstant,	//!< C このオペランドは定数を表している
 		vifNumber,		//!< N このオペランドは(すべての必須オペランドが終了し
+						//!<   た後に続く)追加オペランドの個数を表している
 		vifAddress,		//!< A このオペランドはアドレスを表している
 		vifParameter,	//!< A このオペランドは関数へのパラメータを表している
 		vifShared,		//!< S このオペランドは共有空間の変数を表している

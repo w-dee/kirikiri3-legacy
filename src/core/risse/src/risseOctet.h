@@ -417,6 +417,7 @@ public: // utilities
 class tOctetData : public tCollectee
 {
 	tOctetBlock * Block; //!< ブロックへのポインタ (最下位の2ビットは常に01なので注意)
+							//!< アクセス時は必ず GetBlock, SetBlock を用いること
 
 protected: // Block pointer operation
 	void SetBlock(tOctetBlock * block)

@@ -146,6 +146,7 @@ public:
 	typedef tPinInstance inherited;
 
 	typedef tInputPinInstance tPinDirectionType;
+		//!< テンプレート中で派生クラスが tInputPinInstance の派生なのか tOutputPin の派生なのかを調べるために使われる
 
 private:
 	tOutputPinInstance * OutputPinInstance; //!< この入力ピンにつながっている出力ピン
@@ -308,6 +309,7 @@ public:
 	typedef tPinInstance inherited;
 
 	typedef tOutputPinInstance tPinInstanceDirectionType;
+		//!< テンプレート中で派生クラスが tInputPinInstance の派生なのか tOutputPinInstance の派生なのかを調べるために使われる
 
 private:
 	friend class tInputPinInstance;

@@ -28,6 +28,8 @@ namespace Risse
 class tPrimitiveClassBase : public tClassBase
 {
 	tVariant Gateway;
+		//!< ゲートウェイアクセス用の代表オブジェクト(すべてのプリミティブへのアクセスは
+		//!< このオブジェクトを経由して行われる
 public:
 	/**
 	 * コンストラクタ

@@ -117,6 +117,7 @@ public:
 		epMax = epLow //!< イベント優先度の最大値
 	};
 	static bool IsPriorityValid(tPriority prio) { return prio >= epMin && prio <= epMax; }
+		//!< 優先度が有効な値の範囲であるかどうか
 
 private:
 	int Id; //!< イベントID (Source固有)

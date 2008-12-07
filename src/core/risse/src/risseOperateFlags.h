@@ -25,9 +25,18 @@ class tOperateFlags : public tCollectee
 	risse_uint32 Flags; //!< フラグの値
 public:
 	static const risse_uint32 ofMemberEnsure = 0x1000;
+		//!< メンバが無かった場合に作成を行う(ocDSetのみ)
 	static const risse_uint32 ofInstanceMemberOnly = 0x2000;
+		//!< インスタンスメンバのみ参照(クラスのメンバを見に行かない)
+		//!< (ocDSet/ocDGetやメンバを参照するもの全般)
 	static const risse_uint32 ofFinalOnly = 0x4000;
+		//!< finalメンバのみを探す。見つかった場合はrvMemberIsFinalが帰る。
+		//!< 見つからなかった場合や、見つかってもfinalメンバではなかった場合は
+		//!< rvMemberNotFound が帰る。
 	static const risse_uint32 ofUseClassMembersRule = 0x8000;
+		//!< 常にThisパラメータで渡されたインスタンスをコンテキストとして使う。
+		//!< また、クラスやモジュールにおいては、
+		//!< members の中身を見に行く (クラスそのものを見ない)
 
 public:
 	/**

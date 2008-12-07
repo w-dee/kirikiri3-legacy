@@ -153,6 +153,7 @@ public:
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tMethodArgument & args;	//!< 引数
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
+										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
 	/**
@@ -258,6 +259,7 @@ public:
 	tVariant * result;				//!< 結果の格納先 (NULLの場合は結果が要らない場合)
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
+										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
 
@@ -293,6 +295,7 @@ public:
 	const tVariant & value;		//!< 値
 	tOperateFlags flags;			//!< オペレーションフラグ
 	const tVariant &This;			//!< メソッドが実行されるべき"Thisオブジェクト"
+										//!< (NULL="Thisオブジェクト"を指定しない場合)
 	tClassBase * Class;			//!< クラスインスタンス
 
 

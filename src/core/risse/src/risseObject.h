@@ -37,6 +37,8 @@ class tRTTI;
 class tObjectInterface : public tCollectee, public tOperateRetValue
 {
 	const tRTTI * RTTI; //!< このオブジェクトインターフェースの「型」をC++レベルで
+					//!< 識別するためのメンバ。簡易RTTI。とくに識別しない場合は
+					//!< NULLを入れておく。
 	tCriticalSection * CS; //!< このオブジェクトを保護するためのクリティカルセクション
 
 public:
@@ -128,6 +130,9 @@ public:
 	private:
 		char Locker[sizeof(tCriticalSection::tLocker)]; //!< ロックオブジェクトを配置する先
 		tCriticalSection * CS; //!< ロックが行うCS
+			//!< (たんにロックが行われたかどうかを表すbool値でもよいのだが
+			//!<  この構造体のサイズを推測しなければならない理由が risseVariant.h にあり
+			//!< 推測しやすいポインタサイズとした (bool はパディングがどうなるかが分かりづらい) )
 		// void * operator new(size_t); //!< heap 上に作成できません
 		// void * operator new[](size_t); //!< heap 上に作成できません
 		tSynchronizer(const tSynchronizer &); //!< copy 出来ません

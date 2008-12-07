@@ -174,6 +174,7 @@ class tTickCount : public singleton_base<tTickCount>
 
 public:
 	static const risse_uint64 InvalidTickCount = ~ static_cast<risse_uint64>(0);
+		//!< 無効な tick を表す値
 
 	/**
 	 * コンストラクタ

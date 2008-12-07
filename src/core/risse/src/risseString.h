@@ -179,6 +179,7 @@ struct tStringData
 
 public:
 	const static risse_char MightBeShared  = static_cast<risse_char>(-1L);
+		//!< 共有可能性フラグとして Buffer[-1] に設定する値
 
 	/**
 	 * -1, 0, 0 が入っている配列(空のバッファを表す)

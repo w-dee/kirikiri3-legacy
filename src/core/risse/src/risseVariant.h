@@ -82,6 +82,7 @@ private: // static オブジェクト
 	{
 		risse_ptruint Type; //!< バリアントタイプ
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint)];
+			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticPrimitive VoidObject;
 	static tStaticPrimitive NullObject;
@@ -93,7 +94,9 @@ private: // static オブジェクト
 	{
 		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
 		const tVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+						//!< 指しているとして)メソッドが動作するコンテキスト
 		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tVariantBlock *)];
+			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticObject DynamicContext;
 
@@ -165,9 +168,13 @@ public: // GuessTypeXXXXX で使用されるもの
 		gtObject	= vtObject,
 
 		gtAny = 9,	//!< 任意の型(GuessTypeXXXXX の入力として用いられた場合は
+					//!< どのような型もあり得ることを表す。出力として得られた場合も
+					//!< どのような型もあり得ることを表す)
 
 		// 以降、出力のみ
 		gtError		//!< (出力のみ) この演算の組み合わせは「必ず」エラーになる。
+					//!< 「場合によってはエラーになる」場合は他の結果が
+					//!< 得られる。
 	};
 	enum tGuessTypeFlags
 	{

@@ -57,6 +57,7 @@ public:
 	tScriptEngine * GetScriptEngine() { return ScriptEngine; } //!< スクリプトエンジンを返す
 
 	const tRTTI * GetDefaultRTTI() const { return DefaultRTTI; }
+		//!< デフォルトの RTTI を帰す
 
 	/**
 	 * 式を評価して結果をコンソールに表示する

@@ -103,12 +103,19 @@ public:
 class tSSALocalNamespace : public tCollectee
 {
 	tCompiler * Compiler; //!< この名前空間に結びつけられている基本ブロック
+				//!< たとえ Block が null でも、 ユニークな値を得るために必要。
 	tSSABlock * Block; //!< この名前空間に結びつけられている基本ブロック
 	tSSAVariableAccessMap * AccessMap;
+		//!< この名前空間内に見つからなかった読み込みあるいは書き込みをチェックするためのマップ
+		//!< この名前空間内に見つからなかった変数は親名前空間内で検索される。見つかった場合は
+		//!< AccessMapが NULL の場合は、親名前空間内で共有されるが、
+		//!< AccessMapが非 NULL の場合は共有されずに AccessMap にマッピングが追加される
 	tSSALocalNamespace * Parent; //!< チェーンされた親名前空間
 public:
 	typedef gc_map<tString, tSSAVariable *> tVariableMap;
+		//!< 変数名(番号付き)→変数オブジェクトのマップのtypedef
 	typedef gc_map<tString, tString> tAliasMap;
+		//!< 変数名(番号なし)→変数名(番号付き)のマップのtypedef
 private:
 
 	/**

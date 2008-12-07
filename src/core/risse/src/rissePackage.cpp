@@ -68,6 +68,7 @@ class tBuiltinPackageFileSystem : public tCollectee
 	tNode Root; //!< ルートノード
 	tScriptEngine * ScriptEngine; //!< スクリプトエンジンインスタンス
 	tDummyBuiltinPackageInitializer DummyBuiltinPackageInitializer;
+		//!< ダミーのパッケージイニシャライザ
 
 public:
 	/**

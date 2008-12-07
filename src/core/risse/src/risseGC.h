@@ -41,6 +41,16 @@ namespace Risse
 //---------------------------------------------------------------------------
 typedef	gc			tCollectee; //!< コレクタの対象となるクラスの基本クラス
 typedef	gc_cleanup	tDestructee; //!< コレクタの対象かつデストラクタが呼ばれるクラスの基本クラス
+//!< @note tDestructee のデストラクタは、
+//!< コンストラクタとは異なるスレッドから呼ばれる可能性があることに注意。
+//!< tDestructee 派生クラスはいろいろと注意点が多い。
+//!< まず、循環参照を作るとデストラクタが呼ばれなくなるが、これは循環参照が
+//!< 無いように、tCollecteeでの管理部分とtDestructeeの管理部分を分離すること
+//!< で解決できる。
+//!< tCollecteeの直接のメンバになることはできない。
+//!< (tCollecteeがこのクラスのポインタを持つことは可能)。
+//!< tDestructeeの直接のメンバになることは可能で、この場合はメンバ親と
+//!< 生死をともにすることになる。
 
 
 // http://www.al.cs.kobe-u.ac.jp/~inamoto/unix-tools/useful/programming/gc/x272.html

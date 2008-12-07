@@ -49,6 +49,7 @@ class tCodeGenerator : public tCollectee
 	risse_size MaxNumUsedRegs; // 使用中のレジスタの最大数
 public:
 	typedef gc_map<tString, risse_size> tNamedRegMap;
+		//!< 変数名とそれに対応するレジスタ番号のマップのtypedef
 private:
 	tNamedRegMap *SharedRegNameMap; //!< 共有変数名とそれに対応するレジスタ番号のマップ(一連の関数グループ内ではこれを共有する)
 	risse_size SharedRegCount; //!< このコードジェネレータのネストレベルに対する共有変数の数を返す
@@ -66,7 +67,9 @@ private:
 			: Block(block), EmitPosition(emit_pos), InsnPosition(insn_pos) {;}
 	};
 	gc_vector<tPendingBlockJump> PendingBlockJumps;
+			//!< 未解決のジャンプとその基本ブロックのリスト
 	typedef gc_map<const tSSABlock *, risse_size> tBlockMap;
+			//!< 基本ブロックとそれが対応するアドレスの typedef
 	tBlockMap BlockMap; //!< 変数とそれに対応するレジスタ番号のマップ
 
 	gc_vector<std::pair<risse_size, risse_size> > CodeBlockRelocations; // 他のコードブロックの再配置情報用配列

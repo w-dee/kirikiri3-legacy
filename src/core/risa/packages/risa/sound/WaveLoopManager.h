@@ -244,8 +244,10 @@ private:
 	bool FirstRendered; //!< 最初のサンプルをレンダリングしたかどうか
 
 	risse_int ShortCrossFadeHalfSamples;
+		//!< SmoothTimeHalf in sample unit
 
 	bool Looping; 
+		//!< ループ再生しているときは真 (ただしこれはループ情報を読み込んでいない場合の設定で、
 		//   ループ情報を読み込んでいる場合はこの設定に従わない
 
 	risse_int64 Position; //!< decoding position
@@ -365,6 +367,7 @@ public:
 	//------- tWaveFilter メソッド  ここから
 	void Reset() {;} //!< @note tWaveLoopManager ではなにもしない
 	void SetInput(tWaveFilter * input) {;}
+		//!< @note tWaveLoopManager には入力するフィルタがないのでこのメソッドはなにもしない
 
 	/**
 	 * PCMフォーマットを提案する

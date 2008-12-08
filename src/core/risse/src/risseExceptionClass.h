@@ -178,27 +178,8 @@ public: // Risse用メソッドなど
  *			このクラスのインスタンスを自前で作成したり、インスタンスのメンバに
  *			書き込んだりしないこと。
  */
-class tSourcePointClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tSourcePointClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-};
+RISSE_DEFINE_CLASS_BEGIN(tSourcePointClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -216,22 +197,7 @@ public:
  *			C++メソッドはすべてstatic宣言になり、あまりNativeBinderの恩恵が
  *			無いが、しかたない。
  */
-class tThrowableClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tThrowableClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tThrowableClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -239,7 +205,7 @@ public: // Risse用メソッドなど
 	static void addTrace(const tVariant & point,
 		const tNativeCallInfo & info);
 	static tVariant toException(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -253,26 +219,11 @@ public: // Risse用メソッドなど
 /**
  * "Error" クラス
  */
-class tErrorClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tErrorClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tErrorClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -288,22 +239,7 @@ public: // Risse用メソッドなど
 /**
  * "AssertionError" クラス
  */
-class tAssertionErrorClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tAssertionErrorClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tAssertionErrorClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -321,7 +257,7 @@ public:
 	 * @param expression	ASSERTに失敗した式
 	 */
 	static void Throw(const tString & expression) RISSE_NORETURN { Throw(NULL, expression); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -336,26 +272,11 @@ public:
 /**
  * "BlockExitException" クラス
  */
-class tBlockExitExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tBlockExitExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tBlockExitExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -371,26 +292,11 @@ public: // Risse用メソッドなど
 /**
  * "Exception" クラス
  */
-class tExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -407,22 +313,7 @@ public: // Risse用メソッドなど
 /**
  * "InsufficientResourceException" クラス
  */
-class tInsufficientResourceExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tInsufficientResourceExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tInsufficientResourceExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -437,7 +328,7 @@ public:
 	 * 「コルーチンを作成できない」例外を発生
 	 */
 	static void ThrowCouldNotCreateCoroutine() RISSE_NORETURN { ThrowCouldNotCreateCoroutine(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -453,22 +344,7 @@ public:
 /**
  * "IOException" クラス
  */
-class tIOExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tIOExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tIOExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -560,7 +436,7 @@ public:
 		tString::GetEmptyString()) RISSE_NORETURN
 		{ ThrowStreamIsClosed(NULL, name); }
 #endif
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -574,22 +450,7 @@ public:
 /**
  * "CharConversionException" クラス
  */
-class tCharConversionExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tCharConversionExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tCharConversionExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -604,7 +465,7 @@ public:
 	 * 「無効なUTF-8文字列です」例外を発生
 	 */
 	static void ThrowInvalidUTF8String() RISSE_NORETURN { ThrowInvalidUTF8String(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -619,26 +480,11 @@ public:
 /**
  * "RuntimeException" クラス
  */
-class tRuntimeExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tRuntimeExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tRuntimeExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -651,22 +497,7 @@ public: // Risse用メソッドなど
 /**
  * "CompileException" クラス
  */
-class tCompileExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tCompileExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tCompileExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -687,7 +518,7 @@ public:
 	 */
 	static void Throw(const tString & reason) RISSE_NORETURN
 		{ Throw(NULL, reason); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -703,22 +534,7 @@ public:
 /**
  * "ImportException" クラス
  */
-class tImportExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tImportExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tImportExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -792,8 +608,7 @@ public:
 	static void ThrowInvalidRelativePckageName(
 		const tString & package_name, const tString & ref) RISSE_NORETURN
 		{ ThrowInvalidRelativePckageName(NULL, package_name, ref); }
-
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -809,22 +624,7 @@ public:
 /**
  * "ClassDefinitionException" クラス
  */
-class tClassDefinitionExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tClassDefinitionExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tClassDefinitionExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -852,7 +652,7 @@ public:
 	 */
 	static void ThrowSuperClassIsNotAClass() RISSE_NORETURN
 		{ ThrowSuperClassIsNotAClass(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -869,22 +669,7 @@ public:
 /**
  * "InstantiationException" クラス
  */
-class tInstantiationExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tInstantiationExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tInstantiationExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -911,7 +696,7 @@ public:
 	 */
 	static void ThrowCannotCreateInstanceFromThisClass() RISSE_NORETURN
 		{ ThrowCannotCreateInstanceFromThisClass(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -925,22 +710,7 @@ public:
 /**
  * "BadContextException" クラス
  */
-class tBadContextExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tBadContextExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tBadContextExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -955,7 +725,7 @@ public:
 	 * 「異なるクラスのコンテキストです」例外を発生
 	 */
 	static void Throw() RISSE_NORETURN { Throw(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -972,22 +742,7 @@ public:
 /**
  * "UnsupportedOperationException" クラス
  */
-class tUnsupportedOperationExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tUnsupportedOperationExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tUnsupportedOperationExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1014,7 +769,7 @@ public:
 	 */
 	static void ThrowOperationIsNotImplemented() RISSE_NORETURN
 		{ ThrowOperationIsNotImplemented(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1024,22 +779,7 @@ public:
 /**
  * "ArithmeticException" クラス
  */
-class tArithmeticExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tArithmeticExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tArithmeticExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1055,7 +795,7 @@ public:
 	 */
 	static void ThrowDivideByZeroException() RISSE_NORETURN
 		{ ThrowDivideByZeroException(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1068,26 +808,11 @@ public:
 /**
  * "ArgumentException" クラス
  */
-class tArgumentExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tArgumentExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tArgumentExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1104,22 +829,7 @@ public: // Risse用メソッドなど
 /**
  * "NullObjectException" クラス
  */
-class tNullObjectExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tNullObjectExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tNullObjectExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1134,7 +844,7 @@ public:
 	 * 「nullオブジェクトにアクセスしようとしました」例外を発生
 	 */
 	static void Throw() RISSE_NORETURN { Throw(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1149,22 +859,7 @@ public:
 /**
  * "IllegalArgumentClassException" クラス
  */
-class tIllegalArgumentClassExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tIllegalArgumentClassExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1214,9 +909,7 @@ public:
 	 */
 	static void ThrowSpecifyInstanceOfClass(const tString & class_name) RISSE_NORETURN
 		{ ThrowSpecifyInstanceOfClass(NULL, class_name); }
-
-
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1231,22 +924,7 @@ public:
 /**
  * "IllegalArgumentException" クラス
  */
-class tIllegalArgumentExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tIllegalArgumentExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1274,7 +952,7 @@ public:
 	 * 「無効な日付文字列」例外を投げる
 	 */
 	static void ThrowInvalidDateString() RISSE_NORETURN { ThrowInvalidDateString(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1291,22 +969,7 @@ public:
 /**
  * "BadArgumentCountException" クラス
  */
-class tBadArgumentCountExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tBadArgumentCountExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tBadArgumentCountExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1341,7 +1004,7 @@ public:
 	 */
 	static void ThrowBlock(risse_size passed, risse_size expected) RISSE_NORETURN
 		{ ThrowBlock(NULL, passed, expected); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1356,26 +1019,11 @@ public:
 /**
  * "MemberAccessException" クラス
  */
-class tMemberAccessExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tMemberAccessExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tMemberAccessExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1391,22 +1039,7 @@ public: // Risse用メソッドなど
 /**
  * "NoSuchMemberException" クラス
  */
-class tNoSuchMemberExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tNoSuchMemberExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tNoSuchMemberExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1423,7 +1056,7 @@ public:
 	 * @param name	メンバ名
 	 */
 	static void Throw(const tString & name) RISSE_NORETURN { Throw(NULL, name); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1437,22 +1070,7 @@ public:
 /**
  * "IllegalMemberAccessException" クラス
  */
-class tIllegalMemberAccessExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tIllegalMemberAccessExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1513,7 +1131,7 @@ public:
 	 */
 	static void ThrowPropertyCannotBeWritten(const tString & name) RISSE_NORETURN
 		{ ThrowPropertyCannotBeWritten(NULL, name); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1527,28 +1145,11 @@ public:
 /**
  * "IllegalStateException" クラス
  */
-class tIllegalStateExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tIllegalStateExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tIllegalStateExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
-
-public:
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1558,22 +1159,7 @@ public:
 /**
  * "InaccessibleResourceException" クラス
  */
-class tInaccessibleResourceExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tInaccessibleResourceExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tInaccessibleResourceExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1590,7 +1176,7 @@ public:
 	 */
 	static void Throw() RISSE_NORETURN
 		{ Throw(NULL); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

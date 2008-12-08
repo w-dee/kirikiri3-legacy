@@ -266,37 +266,12 @@ tString tSourcePointInstance::toString()
 
 
 //---------------------------------------------------------------------------
-tSourcePointClass::tSourcePointClass(tScriptEngine * engine) :
-	tClassBase(ss_SourcePoint, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSourcePointClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tSourcePointClass, ss_SourcePoint, engine->ObjectClass, new tSourcePointInstance())
 	BindFunction(this, ss_ovulate,  &tSourcePointClass::ovulate);
 	BindFunction(this, ss_construct,  &tSourcePointInstance::construct);
 	BindFunction(this, ss_initialize,  &tSourcePointInstance::initialize);
 	BindFunction(this, mnString,  &tSourcePointInstance::toString);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tSourcePointClass::ovulate()
-{
-	return tVariant(new tSourcePointInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -310,31 +285,13 @@ tVariant tSourcePointClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-tThrowableClass::tThrowableClass(tScriptEngine * engine) :
-	tClassBase(ss_Throwable, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tThrowableClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tThrowableClass, ss_Throwable, engine->ObjectClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tThrowableClass::construct);
 	BindFunction(this, ss_initialize, &tThrowableClass::initialize);
 	BindFunction(this, mnString, &tThrowableClass::toString);
 	BindFunction(this, ss_addTrace, &tThrowableClass::addTrace);
 	BindFunction(this, ss_toException, &tThrowableClass::toException);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -422,28 +379,10 @@ tVariant tThrowableClass::toException(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tErrorClass::tErrorClass(tScriptEngine * engine) :
-	tClassBase(ss_Error, engine->ThrowableClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tErrorClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tErrorClass, ss_Error, engine->ThrowableClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tErrorClass::construct);
 	BindFunction(this, ss_initialize, &tErrorClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -474,28 +413,10 @@ void tErrorClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tAssertionErrorClass::tAssertionErrorClass(tScriptEngine * engine) :
-	tClassBase(ss_AssertionError, engine->ErrorClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tAssertionErrorClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tAssertionErrorClass, ss_AssertionError, engine->ErrorClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tAssertionErrorClass::construct);
 	BindFunction(this, ss_initialize, &tAssertionErrorClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -542,28 +463,10 @@ void tAssertionErrorClass::Throw(tScriptEngine * engine, const tString & express
 
 
 //---------------------------------------------------------------------------
-tBlockExitExceptionClass::tBlockExitExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_BlockExitException, engine->ThrowableClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tBlockExitExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tBlockExitExceptionClass, ss_BlockExitException, engine->ThrowableClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tBlockExitExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBlockExitExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -614,28 +517,10 @@ void tBlockExitExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tExceptionClass::tExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_Exception, engine->ThrowableClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tExceptionClass, ss_Exception, engine->ThrowableClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -663,29 +548,10 @@ void tExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tInsufficientResourceExceptionClass::tInsufficientResourceExceptionClass(
-	tScriptEngine * engine) :
-	tClassBase(ss_InsufficientResourceException, engine->ExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tInsufficientResourceExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tInsufficientResourceExceptionClass, ss_InsufficientResourceException, engine->ExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tInsufficientResourceExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInsufficientResourceExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -725,28 +591,10 @@ void tInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tScriptEn
 
 
 //---------------------------------------------------------------------------
-tIOExceptionClass::tIOExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IOException, engine->ExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tIOExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tIOExceptionClass, ss_IOException, engine->ExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tIOExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIOExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -861,28 +709,10 @@ void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tStrin
 
 
 //---------------------------------------------------------------------------
-tCharConversionExceptionClass::tCharConversionExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_CharConversionException, engine->IOExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tCharConversionExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tCharConversionExceptionClass, ss_CharConversionException, engine->IOExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tCharConversionExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCharConversionExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -920,28 +750,10 @@ void tCharConversionExceptionClass::ThrowInvalidUTF8String(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-tRuntimeExceptionClass::tRuntimeExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_RuntimeException, engine->ExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRuntimeExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tRuntimeExceptionClass, ss_RuntimeException, engine->ExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tRuntimeExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tRuntimeExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -968,28 +780,10 @@ void tRuntimeExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tCompileExceptionClass::tCompileExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_CompileException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tCompileExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tCompileExceptionClass, ss_CompileException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tCompileExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCompileExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1041,98 +835,10 @@ void tCompileExceptionClass::Throw(tScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-tClassDefinitionExceptionClass::tClassDefinitionExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_ClassDefinitionException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tClassDefinitionExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	BindFunction(this, ss_construct, &tClassDefinitionExceptionClass::construct);
-	BindFunction(this, ss_initialize, &tClassDefinitionExceptionClass::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tClassDefinitionExceptionClass::construct()
-{
-	// 特にやることはない
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tClassDefinitionExceptionClass::initialize(const tNativeCallInfo & info)
-{
-	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
-	info.InitializeSuperClass(info.args);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine)
-{
-	tTemporaryException * e =
-		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
-			tString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
-	if(engine) e->ThrowConverted(engine); else throw e;
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * engine)
-{
-	tTemporaryException * e =
-		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
-			tString(RISSE_WS_TR("the superclass is not a class")));
-	if(engine) e->ThrowConverted(engine); else throw e;
-}
-//---------------------------------------------------------------------------
-
-
-
-
-
-
-
-//---------------------------------------------------------------------------
-tImportExceptionClass::tImportExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_ImportException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImportExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImportExceptionClass, ss_ImportException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tImportExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tImportExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1228,28 +934,62 @@ void tImportExceptionClass::ThrowInvalidRelativePckageName(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-tInstantiationExceptionClass::tInstantiationExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_InstantiationException, engine->RuntimeExceptionClass)
+RISSE_IMPL_CLASS_BEGIN(tClassDefinitionExceptionClass, ss_ClassDefinitionException, engine->RuntimeExceptionClass, new tObjectBase())
+	BindFunction(this, ss_construct, &tClassDefinitionExceptionClass::construct);
+	BindFunction(this, ss_initialize, &tClassDefinitionExceptionClass::initialize);
+RISSE_IMPL_CLASS_END()
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tClassDefinitionExceptionClass::construct()
 {
-	RegisterMembers();
+	// 特にやることはない
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-void tInstantiationExceptionClass::RegisterMembers()
+void tClassDefinitionExceptionClass::initialize(const tNativeCallInfo & info)
 {
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
+	// 親クラスの同名メソッドを呼び出す(引数はそのまま)
+	info.InitializeSuperClass(info.args);
+}
+//---------------------------------------------------------------------------
 
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
+//---------------------------------------------------------------------------
+void tClassDefinitionExceptionClass::ThrowCannotCreateSubClassOfNonExtensibleClass(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
+			tString(RISSE_WS_TR("cannot create subclass of non-extensible superclass")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_risse, ss_ClassDefinitionException,
+			tString(RISSE_WS_TR("the superclass is not a class")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+//---------------------------------------------------------------------------
+RISSE_IMPL_CLASS_BEGIN(tInstantiationExceptionClass, ss_InstantiationException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tInstantiationExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInstantiationExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1297,28 +1037,10 @@ void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tScrip
 
 
 //---------------------------------------------------------------------------
-tBadContextExceptionClass::tBadContextExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_BadContextException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tBadContextExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tBadContextExceptionClass, ss_BadContextException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tBadContextExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBadContextExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1356,28 +1078,10 @@ void tBadContextExceptionClass::Throw(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-tUnsupportedOperationExceptionClass::tUnsupportedOperationExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_UnsupportedOperationException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tUnsupportedOperationExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tUnsupportedOperationExceptionClass, ss_UnsupportedOperationException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tUnsupportedOperationExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tUnsupportedOperationExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1426,28 +1130,10 @@ void tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tScript
 
 
 //---------------------------------------------------------------------------
-tArithmeticExceptionClass::tArithmeticExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_ArithmeticException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tArithmeticExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tArithmeticExceptionClass, ss_ArithmeticException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tArithmeticExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tArithmeticExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1485,28 +1171,10 @@ void tArithmeticExceptionClass::ThrowDivideByZeroException(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-tArgumentExceptionClass::tArgumentExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_ArgumentException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tArgumentExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tArgumentExceptionClass, ss_ArgumentException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tArgumentExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tArgumentExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1537,28 +1205,10 @@ void tArgumentExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tNullObjectExceptionClass::tNullObjectExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_NullObjectException, engine->IllegalArgumentExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNullObjectExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tNullObjectExceptionClass, ss_NullObjectException, engine->IllegalArgumentExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tNullObjectExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tNullObjectExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1596,28 +1246,10 @@ void tNullObjectExceptionClass::Throw(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-tIllegalArgumentClassExceptionClass::tIllegalArgumentClassExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IllegalArgumentClassException, engine->IllegalArgumentExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tIllegalArgumentClassExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, ss_IllegalArgumentClassException, engine->IllegalArgumentExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tIllegalArgumentClassExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalArgumentClassExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1682,28 +1314,10 @@ void tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(tScriptEng
 
 
 //---------------------------------------------------------------------------
-tIllegalArgumentExceptionClass::tIllegalArgumentExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IllegalArgumentException, engine->ArgumentExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tIllegalArgumentExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentExceptionClass, ss_IllegalArgumentException, engine->ArgumentExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tIllegalArgumentExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalArgumentExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1754,28 +1368,10 @@ void tIllegalArgumentExceptionClass::ThrowInvalidDateString(tScriptEngine * engi
 
 
 //---------------------------------------------------------------------------
-tBadArgumentCountExceptionClass::tBadArgumentCountExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_BadArgumentCountException, engine->ArgumentExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tBadArgumentCountExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tBadArgumentCountExceptionClass, ss_BadArgumentCountException, engine->ArgumentExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tBadArgumentCountExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBadArgumentCountExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1831,28 +1427,10 @@ void tBadArgumentCountExceptionClass::ThrowBlock(tScriptEngine * engine, risse_s
 
 
 //---------------------------------------------------------------------------
-tMemberAccessExceptionClass::tMemberAccessExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_MemberAccessException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tMemberAccessExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tMemberAccessExceptionClass, ss_MemberAccessException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tMemberAccessExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tMemberAccessExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1888,28 +1466,10 @@ void tMemberAccessExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tNoSuchMemberExceptionClass::tNoSuchMemberExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_NoSuchMemberException, engine->MemberAccessExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNoSuchMemberExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tNoSuchMemberExceptionClass, ss_NoSuchMemberException, engine->MemberAccessExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tNoSuchMemberExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tNoSuchMemberExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -1953,28 +1513,10 @@ void tNoSuchMemberExceptionClass::Throw(tScriptEngine * engine, const tString & 
 
 
 //---------------------------------------------------------------------------
-tIllegalMemberAccessExceptionClass::tIllegalMemberAccessExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tIllegalMemberAccessExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tIllegalMemberAccessExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalMemberAccessExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -2065,28 +1607,10 @@ void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tScriptEng
 
 
 //---------------------------------------------------------------------------
-tIllegalStateExceptionClass::tIllegalStateExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_IllegalStateException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tIllegalStateExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tIllegalStateExceptionClass, ss_IllegalStateException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tIllegalStateExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalStateExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -2118,28 +1642,10 @@ void tIllegalStateExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tInaccessibleResourceExceptionClass::tInaccessibleResourceExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_InaccessibleResourceException, engine->IllegalStateExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tInaccessibleResourceExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tInaccessibleResourceExceptionClass, ss_InaccessibleResourceException, engine->IllegalStateExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tInaccessibleResourceExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInaccessibleResourceExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

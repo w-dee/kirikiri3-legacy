@@ -26,31 +26,12 @@ namespace Risse
 /**
  * "Boolean" クラス
  */
-class tBooleanClass : public tPrimitiveClassBase
-{
-	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tBooleanClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
+RISSE_DEFINE_CLASS_BEGIN(tBooleanClass, tPrimitiveClassBase)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static tString toString(const tNativeCallInfo & info);
 	static tString dump(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse
 

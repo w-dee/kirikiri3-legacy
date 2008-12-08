@@ -23,6 +23,7 @@
 #include "risseNativeBinder.h"
 #include "risseModuleClass.h"
 #include "risseObjectClass.h"
+#include "risseExceptionClass.h"
 
 namespace Risse
 {
@@ -210,7 +211,7 @@ tClassBase::tRetValue tClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG
 
 //---------------------------------------------------------------------------
 void tClassBase::CallSuperClassMethod(tVariantBlock * ret,
-	const tString & name,risse_uint32 flags, 
+	const tString & name,risse_uint32 flags,
 	const tMethodArgument & args, const tVariant & This)
 {
 	// class.super を取り出す
@@ -219,6 +220,15 @@ void tClassBase::CallSuperClassMethod(tVariantBlock * ret,
 
 	// super の中のメソッドを呼ぶ
 	super.FuncCall_Object(ret, name, flags|tOperateFlags::ofUseClassMembersRule, args, This);
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tClassBase::ThrowCannotCreateInstanceFromThisClass()
+{
+	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 

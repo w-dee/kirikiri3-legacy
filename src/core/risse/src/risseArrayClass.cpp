@@ -305,25 +305,7 @@ bool tArrayInstance::has(const tVariant & value)
 
 
 //---------------------------------------------------------------------------
-tArrayClass::tArrayClass(tScriptEngine * engine) :
-	tClassBase(ss_Array, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tArrayClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tArrayClass, ss_Array, engine->ObjectClass, new tArrayInstance())
 	BindFunction(this, ss_ovulate, &tArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tArrayInstance::initialize);
@@ -338,15 +320,7 @@ void tArrayClass::RegisterMembers()
 	BindFunction(this, ss_remove, &tArrayInstance::remove);
 	BindFunction(this, ss_erase, &tArrayInstance::erase);
 	BindFunction(this, ss_has, &tArrayInstance::has);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tArrayClass::ovulate()
-{
-	return tVariant(new tArrayInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

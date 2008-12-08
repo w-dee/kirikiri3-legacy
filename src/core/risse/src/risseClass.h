@@ -117,6 +117,12 @@ public:
 		tVariantBlock * ret, const tString & name,
 		risse_uint32 flags, const tMethodArgument & args, const tVariant & This);
 
+	/**
+	 * 「このクラスのインスタンスは作成できない」例外を投げるユーティリティメソッド
+	 * @return このメソッドは帰らないが便宜上 tVariant() を返すようになっている。
+	 */
+	static tVariant ThrowCannotCreateInstanceFromThisClass();
+
 public: // Risse用メソッドなど
 	static void risse_new(const tNativeCallInfo &info);
 	static void fertilize(const tVariant & instance, const tNativeCallInfo &info);
@@ -125,6 +131,37 @@ public: // Risse用メソッドなど
 };
 //---------------------------------------------------------------------------
 
+
+
+
+//---------------------------------------------------------------------------
+// クラスを簡単に定義するためのマクロ
+#define RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS) \
+	class CPPNAME : public SUPERCLASS \
+	{ \
+	typedef SUPERCLASS inherited; \
+public: \
+	CPPNAME(tScriptEngine * engine); \
+	void RegisterMembers(); \
+	static tVariant ovulate(); \
+public:
+
+#define RISSE_DEFINE_CLASS_END() \
+	};
+
+#define RISSE_DEFINE_CLASS(CPPNAME, SUPERCLASS) \
+	RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS) \
+	RISSE_DEFINE_CLASS_END()
+
+#define RISSE_IMPL_CLASS_BEGIN(CPPNAME, RISSENAME, SUPERCLASS, NEWINSTANCE) \
+	CPPNAME::CPPNAME(tScriptEngine * engine) : \
+		inherited((RISSENAME), (SUPERCLASS)) { RegisterMembers(); } \
+	tVariant CPPNAME::ovulate() { return tVariant(NEWINSTANCE); } \
+	void CPPNAME::RegisterMembers() { inherited::RegisterMembers();
+
+#define RISSE_IMPL_CLASS_END() \
+	}
+//---------------------------------------------------------------------------
 
 
 

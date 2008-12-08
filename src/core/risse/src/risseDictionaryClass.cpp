@@ -145,25 +145,7 @@ void tDictionaryInstance::eachPair(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tDictionaryClass::tDictionaryClass(tScriptEngine * engine) :
-	tClassBase(ss_Dictionary, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tDictionaryClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tDictionaryClass, ss_Dictionary, engine->ObjectClass, new tDictionaryInstance())
 	BindFunction(this, ss_ovulate, &tDictionaryClass::ovulate);
 	BindFunction(this, ss_construct, &tDictionaryInstance::construct);
 	BindFunction(this, ss_initialize, &tDictionaryInstance::initialize);
@@ -173,15 +155,7 @@ void tDictionaryClass::RegisterMembers()
 	BindFunction(this, ss_clear, &tDictionaryInstance::clear);
 	BindProperty(this, ss_count, &tDictionaryInstance::get_count);
 	BindFunction(this, ss_eachPair, &tDictionaryInstance::eachPair);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tDictionaryClass::ovulate()
-{
-	return tVariant(new tDictionaryInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 } /* namespace Risse */

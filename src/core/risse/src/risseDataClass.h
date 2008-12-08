@@ -23,32 +23,10 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-/**
- * Dataクラスの基底クラス(Risse用)
- */
-class tDataClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tDataClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
+RISSE_DEFINE_CLASS_BEGIN(tDataClass, tClassBase/* tPrimitiveClassBase ではないので注意 */)
 public: // Risse用メソッドなど
 	static void construct();
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

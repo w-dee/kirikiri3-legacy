@@ -1131,7 +1131,6 @@ void tLogScrollView::OnLeftDown(wxMouseEvent & event)
 			MouseSelStart1 = pos;
 			MouseSelStart2 = pos;
 			MouseSelStart2.CharPosition += charlength;
-			printf("charlength : %d\n", charlength);
 			SetSelection(MouseSelStart1, MouseSelStart2, tCharacterPosition());
 		}
 		else
@@ -1232,7 +1231,7 @@ void tLogScrollView::OnMenuCopy(wxCommandEvent &event)
 	// 選択範囲をコピーする
 	if (wxTheClipboard->Open())
 	{
-		// This data objects are held by the clipboard, 
+		// This data objects are held by the clipboard,
 		// so do not delete them in the app.
 
 		// GetSelectionString はクリティカルセクションで保護すること。

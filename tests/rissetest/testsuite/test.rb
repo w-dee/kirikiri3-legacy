@@ -11,7 +11,9 @@ test_count = 0
 files = Dir.glob(TESTS_DIR + '*.rs').sort.delete_if { |x| x =~ /^\./ }
 
 # if an argument is specified, pick up files witch include specified string.
-if ARGV[0]
+if ARGV[0] && ARGV[0]=~/^\^(.*)/
+	files.delete_if { |x| x[$1] }
+elsif ARGV[0]
 	files.delete_if { |x| !x[ARGV[0]] }
 end
 

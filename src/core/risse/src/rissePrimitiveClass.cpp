@@ -82,22 +82,7 @@ void tPrimitiveClassBase::construct()
 
 
 //---------------------------------------------------------------------------
-tPrimitiveClass::tPrimitiveClass(tScriptEngine * engine) :
-	tClassBase(ss_Primitive, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tPrimitiveClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-
+RISSE_IMPL_CLASS_BEGIN(tPrimitiveClass, ss_Primitive, engine->ObjectClass, ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate,
 		&tPrimitiveClass::ovulate,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
@@ -110,17 +95,7 @@ void tPrimitiveClass::RegisterMembers()
 		&tPrimitiveClass::toString,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tPrimitiveClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

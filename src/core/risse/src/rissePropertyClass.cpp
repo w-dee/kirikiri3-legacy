@@ -98,20 +98,7 @@ void tPropertyInstance::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tPropertyClass::tPropertyClass(tScriptEngine * engine) :
-	tClassBase(ss_Property, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tPropertyClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
+RISSE_IMPL_CLASS_BEGIN(tPropertyClass, ss_Property, engine->ObjectClass, new tPropertyInstance())
 	// 注: この時点では Property クラスの ovulate は inherited::RegisterMembers で
 	// 登録された、親クラスの ovulate となっている。
 	// この状態で Property クラスのメソッドを登録しようとしても(間違ったovulateが
@@ -136,15 +123,7 @@ void tPropertyClass::RegisterMembers()
 	BindProperty(this, ss_setter, &tPropertyInstance::GetSetter);
 	BindProperty(this, ss_synchronized,
 		&tPropertyInstance::get_synchronized, &tPropertyInstance::set_synchronized);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tPropertyClass::ovulate()
-{
-	return tVariant(new tPropertyInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 } /* namespace Risse */

@@ -59,29 +59,8 @@ public: // Risse用メソッドなど
 /**
  * "Coroutine" クラス
  */
-class tCoroutineClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tCoroutineClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-};
+RISSE_DEFINE_CLASS_BEGIN(tCoroutineClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -89,22 +68,7 @@ public:
 /**
  * "CoroutineException" クラス
  */
-class tCoroutineExceptionClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tCoroutineExceptionClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
+RISSE_DEFINE_CLASS_BEGIN(tCoroutineExceptionClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -157,8 +121,7 @@ public:
 	 */
 	static void ThrowCoroutineIsRunning() RISSE_NORETURN
 		{ ThrowCoroutineIsRunning(NULL); }
-
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

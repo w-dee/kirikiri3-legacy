@@ -137,25 +137,7 @@ bool tCoroutineInstance::get_alive() const
 
 
 //---------------------------------------------------------------------------
-tCoroutineClass::tCoroutineClass(tScriptEngine * engine) :
-	tClassBase(ss_Coroutine, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tCoroutineClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tCoroutineClass, ss_Coroutine, engine->ObjectClass, new tCoroutineInstance())
 	BindFunction(this, ss_ovulate, &tCoroutineClass::ovulate);
 	BindFunction(this, ss_construct, &tCoroutineInstance::construct);
 	BindFunction(this, ss_initialize, &tCoroutineInstance::initialize);
@@ -164,15 +146,7 @@ void tCoroutineClass::RegisterMembers()
 	BindFunction(this, ss_yield, &tCoroutineInstance::yield);
 	BindFunction(this, ss_dispose, &tCoroutineInstance::dispose);
 	BindProperty(this, ss_alive, &tCoroutineInstance::get_alive);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tCoroutineClass::ovulate()
-{
-	return tVariant(new tCoroutineInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -184,28 +158,10 @@ tVariant tCoroutineClass::ovulate()
 
 
 //---------------------------------------------------------------------------
-tCoroutineExceptionClass::tCoroutineExceptionClass(tScriptEngine * engine) :
-	tClassBase(ss_CoroutineException, engine->RuntimeExceptionClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tCoroutineExceptionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tCoroutineExceptionClass, ss_CoroutineException, engine->RuntimeExceptionClass, new tObjectBase())
 	BindFunction(this, ss_construct, &tCoroutineExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCoroutineExceptionClass::initialize);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

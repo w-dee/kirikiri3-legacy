@@ -29,25 +29,7 @@ RISSE_DEFINE_SOURCE_ID(32602,55496,58565,16678,10384,39976,12087,42806);
 
 
 //---------------------------------------------------------------------------
-tVoidClass::tVoidClass(tScriptEngine * engine) :
-	tPrimitiveClassBase(ss_Void, engine->PrimitiveClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tVoidClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tVoidClass, ss_Void, engine->PrimitiveClass, tVariant())
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tVoidClass::ovulate,
@@ -58,15 +40,7 @@ void tVoidClass::RegisterMembers()
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_dump, &tVoidClass::dump,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tVoidClass::ovulate()
-{
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

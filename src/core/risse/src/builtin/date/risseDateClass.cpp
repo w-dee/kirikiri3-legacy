@@ -8,7 +8,7 @@
 */
 //---------------------------------------------------------------------------
 /**
- * @file	
+ * @file
  * Risse用 "Date" クラスの実装
  */
 //---------------------------------------------------------------------------
@@ -527,25 +527,7 @@ bool tDateInstance::equal(const tVariant & rhs)
 
 
 //---------------------------------------------------------------------------
-tDateClass::tDateClass(tScriptEngine * engine) :
-	tClassBase(ss_Date, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tDateClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tDateClass, ss_Date, engine->ObjectClass, new tDateInstance())
 	BindFunction(this, ss_ovulate, &tDateClass::ovulate);
 	BindFunction(this, ss_construct, &tDateInstance::construct);
 	BindFunction(this, ss_initialize, &tDateInstance::initialize);
@@ -584,16 +566,9 @@ void tDateClass::RegisterMembers()
 	BindFunction(this, ss_toLocaleString, &tDateInstance::toLocaleString);
 
 	BindFunction(this, mnEqual, &tDateInstance::equal);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
-
-//---------------------------------------------------------------------------
-tVariant tDateClass::ovulate()
-{
-	return tVariant(new tDateInstance());
-}
-//---------------------------------------------------------------------------
 
 
 

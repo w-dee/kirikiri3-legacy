@@ -22,26 +22,9 @@
 namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(2098,51592,31991,16696,47274,13601,12452,21741);
-//---------------------------------------------------------------------------
-tNumberClass::tNumberClass(tScriptEngine * engine) :
-	tClassBase(ss_Number, engine->PrimitiveClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
-void tNumberClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tNumberClass, ss_Number, engine->PrimitiveClass, ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate,
 		&tNumberClass::ovulate,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
@@ -53,17 +36,7 @@ void tNumberClass::RegisterMembers()
 	BindProperty(this, ss_isNaN, &tNumberClass::isNaN,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
 								tMemberAttribute(tMemberAttribute::ocFinal)) );
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tNumberClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

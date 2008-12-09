@@ -29,25 +29,7 @@ RISSE_DEFINE_SOURCE_ID(19296,56052,4218,18194,45952,40158,60560,61630);
 
 
 //---------------------------------------------------------------------------
-tOctetClass::tOctetClass(tScriptEngine * engine) :
-	tPrimitiveClassBase(ss_Octet, engine->PrimitiveClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOctetClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOctetClass, ss_Octet, engine->PrimitiveClass, tOctet())
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tOctetClass::ovulate,
@@ -56,15 +38,7 @@ void tOctetClass::RegisterMembers()
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindProperty(this, ss_length, &tOctetClass::get_length,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOctetClass::ovulate()
-{
-	return tVariant(tOctet());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

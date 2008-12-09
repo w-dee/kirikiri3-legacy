@@ -207,29 +207,8 @@ public: // risse 用メソッドとか
 /**
  * "Stream" クラス
  */
-class tStreamClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tStreamClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-};
+RISSE_DEFINE_CLASS_BEGIN(tStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

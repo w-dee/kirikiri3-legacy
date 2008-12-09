@@ -59,30 +59,11 @@ public: // Risse用メソッドなど
  *			前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
  *			後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
  */
-class tPrimitiveClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tPrimitiveClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
+RISSE_DEFINE_CLASS_BEGIN(tPrimitiveClass, tClassBase)
 public: // Risse用メソッドなど
 	static void construct();
 	static tVariant toString(const tNativeCallInfo & info); // toString
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse
 

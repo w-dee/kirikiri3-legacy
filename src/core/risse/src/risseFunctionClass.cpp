@@ -93,20 +93,7 @@ void tFunctionInstance::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-tFunctionClass::tFunctionClass(tScriptEngine * engine) :
-	tClassBase(ss_Function, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFunctionClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
+RISSE_IMPL_CLASS_BEGIN(tFunctionClass, ss_Function, engine->ObjectClass, new tFunctionInstance())
 	// 注: この時点では Function クラスの ovulate は inherited::RegisterMembers で
 	// 登録された、親クラスの ovulate となっている。
 	// この状態で function クラスのメソッドを登録しようとしても(間違ったovulateが
@@ -123,21 +110,12 @@ void tFunctionClass::RegisterMembers()
 	// 基本的に ss_construct と ss_initialize は各クラスごとに
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
 	BindFunction(this, ss_ovulate, &tFunctionClass::ovulate);
 	BindFunction(this, ss_construct, &tFunctionInstance::construct);
 	BindFunction(this, ss_initialize, &tFunctionInstance::initialize);
 	BindProperty(this, ss_synchronized,
 		&tFunctionInstance::get_synchronized, &tFunctionInstance::set_synchronized);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFunctionClass::ovulate()
-{
-	return tVariant(new tFunctionInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

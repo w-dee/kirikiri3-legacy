@@ -51,29 +51,8 @@ public: // Risse用メソッドなど
 /**
  * "ScriptBlock" クラス
  */
-class tRisseScriptBlockClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tRisseScriptBlockClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-};
+RISSE_DEFINE_CLASS_BEGIN(tRisseScriptBlockClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

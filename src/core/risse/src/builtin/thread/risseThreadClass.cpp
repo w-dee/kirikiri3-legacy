@@ -261,25 +261,7 @@ void tThreadInstance::wakeup()
 
 
 //---------------------------------------------------------------------------
-tThreadClass::tThreadClass(tScriptEngine * engine) :
-	tClassBase(ss_Thread, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tThreadClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tThreadClass, ss_Thread, engine->ObjectClass, new tThreadInstance())
 	BindFunction(this, ss_ovulate, &tThreadClass::ovulate);
 	BindFunction(this, ss_construct, &tThreadInstance::construct);
 	BindFunction(this, ss_initialize, &tThreadInstance::initialize);
@@ -290,15 +272,7 @@ void tThreadClass::RegisterMembers()
 	BindFunction(this, ss_sleep, &tThreadInstance::sleep);
 	BindFunction(this, ss_wakeup, &tThreadInstance::wakeup);
 #endif
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tThreadClass::ovulate()
-{
-	return tVariant(new tThreadInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

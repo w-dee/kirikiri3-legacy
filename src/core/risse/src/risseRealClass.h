@@ -26,29 +26,10 @@ namespace Risse
 /**
  * "Real" クラス
  */
-class tRealClass : public tPrimitiveClassBase
-{
-	typedef tPrimitiveClassBase inherited; //!< 親クラスの typedef
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tRealClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
+RISSE_DEFINE_CLASS_BEGIN(tRealClass, tPrimitiveClassBase)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse
 

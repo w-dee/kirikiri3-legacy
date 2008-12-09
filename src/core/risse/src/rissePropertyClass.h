@@ -101,26 +101,8 @@ public: // Risse用オブジェクトなど
 /**
  * "Property" クラス
  */
-class tPropertyClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tPropertyClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-};
+RISSE_DEFINE_CLASS_BEGIN(tPropertyClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse
 

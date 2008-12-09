@@ -359,25 +359,7 @@ void tScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-tScriptBlockClass::tScriptBlockClass(tScriptEngine * engine) :
-	tClassBase(ss_ScriptBlock, engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tScriptBlockClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tScriptBlockClass, ss_ScriptBlock, engine->ObjectClass, ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tScriptBlockClass::ovulate);
 	BindFunction(this, ss_construct, &tScriptBlockInstance::construct);
 	BindFunction(this, ss_initialize, &tScriptBlockInstance::initialize);
@@ -386,17 +368,7 @@ void tScriptBlockClass::RegisterMembers()
 	BindProperty(this, ss_name, &tScriptBlockInstance::get_name);
 	BindFunction(this, ss_getLineAt, &tScriptBlockInstance::getLineAt);
 	BindFunction(this, ss_positionToLine, &tScriptBlockInstance::positionToLine);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tScriptBlockClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

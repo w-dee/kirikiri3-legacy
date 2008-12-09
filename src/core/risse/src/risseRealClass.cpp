@@ -30,40 +30,14 @@ RISSE_DEFINE_SOURCE_ID(5442,9100,49866,17725,24713,23464,12701,40981);
 
 
 //---------------------------------------------------------------------------
-tRealClass::tRealClass(tScriptEngine * engine) :
-	tPrimitiveClassBase(ss_Real, engine->NumberClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRealClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tRealClass, ss_Real, engine->NumberClass, (risse_real)0.0)
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tRealClass::ovulate,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_initialize, &tRealClass::initialize,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tRealClass::ovulate()
-{
-	return tVariant((risse_real)0.0);
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

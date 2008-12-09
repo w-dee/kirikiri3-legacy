@@ -75,39 +75,11 @@ void tRisseScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-tRisseScriptBlockClass::tRisseScriptBlockClass(tScriptEngine * engine) :
-	tClassBase(ss_RisseScriptBlock, engine->ScriptBlockClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRisseScriptBlockClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tRisseScriptBlockClass, ss_RisseScriptBlock, engine->ScriptBlockClass, new tRisseScriptBlockInstance())
 	BindFunction(this, ss_ovulate, &tRisseScriptBlockClass::ovulate);
 	BindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
 	BindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tRisseScriptBlockClass::ovulate()
-{
-	return tVariant(new tRisseScriptBlockInstance());
-}
-//---------------------------------------------------------------------------
-
+RISSE_IMPL_CLASS_END()
 
 } // namespace Risse
 

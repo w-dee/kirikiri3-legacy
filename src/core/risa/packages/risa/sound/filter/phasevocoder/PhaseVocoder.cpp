@@ -282,26 +282,10 @@ void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tPhaseVocoderClass::tPhaseVocoderClass(tScriptEngine * engine) :
-	tClassBase(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>(),
-		tClassHolder<tWaveFilterClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tPhaseVocoderClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tPhaseVocoderClass,
+		(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>()),
+		tClassHolder<tWaveFilterClass>::instance()->GetClass(),
+		new tPhaseVocoderInstance())
 	BindFunction(this, ss_ovulate, &tPhaseVocoderClass::ovulate);
 	BindFunction(this, ss_construct, &tPhaseVocoderInstance::construct);
 	BindFunction(this, ss_initialize, &tPhaseVocoderInstance::initialize);
@@ -310,15 +294,7 @@ void tPhaseVocoderClass::RegisterMembers()
 	BindProperty(this, tSS<'o','v','e','r','a','l','p'>(), &tPhaseVocoderInstance::get_overlap, &tPhaseVocoderInstance::set_overlap);
 	BindProperty(this, tSS<'t','i','m','e'>(), &tPhaseVocoderInstance::get_time, &tPhaseVocoderInstance::set_time);
 	BindProperty(this, tSS<'p','i','t','c','h'>(), &tPhaseVocoderInstance::get_pitch, &tPhaseVocoderInstance::set_pitch);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tPhaseVocoderClass::ovulate()
-{
-	return tVariant(new tPhaseVocoderInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

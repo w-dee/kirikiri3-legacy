@@ -10,7 +10,7 @@
 */
 //---------------------------------------------------------------------------
 /**
- * @file	
+ * @file
  * RINA ラスタ画像用のピンなど
  */
 //---------------------------------------------------------------------------
@@ -99,38 +99,14 @@ void tImageInputPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tImageInputPinClass::tImageInputPinClass(tScriptEngine * engine) :
-	inherited(tSS<'I','m','a','g','e','I','n','p','u','t','P','i','n'>(),
-	tClassHolder<tInputPinClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImageInputPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImageInputPinClass,
+		(tSS<'I','m','a','g','e','I','n','p','u','t','P','i','n'>()),
+		tClassHolder<tInputPinClass>::instance()->GetClass(),
+		new tImageInputPinInstance())
 	BindFunction(this, ss_ovulate, &tImageInputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tImageInputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tImageInputPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tImageInputPinClass::ovulate()
-{
-	return tVariant(new tImageInputPinInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -190,38 +166,14 @@ void tImageMixerInputPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tImageMixerInputPinClass::tImageMixerInputPinClass(tScriptEngine * engine) :
-	inherited(tSS<'I','m','a','g','e','M','i','x','e','r','I','n','p','u','t','P','i','n'>(),
-	tClassHolder<tImageInputPinClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImageMixerInputPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImageMixerInputPinClass,
+		(tSS<'I','m','a','g','e','M','i','x','e','r','I','n','p','u','t','P','i','n'>()),
+		tClassHolder<tImageInputPinClass>::instance()->GetClass(),
+		new tImageMixerInputPinInstance())
 	BindFunction(this, ss_ovulate, &tImageMixerInputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tImageMixerInputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tImageMixerInputPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tImageMixerInputPinClass::ovulate()
-{
-	return tVariant(new tImageMixerInputPinInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -316,38 +268,14 @@ void tImageOutputPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tImageOutputPinClass::tImageOutputPinClass(tScriptEngine * engine) :
-	inherited(tSS<'I','m','a','g','e','O','u','t','p','u','t','P','i','n'>(),
-	tClassHolder<tOutputPinClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImageOutputPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImageOutputPinClass,
+		(tSS<'I','m','a','g','e','O','u','t','p','u','t','P','i','n'>()),
+		tClassHolder<tOutputPinClass>::instance()->GetClass(),
+		new tImageOutputPinInstance())
 	BindFunction(this, ss_ovulate, &tImageOutputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tImageOutputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tImageOutputPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tImageOutputPinClass::ovulate()
-{
-	return tVariant(new tImageOutputPinInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

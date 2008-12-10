@@ -353,27 +353,8 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 
 //---------------------------------------------------------------------------
-tOSFSClass::tOSFSClass(tScriptEngine * engine) :
-	tClassBase(tSS<'O','S','F','S'>(),
-		tClassHolder<tFileSystemClass>::instance()->GetClass())
-{
-	OSNativeStreamClass = new tOSNativeStreamClass(engine);
-
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOSFSClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+RISSE_IMPL_CLASS_BEGIN(tOSFSClass, (tSS<'O','S','F','S'>()), tClassHolder<tFileSystemClass>::instance()->GetClass(), new tOSFSInstance())
+	OSNativeStreamClass = new tOSNativeStreamClass(GetRTTI()->GetScriptEngine());
 
 	BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
 	BindFunction(this, ss_construct, &tOSFSInstance::construct);
@@ -390,15 +371,7 @@ void tOSFSClass::RegisterMembers()
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tOSFSInstance::flush);
 
 	BindProperty(this, tSS<'s','o','u','r','c','e'>(), &tOSFSInstance::get_source);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOSFSClass::ovulate()
-{
-	return tVariant(new tOSFSInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

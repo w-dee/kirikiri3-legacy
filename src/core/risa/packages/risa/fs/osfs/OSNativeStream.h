@@ -118,29 +118,8 @@ public: // risse 用メソッドとか
 /**
  * "OSNativeStream" クラス
  */
-class tOSNativeStreamClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOSNativeStreamClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-};
+RISSE_DEFINE_CLASS_BEGIN(tOSNativeStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

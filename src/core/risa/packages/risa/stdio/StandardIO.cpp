@@ -101,42 +101,18 @@ void tStandardIOStreamInstance::flush()
 
 
 //---------------------------------------------------------------------------
-tStandardIOStreamClass::tStandardIOStreamClass(tScriptEngine * engine) :
-	tClassBase(tSS<'S','t','a','n','d','a','r','d','I','O','S','t','r','e','a','m'>(),
-	static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
-		GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tStandardIOStreamClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tStandardIOStreamClass,
+		(tSS<'S','t','a','n','d','a','r','d','I','O','S','t','r','e','a','m'>()),
+		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()),
+		new tStandardIOStreamInstance())
 	BindFunction(this, ss_ovulate, &tStandardIOStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tStandardIOStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tStandardIOStreamInstance::initialize);
 	BindFunction(this, ss_get, &tStandardIOStreamInstance::get);
 	BindFunction(this, ss_put, &tStandardIOStreamInstance::put);
 	BindFunction(this, ss_flush, &tStandardIOStreamInstance::flush);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tStandardIOStreamClass::ovulate()
-{
-	return tVariant(new tStandardIOStreamInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

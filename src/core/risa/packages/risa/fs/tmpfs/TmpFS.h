@@ -97,7 +97,7 @@ public:
 	tType GetType() const { return Type; }
 	bool IsFile() const { return Type == ntFile; }
 	bool IsDirectory() const { return Type == ntDirectory; }
-	tMemoryStreamBlock * GetMemoryStreamBlock() { return File; } 
+	tMemoryStreamBlock * GetMemoryStreamBlock() { return File; }
 	tTmpFSNode * GetParent() { return Parent; }
 	const tString & GetName() const { return Name; }
 	bool HasSubNode() const { return Type == ntDirectory &&
@@ -266,36 +266,15 @@ public: // Risse 用メソッドなど
 /**
  * "TmpFS" クラス
  */
-class tTmpFSClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
+RISSE_DEFINE_CLASS_BEGIN(tTmpFSClass, tClassBase)
+private:
 	tMemoryStreamClass * MemoryStreamClass; //!< MemoryStream クラスインスタンス
-
 public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tTmpFSClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-
 	/**
 	 * MemoryStream クラスインスタンスを得る
 	 */
 	tMemoryStreamClass * GetMemoryStreamClass() const { return MemoryStreamClass; }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -418,39 +418,13 @@ void tEventQueueInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tEventQueueClass::tEventQueueClass(tScriptEngine * engine) :
-	tClassBase(tSS<'E','v','e','n','t','Q','u','e','u','e'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tEventQueueClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tEventQueueClass, (tSS<'E','v','e','n','t','Q','u','e','u','e'>()), engine->ObjectClass, new tEventQueueInstance())
 	BindFunction(this, ss_ovulate, &tEventQueueClass::ovulate);
 	BindFunction(this, ss_construct, &tEventQueueInstance::construct);
 	BindFunction(this, ss_initialize, &tEventQueueInstance::initialize);
 	BindFunction(this, tSS<'l','o','o','p'>(), &tEventQueueInstance::loop);
 	BindFunction(this, tSS<'q','u','i','t'>(), &tEventQueueInstance::quit);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tEventQueueClass::ovulate()
-{
-	return tVariant(new tEventQueueInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

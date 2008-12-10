@@ -147,25 +147,9 @@ void tFileSystemInstance::flush()
 
 
 //---------------------------------------------------------------------------
-tFileSystemClass::tFileSystemClass(tScriptEngine * engine) :
-	tClassBase(tSS<'F','i','l','e','S','y','s','t','e','m'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFileSystemClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tFileSystemClass,
+		(tSS<'F','i','l','e','S','y','s','t','e','m'>()), engine->ObjectClass,
+		ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tFileSystemClass::ovulate);
 	BindFunction(this, ss_construct, &tFileSystemInstance::construct);
 	BindFunction(this, ss_initialize, &tFileSystemInstance::initialize);
@@ -179,17 +163,7 @@ void tFileSystemClass::RegisterMembers()
 	BindFunction(this, tSS<'s','t','a','t'>(), &tFileSystemInstance::stat);
 	BindFunction(this, tSS<'o','p','e','n'>(), &tFileSystemInstance::open);
 	BindFunction(this, tSS<'f','l','u','s','h'>(), &tFileSystemInstance::flush);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFileSystemClass::ovulate()
-{
-	// このクラスのインスタンスは作成できないので例外を投げる
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

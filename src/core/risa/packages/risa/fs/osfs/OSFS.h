@@ -165,36 +165,15 @@ private:
 /**
  * "OSFS" クラス
  */
-class tOSFSClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
+RISSE_DEFINE_CLASS_BEGIN(tOSFSClass, tClassBase)
+private:
 	tOSNativeStreamClass * OSNativeStreamClass; //!< OSNativeStream クラスインスタンス
-
 public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOSFSClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-
 	/**
 	 * OSNativeStreamClass クラスインスタンスを得る
 	 */
 	tOSNativeStreamClass * GetOSNativeStreamClass() const { return OSNativeStreamClass; }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

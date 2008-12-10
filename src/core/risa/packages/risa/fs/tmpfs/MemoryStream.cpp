@@ -346,27 +346,11 @@ void tMemoryStreamInstance::flush()
 
 
 //---------------------------------------------------------------------------
-tMemoryStreamClass::tMemoryStreamClass(tScriptEngine * engine) :
-	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),
+RISSE_IMPL_CLASS_BEGIN(tMemoryStreamClass,
+		(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>()),
 		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
-		GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tMemoryStreamClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()),
+		new tMemoryStreamInstance())
 	BindFunction(this, ss_ovulate, &tMemoryStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tMemoryStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tMemoryStreamInstance::initialize);
@@ -378,15 +362,7 @@ void tMemoryStreamClass::RegisterMembers()
 	BindFunction(this, ss_truncate, &tMemoryStreamInstance::truncate);
 	BindProperty(this, ss_size, &tMemoryStreamInstance::get_size);
 	BindFunction(this, ss_flush, &tMemoryStreamInstance::flush);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tMemoryStreamClass::ovulate()
-{
-	return tVariant(new tMemoryStreamInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

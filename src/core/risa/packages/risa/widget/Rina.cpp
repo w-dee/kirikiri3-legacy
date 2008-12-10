@@ -99,38 +99,14 @@ void tRinaWidgetNodeInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tRinaWidgetNodeClass::tRinaWidgetNodeClass(tScriptEngine * engine) :
-	tClassBase(tSS<'R','i','n','a','W','i','d','g','e','t','N','o','d','e'>(),
-		tClassHolder<tNodeClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaWidgetNodeClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tRinaWidgetNodeClass,
+		(tSS<'R','i','n','a','W','i','d','g','e','t','N','o','d','e'>()),
+		tClassHolder<tNodeClass>::instance()->GetClass(),
+		new tRinaWidgetNodeInstance())
 	BindFunction(this, ss_ovulate, &tRinaWidgetNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tRinaWidgetNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tRinaWidgetNodeInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tRinaWidgetNodeClass::ovulate()
-{
-	return tVariant(new tRinaWidgetNodeInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -302,38 +278,12 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 
 
 //---------------------------------------------------------------------------
-tRinaClass::tRinaClass(tScriptEngine * engine) :
-	tClassBase(tSS<'R','i','n','a'>(),
-		tClassHolder<tWindowClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tRinaClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tRinaClass, (tSS<'R','i','n','a'>()),
+		tClassHolder<tWindowClass>::instance()->GetClass(), new tRinaInstance())
 	BindFunction(this, ss_ovulate, &tRinaClass::ovulate);
 	BindFunction(this, ss_construct, &tRinaInstance::construct);
 	BindFunction(this, ss_initialize, &tRinaInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tRinaClass::ovulate()
-{
-	return tVariant(new tRinaInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

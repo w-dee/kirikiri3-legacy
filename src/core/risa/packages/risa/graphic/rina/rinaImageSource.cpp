@@ -103,38 +103,14 @@ void tImageSourceNodeInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tImageSourceNodeClass::tImageSourceNodeClass(tScriptEngine * engine) :
-	tClassBase(tSS<'I','m','a','g','e','S','o','u','r','c','e'>(),
-		tClassHolder<tNodeClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImageSourceNodeClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImageSourceNodeClass,
+		(tSS<'I','m','a','g','e','S','o','u','r','c','e'>()),
+		tClassHolder<tNodeClass>::instance()->GetClass(),
+		new tImageSourceNodeInstance())
 	BindFunction(this, ss_ovulate, &tImageSourceNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tImageSourceNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tImageSourceNodeInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tImageSourceNodeClass::ovulate()
-{
-	return tVariant(new tImageSourceNodeInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

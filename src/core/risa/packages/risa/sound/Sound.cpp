@@ -200,7 +200,7 @@ void tSoundInstance::Open(const tString & filename)
 						filter->SetInput(last_filter);
 						last_filter = filter;
 				}
-				RISA_PREPEND_EXCEPTION_MESSAGE_END(engine, 
+				RISA_PREPEND_EXCEPTION_MESSAGE_END(engine,
 						tString(RISSE_WS_TR("Failed to connect filter index %1: "),
 							tString::AsString((risse_int64)i)))
 			}
@@ -495,27 +495,8 @@ void tSoundInstance::initialize(const tNativeCallInfo &info)
 /**
  * "Sound" クラス
  */
-class tSoundClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tSoundClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-};
+RISSE_DEFINE_CLASS_BEGIN(tSoundClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -525,26 +506,10 @@ public:
 
 
 //---------------------------------------------------------------------------
-tSoundClass::tSoundClass(tScriptEngine * engine) :
-	tClassBase(tSS<'S','o','u','n','d'>(),
-		tClassHolder<tEventSourceClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tSoundClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tSoundClass,
+		(tSS<'S','o','u','n','d'>()),
+		tClassHolder<tEventSourceClass>::instance()->GetClass(),
+		new tSoundInstance())
 	BindFunction(this, ss_ovulate, &tSoundClass::ovulate);
 	BindFunction(this, ss_construct, &tSoundInstance::construct);
 	BindFunction(this, ss_initialize, &tSoundInstance::initialize);
@@ -562,15 +527,7 @@ void tSoundClass::RegisterMembers()
 			&tSoundInstance::onStatusChanged);
 	BindFunction(this, tSS<'o','n','L','a','b','e','l'>(),
 			&tSoundInstance::onLabel);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tSoundClass::ovulate()
-{
-	return tVariant(new tSoundInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

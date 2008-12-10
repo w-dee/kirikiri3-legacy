@@ -92,39 +92,12 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 
 
 //---------------------------------------------------------------------------
-tNodeClass::tNodeClass(tScriptEngine * engine) :
-	inherited(tSS<'G','r','a','p','h'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tNodeClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass,
+		ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tNodeInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tNodeClass::ovulate()
-{
-	// このクラスのインスタンスは生成できない
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -96,38 +96,14 @@ void tReverbInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tReverbClass::tReverbClass(tScriptEngine * engine) :
-	tClassBase(tSS<'R','e','v','e','r','b'>(),
-		tClassHolder<tWaveFilterClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tReverbClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tReverbClass,
+		(tSS<'R','e','v','e','r','b'>()),
+		tClassHolder<tWaveFilterClass>::instance()->GetClass(),
+		new tReverbInstance())
 	BindFunction(this, ss_ovulate, &tReverbClass::ovulate);
 	BindFunction(this, ss_construct, &tReverbInstance::construct);
 	BindFunction(this, ss_initialize, &tReverbInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tReverbClass::ovulate()
-{
-	return tVariant(new tReverbInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

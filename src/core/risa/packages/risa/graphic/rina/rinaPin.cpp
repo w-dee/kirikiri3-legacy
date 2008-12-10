@@ -81,39 +81,12 @@ void tPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tPinClass::tPinClass(tScriptEngine * engine) :
-	inherited(tSS<'P','i','n'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tPinClass, (tSS<'P','i','n'>()), engine->ObjectClass,
+		ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tPinClass::ovulate);
 	BindFunction(this, ss_construct, &tPinInstance::construct);
 	BindFunction(this, ss_initialize, &tPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tPinClass::ovulate()
-{
-	// このクラスのインスタンスは生成できない
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -234,40 +207,14 @@ void tInputPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tInputPinClass::tInputPinClass(tScriptEngine * engine) :
-	inherited(tSS<'I','n','p','u','t','P','i','n'>(),
-	tClassHolder<tPinClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tInputPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tInputPinClass,
+		(tSS<'I','n','p','u','t','P','i','n'>()),
+		tClassHolder<tPinClass>::instance()->GetClass(),
+		ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tInputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tInputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tInputPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tInputPinClass::ovulate()
-{
-	// このクラスのインスタンスは生成できない
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -380,40 +327,14 @@ void tOutputPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tOutputPinClass::tOutputPinClass(tScriptEngine * engine) :
-	inherited(tSS<'O','u','t','p','u','t','P','i','n'>(),
-	tClassHolder<tPinClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOutputPinClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOutputPinClass,
+		(tSS<'O','u','t','p','u','t','P','i','n'>()),
+		tClassHolder<tPinClass>::instance()->GetClass(),
+		ThrowCannotCreateInstanceFromThisClass())
 	BindFunction(this, ss_ovulate, &tOutputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tOutputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tOutputPinInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOutputPinClass::ovulate()
-{
-	// このクラスのインスタンスは生成できない
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -457,38 +378,14 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 
 
 //---------------------------------------------------------------------------
-tInputPinArrayClass::tInputPinArrayClass(tScriptEngine * engine) :
-	inherited(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>(),
-	engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tInputPinArrayClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tInputPinArrayClass,
+		(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
+		engine->ObjectClass,
+		new tInputPinArrayInstance())
 	BindFunction(this, ss_ovulate, &tInputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tInputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tInputPinArrayInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tInputPinArrayClass::ovulate()
-{
-	return tVariant(new tInputPinArrayInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -540,38 +437,14 @@ void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant
 
 
 //---------------------------------------------------------------------------
-tOneInputPinArrayClass::tOneInputPinArrayClass(tScriptEngine * engine) :
-	inherited(tSS<'O','n','e','I','n','p','u','t','P','i','n','A','r','r','a','y'>(),
-	tClassHolder<tInputPinArrayClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOneInputPinArrayClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOneInputPinArrayClass,
+		(tSS<'O','n','e','I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
+		tClassHolder<tInputPinArrayClass>::instance()->GetClass(),
+		new tOneInputPinArrayInstance())
 	BindFunction(this, ss_ovulate, &tOneInputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOneInputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOneInputPinArrayInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOneInputPinArrayClass::ovulate()
-{
-	return tVariant(new tOneInputPinArrayInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -622,38 +495,14 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 
 
 //---------------------------------------------------------------------------
-tOutputPinArrayClass::tOutputPinArrayClass(tScriptEngine * engine) :
-	inherited(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>(),
-	engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOutputPinArrayClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOutputPinArrayClass,
+		(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
+		engine->ObjectClass,
+		new tOutputPinArrayInstance())
 	BindFunction(this, ss_ovulate, &tOutputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOutputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOutputPinArrayInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOutputPinArrayClass::ovulate()
-{
-	return tVariant(new tOutputPinArrayInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -707,38 +556,14 @@ void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVarian
 
 
 //---------------------------------------------------------------------------
-tOneOutputPinArrayClass::tOneOutputPinArrayClass(tScriptEngine * engine) :
-	inherited(tSS<'O','n','e','O','u','t','p','u','t','P','i','n','A','r','r','a','y'>(),
-	tClassHolder<tOutputPinArrayClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOneOutputPinArrayClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOneOutputPinArrayClass,
+		(tSS<'O','n','e','O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
+		tClassHolder<tOutputPinArrayClass>::instance()->GetClass(),
+		new tOneOutputPinArrayInstance())
 	BindFunction(this, ss_ovulate, &tOneOutputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOneOutputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOneOutputPinArrayInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOneOutputPinArrayClass::ovulate()
-{
-	return tVariant(new tOneOutputPinArrayInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -154,7 +154,7 @@ risse_size tOSNativeStreamInstance::put(const tOctet & buf)
 //---------------------------------------------------------------------------
 void tOSNativeStreamInstance::truncate()
 {
-	// TODO: implement this 
+	// TODO: implement this
 	if(!Internal) tInaccessibleResourceExceptionClass::Throw();
 
 	tIOExceptionClass::Throw(RISSE_WS_TR("tOSNativeStreamInstance::Truncate not implemented"));
@@ -192,27 +192,11 @@ void tOSNativeStreamInstance::flush()
 
 
 //---------------------------------------------------------------------------
-tOSNativeStreamClass::tOSNativeStreamClass(tScriptEngine * engine) :
-	tClassBase(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>(),
-		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
-			GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tOSNativeStreamClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tOSNativeStreamClass,
+			(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>()),
+			(static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
+			GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface())),
+			new tOSNativeStreamInstance)
 	BindFunction(this, ss_ovulate, &tOSNativeStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tOSNativeStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tOSNativeStreamInstance::initialize);
@@ -224,15 +208,7 @@ void tOSNativeStreamClass::RegisterMembers()
 	BindFunction(this, ss_truncate, &tOSNativeStreamInstance::truncate);
 	BindProperty(this, ss_size, &tOSNativeStreamInstance::get_size);
 	BindFunction(this, ss_flush, &tOSNativeStreamInstance::flush);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tOSNativeStreamClass::ovulate()
-{
-	return tVariant(new tOSNativeStreamInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

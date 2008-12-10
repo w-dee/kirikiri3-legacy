@@ -102,29 +102,8 @@ public: // Risse用メソッドなど
 /**
  * ピンクラス
  */
-class tPinClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tPinClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tPinClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -264,29 +243,8 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンクラス
  */
-class tInputPinClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tInputPinClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tInputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -364,29 +322,8 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンクラス
  */
-class tOutputPinClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOutputPinClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tOutputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -539,29 +476,8 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンのピン配列クラス
  */
-class tInputPinArrayClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tInputPinArrayClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tInputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -647,29 +563,8 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンのピン配列クラス(一個だけの要素の場合)
  */
-class tOneInputPinArrayClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOneInputPinArrayClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tOneInputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -733,29 +628,8 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンのピン配列クラス
  */
-class tOutputPinArrayClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOutputPinArrayClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tOutputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -844,29 +718,8 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンのピン配列クラス(一個だけの要素の場合)
  */
-class tOneOutputPinArrayClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tOneOutputPinArrayClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public: // Risse 用メソッドなど
-};
+RISSE_DEFINE_CLASS_BEGIN(tOneOutputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

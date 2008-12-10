@@ -134,38 +134,12 @@ void tFrameInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-tFrameClass::tFrameClass(tScriptEngine * engine) :
-	tClassBase(tSS<'F','r','a','m','e'>(),
-		tClassHolder<tWindowClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tFrameClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tFrameClass, (tSS<'F','r','a','m','e'>()),
+		tClassHolder<tWindowClass>::instance()->GetClass(), new tFrameInstance())
 	BindFunction(this, ss_ovulate, &tFrameClass::ovulate);
 	BindFunction(this, ss_construct, &tFrameInstance::construct);
 	BindFunction(this, ss_initialize, &tFrameInstance::initialize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tFrameClass::ovulate()
-{
-	return tVariant(new tFrameInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -526,30 +526,10 @@ void tTimerInstance::initialize(const tNativeCallInfo &info)
 /**
  * "Timer" クラス
  */
-class tTimerClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tTimerClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
+RISSE_DEFINE_CLASS_BEGIN(tTimerClass, tClassBase)
 public: // Risse 用メソッドとか
 	static risse_uint64 getTickCount() { return tTickCount::instance()->Get(); }
-};
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 
@@ -559,26 +539,7 @@ public: // Risse 用メソッドとか
 
 
 //---------------------------------------------------------------------------
-tTimerClass::tTimerClass(tScriptEngine * engine) :
-	tClassBase(tSS<'T','i','m','e','r'>(),
-		tClassHolder<tEventSourceClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTimerClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tTimerClass, (tSS<'T','i','m','e','r'>()), tClassHolder<tEventSourceClass>::instance()->GetClass(), new tTimerInstance())
 	BindFunction(this, ss_ovulate, &tTimerClass::ovulate);
 	BindFunction(this, ss_construct, &tTimerInstance::construct);
 	BindFunction(this, ss_initialize, &tTimerInstance::initialize);
@@ -589,15 +550,7 @@ void tTimerClass::RegisterMembers()
 	BindFunction(this, tSS<'o','n','T','i','m','e','r'>(), &tTimerInstance::onTimer);
 
 	BindFunction(this, tSS<'g','e','t','T','i','c','k','C','o','u','n','t'>(), &tTimerClass::getTickCount);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tTimerClass::ovulate()
-{
-	return tVariant(new tTimerInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

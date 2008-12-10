@@ -297,25 +297,7 @@ void tImageInstance::save(const tString & filename, const tMethodArgument & args
 
 
 //---------------------------------------------------------------------------
-tImageClass::tImageClass(tScriptEngine * engine) :
-	tClassBase(tSS<'I','m','a','g','e'>(), engine->ObjectClass)
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tImageClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tImageClass, (tSS<'I','m','a','g','e'>()), engine->ObjectClass, new tImageInstance())
 	BindFunction(this, ss_ovulate, &tImageClass::ovulate);
 	BindFunction(this, ss_construct, &tImageInstance::construct);
 	BindFunction(this, ss_initialize, &tImageInstance::initialize);
@@ -328,15 +310,7 @@ void tImageClass::RegisterMembers()
 	BindFunction(this, tSS<'s','a','v','e'>(), &tImageInstance::save);
 	BindFunction(this, tSS<'g','e','t','A','R','G','B','3','2'>(), &tImageInstance::getARGB32);
 	BindFunction(this, tSS<'s','e','t','A','R','G','B','3','2'>(), &tImageInstance::setARGB32);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tImageClass::ovulate()
-{
-	return tVariant(new tImageInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

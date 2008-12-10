@@ -581,7 +581,7 @@ tStreamInstance * tTmpFSInstance::open(const tString & filename,
 				// 第２引数の true は、ストリームになんらメモリブロックがアタッチ
 				// されずにストリームが作成されることを表す(下でアタッチする)
 	obj.AssertClass(tClassHolder<tMemoryStreamClass>::instance()->GetClass());
-	tMemoryStreamInstance *memstream = 
+	tMemoryStreamInstance *memstream =
 		static_cast<tMemoryStreamInstance *>(obj.GetObjectInterface());
 
 	memstream->SetMemoryBlock(node->GetMemoryStreamBlock()); // ここでアタッチ
@@ -628,27 +628,8 @@ void tTmpFSInstance::load(const tVariant & filename)
 
 
 //---------------------------------------------------------------------------
-tTmpFSClass::tTmpFSClass(tScriptEngine * engine) :
-	tClassBase(tSS<'T','m','p','F','S'>(),
-		tClassHolder<tFileSystemClass>::instance()->GetClass())
-{
-	MemoryStreamClass = new tMemoryStreamClass(engine);
-
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tTmpFSClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
+RISSE_IMPL_CLASS_BEGIN(tTmpFSClass, (tSS<'T','m','p','F','S'>()), tClassHolder<tFileSystemClass>::instance()->GetClass(), new tTmpFSInstance())
+	MemoryStreamClass = new tMemoryStreamClass(GetRTTI()->GetScriptEngine());
 
 	BindFunction(this, ss_ovulate, &tTmpFSClass::ovulate);
 	BindFunction(this, ss_construct, &tTmpFSInstance::construct);
@@ -666,15 +647,7 @@ void tTmpFSClass::RegisterMembers()
 
 	BindFunction(this, tSS<'s','a','v','e'>(), &tTmpFSInstance::save);
 	BindFunction(this, tSS<'l','o','a','d'>(), &tTmpFSInstance::load);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tTmpFSClass::ovulate()
-{
-	return tVariant(new tTmpFSInstance());
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

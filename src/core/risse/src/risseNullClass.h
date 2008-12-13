@@ -26,7 +26,7 @@ namespace Risse
 /**
  * "Null" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tNullClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tNullClass, tPrimitiveClassBase, tVariant, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static tString toString();

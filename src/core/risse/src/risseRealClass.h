@@ -26,7 +26,7 @@ namespace Risse
 /**
  * "Real" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tRealClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tRealClass, tPrimitiveClassBase, risse_real, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 RISSE_DEFINE_CLASS_END()

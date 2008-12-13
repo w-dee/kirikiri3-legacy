@@ -30,7 +30,7 @@ RISSE_DEFINE_SOURCE_ID(5442,9100,49866,17725,24713,23464,12701,40981);
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tRealClass, ss_Real, engine->NumberClass, (risse_real)0.0)
+RISSE_IMPL_CLASS_BEGIN(tRealClass, ss_Real, engine->NumberClass)
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tRealClass::ovulate,

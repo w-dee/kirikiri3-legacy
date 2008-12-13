@@ -85,7 +85,7 @@ public: // risse 用メソッドとか
 /**
  * "StandardIOStream" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tStandardIOStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tStandardIOStreamClass, tClassBase, tStandardIOStreamInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

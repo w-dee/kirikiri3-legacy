@@ -75,7 +75,7 @@ void tRisseScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tRisseScriptBlockClass, ss_RisseScriptBlock, engine->ScriptBlockClass, new tRisseScriptBlockInstance())
+RISSE_IMPL_CLASS_BEGIN(tRisseScriptBlockClass, ss_RisseScriptBlock, engine->ScriptBlockClass)
 	BindFunction(this, ss_ovulate, &tRisseScriptBlockClass::ovulate);
 	BindFunction(this, ss_construct, &tRisseScriptBlockInstance::construct);
 	BindFunction(this, ss_initialize, &tRisseScriptBlockInstance::initialize);

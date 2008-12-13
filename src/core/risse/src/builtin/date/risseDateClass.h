@@ -101,7 +101,7 @@ public: // Risse用メソッドなど
 /**
  * "Date" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tDateClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tDateClass, tClassBase, tDateInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

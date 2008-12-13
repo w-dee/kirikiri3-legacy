@@ -23,7 +23,7 @@ namespace Risse
 {
 RISSE_DEFINE_SOURCE_ID(34010,6722,37400,20210,25254,51796,49710,12325);
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tDataClass, ss_Data, engine->PrimitiveClass, ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tDataClass, ss_Data, engine->PrimitiveClass)
 	BindFunction(this, ss_ovulate,
 		&tDataClass::ovulate,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|

@@ -236,7 +236,7 @@ public: // Risse用メソッドなど
 /**
  * "ScriptBlock" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tScriptBlockClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tScriptBlockClass, tClassBase, tScriptBlockInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

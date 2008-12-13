@@ -165,7 +165,7 @@ private:
 /**
  * "OSFS" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tOSFSClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOSFSClass, tClassBase, tOSFSInstance, itNormal)
 private:
 	tOSNativeStreamClass * OSNativeStreamClass; //!< OSNativeStream クラスインスタンス
 public:

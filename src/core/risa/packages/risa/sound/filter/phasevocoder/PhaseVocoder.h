@@ -149,7 +149,7 @@ public: // Risse用メソッドなど
 /**
  * "PhaseVocoder" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tPhaseVocoderClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tPhaseVocoderClass, tClassBase, tPhaseVocoderInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

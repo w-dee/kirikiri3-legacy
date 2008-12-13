@@ -168,7 +168,7 @@ void tStreamInstance::print(const tString & str)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tStreamClass, ss_Stream, engine->ObjectClass, ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tStreamClass, ss_Stream, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tStreamInstance::initialize);

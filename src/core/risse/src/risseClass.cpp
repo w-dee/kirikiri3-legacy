@@ -225,10 +225,9 @@ void tClassBase::CallSuperClassMethod(tVariantBlock * ret,
 
 
 //---------------------------------------------------------------------------
-tVariant tClassBase::ThrowCannotCreateInstanceFromThisClass()
+tClassBase::tNoInstanceClass::tNoInstanceClass()
 {
 	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
 }
 //---------------------------------------------------------------------------
 

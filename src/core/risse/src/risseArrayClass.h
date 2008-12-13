@@ -69,7 +69,7 @@ public: // Risse用メソッドなど
 /**
  * "Array" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tArrayClass, tClassBase, tArrayInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

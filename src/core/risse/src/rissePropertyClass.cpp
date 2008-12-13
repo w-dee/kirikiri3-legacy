@@ -98,7 +98,7 @@ void tPropertyInstance::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tPropertyClass, ss_Property, engine->ObjectClass, new tPropertyInstance())
+RISSE_IMPL_CLASS_BEGIN(tPropertyClass, ss_Property, engine->ObjectClass)
 	// 注: この時点では Property クラスの ovulate は inherited::RegisterMembers で
 	// 登録された、親クラスの ovulate となっている。
 	// この状態で Property クラスのメソッドを登録しようとしても(間違ったovulateが

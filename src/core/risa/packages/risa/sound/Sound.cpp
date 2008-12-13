@@ -195,7 +195,7 @@ void tSoundInstance::Open(const tString & filename)
 				RISA_PREPEND_EXCEPTION_MESSAGE_BEGIN()
 				{
 					tWaveFilterInstance * filter =
-							item.ExpectAndGetObjectInterface<tWaveFilterInstance>(
+							item.ExpectAndGetObjectInterface(
 							tClassHolder<tWaveFilterClass>::instance()->GetClass());
 						filter->SetInput(last_filter);
 						last_filter = filter;
@@ -495,7 +495,7 @@ void tSoundInstance::initialize(const tNativeCallInfo &info)
 /**
  * "Sound" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tSoundClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tSoundClass, tClassBase, tSoundInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -508,8 +508,7 @@ RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tSoundClass,
 		(tSS<'S','o','u','n','d'>()),
-		tClassHolder<tEventSourceClass>::instance()->GetClass(),
-		new tSoundInstance())
+		tClassHolder<tEventSourceClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tSoundClass::ovulate);
 	BindFunction(this, ss_construct, &tSoundInstance::construct);
 	BindFunction(this, ss_initialize, &tSoundInstance::initialize);

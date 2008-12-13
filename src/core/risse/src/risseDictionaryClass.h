@@ -64,7 +64,7 @@ public: // Risse用メソッドなど
 /**
  * "Dictionary" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tDictionaryClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tDictionaryClass, tClassBase, tDictionaryInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse

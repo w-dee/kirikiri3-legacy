@@ -145,7 +145,7 @@ public: // Risse用メソッドなど
 /**
  * "Node" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tNodeClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tNodeClass, tClassBase, tNodeInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

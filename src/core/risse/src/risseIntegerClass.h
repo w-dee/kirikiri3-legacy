@@ -25,7 +25,7 @@ namespace Risse
 /**
  * "Integer" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIntegerClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIntegerClass, tPrimitiveClassBase, risse_int64, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static void times(const tNativeCallInfo & info);

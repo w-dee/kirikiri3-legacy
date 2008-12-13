@@ -101,7 +101,7 @@ public: // Risse用オブジェクトなど
 /**
  * "Property" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tPropertyClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tPropertyClass, tClassBase, tPropertyInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse

@@ -88,7 +88,7 @@ public: // Risse用メソッドなど
 /**
  * "Binding" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tBindingClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tBindingClass, tClassBase, tBindingInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse

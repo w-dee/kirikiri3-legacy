@@ -118,7 +118,7 @@ public: // risse 用メソッドとか
 /**
  * "OSNativeStream" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tOSNativeStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOSNativeStreamClass, tClassBase, tOSNativeStreamInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

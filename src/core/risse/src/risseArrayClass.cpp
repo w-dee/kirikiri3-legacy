@@ -305,7 +305,7 @@ bool tArrayInstance::has(const tVariant & value)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tArrayClass, ss_Array, engine->ObjectClass, new tArrayInstance())
+RISSE_IMPL_CLASS_BEGIN(tArrayClass, ss_Array, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tArrayInstance::initialize);

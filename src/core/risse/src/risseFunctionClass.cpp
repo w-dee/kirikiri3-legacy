@@ -93,7 +93,7 @@ void tFunctionInstance::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tFunctionClass, ss_Function, engine->ObjectClass, new tFunctionInstance())
+RISSE_IMPL_CLASS_BEGIN(tFunctionClass, ss_Function, engine->ObjectClass)
 	// 注: この時点では Function クラスの ovulate は inherited::RegisterMembers で
 	// 登録された、親クラスの ovulate となっている。
 	// この状態で function クラスのメソッドを登録しようとしても(間違ったovulateが

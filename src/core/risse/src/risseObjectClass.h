@@ -25,6 +25,8 @@ class tObjectClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
 public:
+	typedef tObjectBase tInstanceClass;
+public:
 	/**
 	 * コンストラクタ
 	 * @param engine	スクリプトエンジンインスタンス

@@ -628,7 +628,8 @@ void tTmpFSInstance::load(const tVariant & filename)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tTmpFSClass, (tSS<'T','m','p','F','S'>()), tClassHolder<tFileSystemClass>::instance()->GetClass(), new tTmpFSInstance())
+RISSE_IMPL_CLASS_BEGIN(tTmpFSClass, (tSS<'T','m','p','F','S'>()),
+		tClassHolder<tFileSystemClass>::instance()->GetClass())
 	MemoryStreamClass = new tMemoryStreamClass(GetRTTI()->GetScriptEngine());
 
 	BindFunction(this, ss_ovulate, &tTmpFSClass::ovulate);

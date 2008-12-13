@@ -353,7 +353,8 @@ bool tOSFSInstance::CheckFileNameCase(const wxString & path_to_check, bool raise
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tOSFSClass, (tSS<'O','S','F','S'>()), tClassHolder<tFileSystemClass>::instance()->GetClass(), new tOSFSInstance())
+RISSE_IMPL_CLASS_BEGIN(tOSFSClass, (tSS<'O','S','F','S'>()),
+		tClassHolder<tFileSystemClass>::instance()->GetClass())
 	OSNativeStreamClass = new tOSNativeStreamClass(GetRTTI()->GetScriptEngine());
 
 	BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);

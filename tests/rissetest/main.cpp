@@ -136,45 +136,17 @@ public:
 //---------------------------------------------------------------------------
 //! @brief		"Test" クラス
 //---------------------------------------------------------------------------
-class tTestClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
+RISSE_DEFINE_CLASS_BEGIN(tTestClass, tClassBase, tTestInstance, itNormal)
+RISSE_DEFINE_CLASS_END()
 
-public:
-	//! @brief		コンストラクタ
-	//! @param		engine		スクリプトエンジンインスタンス
-	tTestClass(tScriptEngine * engine) :
-		tClassBase(tSS<'T','e','s','t'>(), engine->ObjectClass)
-	{
-		RegisterMembers();
-	}
-
-	//! @brief		各メンバをインスタンスに追加する
-	void RegisterMembers()
-	{
-		// 親クラスの RegisterMembers を呼ぶ
-		inherited::RegisterMembers();
-
-		// クラスに必要なメソッドを登録する
-		// 基本的に ss_construct と ss_initialize は各クラスごとに
-		// 記述すること。たとえ construct の中身が空、あるいは initialize の
-		// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
+RISSE_IMPL_CLASS_BEGIN(tTestClass, (tSS<'T','e','s','t'>()), engine->ObjectClass)
 		BindFunction(this, ss_ovulate, &tTestClass::ovulate);
 		BindFunction(this, ss_construct, &tTestInstance::construct);
 		BindFunction(this, ss_initialize, &tTestInstance::initialize);
 		BindFunction(this, tSS<'g','e','t','S','t','r','i','n','g'>(), &tTestInstance::getString);
 		BindProperty(this, tSS<'p','r','o','p','S','t','r','i','n','g'>(),
 			&tTestInstance::get_propString, &tTestInstance::set_propString);
-	}
-
-	//! @brief		newの際の新しいオブジェクトを作成して返す
-	static tVariant ovulate()
-	{
-		return tVariant(new tTestInstance());
-	}
-public:
-};
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -104,8 +104,7 @@ void tStandardIOStreamInstance::flush()
 RISSE_IMPL_CLASS_BEGIN(tStandardIOStreamClass,
 		(tSS<'S','t','a','n','d','a','r','d','I','O','S','t','r','e','a','m'>()),
 		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
-				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()),
-		new tStandardIOStreamInstance())
+				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
 	BindFunction(this, ss_ovulate, &tStandardIOStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tStandardIOStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tStandardIOStreamInstance::initialize);

@@ -76,7 +76,7 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetGraphInstance(graph.ExpectAndGetObjectInterface<tGraphInstance>(
+	SetGraphInstance(graph.ExpectAndGetObjectInterface(
 					tClassHolder<tGraphClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
@@ -92,8 +92,7 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass,
-		ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tNodeInstance::initialize);

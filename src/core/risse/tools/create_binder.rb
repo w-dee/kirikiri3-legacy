@@ -94,7 +94,7 @@ STDOUT.print "
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.AssertAndGetObjectInterafce<IC>((CC*)info.Class);
+			IC * instance = info.This.AssertAndGetObjectInterafce((CC*)info.Class);
 			if(info.result)
 				*info.result = ToVariant((instance->*((tFunc)f))(#{args_list}));
 			else
@@ -112,7 +112,7 @@ STDOUT.print "
 			const tNativeCallInfo & info)
 		{
 			info.args.ExpectArgumentCount(Cs::Man);
-			IC * instance = info.This.AssertAndGetObjectInterafce<IC>((CC*)info.Class);
+			IC * instance = info.This.AssertAndGetObjectInterafce((CC*)info.Class);
 			if(info.result) *info.result = info.This;
 			(instance->*((tFunc)f))(#{args_list});
 		}

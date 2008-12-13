@@ -91,7 +91,7 @@ public: // Risse用メソッドとか
 /**
  * "Function" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tFunctionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tFunctionClass, tClassBase, tFunctionInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 } // namespace Risse

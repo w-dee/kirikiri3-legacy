@@ -178,7 +178,7 @@ public: // Risse用メソッドなど
  *			このクラスのインスタンスを自前で作成したり、インスタンスのメンバに
  *			書き込んだりしないこと。
  */
-RISSE_DEFINE_CLASS_BEGIN(tSourcePointClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tSourcePointClass, tClassBase, tSourcePointInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -197,7 +197,7 @@ RISSE_DEFINE_CLASS_END()
  *			C++メソッドはすべてstatic宣言になり、あまりNativeBinderの恩恵が
  *			無いが、しかたない。
  */
-RISSE_DEFINE_CLASS_BEGIN(tThrowableClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tThrowableClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -219,7 +219,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "Error" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tErrorClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tErrorClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -239,7 +239,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "AssertionError" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tAssertionErrorClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tAssertionErrorClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -272,7 +272,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "BlockExitException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tBlockExitExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tBlockExitExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -292,7 +292,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "Exception" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -313,7 +313,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "InsufficientResourceException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tInsufficientResourceExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tInsufficientResourceExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -344,7 +344,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "IOException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIOExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIOExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -450,7 +450,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "CharConversionException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tCharConversionExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tCharConversionExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -480,7 +480,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "RuntimeException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tRuntimeExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tRuntimeExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -497,7 +497,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "CompileException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tCompileExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tCompileExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -534,7 +534,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "ImportException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImportExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImportExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -624,7 +624,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "ClassDefinitionException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tClassDefinitionExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tClassDefinitionExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -669,7 +669,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "InstantiationException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tInstantiationExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tInstantiationExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -710,7 +710,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "BadContextException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tBadContextExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tBadContextExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -742,7 +742,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "UnsupportedOperationException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tUnsupportedOperationExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tUnsupportedOperationExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -779,7 +779,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "ArithmeticException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tArithmeticExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tArithmeticExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -808,7 +808,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "ArgumentException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tArgumentExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tArgumentExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -829,7 +829,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "NullObjectException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tNullObjectExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tNullObjectExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -859,7 +859,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "IllegalArgumentClassException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -924,7 +924,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "IllegalArgumentException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIllegalArgumentExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -969,7 +969,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "BadArgumentCountException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tBadArgumentCountExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tBadArgumentCountExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1019,7 +1019,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "MemberAccessException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tMemberAccessExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tMemberAccessExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct(const tNativeCallInfo & info);
 	static void initialize(const tNativeCallInfo & info);
@@ -1039,7 +1039,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "NoSuchMemberException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tNoSuchMemberExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tNoSuchMemberExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1070,7 +1070,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "IllegalMemberAccessException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1145,7 +1145,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "IllegalStateException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tIllegalStateExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tIllegalStateExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);
@@ -1159,7 +1159,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "InaccessibleResourceException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tInaccessibleResourceExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tInaccessibleResourceExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);

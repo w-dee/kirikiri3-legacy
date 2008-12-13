@@ -116,7 +116,7 @@ void tClassClass::initialize(const tNativeCallInfo &info)
 											tOperateFlags::ofInstanceMemberOnly);
 		tVariant super_members = super_class.GetPropertyDirect(info.engine, ss_members,
 											tOperateFlags::ofInstanceMemberOnly);
-		members.SetPropertyDirect(info.engine, ss_prototype, 
+		members.SetPropertyDirect(info.engine, ss_prototype,
 			tOperateFlags(tMemberAttribute::GetDefault())|
 			access_flags,
 			super_members, info.This);
@@ -126,7 +126,7 @@ void tClassClass::initialize(const tNativeCallInfo &info)
 			info.This.AssertAndGetObjectInterafce<tClassBase>(
 				info.engine->ClassClass);
 		tClassBase * super_class_intf =
-			super_class.ExpectAndGetObjectInterface<tClassBase>(
+			super_class.ExpectAndGetObjectInterface(
 				info.engine->ClassClass);
 
 		this_class_intf->GetClassRTTI() = super_class_intf->GetClassRTTI();

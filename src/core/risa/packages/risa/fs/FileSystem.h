@@ -136,7 +136,7 @@ public: // Risse用メソッドなど
 /**
  * "FileSystem" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tFileSystemClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tFileSystemClass, tClassBase, tFileSystemInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

@@ -72,7 +72,7 @@ public: // Risse用メソッドなど
 /**
  * "RinaWidgetNode" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tRinaWidgetNodeClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tRinaWidgetNodeClass, tClassBase, tRinaWidgetNodeInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -167,7 +167,7 @@ public: // Risse用メソッドなど
 /**
  * "Rina" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tRinaClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tRinaClass, tClassBase, tRinaInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

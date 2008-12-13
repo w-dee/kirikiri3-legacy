@@ -60,7 +60,8 @@ void tGraphInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tGraphClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass, new tGraphInstance())
+RISSE_IMPL_CLASS_BEGIN(tGraphClass, (tSS<'G','r','a','p','h'>()),
+		engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tGraphClass::ovulate);
 	BindFunction(this, ss_construct, &tGraphInstance::construct);
 	BindFunction(this, ss_initialize, &tGraphInstance::initialize);

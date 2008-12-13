@@ -51,7 +51,7 @@ public: // Risse用メソッドなど
 /**
  * "Graph" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tGraphClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tGraphClass, tClassBase, tGraphInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

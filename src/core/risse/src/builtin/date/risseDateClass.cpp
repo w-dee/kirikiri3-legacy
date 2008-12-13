@@ -270,7 +270,7 @@ void tDateInstance::initialize(const tNativeCallInfo &info)
 		else if(info.args[0].GetType() == tVariant::vtObject)
 		{
 			tDateInstance * instance =
-				info.args[0].AssertAndGetObjectInterafce<tDateInstance>(
+				info.args[0].AssertAndGetObjectInterafce(
 					info.engine->DatePackageInitializer->DateClass);
 			DateTime = instance->DateTime;
 		}
@@ -508,7 +508,7 @@ tString tDateInstance::toLocaleString() const
 bool tDateInstance::equal(const tVariant & rhs)
 {
 	tDateInstance *instance =
-		rhs.CheckAndGetObjectInterafce<tDateInstance>(
+		rhs.CheckAndGetObjectInterafce(
 			GetRTTI()->GetScriptEngine()->DatePackageInitializer->DateClass);
 
 	volatile tSynchronizer sync1(this); // sync
@@ -527,7 +527,7 @@ bool tDateInstance::equal(const tVariant & rhs)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tDateClass, ss_Date, engine->ObjectClass, new tDateInstance())
+RISSE_IMPL_CLASS_BEGIN(tDateClass, ss_Date, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tDateClass::ovulate);
 	BindFunction(this, ss_construct, &tDateInstance::construct);
 	BindFunction(this, ss_initialize, &tDateInstance::initialize);

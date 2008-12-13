@@ -81,8 +81,7 @@ void tPinInstance::initialize(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tPinClass, (tSS<'P','i','n'>()), engine->ObjectClass,
-		ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tPinClass, (tSS<'P','i','n'>()), engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tPinClass::ovulate);
 	BindFunction(this, ss_construct, &tPinInstance::construct);
 	BindFunction(this, ss_initialize, &tPinInstance::initialize);
@@ -209,8 +208,7 @@ void tInputPinInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tInputPinClass,
 		(tSS<'I','n','p','u','t','P','i','n'>()),
-		tClassHolder<tPinClass>::instance()->GetClass(),
-		ThrowCannotCreateInstanceFromThisClass())
+		tClassHolder<tPinClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tInputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tInputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tInputPinInstance::initialize);
@@ -256,7 +254,7 @@ risse_size tOutputPinInstance::GetLongestDistance() const
 	while(it.Next())
 	{
 		risse_size dist = it.GetValue().
-			ExpectAndGetObjectInterface<tInputPinInstance>(
+			ExpectAndGetObjectInterface(
 				tClassHolder<tInputPinClass>::instance()->GetClass())->
 					GetNodeInstance()->GetLongestDistance();
 		if(longest == risse_size_max || longest < dist)
@@ -329,8 +327,7 @@ void tOutputPinInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tOutputPinClass,
 		(tSS<'O','u','t','p','u','t','P','i','n'>()),
-		tClassHolder<tPinClass>::instance()->GetClass(),
-		ThrowCannotCreateInstanceFromThisClass())
+		tClassHolder<tPinClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tOutputPinClass::ovulate);
 	BindFunction(this, ss_construct, &tOutputPinInstance::construct);
 	BindFunction(this, ss_initialize, &tOutputPinInstance::initialize);
@@ -367,7 +364,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterface<tNodeInstance>(
+	SetNodeInstance(node.ExpectAndGetObjectInterface(
 		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
@@ -380,8 +377,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tInputPinArrayClass,
 		(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
-		engine->ObjectClass,
-		new tInputPinArrayInstance())
+		engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tInputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tInputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tInputPinArrayInstance::initialize);
@@ -424,7 +420,7 @@ void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant
 	volatile tSynchronizer sync(this); // sync
 
 	// ピンを設定する
-	PinInstance = pin.ExpectAndGetObjectInterface<tInputPinInstance>(
+	PinInstance = pin.ExpectAndGetObjectInterface(
 			tClassHolder<tInputPinClass>::instance()->GetClass());
 
 	// 親クラスの同名メソッドを呼び出す
@@ -439,8 +435,7 @@ void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tOneInputPinArrayClass,
 		(tSS<'O','n','e','I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
-		tClassHolder<tInputPinArrayClass>::instance()->GetClass(),
-		new tOneInputPinArrayInstance())
+		tClassHolder<tInputPinArrayClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tOneInputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOneInputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOneInputPinArrayInstance::initialize);
@@ -483,7 +478,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterface<tNodeInstance>(
+	SetNodeInstance(node.ExpectAndGetObjectInterface(
 		tClassHolder<tNodeClass>::instance()->GetClass()));
 
 	info.InitializeSuperClass();
@@ -497,8 +492,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tOutputPinArrayClass,
 		(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
-		engine->ObjectClass,
-		new tOutputPinArrayInstance())
+		engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tOutputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOutputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOutputPinArrayInstance::initialize);
@@ -543,7 +537,7 @@ void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVarian
 	volatile tSynchronizer sync(this); // sync
 
 	// ピンを設定する
-	PinInstance = pin.ExpectAndGetObjectInterface<tOutputPinInstance>(
+	PinInstance = pin.ExpectAndGetObjectInterface(
 			tClassHolder<tOutputPinClass>::instance()->GetClass());
 
 	// 親クラスの同名メソッドを呼び出す
@@ -558,8 +552,7 @@ void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVarian
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tOneOutputPinArrayClass,
 		(tSS<'O','n','e','O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
-		tClassHolder<tOutputPinArrayClass>::instance()->GetClass(),
-		new tOneOutputPinArrayInstance())
+		tClassHolder<tOutputPinArrayClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tOneOutputPinArrayClass::ovulate);
 	BindFunction(this, ss_construct, &tOneOutputPinArrayInstance::construct);
 	BindFunction(this, ss_initialize, &tOneOutputPinArrayInstance::initialize);

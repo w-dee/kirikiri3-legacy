@@ -179,7 +179,7 @@ public: // risse 用メソッドとか
 /**
  * "MemoryStream" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tMemoryStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tMemoryStreamClass, tClassBase, tMemoryStreamInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

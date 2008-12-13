@@ -37,7 +37,7 @@ void tBindingInstance::AddMap(tVariant &This, const tString &name, risse_uint32 
 	RISSE_ASSERT(This.GetType() == tVariant::vtObject);
 	tScriptEngine * engine = This.GetObjectInterface()->GetRTTI()->GetScriptEngine();
 	tBindingInstance * obj =
-		This.AssertAndGetObjectInterafce<tBindingInstance>(engine->BindingClass);
+		This.AssertAndGetObjectInterafce(engine->BindingClass);
 	obj->GetBindingMap().insert(tBindingInfo::tBindingMap::value_type(name, reg));
 }
 //---------------------------------------------------------------------------
@@ -131,7 +131,7 @@ void tBindingInstance::iset(const tVariant & value, const tString & name)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tBindingClass, ss_Binding, engine->ObjectClass, new tBindingInstance())
+RISSE_IMPL_CLASS_BEGIN(tBindingClass, ss_Binding, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tBindingClass::ovulate);
 	BindFunction(this, ss_construct, &tBindingInstance::construct);
 	BindFunction(this, ss_initialize, &tBindingInstance::initialize);

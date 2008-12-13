@@ -63,20 +63,20 @@ void tImageSourceNodeInstance::construct()
 	OutputPinInstance =
 		tClassHolder<tImageOutputPinClass>::instance()->GetClass()->
 			Invoke(ss_new).
-		ExpectAndGetObjectInterface<tImageOutputPinInstance>(
+		ExpectAndGetObjectInterface(
 		tClassHolder<tImageOutputPinClass>::instance()->GetClass()
 		);
 	// 入力ピン配列と出力ピン配列を生成
 	InputPinArrayInstance =
 			tClassHolder<tInputPinArrayClass>::instance()->GetClass()->
 				Invoke(ss_new, tVariant(this)).
-			ExpectAndGetObjectInterface<tInputPinArrayInstance>(
+			ExpectAndGetObjectInterface(
 			tClassHolder<tInputPinArrayClass>::instance()->GetClass()
 			);
 	OutputPinArrayInstance =
 			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()->
 				Invoke(ss_new, tVariant(this), tVariant(OutputPinInstance)).
-			ExpectAndGetObjectInterface<tOutputPinArrayInstance>(
+			ExpectAndGetObjectInterface(
 			tClassHolder<tOneOutputPinArrayClass>::instance()->GetClass()
 			);
 }
@@ -105,8 +105,7 @@ void tImageSourceNodeInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tImageSourceNodeClass,
 		(tSS<'I','m','a','g','e','S','o','u','r','c','e'>()),
-		tClassHolder<tNodeClass>::instance()->GetClass(),
-		new tImageSourceNodeInstance())
+		tClassHolder<tNodeClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tImageSourceNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tImageSourceNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tImageSourceNodeInstance::initialize);

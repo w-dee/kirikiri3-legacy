@@ -135,7 +135,7 @@ void tFrameInstance::initialize(const tNativeCallInfo &info)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tFrameClass, (tSS<'F','r','a','m','e'>()),
-		tClassHolder<tWindowClass>::instance()->GetClass(), new tFrameInstance())
+		tClassHolder<tWindowClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tFrameClass::ovulate);
 	BindFunction(this, ss_construct, &tFrameInstance::construct);
 	BindFunction(this, ss_initialize, &tFrameInstance::initialize);

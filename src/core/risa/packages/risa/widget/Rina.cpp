@@ -59,20 +59,20 @@ void tRinaWidgetNodeInstance::construct()
 	InputPinInstance =
 		tClassHolder<tImageInputPinClass>::instance()->GetClass()->
 			Invoke(ss_new).
-		ExpectAndGetObjectInterface<tImageInputPinInstance>(
+		ExpectAndGetObjectInterface(
 		tClassHolder<tImageInputPinClass>::instance()->GetClass()
 		);
 	// 入力ピン配列と出力ピン配列を生成
 	InputPinArrayInstance =
 			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()->
 				Invoke(ss_new, tVariant(this), tVariant(InputPinInstance)).
-			ExpectAndGetObjectInterface<tOneInputPinArrayInstance>(
+			ExpectAndGetObjectInterface(
 			tClassHolder<tOneInputPinArrayClass>::instance()->GetClass()
 			);
 	OutputPinArrayInstance =
 			tClassHolder<tOutputPinArrayClass>::instance()->GetClass()->
 				Invoke(ss_new, tVariant(this)).
-			ExpectAndGetObjectInterface<tOutputPinArrayInstance>(
+			ExpectAndGetObjectInterface(
 			tClassHolder<tOutputPinArrayClass>::instance()->GetClass()
 			);
 }
@@ -101,8 +101,7 @@ void tRinaWidgetNodeInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tRinaWidgetNodeClass,
 		(tSS<'R','i','n','a','W','i','d','g','e','t','N','o','d','e'>()),
-		tClassHolder<tNodeClass>::instance()->GetClass(),
-		new tRinaWidgetNodeInstance())
+		tClassHolder<tNodeClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tRinaWidgetNodeClass::ovulate);
 	BindFunction(this, ss_construct, &tRinaWidgetNodeInstance::construct);
 	BindFunction(this, ss_initialize, &tRinaWidgetNodeInstance::initialize);
@@ -153,7 +152,7 @@ tRina::tRina(tRinaInstance * instance, wxWindow * parent) :
 {
 	TestImage =
 			tClassHolder<tImageClass>::instance()->GetClass()->Invoke(ss_new).
-				ExpectAndGetObjectInterface<tImageInstance>(
+				ExpectAndGetObjectInterface(
 				tClassHolder<tImageClass>::instance()->GetClass()
 				);
 	TestImage->Load(RISSE_WS("/root/media/jpegFullColor.jpg"));
@@ -241,12 +240,12 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 
 	// parent から tFrameInstance のインスタンスを取り出す
 	tFrameInstance * frame =
-		parent.ExpectAndGetObjectInterface<tFrameInstance>(
+		parent.ExpectAndGetObjectInterface(
 			tClassHolder<tFrameClass>::instance()->GetClass());
 
 	// graph から tGraphInstance のインスタンスを取り出す
 	tGraphInstance * graph_instance =
-		graph.ExpectAndGetObjectInterface<tGraphInstance>(
+		graph.ExpectAndGetObjectInterface(
 			tClassHolder<tGraphClass>::instance()->GetClass());
 
 	// Rinaコントロールを作成
@@ -255,7 +254,7 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 	// tGraphInstance のインスタンスを引数にして RinaWidgetNode のインスタンスを作成する
 	RinaWidgetNode =
 		tClassHolder<tRinaWidgetNodeClass>::instance()->GetClass()->Invoke(ss_new, tVariant(graph_instance)).
-						ExpectAndGetObjectInterface<tRinaWidgetNodeInstance>(
+						ExpectAndGetObjectInterface(
 						tClassHolder<tRinaWidgetNodeClass>::instance()->GetClass()
 						);
 }
@@ -279,7 +278,7 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tRinaClass, (tSS<'R','i','n','a'>()),
-		tClassHolder<tWindowClass>::instance()->GetClass(), new tRinaInstance())
+		tClassHolder<tWindowClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tRinaClass::ovulate);
 	BindFunction(this, ss_construct, &tRinaInstance::construct);
 	BindFunction(this, ss_initialize, &tRinaInstance::initialize);

@@ -349,8 +349,7 @@ void tMemoryStreamInstance::flush()
 RISSE_IMPL_CLASS_BEGIN(tMemoryStreamClass,
 		(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>()),
 		static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
-				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()),
-		new tMemoryStreamInstance())
+				GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface()))
 	BindFunction(this, ss_ovulate, &tMemoryStreamClass::ovulate);
 	BindFunction(this, ss_construct, &tMemoryStreamInstance::construct);
 	BindFunction(this, ss_initialize, &tMemoryStreamInstance::initialize);

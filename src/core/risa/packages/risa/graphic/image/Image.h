@@ -144,7 +144,7 @@ public: // Risse用メソッドなど
 /**
  * "Image" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImageClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImageClass, tClassBase, tImageInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

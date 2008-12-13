@@ -373,7 +373,7 @@ public: // Risse用メソッドなど
 /**
  * "EventQueue" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tEventQueueClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tEventQueueClass, tClassBase, tEventQueueInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -472,29 +472,8 @@ public: // Risse用メソッドなど
 /**
  * "EventSource" クラス
  */
-class tEventSourceClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tEventSourceClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-
-public:
-};
+RISSE_DEFINE_CLASS_BEGIN(tEventSourceClass, tClassBase, tEventSourceInstance, itNoInstance)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

@@ -526,7 +526,7 @@ void tTimerInstance::initialize(const tNativeCallInfo &info)
 /**
  * "Timer" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tTimerClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tTimerClass, tClassBase, tTimerInstance, itNormal)
 public: // Risse 用メソッドとか
 	static risse_uint64 getTickCount() { return tTickCount::instance()->Get(); }
 RISSE_DEFINE_CLASS_END()
@@ -539,7 +539,8 @@ RISSE_DEFINE_CLASS_END()
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tTimerClass, (tSS<'T','i','m','e','r'>()), tClassHolder<tEventSourceClass>::instance()->GetClass(), new tTimerInstance())
+RISSE_IMPL_CLASS_BEGIN(tTimerClass, (tSS<'T','i','m','e','r'>()),
+		tClassHolder<tEventSourceClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tTimerClass::ovulate);
 	BindFunction(this, ss_construct, &tTimerInstance::construct);
 	BindFunction(this, ss_initialize, &tTimerInstance::initialize);

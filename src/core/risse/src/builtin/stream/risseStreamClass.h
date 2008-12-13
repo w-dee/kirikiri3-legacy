@@ -207,7 +207,7 @@ public: // risse 用メソッドとか
 /**
  * "Stream" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tStreamClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tStreamClass, tClassBase, tStreamInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

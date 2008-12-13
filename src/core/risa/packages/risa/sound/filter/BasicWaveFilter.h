@@ -145,7 +145,7 @@ public: // Risse用メソッドなど
 /**
  * "WaveFilter" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tWaveFilterClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tWaveFilterClass, tClassBase, tWaveFilterInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

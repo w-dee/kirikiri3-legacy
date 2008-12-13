@@ -840,7 +840,7 @@ public: // operate
 				InstanceOf(engine, args[0]); /* discard result */
 			return rvNoError;
 
-//		case ocDGet				://!< get .  
+//		case ocDGet				://!< get .
 //			RISSE_BIN_OP(DGet);
 
 		case ocIGet				://!< get [ ]
@@ -3660,11 +3660,12 @@ public: // ユーティリティ
 	 * @note	AssertAndGetObjectInterafce() に似るが、チェックに失敗した場合は
 	 *			例外が発生せずに NULL が帰る。
 	 */
-	template <typename ObjectT>
-	ObjectT * CheckAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
+	template <typename ClassT>
+	typename ClassT::tInstanceClass * CheckAndGetObjectInterafce(ClassT * cls) const
 	{
 		if(GetType() != vtObject) return NULL;
-		ObjectT * intf = static_cast<ObjectT*>(GetObjectInterface());
+		typename ClassT::tInstanceClass *intf =
+			static_cast<typename ClassT::tInstanceClass *>(GetObjectInterface());
 		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
 			return NULL;
 		return intf;
@@ -3685,11 +3686,12 @@ public: // ユーティリティ
 	 *			ちなみに InstanceOf はモジュールもチェックするが、
 	 *			これはモジュールまではチェックしないというかモジュールはチェックのしようがない。
 	 */
-	template <typename ObjectT>
-	ObjectT * AssertAndGetObjectInterafce(typename ObjectT::tClassBase * cls) const
+	template <typename ClassT>
+	typename ClassT::tInstanceClass * AssertAndGetObjectInterafce(ClassT * cls) const
 	{
 		if(GetType() != vtObject) ThrowBadContextException();
-		ObjectT * intf = static_cast<ObjectT*>(GetObjectInterface());
+		typename ClassT::tInstanceClass* intf =
+			static_cast<typename ClassT::tInstanceClass*>(GetObjectInterface());
 		if(!cls->GetRTTIMatcher().Match(intf->GetRTTI()))
 			ThrowBadContextException();
 		return intf;
@@ -3708,11 +3710,11 @@ public: // ユーティリティ
 	 * @note	AssertAndGetObjectInterafce に似ているが、型が違ったときの
 	 *			発生する例外が違う。
 	 */
-	template <typename ObjectT>
-	ObjectT * ExpectAndGetObjectInterface(tClassBase * cls) const
+	template <typename ClassT>
+	typename ClassT::tInstanceClass * ExpectAndGetObjectInterface(ClassT * cls) const
 	{
 		AssertClass(cls);
-		return static_cast<ObjectT*>(GetObjectInterface());
+		return static_cast<typename ClassT::tInstanceClass*>(GetObjectInterface());
 	}
 
 	/**

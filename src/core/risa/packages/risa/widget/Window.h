@@ -310,27 +310,8 @@ public: // Risse用メソッドなど
 /**
  * "Window" クラス
  */
-class tWindowClass : public tClassBase
-{
-	typedef tClassBase inherited; //!< 親クラスの typedef
-
-public:
-	/**
-	 * コンストラクタ
-	 * @param engine	スクリプトエンジンインスタンス
-	 */
-	tWindowClass(tScriptEngine * engine);
-
-	/**
-	 * 各メンバをインスタンスに追加する
-	 */
-	void RegisterMembers();
-
-	/**
-	 * newの際の新しいオブジェクトを作成して返す
-	 */
-	static tVariant ovulate();
-};
+RISSE_DEFINE_CLASS_BEGIN(tWindowClass, tClassBase, tWindowInstance, itNormal)
+RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
 

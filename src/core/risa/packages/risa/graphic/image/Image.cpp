@@ -220,7 +220,7 @@ void tImageInstance::load(const tString & filename, const tMethodArgument & args
 	if(args.HasArgument(1))
 	{
 		dict = args[1].
-			ExpectAndGetObjectInterface<tDictionaryInstance>(
+			ExpectAndGetObjectInterface(
 					GetRTTI()->GetScriptEngine()->DictionaryClass);
 		// ピクセルフォーマット ('_pixel_format' を得る)
 		tVariant val =
@@ -252,7 +252,7 @@ void tImageInstance::save(const tString & filename, const tMethodArgument & args
 	if(args.HasArgument(1))
 	{
 		dict = args[1].
-			ExpectAndGetObjectInterface<tDictionaryInstance>(
+			ExpectAndGetObjectInterface(
 					GetRTTI()->GetScriptEngine()->DictionaryClass);
 	}
 
@@ -297,7 +297,8 @@ void tImageInstance::save(const tString & filename, const tMethodArgument & args
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tImageClass, (tSS<'I','m','a','g','e'>()), engine->ObjectClass, new tImageInstance())
+RISSE_IMPL_CLASS_BEGIN(tImageClass, (tSS<'I','m','a','g','e'>()),
+		engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tImageClass::ovulate);
 	BindFunction(this, ss_construct, &tImageInstance::construct);
 	BindFunction(this, ss_initialize, &tImageInstance::initialize);

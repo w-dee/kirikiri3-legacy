@@ -105,8 +105,8 @@ bool tApplication::OnInit()
 	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
 	locale.Init(wxLANGUAGE_DEFAULT);
-	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale")); 
-	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale"));
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale"));
 
 	// メッセージカタログを追加する
 	locale.AddCatalog(wxT("k3"));
@@ -163,7 +163,7 @@ bool tApplication::OnInit()
 			// / に TmpFS をマウント
 			tFileSystemManager::instance()->Mount(tSS<'/'>(),
 				tClassHolder<tTmpFSClass>::instance()->GetClass()->Invoke(ss_new).
-						ExpectAndGetObjectInterface<tFileSystemInstance>(
+						ExpectAndGetObjectInterface(
 							tClassHolder<tTmpFSClass>::instance()->GetClass()
 						)
 			);
@@ -175,7 +175,7 @@ bool tApplication::OnInit()
 
 				tFileSystemManager::instance()->Mount(tSS<'/','b','o','o','t'>(),
 					tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(script_dir), true).
-							ExpectAndGetObjectInterface<tFileSystemInstance>(
+							ExpectAndGetObjectInterface(
 								tClassHolder<tOSFSClass>::instance()->GetClass()
 							)
 				);
@@ -186,7 +186,7 @@ bool tApplication::OnInit()
 
 			tFileSystemManager::instance()->Mount(tSS<'/','b','i','n'>(),
 				tClassHolder<tOSFSClass>::instance()->GetClass()->Invoke(ss_new, tString(bin_dir), true).
-						ExpectAndGetObjectInterface<tFileSystemInstance>(
+						ExpectAndGetObjectInterface(
 							tClassHolder<tOSFSClass>::instance()->GetClass()
 						)
 			);

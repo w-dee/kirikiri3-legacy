@@ -266,7 +266,7 @@ tString tSourcePointInstance::toString()
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tSourcePointClass, ss_SourcePoint, engine->ObjectClass, new tSourcePointInstance())
+RISSE_IMPL_CLASS_BEGIN(tSourcePointClass, ss_SourcePoint, engine->ObjectClass)
 	BindFunction(this, ss_ovulate,  &tSourcePointClass::ovulate);
 	BindFunction(this, ss_construct,  &tSourcePointInstance::construct);
 	BindFunction(this, ss_initialize,  &tSourcePointInstance::initialize);
@@ -285,7 +285,7 @@ RISSE_IMPL_CLASS_END()
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tThrowableClass, ss_Throwable, engine->ObjectClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tThrowableClass, ss_Throwable, engine->ObjectClass)
 	BindFunction(this, ss_construct, &tThrowableClass::construct);
 	BindFunction(this, ss_initialize, &tThrowableClass::initialize);
 	BindFunction(this, mnString, &tThrowableClass::toString);
@@ -379,7 +379,7 @@ tVariant tThrowableClass::toException(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tErrorClass, ss_Error, engine->ThrowableClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tErrorClass, ss_Error, engine->ThrowableClass)
 	BindFunction(this, ss_construct, &tErrorClass::construct);
 	BindFunction(this, ss_initialize, &tErrorClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -413,7 +413,7 @@ void tErrorClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tAssertionErrorClass, ss_AssertionError, engine->ErrorClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tAssertionErrorClass, ss_AssertionError, engine->ErrorClass)
 	BindFunction(this, ss_construct, &tAssertionErrorClass::construct);
 	BindFunction(this, ss_initialize, &tAssertionErrorClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -463,7 +463,7 @@ void tAssertionErrorClass::Throw(tScriptEngine * engine, const tString & express
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tBlockExitExceptionClass, ss_BlockExitException, engine->ThrowableClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tBlockExitExceptionClass, ss_BlockExitException, engine->ThrowableClass)
 	BindFunction(this, ss_construct, &tBlockExitExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBlockExitExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -517,7 +517,7 @@ void tBlockExitExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tExceptionClass, ss_Exception, engine->ThrowableClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tExceptionClass, ss_Exception, engine->ThrowableClass)
 	BindFunction(this, ss_construct, &tExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -548,7 +548,7 @@ void tExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tInsufficientResourceExceptionClass, ss_InsufficientResourceException, engine->ExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tInsufficientResourceExceptionClass, ss_InsufficientResourceException, engine->ExceptionClass)
 	BindFunction(this, ss_construct, &tInsufficientResourceExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInsufficientResourceExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -591,7 +591,7 @@ void tInsufficientResourceExceptionClass::ThrowCouldNotCreateCoroutine(tScriptEn
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tIOExceptionClass, ss_IOException, engine->ExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tIOExceptionClass, ss_IOException, engine->ExceptionClass)
 	BindFunction(this, ss_construct, &tIOExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIOExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -709,7 +709,7 @@ void tIOExceptionClass::ThrowStreamIsClosed(tScriptEngine * engine, const tStrin
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tCharConversionExceptionClass, ss_CharConversionException, engine->IOExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tCharConversionExceptionClass, ss_CharConversionException, engine->IOExceptionClass)
 	BindFunction(this, ss_construct, &tCharConversionExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCharConversionExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -750,7 +750,7 @@ void tCharConversionExceptionClass::ThrowInvalidUTF8String(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tRuntimeExceptionClass, ss_RuntimeException, engine->ExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tRuntimeExceptionClass, ss_RuntimeException, engine->ExceptionClass)
 	BindFunction(this, ss_construct, &tRuntimeExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tRuntimeExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -780,7 +780,7 @@ void tRuntimeExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tCompileExceptionClass, ss_CompileException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tCompileExceptionClass, ss_CompileException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tCompileExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCompileExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -835,7 +835,7 @@ void tCompileExceptionClass::Throw(tScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tImportExceptionClass, ss_ImportException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tImportExceptionClass, ss_ImportException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tImportExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tImportExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -934,7 +934,7 @@ void tImportExceptionClass::ThrowInvalidRelativePckageName(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tClassDefinitionExceptionClass, ss_ClassDefinitionException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tClassDefinitionExceptionClass, ss_ClassDefinitionException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tClassDefinitionExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tClassDefinitionExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -986,7 +986,7 @@ void tClassDefinitionExceptionClass::ThrowSuperClassIsNotAClass(tScriptEngine * 
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tInstantiationExceptionClass, ss_InstantiationException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tInstantiationExceptionClass, ss_InstantiationException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tInstantiationExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInstantiationExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1037,7 +1037,7 @@ void tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass(tScrip
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tBadContextExceptionClass, ss_BadContextException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tBadContextExceptionClass, ss_BadContextException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tBadContextExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBadContextExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1078,7 +1078,7 @@ void tBadContextExceptionClass::Throw(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tUnsupportedOperationExceptionClass, ss_UnsupportedOperationException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tUnsupportedOperationExceptionClass, ss_UnsupportedOperationException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tUnsupportedOperationExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tUnsupportedOperationExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1130,7 +1130,7 @@ void tUnsupportedOperationExceptionClass::ThrowOperationIsNotImplemented(tScript
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tArithmeticExceptionClass, ss_ArithmeticException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tArithmeticExceptionClass, ss_ArithmeticException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tArithmeticExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tArithmeticExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1171,7 +1171,7 @@ void tArithmeticExceptionClass::ThrowDivideByZeroException(tScriptEngine * engin
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tArgumentExceptionClass, ss_ArgumentException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tArgumentExceptionClass, ss_ArgumentException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tArgumentExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tArgumentExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1205,7 +1205,7 @@ void tArgumentExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tNullObjectExceptionClass, ss_NullObjectException, engine->IllegalArgumentExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tNullObjectExceptionClass, ss_NullObjectException, engine->IllegalArgumentExceptionClass)
 	BindFunction(this, ss_construct, &tNullObjectExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tNullObjectExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1246,7 +1246,7 @@ void tNullObjectExceptionClass::Throw(tScriptEngine * engine)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, ss_IllegalArgumentClassException, engine->IllegalArgumentExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentClassExceptionClass, ss_IllegalArgumentClassException, engine->IllegalArgumentExceptionClass)
 	BindFunction(this, ss_construct, &tIllegalArgumentClassExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalArgumentClassExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1314,7 +1314,7 @@ void tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(tScriptEng
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentExceptionClass, ss_IllegalArgumentException, engine->ArgumentExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tIllegalArgumentExceptionClass, ss_IllegalArgumentException, engine->ArgumentExceptionClass)
 	BindFunction(this, ss_construct, &tIllegalArgumentExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalArgumentExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1368,7 +1368,7 @@ void tIllegalArgumentExceptionClass::ThrowInvalidDateString(tScriptEngine * engi
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tBadArgumentCountExceptionClass, ss_BadArgumentCountException, engine->ArgumentExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tBadArgumentCountExceptionClass, ss_BadArgumentCountException, engine->ArgumentExceptionClass)
 	BindFunction(this, ss_construct, &tBadArgumentCountExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tBadArgumentCountExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1427,7 +1427,7 @@ void tBadArgumentCountExceptionClass::ThrowBlock(tScriptEngine * engine, risse_s
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tMemberAccessExceptionClass, ss_MemberAccessException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tMemberAccessExceptionClass, ss_MemberAccessException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tMemberAccessExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tMemberAccessExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1466,7 +1466,7 @@ void tMemberAccessExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tNoSuchMemberExceptionClass, ss_NoSuchMemberException, engine->MemberAccessExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tNoSuchMemberExceptionClass, ss_NoSuchMemberException, engine->MemberAccessExceptionClass)
 	BindFunction(this, ss_construct, &tNoSuchMemberExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tNoSuchMemberExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1513,7 +1513,7 @@ void tNoSuchMemberExceptionClass::Throw(tScriptEngine * engine, const tString & 
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tIllegalMemberAccessExceptionClass, ss_IllegalMemberAccessException, engine->MemberAccessExceptionClass)
 	BindFunction(this, ss_construct, &tIllegalMemberAccessExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalMemberAccessExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1607,7 +1607,7 @@ void tIllegalMemberAccessExceptionClass::ThrowPropertyCannotBeWritten(tScriptEng
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tIllegalStateExceptionClass, ss_IllegalStateException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tIllegalStateExceptionClass, ss_IllegalStateException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tIllegalStateExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tIllegalStateExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()
@@ -1642,7 +1642,7 @@ void tIllegalStateExceptionClass::initialize(const tNativeCallInfo & info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tInaccessibleResourceExceptionClass, ss_InaccessibleResourceException, engine->IllegalStateExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tInaccessibleResourceExceptionClass, ss_InaccessibleResourceException, engine->IllegalStateExceptionClass)
 	BindFunction(this, ss_construct, &tInaccessibleResourceExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tInaccessibleResourceExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()

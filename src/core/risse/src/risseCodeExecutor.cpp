@@ -43,7 +43,7 @@ RISSE_DEFINE_SOURCE_ID(38733,31388,53292,19613,29887,64791,9160,61431);
 tCodeInterpreter::tCodeInterpreter(tCodeBlock *cb) :
 	tCodeExecutor(cb)
 {
-	
+
 }
 //---------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ void tCodeInterpreter::Execute(
 						tVariant(engine->BindingClass).
 									New(0, tMethodArgument::Empty());
 					tBindingInstance * obj =
-						AR(code[1]).ExpectAndGetObjectInterface<tBindingInstance>(engine->BindingClass);
+						AR(code[1]).ExpectAndGetObjectInterface(engine->BindingClass);
 					obj->SetInfo(new tBindingInfo(global, This, new tSharedVariableFrames(shared_overlay)));
 					code += 2;
 					break;
@@ -655,13 +655,13 @@ void tCodeInterpreter::Execute(
 					const tVariant & try_id = AC(code[2]);
 					RISSE_ASSERT(try_id.GetType() == tVariant::vtObject);
 					RISSE_ASSERT(try_id.GetObjectInterface() != NULL);
-					throw new 
+					throw new
 						tVariant(
 							tVariant(engine->BlockExitExceptionClass).New(
 								0,
 								tMethodArgument::New(
 									try_id,
-									tVariant((risse_int64)code[3]), 
+									tVariant((risse_int64)code[3]),
 									CI(code[1]) == InvalidRegNum ?
 										tVariant::GetNullObject() : AR(code[1]) ))
 						);
@@ -1003,7 +1003,7 @@ void tCodeInterpreter::Execute(
 				code += 3;
 				break;
 
-			case ocDGet			: // dget	 get .  
+			case ocDGet			: // dget	 get .
 				RISSE_ASSERT(CI(code[1]) < framesize);
 				RISSE_ASSERT(CI(code[2]) < framesize);
 				RISSE_ASSERT(CI(code[3]) < framesize);

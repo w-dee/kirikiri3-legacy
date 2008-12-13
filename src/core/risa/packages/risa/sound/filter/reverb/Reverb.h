@@ -72,7 +72,7 @@ public: // Risse用メソッドなど
 /**
  * "Reverb" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tReverbClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tReverbClass, tClassBase, tReverbInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

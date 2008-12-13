@@ -23,6 +23,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
+class tClassInstance;
 /**
  * クラス用クラスの基底クラス(Risse用)
  * @note	tClassBase と tClassClass を混同しないこと。
@@ -33,7 +34,8 @@ namespace Risse
 class tClassClass : public tClassBase
 {
 	typedef tClassBase inherited; //!< 親クラスの typedef
-
+public:
+	typedef tClassInstance tInstanceClass;
 public:
 	/**
 	 * コンストラクタ

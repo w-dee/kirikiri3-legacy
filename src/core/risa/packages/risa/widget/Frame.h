@@ -112,7 +112,7 @@ public: // Risse用メソッドなど
 /**
  * "Frame" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tFrameClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tFrameClass, tClassBase, tFrameInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

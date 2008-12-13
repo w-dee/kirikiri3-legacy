@@ -59,7 +59,7 @@ public: // Risse用メソッドなど
 /**
  * "Coroutine" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tCoroutineClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tCoroutineClass, tClassBase, tCoroutineInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ RISSE_DEFINE_CLASS_END()
 /**
  * "CoroutineException" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tCoroutineExceptionClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tCoroutineExceptionClass, tClassBase, tObjectBase, itNormal)
 public: // Risse用メソッドなど
 	static void construct();
 	static void initialize(const tNativeCallInfo & info);

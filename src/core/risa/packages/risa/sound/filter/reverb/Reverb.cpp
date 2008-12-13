@@ -98,8 +98,7 @@ void tReverbInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tReverbClass,
 		(tSS<'R','e','v','e','r','b'>()),
-		tClassHolder<tWaveFilterClass>::instance()->GetClass(),
-		new tReverbInstance())
+		tClassHolder<tWaveFilterClass>::instance()->GetClass())
 	BindFunction(this, ss_ovulate, &tReverbClass::ovulate);
 	BindFunction(this, ss_construct, &tReverbInstance::construct);
 	BindFunction(this, ss_initialize, &tReverbInstance::initialize);

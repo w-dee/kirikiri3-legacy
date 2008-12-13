@@ -102,7 +102,7 @@ public: // Risse用メソッドなど
 /**
  * ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tPinClass, tClassBase, tPinInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -243,7 +243,7 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tInputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tInputPinClass, tClassBase, tInputPinInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -322,7 +322,7 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tOutputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOutputPinClass, tClassBase, tOutputPinInstance, itNoInstance)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -476,7 +476,7 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンのピン配列クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tInputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tInputPinArrayClass, tClassBase, tInputPinArrayInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -563,7 +563,7 @@ public: // Risse用メソッドなど
 /**
  * 入力ピンのピン配列クラス(一個だけの要素の場合)
  */
-RISSE_DEFINE_CLASS_BEGIN(tOneInputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOneInputPinArrayClass, tClassBase, tOneInputPinArrayInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -628,7 +628,7 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンのピン配列クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tOutputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOutputPinArrayClass, tClassBase, tOutputPinArrayInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -718,7 +718,7 @@ public: // Risse用メソッドなど
 /**
  * 出力ピンのピン配列クラス(一個だけの要素の場合)
  */
-RISSE_DEFINE_CLASS_BEGIN(tOneOutputPinArrayClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOneOutputPinArrayClass, tClassBase, tOneOutputPinArrayInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

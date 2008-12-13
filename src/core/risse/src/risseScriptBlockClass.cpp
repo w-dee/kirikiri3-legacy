@@ -359,7 +359,7 @@ void tScriptBlockInstance::initialize(
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tScriptBlockClass, ss_ScriptBlock, engine->ObjectClass, ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tScriptBlockClass, ss_ScriptBlock, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tScriptBlockClass::ovulate);
 	BindFunction(this, ss_construct, &tScriptBlockInstance::construct);
 	BindFunction(this, ss_initialize, &tScriptBlockInstance::initialize);

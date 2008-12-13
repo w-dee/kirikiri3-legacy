@@ -29,7 +29,7 @@ RISSE_DEFINE_SOURCE_ID(19296,56052,4218,18194,45952,40158,60560,61630);
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tOctetClass, ss_Octet, engine->PrimitiveClass, tOctet())
+RISSE_IMPL_CLASS_BEGIN(tOctetClass, ss_Octet, engine->PrimitiveClass)
 	// construct は tPrimitiveClass 内ですでに登録されている
 
 	BindFunction(this, ss_ovulate, &tOctetClass::ovulate,

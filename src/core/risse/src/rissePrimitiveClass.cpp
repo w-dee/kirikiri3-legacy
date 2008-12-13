@@ -82,7 +82,7 @@ void tPrimitiveClassBase::construct()
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tPrimitiveClass, ss_Primitive, engine->ObjectClass, ThrowCannotCreateInstanceFromThisClass())
+RISSE_IMPL_CLASS_BEGIN(tPrimitiveClass, ss_Primitive, engine->ObjectClass)
 	BindFunction(this, ss_ovulate,
 		&tPrimitiveClass::ovulate,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|

@@ -25,7 +25,7 @@ namespace Risse
 /**
  * 数値型用クラスの基底クラス(Risse用)
  */
-RISSE_DEFINE_CLASS_BEGIN(tNumberClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tNumberClass, tClassBase, tNoInstanceClass, itNoInstance)
 public: // Risse用メソッドなど
 	static void construct();
 	static void isNaN(const tNativePropGetInfo & info);

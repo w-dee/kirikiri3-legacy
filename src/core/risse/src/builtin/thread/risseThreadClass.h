@@ -66,7 +66,7 @@ public: // Risse用メソッドなど
 /**
  * "Thread" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tThreadClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tThreadClass, tClassBase, tThreadInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

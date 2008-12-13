@@ -74,7 +74,7 @@ public: // Risse用メソッドなど
 /**
  * "ImageSource" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImageSourceNodeClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImageSourceNodeClass, tClassBase, tImageSourceNodeInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

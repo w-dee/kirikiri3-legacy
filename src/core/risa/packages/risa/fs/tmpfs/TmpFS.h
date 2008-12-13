@@ -266,7 +266,7 @@ public: // Risse 用メソッドなど
 /**
  * "TmpFS" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tTmpFSClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tTmpFSClass, tClassBase, tTmpFSInstance, itNormal)
 private:
 	tMemoryStreamClass * MemoryStreamClass; //!< MemoryStream クラスインスタンス
 public:

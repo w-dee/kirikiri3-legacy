@@ -26,7 +26,7 @@ namespace Risse
 /**
  * "String" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tStringClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tStringClass, tPrimitiveClassBase, tString, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static void charAt(const tNativeCallInfo & info, risse_offset index);

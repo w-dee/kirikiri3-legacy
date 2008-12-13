@@ -145,7 +145,7 @@ void tDictionaryInstance::eachPair(const tNativeCallInfo &info)
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tDictionaryClass, ss_Dictionary, engine->ObjectClass, new tDictionaryInstance())
+RISSE_IMPL_CLASS_BEGIN(tDictionaryClass, ss_Dictionary, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tDictionaryClass::ovulate);
 	BindFunction(this, ss_construct, &tDictionaryInstance::construct);
 	BindFunction(this, ss_initialize, &tDictionaryInstance::initialize);

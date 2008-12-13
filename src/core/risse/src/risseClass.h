@@ -39,6 +39,9 @@ private:
 	tRTTI::tMatcher RTTIMatcher; //!< ClassRTTI にマッチするための情報
 
 public:
+	typedef tClassBase tInstanceClass; //!< このクラスのインスタンスはこのクラス
+
+public:
 	/**
 	 * コンストラクタ
 	 * @param name			クラス名
@@ -117,11 +120,51 @@ public:
 		tVariantBlock * ret, const tString & name,
 		risse_uint32 flags, const tMethodArgument & args, const tVariant & This);
 
+protected:
 	/**
-	 * 「このクラスのインスタンスは作成できない」例外を投げるユーティリティメソッド
-	 * @return このメソッドは帰らないが便宜上 tVariant() を返すようになっている。
+	 * newされると「このクラスのインスタンスは作成できない」例外を投げるダミーのクラス
+	 * @note	このクラスからはインスタンスを生成できないことを表す。
 	 */
-	static tVariant ThrowCannotCreateInstanceFromThisClass();
+	class tNoInstanceClass : public tObjectBase
+	{
+	public:
+		/**
+		 * コンストラクタ
+		 */
+		tNoInstanceClass();
+	};
+
+	/**
+	 * どのようにインスタンス化するかを表す定数
+	 */
+	enum tInstantiationType
+	{
+		itNormal, //!< 普通にインスタンス化可能
+		itPrimitive, //!< プリミティブ型用
+		itNoInstance //!< インスタンス化できない
+	};
+
+	/**
+	 * Tに応じた新規オブジェクトを返す
+	 * @return 新規作成されたオブジェクト
+	 */
+	template <int I, typename T>
+	struct tOvulateNewObject
+	{
+		static T * C() { return new T(); }
+	};
+
+	template <typename T>
+	struct tOvulateNewObject<itPrimitive, T>
+	{
+		static T C() { return T(); }
+	};
+
+	template <typename T>
+	struct tOvulateNewObject<itNoInstance, T>
+	{
+		static tVariant C() { return new tNoInstanceClass(); }
+	};
 
 public: // Risse用メソッドなど
 	static void risse_new(const tNativeCallInfo &info);
@@ -136,10 +179,13 @@ public: // Risse用メソッドなど
 
 //---------------------------------------------------------------------------
 // クラスを簡単に定義するためのマクロ
-#define RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS) \
+#define RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS, INSTANCECLASS, INSTANCETYPE) \
 	class CPPNAME : public SUPERCLASS \
 	{ \
 	typedef SUPERCLASS inherited; \
+public: \
+	typedef INSTANCECLASS tInstanceClass; \
+	enum { InstanceType = INSTANCETYPE }; \
 public: \
 	CPPNAME(tScriptEngine * engine); \
 	void RegisterMembers(); \
@@ -149,14 +195,14 @@ public:
 #define RISSE_DEFINE_CLASS_END() \
 	};
 
-#define RISSE_DEFINE_CLASS(CPPNAME, SUPERCLASS) \
-	RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS) \
+#define RISSE_DEFINE_CLASS(CPPNAME, SUPERCLASS, INSTANCECLASS, INSTANCETYPE) \
+	RISSE_DEFINE_CLASS_BEGIN(CPPNAME, SUPERCLASS, INSTANCECLASS, INSTANCETYPE) \
 	RISSE_DEFINE_CLASS_END()
 
-#define RISSE_IMPL_CLASS_BEGIN(CPPNAME, RISSENAME, SUPERCLASS, NEWINSTANCE) \
+#define RISSE_IMPL_CLASS_BEGIN(CPPNAME, RISSENAME, SUPERCLASS) \
 	CPPNAME::CPPNAME(tScriptEngine * engine) : \
 		inherited((RISSENAME), (SUPERCLASS)) { RegisterMembers(); } \
-	tVariant CPPNAME::ovulate() { return tVariant(NEWINSTANCE); } \
+	tVariant CPPNAME::ovulate() { return tOvulateNewObject<InstanceType, tInstanceClass>::C(); }\
 	void CPPNAME::RegisterMembers() { inherited::RegisterMembers();
 
 #define RISSE_IMPL_CLASS_END() \

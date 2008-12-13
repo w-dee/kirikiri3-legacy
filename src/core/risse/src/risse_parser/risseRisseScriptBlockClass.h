@@ -51,7 +51,7 @@ public: // Risse用メソッドなど
 /**
  * "ScriptBlock" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tRisseScriptBlockClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tRisseScriptBlockClass, tClassBase, tRisseScriptBlockInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

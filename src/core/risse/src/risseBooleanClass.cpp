@@ -29,7 +29,7 @@ RISSE_DEFINE_SOURCE_ID(60941,39465,30047,17348,4512,31235,57590,9843);
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tBooleanClass, ss_Boolean, engine->PrimitiveClass, tVariant())
+RISSE_IMPL_CLASS_BEGIN(tBooleanClass, ss_Boolean, engine->PrimitiveClass)
 	BindFunction(this, ss_ovulate, &tBooleanClass::ovulate,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_initialize, &tBooleanClass::initialize,

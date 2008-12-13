@@ -153,7 +153,7 @@ public: // Risse用メソッドなど
 /**
  * ラスタ画像用の入力ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImageInputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImageInputPinClass, tClassBase, tImageInputPinInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -203,7 +203,7 @@ public: // Risse用メソッドなど
 /**
  * ミキサ(あるいはコンポジッタ)用のラスタ画像用の入力ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImageMixerInputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImageMixerInputPinClass, tClassBase, tImageMixerInputPinInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -252,7 +252,7 @@ public: // Risse用メソッドなど
 /**
  * ラスタ画像用の出力ピンクラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tImageOutputPinClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tImageOutputPinClass, tClassBase, tImageOutputPinInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

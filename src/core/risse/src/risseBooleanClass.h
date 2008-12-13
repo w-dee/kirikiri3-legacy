@@ -26,7 +26,7 @@ namespace Risse
 /**
  * "Boolean" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tBooleanClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tBooleanClass, tPrimitiveClassBase, tVariant, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static tString toString(const tNativeCallInfo & info);

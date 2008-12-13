@@ -137,7 +137,7 @@ bool tCoroutineInstance::get_alive() const
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tCoroutineClass, ss_Coroutine, engine->ObjectClass, new tCoroutineInstance())
+RISSE_IMPL_CLASS_BEGIN(tCoroutineClass, ss_Coroutine, engine->ObjectClass)
 	BindFunction(this, ss_ovulate, &tCoroutineClass::ovulate);
 	BindFunction(this, ss_construct, &tCoroutineInstance::construct);
 	BindFunction(this, ss_initialize, &tCoroutineInstance::initialize);
@@ -158,7 +158,7 @@ RISSE_IMPL_CLASS_END()
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tCoroutineExceptionClass, ss_CoroutineException, engine->RuntimeExceptionClass, new tObjectBase())
+RISSE_IMPL_CLASS_BEGIN(tCoroutineExceptionClass, ss_CoroutineException, engine->RuntimeExceptionClass)
 	BindFunction(this, ss_construct, &tCoroutineExceptionClass::construct);
 	BindFunction(this, ss_initialize, &tCoroutineExceptionClass::initialize);
 RISSE_IMPL_CLASS_END()

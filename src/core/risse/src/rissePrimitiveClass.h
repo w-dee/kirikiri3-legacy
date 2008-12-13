@@ -59,7 +59,7 @@ public: // Risse用メソッドなど
  *			前者はC++のクラス階層において各プリミティブクラスの親クラスになり、
  *			後者はRisseのクラス階層において各プリミティブクラスの親クラスになる。
  */
-RISSE_DEFINE_CLASS_BEGIN(tPrimitiveClass, tClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tPrimitiveClass, tClassBase, tVariant, itNoInstance)
 public: // Risse用メソッドなど
 	static void construct();
 	static tVariant toString(const tNativeCallInfo & info); // toString

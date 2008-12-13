@@ -23,7 +23,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-RISSE_DEFINE_CLASS_BEGIN(tDataClass, tClassBase/* tPrimitiveClassBase ではないので注意 */)
+RISSE_DEFINE_CLASS_BEGIN(tDataClass, tClassBase/* tPrimitiveClassBase ではないので注意 */, tVariant, itNoInstance)
 public: // Risse用メソッドなど
 	static void construct();
 RISSE_DEFINE_CLASS_END()

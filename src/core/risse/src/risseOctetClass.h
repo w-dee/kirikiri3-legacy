@@ -26,7 +26,7 @@ namespace Risse
 /**
  * "Octet" クラス
  */
-RISSE_DEFINE_CLASS_BEGIN(tOctetClass, tPrimitiveClassBase)
+RISSE_DEFINE_CLASS_BEGIN(tOctetClass, tPrimitiveClassBase, tOctet, itPrimitive)
 public: // Risse用メソッドなど
 	static void initialize(const tNativeCallInfo & info);
 	static void get_length(const tNativePropGetInfo & info);

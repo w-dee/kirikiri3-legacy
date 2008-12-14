@@ -132,9 +132,7 @@ void tBindingInstance::iset(const tVariant & value, const tString & name)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tBindingClass, ss_Binding, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tBindingClass::ovulate);
-	BindFunction(this, ss_construct, &tBindingInstance::construct);
-	BindFunction(this, ss_initialize, &tBindingInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_eval, &tBindingInstance::eval);
 	BindFunction(this, mnIGet, &tBindingInstance::iget);
 	BindFunction(this, mnISet, &tBindingInstance::iset);

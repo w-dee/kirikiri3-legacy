@@ -82,9 +82,7 @@ void tPinInstance::initialize(const tNativeCallInfo &info)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tPinClass, (tSS<'P','i','n'>()), engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tPinClass::ovulate);
-	BindFunction(this, ss_construct, &tPinInstance::construct);
-	BindFunction(this, ss_initialize, &tPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -209,9 +207,7 @@ void tInputPinInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tInputPinClass,
 		(tSS<'I','n','p','u','t','P','i','n'>()),
 		tClassHolder<tPinClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tInputPinClass::ovulate);
-	BindFunction(this, ss_construct, &tInputPinInstance::construct);
-	BindFunction(this, ss_initialize, &tInputPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -328,9 +324,7 @@ void tOutputPinInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tOutputPinClass,
 		(tSS<'O','u','t','p','u','t','P','i','n'>()),
 		tClassHolder<tPinClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tOutputPinClass::ovulate);
-	BindFunction(this, ss_construct, &tOutputPinInstance::construct);
-	BindFunction(this, ss_initialize, &tOutputPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -378,9 +372,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 RISSE_IMPL_CLASS_BEGIN(tInputPinArrayClass,
 		(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
 		engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tInputPinArrayClass::ovulate);
-	BindFunction(this, ss_construct, &tInputPinArrayInstance::construct);
-	BindFunction(this, ss_initialize, &tInputPinArrayInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -436,9 +428,7 @@ void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant
 RISSE_IMPL_CLASS_BEGIN(tOneInputPinArrayClass,
 		(tSS<'O','n','e','I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
 		tClassHolder<tInputPinArrayClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tOneInputPinArrayClass::ovulate);
-	BindFunction(this, ss_construct, &tOneInputPinArrayInstance::construct);
-	BindFunction(this, ss_initialize, &tOneInputPinArrayInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -493,9 +483,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 RISSE_IMPL_CLASS_BEGIN(tOutputPinArrayClass,
 		(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
 		engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tOutputPinArrayClass::ovulate);
-	BindFunction(this, ss_construct, &tOutputPinArrayInstance::construct);
-	BindFunction(this, ss_initialize, &tOutputPinArrayInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -553,9 +541,7 @@ void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVarian
 RISSE_IMPL_CLASS_BEGIN(tOneOutputPinArrayClass,
 		(tSS<'O','n','e','O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
 		tClassHolder<tOutputPinArrayClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tOneOutputPinArrayClass::ovulate);
-	BindFunction(this, ss_construct, &tOneOutputPinArrayInstance::construct);
-	BindFunction(this, ss_initialize, &tOneOutputPinArrayInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

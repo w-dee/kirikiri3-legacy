@@ -509,9 +509,7 @@ RISSE_DEFINE_CLASS_END()
 RISSE_IMPL_CLASS_BEGIN(tSoundClass,
 		(tSS<'S','o','u','n','d'>()),
 		tClassHolder<tEventSourceClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tSoundClass::ovulate);
-	BindFunction(this, ss_construct, &tSoundInstance::construct);
-	BindFunction(this, ss_initialize, &tSoundInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'o','p','e','n'>(), &tSoundInstance::open);
 	BindFunction(this, tSS<'p','l','a','y'>(), &tSoundInstance::play);
 	BindFunction(this, tSS<'s','t','o','p'>(), &tSoundInstance::stop);

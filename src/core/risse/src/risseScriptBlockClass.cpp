@@ -360,9 +360,7 @@ void tScriptBlockInstance::initialize(
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tScriptBlockClass, ss_ScriptBlock, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tScriptBlockClass::ovulate);
-	BindFunction(this, ss_construct, &tScriptBlockInstance::construct);
-	BindFunction(this, ss_initialize, &tScriptBlockInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, mnString, &tScriptBlockInstance::mnString);
 	BindProperty(this, ss_script, &tScriptBlockInstance::get_script);
 	BindProperty(this, ss_name, &tScriptBlockInstance::get_name);

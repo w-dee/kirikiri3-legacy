@@ -420,9 +420,7 @@ void tEventQueueInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tEventQueueClass,
 		(tSS<'E','v','e','n','t','Q','u','e','u','e'>()), engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tEventQueueClass::ovulate);
-	BindFunction(this, ss_construct, &tEventQueueInstance::construct);
-	BindFunction(this, ss_initialize, &tEventQueueInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'l','o','o','p'>(), &tEventQueueInstance::loop);
 	BindFunction(this, tSS<'q','u','i','t'>(), &tEventQueueInstance::quit);
 RISSE_IMPL_CLASS_END()
@@ -524,9 +522,7 @@ void tEventSourceInstance::SetDestEventQueue(const tVariant & queue)
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tEventSourceClass,
 		(tSS<'E','v','e','n','t','S','o','u','r','c','e'>()), engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tEventSourceClass::ovulate);
-	BindFunction(this, ss_construct, &tEventSourceInstance::construct);
-	BindFunction(this, ss_initialize, &tEventSourceInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindProperty(this, tSS<'q','u','e','u','e'>(),
 			&tEventSourceInstance::get_queue, &tEventSourceInstance::set_queue);
 RISSE_IMPL_CLASS_END()

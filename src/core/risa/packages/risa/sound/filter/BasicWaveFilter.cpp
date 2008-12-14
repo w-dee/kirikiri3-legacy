@@ -362,9 +362,7 @@ void tWaveFilterInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tWaveFilterClass,
 		(tSS<'W','a','v','e','F','i','l','t','e','r'>()),
 		engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tWaveFilterClass::ovulate);
-	BindFunction(this, ss_construct, &tWaveFilterInstance::construct);
-	BindFunction(this, ss_initialize, &tWaveFilterInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

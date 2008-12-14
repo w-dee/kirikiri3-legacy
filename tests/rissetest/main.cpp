@@ -140,12 +140,10 @@ RISSE_DEFINE_CLASS_BEGIN(tTestClass, tClassBase, tTestInstance, itNormal)
 RISSE_DEFINE_CLASS_END()
 
 RISSE_IMPL_CLASS_BEGIN(tTestClass, (tSS<'T','e','s','t'>()), engine->ObjectClass)
-		BindFunction(this, ss_ovulate, &tTestClass::ovulate);
-		BindFunction(this, ss_construct, &tTestInstance::construct);
-		BindFunction(this, ss_initialize, &tTestInstance::initialize);
-		BindFunction(this, tSS<'g','e','t','S','t','r','i','n','g'>(), &tTestInstance::getString);
-		BindProperty(this, tSS<'p','r','o','p','S','t','r','i','n','g'>(),
-			&tTestInstance::get_propString, &tTestInstance::set_propString);
+	RISSE_BIND_CONSTRUCTORS
+	BindFunction(this, tSS<'g','e','t','S','t','r','i','n','g'>(), &tTestInstance::getString);
+	BindProperty(this, tSS<'p','r','o','p','S','t','r','i','n','g'>(),
+		&tTestInstance::get_propString, &tTestInstance::set_propString);
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

@@ -169,9 +169,7 @@ void tStreamInstance::print(const tString & str)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tStreamClass, ss_Stream, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tStreamClass::ovulate);
-	BindFunction(this, ss_construct, &tStreamInstance::construct);
-	BindFunction(this, ss_initialize, &tStreamInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_dispose, &tStreamInstance::dispose);
 	BindProperty(this, ss_name, &tStreamInstance::get_name, &tStreamInstance::set_name);
 	BindFunction(this, ss_seek, &tStreamInstance::seek);

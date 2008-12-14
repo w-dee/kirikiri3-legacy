@@ -299,9 +299,7 @@ void tImageInstance::save(const tString & filename, const tMethodArgument & args
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tImageClass, (tSS<'I','m','a','g','e'>()),
 		engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tImageClass::ovulate);
-	BindFunction(this, ss_construct, &tImageInstance::construct);
-	BindFunction(this, ss_initialize, &tImageInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_dispose, &tImageInstance::dispose);
 	BindProperty(this, tSS<'h','a','s','B','u','f','f','e','r'>(), &tImageInstance::get_hasBuffer);
 	BindFunction(this, tSS<'a','l','l','o','c','a','t','e'>(), &tImageInstance::allocate);

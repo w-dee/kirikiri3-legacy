@@ -632,10 +632,7 @@ RISSE_IMPL_CLASS_BEGIN(tTmpFSClass, (tSS<'T','m','p','F','S'>()),
 		tClassHolder<tFileSystemClass>::instance()->GetClass())
 	MemoryStreamClass = new tMemoryStreamClass(GetRTTI()->GetScriptEngine());
 
-	BindFunction(this, ss_ovulate, &tTmpFSClass::ovulate);
-	BindFunction(this, ss_construct, &tTmpFSInstance::construct);
-	BindFunction(this, ss_initialize, &tTmpFSInstance::initialize);
-
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tTmpFSInstance::walkAt);
 	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tTmpFSInstance::isFile);
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tTmpFSInstance::isDirectory);

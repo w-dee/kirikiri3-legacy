@@ -379,29 +379,9 @@ void tWindowInstance::setClientSize(int w, int h)
 
 
 //---------------------------------------------------------------------------
-tWindowClass::tWindowClass(tScriptEngine * engine) :
-	tClassBase(tSS<'W','i','n','d','o','w'>(),
+RISSE_IMPL_CLASS_BEGIN(tWindowClass, (tSS<'W','i','n','d','o','w'>()),
 		tClassHolder<tEventSourceClass>::instance()->GetClass())
-{
-	RegisterMembers();
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-void tWindowClass::RegisterMembers()
-{
-	// 親クラスの RegisterMembers を呼ぶ
-	inherited::RegisterMembers();
-
-	// クラスに必要なメソッドを登録する
-	// 基本的に ss_construct と ss_initialize は各クラスごとに
-	// 記述すること。たとえ construct の中身が空、あるいは initialize の
-	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-
-	BindFunction(this, ss_ovulate, &tWindowClass::ovulate);
-	BindFunction(this, ss_construct, &tWindowInstance::construct);
-	BindFunction(this, ss_initialize, &tWindowInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'d','i','s','p','o','s','e'>(), &tWindowInstance::dispose);
 	BindFunction(this, tSS<'c','l','o','s','e'>(), &tWindowInstance::close);
 	BindFunction(this, tSS<'o','n','C','l','o','s','e'>(), &tWindowInstance::onClose);
@@ -416,17 +396,7 @@ void tWindowClass::RegisterMembers()
 	BindProperty(this, tSS<'c','l','i','e','n','t','W','i','d','t','h'>(), &tWindowInstance::get_clientWidth, &tWindowInstance::set_clientWidth);
 	BindProperty(this, tSS<'c','l','i','e','n','t','H','e','i','g','h','t'>(), &tWindowInstance::get_clientHeight, &tWindowInstance::set_clientHeight);
 	BindFunction(this, tSS<'s','e','t','C','l','i','e','n','t','S','i','z','e'>(), &tWindowInstance::setClientSize);
-}
-//---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-tVariant tWindowClass::ovulate()
-{
-	// このクラスのインスタンスは生成できない
-	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromThisClass();
-	return tVariant();
-}
+RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
 

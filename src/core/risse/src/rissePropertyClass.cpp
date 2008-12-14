@@ -116,9 +116,7 @@ RISSE_IMPL_CLASS_BEGIN(tPropertyClass, ss_Property, engine->ObjectClass)
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
 
-	BindFunction(this, ss_ovulate, &tPropertyClass::ovulate);
-	BindFunction(this, ss_construct, &tPropertyInstance::construct);
-	BindFunction(this, ss_initialize, &tPropertyInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindProperty(this, ss_getter, &tPropertyInstance::GetGetter);
 	BindProperty(this, ss_setter, &tPropertyInstance::GetSetter);
 	BindProperty(this, ss_synchronized,

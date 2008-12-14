@@ -102,9 +102,7 @@ void tRinaWidgetNodeInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tRinaWidgetNodeClass,
 		(tSS<'R','i','n','a','W','i','d','g','e','t','N','o','d','e'>()),
 		tClassHolder<tNodeClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tRinaWidgetNodeClass::ovulate);
-	BindFunction(this, ss_construct, &tRinaWidgetNodeInstance::construct);
-	BindFunction(this, ss_initialize, &tRinaWidgetNodeInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

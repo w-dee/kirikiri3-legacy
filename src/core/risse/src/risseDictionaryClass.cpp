@@ -146,9 +146,7 @@ void tDictionaryInstance::eachPair(const tNativeCallInfo &info)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tDictionaryClass, ss_Dictionary, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tDictionaryClass::ovulate);
-	BindFunction(this, ss_construct, &tDictionaryInstance::construct);
-	BindFunction(this, ss_initialize, &tDictionaryInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, mnIGet, &tDictionaryInstance::iget);
 	BindFunction(this, mnISet, &tDictionaryInstance::iset);
 	BindFunction(this, mnIDelete, &tDictionaryInstance::idelete);

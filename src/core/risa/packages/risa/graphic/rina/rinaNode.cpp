@@ -93,9 +93,7 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tNodeClass::ovulate);
-	BindFunction(this, ss_construct, &tNodeInstance::construct);
-	BindFunction(this, ss_initialize, &tNodeInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

@@ -285,10 +285,7 @@ void tPhaseVocoderInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tPhaseVocoderClass,
 		(tSS<'P','h','a','s','e','V','o','c','o','d','e','r'>()),
 		tClassHolder<tWaveFilterClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tPhaseVocoderClass::ovulate);
-	BindFunction(this, ss_construct, &tPhaseVocoderInstance::construct);
-	BindFunction(this, ss_initialize, &tPhaseVocoderInstance::initialize);
-
+	RISSE_BIND_CONSTRUCTORS
 	BindProperty(this, tSS<'w','i','n','d','o','w'>(), &tPhaseVocoderInstance::get_window, &tPhaseVocoderInstance::set_window);
 	BindProperty(this, tSS<'o','v','e','r','a','l','p'>(), &tPhaseVocoderInstance::get_overlap, &tPhaseVocoderInstance::set_overlap);
 	BindProperty(this, tSS<'t','i','m','e'>(), &tPhaseVocoderInstance::get_time, &tPhaseVocoderInstance::set_time);

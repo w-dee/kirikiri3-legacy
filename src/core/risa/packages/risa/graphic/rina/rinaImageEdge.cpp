@@ -102,9 +102,7 @@ void tImageInputPinInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tImageInputPinClass,
 		(tSS<'I','m','a','g','e','I','n','p','u','t','P','i','n'>()),
 		tClassHolder<tInputPinClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tImageInputPinClass::ovulate);
-	BindFunction(this, ss_construct, &tImageInputPinInstance::construct);
-	BindFunction(this, ss_initialize, &tImageInputPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -168,9 +166,7 @@ void tImageMixerInputPinInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tImageMixerInputPinClass,
 		(tSS<'I','m','a','g','e','M','i','x','e','r','I','n','p','u','t','P','i','n'>()),
 		tClassHolder<tImageInputPinClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tImageMixerInputPinClass::ovulate);
-	BindFunction(this, ss_construct, &tImageMixerInputPinInstance::construct);
-	BindFunction(this, ss_initialize, &tImageMixerInputPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -269,9 +265,7 @@ void tImageOutputPinInstance::initialize(const tNativeCallInfo &info)
 RISSE_IMPL_CLASS_BEGIN(tImageOutputPinClass,
 		(tSS<'I','m','a','g','e','O','u','t','p','u','t','P','i','n'>()),
 		tClassHolder<tOutputPinClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tImageOutputPinClass::ovulate);
-	BindFunction(this, ss_construct, &tImageOutputPinInstance::construct);
-	BindFunction(this, ss_initialize, &tImageOutputPinInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

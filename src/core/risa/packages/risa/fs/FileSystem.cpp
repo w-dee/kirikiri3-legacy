@@ -149,10 +149,7 @@ void tFileSystemInstance::flush()
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tFileSystemClass,
 		(tSS<'F','i','l','e','S','y','s','t','e','m'>()), engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tFileSystemClass::ovulate);
-	BindFunction(this, ss_construct, &tFileSystemInstance::construct);
-	BindFunction(this, ss_initialize, &tFileSystemInstance::initialize);
-
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tFileSystemInstance::walkAt);
 	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tFileSystemInstance::isFile);
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tFileSystemInstance::isDirectory);

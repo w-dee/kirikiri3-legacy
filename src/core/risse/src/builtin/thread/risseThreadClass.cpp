@@ -262,9 +262,7 @@ void tThreadInstance::wakeup()
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tThreadClass, ss_Thread, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tThreadClass::ovulate);
-	BindFunction(this, ss_construct, &tThreadInstance::construct);
-	BindFunction(this, ss_initialize, &tThreadInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_run, &tThreadInstance::run);
 	BindFunction(this, ss_start, &tThreadInstance::start);
 	BindFunction(this, ss_join, &tThreadInstance::join);

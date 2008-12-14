@@ -110,9 +110,7 @@ RISSE_IMPL_CLASS_BEGIN(tFunctionClass, ss_Function, engine->ObjectClass)
 	// 基本的に ss_construct と ss_initialize は各クラスごとに
 	// 記述すること。たとえ construct の中身が空、あるいは initialize の
 	// 中身が親クラスを呼び出すだけだとしても、記述すること。
-	BindFunction(this, ss_ovulate, &tFunctionClass::ovulate);
-	BindFunction(this, ss_construct, &tFunctionInstance::construct);
-	BindFunction(this, ss_initialize, &tFunctionInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindProperty(this, ss_synchronized,
 		&tFunctionInstance::get_synchronized, &tFunctionInstance::set_synchronized);
 RISSE_IMPL_CLASS_END()

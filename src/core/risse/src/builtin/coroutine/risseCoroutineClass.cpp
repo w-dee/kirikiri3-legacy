@@ -138,9 +138,7 @@ bool tCoroutineInstance::get_alive() const
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tCoroutineClass, ss_Coroutine, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tCoroutineClass::ovulate);
-	BindFunction(this, ss_construct, &tCoroutineInstance::construct);
-	BindFunction(this, ss_initialize, &tCoroutineInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_run, &tCoroutineInstance::run);
 	BindFunction(this, ss_resume, &tCoroutineInstance::resume);
 	BindFunction(this, ss_yield, &tCoroutineInstance::yield);

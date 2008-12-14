@@ -207,6 +207,11 @@ public:
 
 #define RISSE_IMPL_CLASS_END() \
 	}
+
+#define RISSE_BIND_CONSTRUCTORS /*ovulate, construct, initialize をバインドする */ \
+	BindFunction(this, ss_ovulate, &ovulate); \
+	BindFunction(this, ss_construct, &tInstanceClass::construct); \
+	BindFunction(this, ss_initialize, &tInstanceClass::initialize);
 //---------------------------------------------------------------------------
 
 

@@ -541,9 +541,7 @@ RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tTimerClass, (tSS<'T','i','m','e','r'>()),
 		tClassHolder<tEventSourceClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tTimerClass::ovulate);
-	BindFunction(this, ss_construct, &tTimerInstance::construct);
-	BindFunction(this, ss_initialize, &tTimerInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindProperty(this, tSS<'e','n','a','b','l','e','d'>(), &tTimerInstance::get_enabled, &tTimerInstance::set_enabled);
 	BindProperty(this, tSS<'i','n','t','e','r','v','a','l'>(), &tTimerInstance::get_interval, &tTimerInstance::set_interval);
 	BindProperty(this, tSS<'c','a','p','a','c','i','t','y'>(), &tTimerInstance::get_capacity, &tTimerInstance::set_capacity);

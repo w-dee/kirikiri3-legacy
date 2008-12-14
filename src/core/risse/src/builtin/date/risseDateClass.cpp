@@ -528,10 +528,7 @@ bool tDateInstance::equal(const tVariant & rhs)
 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tDateClass, ss_Date, engine->ObjectClass)
-	BindFunction(this, ss_ovulate, &tDateClass::ovulate);
-	BindFunction(this, ss_construct, &tDateInstance::construct);
-	BindFunction(this, ss_initialize, &tDateInstance::initialize);
-
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_getYear, &tDateInstance::getYear);
 	BindFunction(this, ss_setYear, &tDateInstance::setYear);
 	BindProperty(this, ss_year, &tDateInstance::getYear, &tDateInstance::setYear);

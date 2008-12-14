@@ -196,9 +196,7 @@ RISSE_IMPL_CLASS_BEGIN(tOSNativeStreamClass,
 			(tSS<'O','S','N','a','t','i','v','e','S','t','r','e','a','m'>()),
 			(static_cast<tClassBase*>(engine->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
 			GetPropertyDirect(engine, tSS<'S','t','r','e','a','m'>()).GetObjectInterface())))
-	BindFunction(this, ss_ovulate, &tOSNativeStreamClass::ovulate);
-	BindFunction(this, ss_construct, &tOSNativeStreamInstance::construct);
-	BindFunction(this, ss_initialize, &tOSNativeStreamInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_dispose, &tOSNativeStreamInstance::dispose);
 	BindFunction(this, ss_seek, &tOSNativeStreamInstance::seek);
 	BindFunction(this, ss_tell, &tOSNativeStreamInstance::tell);

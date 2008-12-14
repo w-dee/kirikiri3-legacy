@@ -357,10 +357,7 @@ RISSE_IMPL_CLASS_BEGIN(tOSFSClass, (tSS<'O','S','F','S'>()),
 		tClassHolder<tFileSystemClass>::instance()->GetClass())
 	OSNativeStreamClass = new tOSNativeStreamClass(GetRTTI()->GetScriptEngine());
 
-	BindFunction(this, ss_ovulate, &tOSFSClass::ovulate);
-	BindFunction(this, ss_construct, &tOSFSInstance::construct);
-	BindFunction(this, ss_initialize, &tOSFSInstance::initialize);
-
+	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, tSS<'w','a','l','k','A','t'>(), &tOSFSInstance::walkAt);
 	BindFunction(this, tSS<'i','s','F','i','l','e'>(), &tOSFSInstance::isFile);
 	BindFunction(this, tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), &tOSFSInstance::isDirectory);

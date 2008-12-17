@@ -83,7 +83,7 @@ tVariant tCoroutineInstance::resume(const tMethodArgument & args) const
 	fflush(stdout); fflush(stderr);
 #endif
 
-	return Coroutine->Resume(args.HasArgument(0)?args[0]:tVariant::GetVoidObject());
+	return Coroutine->Resume(args.Get(0, tVariant::GetVoidObject()));
 }
 //---------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ tVariant tCoroutineInstance::yield(const tMethodArgument & args) const
 	fflush(stdout); fflush(stderr);
 #endif
 
-	return Coroutine->DoYield(args.HasArgument(0)?args[0]:tVariant::GetVoidObject());
+	return Coroutine->DoYield(args.Get(0, tVariant::GetVoidObject()));
 }
 //---------------------------------------------------------------------------
 

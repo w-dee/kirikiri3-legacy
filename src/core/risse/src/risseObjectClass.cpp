@@ -57,7 +57,7 @@ void tObjectClass::RegisterMembers()
 	BindFunction(this, ss_identify, &tObjectClass::identify);
 	BindProperty(this, ss_hint, &tObjectClass::get_hint, &tObjectClass::set_hint);
 	BindProperty(this, ss_hash, &tObjectClass::get_hash);
-	BindFunction(this, ss_isA, &tObjectClass::isA, 
+	BindFunction(this, ss_isA, &tObjectClass::isA,
 		tMemberAttribute().Set(tMemberAttribute::mcConst).Set(tMemberAttribute::ocFinal));
 	BindFunction(this, ss_getInstanceMember, &tObjectClass::getInstanceMember);
 	BindFunction(this, ss_setInstanceMember, &tObjectClass::setInstanceMember);
@@ -238,9 +238,7 @@ void tObjectClass::setInstanceMember(
 tVariant tObjectClass::getPublicMembers(
 				const tNativeCallInfo & info)
 {
-	bool recursive = true;
-	if(info.args.HasArgument(0))
-		recursive = info.args[0].operator bool();
+	bool recursive = info.args.Get(0, true);
 
 	if(info.This.GetType() == tVariant::vtObject)
 	{
@@ -289,7 +287,7 @@ tVariant tObjectClass::getPublicMembers(
 //---------------------------------------------------------------------------
 tVariant tObjectClass::toException(const tNativeCallInfo & info)
 {
-	// デフォルトの動作は、This を文字列化してそれを RuntimeException.new 
+	// デフォルトの動作は、This を文字列化してそれを RuntimeException.new
 	// に渡し、その結果を返す
 	// TODO: global.RuntimeException を見に行かずに直接クラスを見に行っちゃっていいの？
 	return tVariant(info.engine->RuntimeExceptionClass).

@@ -145,7 +145,7 @@ void tWindowInstance::close(const tMethodArgument &args)
 	// TODO: 呼び出すスレッドのチェックまたはロック
 	if(!WxWindow) tInaccessibleResourceExceptionClass::Throw();
 
-	bool force = args.HasArgument(0) ? args[0].operator bool() : false;
+	bool force = args.Get(0, false);
 
 	WxWindow->Close(force);
 }

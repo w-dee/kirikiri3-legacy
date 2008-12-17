@@ -79,7 +79,7 @@ void tOSFSInstance::initialize(const tString & base_dir, const tNativeCallInfo &
 	info.InitializeSuperClass();
 
 	// SetOptions を呼ぶ
-	bool check_case = info.args.HasArgument(1) ? (bool)info.args[1] : true;
+	bool check_case = info.args.Get(1, true);
 	SetOptions(base_dir, check_case);
 }
 //---------------------------------------------------------------------------

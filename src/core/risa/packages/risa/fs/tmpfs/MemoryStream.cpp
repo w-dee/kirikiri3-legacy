@@ -143,7 +143,7 @@ void tMemoryStreamInstance::initialize(risse_uint32 flags, const tNativeCallInfo
 	{
 		info.InitializeSuperClass(); // スーパークラスのコンストラクタを呼ぶ
 
-		bool open_stream = info.args.HasArgument(1) ? (bool)info.args[1] : true;
+		bool open_stream = info.args.Get(1, true);
 
 		Flags = flags;
 		CurrentPos = 0;

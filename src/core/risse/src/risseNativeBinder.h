@@ -17,6 +17,8 @@
 #include "risseCharUtils.h"
 #include "risseObjectBase.h"
 #include "risseObjectRTTI.h"
+#include "risseMethod.h"
+
 /*! @note
 
 native binder について
@@ -501,16 +503,6 @@ public:
 
 
 //---------------------------------------------------------------------------
-// 参照の付いていない型を得るためのテンプレートクラス
-//---------------------------------------------------------------------------
-template <typename T> struct tRemoveReference     { typedef T type; };
-template <typename T> struct tRemoveReference<T&> { typedef T type; };
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
 // 各種型 -> tVariant 変換
 // 自前の型がある場合は ToVariant のテンプレート特殊化を行うこと。
 // tVariant のメンバ関数の方がよいのでは？という考えもあるかもしれないが
@@ -566,6 +558,8 @@ inline tVariant ToVariant<float>(float s)
 //---------------------------------------------------------------------------
 // tVariant -> 各種型 変換
 // 自前の型がある場合は FromVariant のテンプレート特殊化を行うこと。
+// ちなみに FromVariant のプロトタイプは、tMethodArgument 内で FromVariant を
+// 使う関係で、risseMethod.h 内にあるので注意。
 //---------------------------------------------------------------------------
 template <typename T>
 inline typename tRemoveReference<T>::type FromVariant(const tVariant & v)

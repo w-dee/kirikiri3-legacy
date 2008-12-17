@@ -475,7 +475,7 @@ void tTmpFSInstance::removeDirectory(const tString & dirname,
 	if(!node) tFileSystemManager::RaiseNoSuchFileOrDirectoryError();
 	if(!node->IsDirectory()) tIOExceptionClass::Throw(RISSE_WS_TR("specified name is not a directory"));
 
-	bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+	bool recursive = args.Get(1, false);
 
 	if(!recursive)
 	{

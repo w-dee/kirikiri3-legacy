@@ -67,9 +67,8 @@ void tBindingInstance::eval(const tString & script,
 {
 	// ロックしない
 
-	tString name = info.args.HasArgument(1) ?
-					tString(info.args[1]) : tString(RISSE_WS("(anonymous)"));
-	risse_size lineofs = info.args.HasArgument(2) ? (risse_size)(risse_int64)info.args[2] : (risse_size)0;
+	tString name = info.args.Get(1, tString(RISSE_WS("(anonymous)")));
+	risse_size lineofs = info.args.Get(2, (risse_size)0);
 
 	GetRTTI()->GetScriptEngine()->Evaluate(script, name, lineofs, info.result, GetInfo(), true);
 }

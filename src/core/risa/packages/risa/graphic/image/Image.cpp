@@ -198,7 +198,7 @@ bool tImageInstance::get_hasBuffer()
 void tImageInstance::allocate(risse_size w, risse_size h, const tMethodArgument &args)
 {
 	// pixel format のデフォルトは今のところ tPixel::pfARGB32
-	Allocate(args.HasArgument(2) ? (tPixel::tFormat)(risse_int64)args[2] : tPixel::pfARGB32, w, h);
+	Allocate((tPixel::tFormat)args.Get(2, (risse_int)tPixel::pfARGB32), w, h);
 }
 //---------------------------------------------------------------------------
 
@@ -206,7 +206,7 @@ void tImageInstance::allocate(risse_size w, risse_size h, const tMethodArgument 
 //---------------------------------------------------------------------------
 void tImageInstance::independ(const tMethodArgument &args)
 {
-	Independ(args.HasArgument(0) ? (bool)args[0] : true);
+	Independ(args.Get(0, true));
 }
 //---------------------------------------------------------------------------
 

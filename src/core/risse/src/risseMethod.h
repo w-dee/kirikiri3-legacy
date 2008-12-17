@@ -39,6 +39,22 @@ class tVariantBlock;
 typedef tVariantBlock tVariant;
 class tMethodArgument;
 
+
+//---------------------------------------------------------------------------
+/**
+ * バリアント型から各種型への変換
+ * @param v		変換したいバリアント型
+ * @return		変換された値
+ * @note		tMethodArgument 内で FromVariant() を使いたい関係で、
+ * 				このメソッドのプロトタイプはここにある。実体は risseNativeBinder.h
+ * 				にあるので注意すること。
+ */
+template <typename T>
+inline typename tRemoveReference<T>::type FromVariant(const tVariant & v);
+//---------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------
 /**
  * メソッドへ渡す引数を表すクラス(可変引数用テンプレートクラス)
@@ -361,6 +377,24 @@ public:
 		// やむを得ず static_cast をつかう。これはダウンキャストなので
 		// 正常に動作するはずである。
 		return !reinterpret_cast<const tVariantData*>(Arguments[n])->IsVoid();
+	}
+
+	/**
+	 * n 番目の引数を得る(デフォルトの値指定付き)
+	 * @param n					パラメータ位置
+	 * @param default_value		デフォルトの値
+	 * @return	もしそのパラメータが存在すればその値、存在しなければ default_value
+	 * @note	このメソッドの中で用いられている FromVariant の実体は risseNativeBinder.h 内に
+	 * 			定義されているため、これを使う場合は risseNativeBinder.h をインクルードしている
+	 * 			ことを確認のこと。もっとも、これを使うような場面(ネイティブメソッドの実装の場面)では
+	 * 			インクルードされていると思う。
+	 */
+	template <typename T>
+	T Get(risse_size n, const T & default_value) const
+	{
+		if(HasArgument(n))
+			return FromVariant<T>(*Arguments[n]);
+		return default_value;
 	}
 
 	/**

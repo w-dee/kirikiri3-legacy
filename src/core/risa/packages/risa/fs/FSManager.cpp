@@ -348,7 +348,7 @@ bool tFileSystemManager::IsFile(const tString & filename)
 	{
 		return fs->Invoke(tSS<'i','s','F','i','l','e'>(), fspath);
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to retrieve existence of file '%1': "), fullpath))
 
 	return false;
@@ -371,7 +371,7 @@ bool tFileSystemManager::IsDirectory(const tString & dirname)
 	{
 		return fs->Invoke(tSS<'i','s','D','i','r','e','c','t','o','r','y'>(), fspath);
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to retrieve existence of directory '%1': "), fullpath))
 
 	return false;
@@ -394,7 +394,7 @@ void tFileSystemManager::RemoveFile(const tString & filename)
 		fs->Do(ocFuncCall, NULL, tSS<'r','e','m','o','v','e','F','i','l','e'>(),
 			0, tMethodArgument::New(fspath));
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("Failed to remove file '%1': "), fullpath))
 }
 //---------------------------------------------------------------------------
@@ -440,7 +440,7 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 		fs->Do(ocFuncCall, NULL, tSS<'r','e','m','o','v','e','D','i','r','e','c','t','o','r','y'>(),
 			0, tMethodArgument::New(fspath, recursive));
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to remove directory '%1': "), fullpath))
 }
 //---------------------------------------------------------------------------
@@ -465,7 +465,7 @@ void tFileSystemManager::CreateDirectory(const tString & dirname, bool recursive
 			fs->Do(ocFuncCall, NULL, tSS<'c','r','e','a','t','e','D','i','r','e','c','t','o','r','y'>(),
 				0, tMethodArgument::New(fspath, recursive));
 		}
-		RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+		RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 				tString(RISSE_WS_TR("failed to create directory '%1': "), fullpath))
 	}
 	else
@@ -515,7 +515,7 @@ tObjectInterface * tFileSystemManager::Stat(const tString & filename)
 	{
 		return fs->Invoke(tSS<'s','t','a','t'>(), fspath).GetObjectInterface();
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to stat '%1': "), fullpath))
 	return NULL;
 }
@@ -539,7 +539,7 @@ tStreamInstance * tFileSystemManager::Open(const tString & filename,
 	{
 		val = fs->Invoke(tSS<'o','p','e','n'>(), fspath, (risse_int64)flags);
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to open '%1': "), fullpath))
 
 	val.AssertClass(static_cast<tClassBase*>(tRisseScriptEngine::instance()->GetScriptEngine()->GetPackageGlobal(tSS<'s','t','r','e','a','m'>()).
@@ -604,7 +604,7 @@ size_t tFileSystemManager::InternalList(
 		fs->Do(ocFuncCall, &ret, tSS<'w','a','l','k','A','t'>(), 0, args);
 		return ret.operator risse_int64();
 	}
-	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(), 
+	RISA_PREPEND_EXCEPTION_MESSAGE_END(tRisseScriptEngine::instance()->GetScriptEngine(),
 			tString(RISSE_WS_TR("failed to list '%1': "), dirname))
 
 	return 0;
@@ -854,7 +854,7 @@ struct tRisaFsStaticMethods
 		// オプションをとってくる
 		args.ExpectBlockArgumentCount(1);
 		tVariant callback = args.GetBlockArgument(0);
-		bool recursive = args.HasArgument(1) ? (bool)args[1] : false;
+		bool recursive = args.Get(1, false);
 
 		// tFileSystemManager::WalkAt が受け取るのは tFileSystemIterationCallback *
 		// なので、そのままでは tVariant callback を渡せないので、変換させる

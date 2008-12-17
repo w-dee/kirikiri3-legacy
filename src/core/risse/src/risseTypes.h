@@ -132,7 +132,7 @@ namespace Risse
  #define RISSE_FORCEINLINE inline
 #endif
 
-// likely and unlikely 
+// likely and unlikely
 #ifndef likely
 	#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
 	#define RISSE_LIKELY(cond) __builtin_expect(!!(cond), 1)
@@ -326,6 +326,17 @@ typedef tPointerSizedInteger<sizeof(void*)>::type risse_ptrint;
  * risse_ptruint は、ポインタと同じサイズを持つことが保証されている符号なし整数型
  */
 typedef tPointerSizedInteger<sizeof(void*)>::utype risse_ptruint;
+
+
+
+//---------------------------------------------------------------------------
+// 参照の付いていない型を得るためのテンプレートクラス
+//---------------------------------------------------------------------------
+template <typename T> struct tRemoveReference     { typedef T type; };
+template <typename T> struct tRemoveReference<T&> { typedef T type; };
+//---------------------------------------------------------------------------
+
+
 
 
 

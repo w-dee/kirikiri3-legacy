@@ -48,13 +48,13 @@ struct tWaveLoopLink : public tAtomicCollectee
 	 */
 	enum tLinkCondition
 	{
-		llcNone,			//!< 無条件リンク
-		llcEqual,			//!< 値が一致したとき
-		llcNotEqual,		//!< 値が一致しないとき
-		llcGreater,			//!< 値がフラグより大きいとき
-		llcGreaterOrEqual,	//!< 値がフラグ以上のとき
-		llcLesser,			//!< 値がフラグより小さいとき
-		llcLesserOrEqual	//!< 値がフラグ以下のとき
+		llcNone				/*!< 無条件リンク */,
+		llcEqual			/*!< 値が一致したとき */,
+		llcNotEqual			/*!< 値が一致しないとき */,
+		llcGreater			/*!< 値がフラグより大きいとき */,
+		llcGreaterOrEqual	/*!< 値がフラグ以上のとき */,
+		llcLesser			/*!< 値がフラグより小さいとき */,
+		llcLesserOrEqual	/*!< 値がフラグ以下のとき */
 	};
 
 	risse_int64 From;		//!< 'From' in sample position
@@ -433,17 +433,17 @@ private:
 //--- flag manupulation by label expression
 	enum tExpressionToken {
 		etUnknown,
-		etEOE,			//!< End of the expression
-		etLBracket,		//!< '['
-		etRBracket,		//!< ']'
-		etInteger,		//!< integer number
-		etEqual,		//!< '='
-		etPlus,			//!< '+'
-		etMinus,		//!< '-'
-		etPlusEqual,	//!< '+='
-		etMinusEqual,	//!< '-='
-		etIncrement,	//!< '++'
-		etDecrement		//!< '--'
+		etEOE			/*!< End of the expression */,
+		etLBracket		/*!< '[' */,
+		etRBracket		/*!< ']' */,
+		etInteger		/*!< integer number */,
+		etEqual			/*!< '=' */,
+		etPlus			/*!< '+' */,
+		etMinus			/*!< '-' */,
+		etPlusEqual		/*!< '+=' */,
+		etMinusEqual	/*!< '-=' */,
+		etIncrement		/*!< '++' */,
+		etDecrement		/*!< '--' */
 	};
 public:
 	/**

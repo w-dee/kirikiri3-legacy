@@ -30,7 +30,7 @@ public:
 	enum tContextControl
 	{
 		ccNone,
-		ccStatic, //!< static コンテキスト
+		ccStatic /*!< static コンテキスト */,
 	};
 
 	/**
@@ -39,7 +39,7 @@ public:
 	enum tSyncControl
 	{
 		scNone,
-		scSynchronized, //!< synchronized コンテキスト
+		scSynchronized /*!< synchronized コンテキスト */,
 	};
 
 private:

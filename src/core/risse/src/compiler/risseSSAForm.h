@@ -243,9 +243,9 @@ public:
 	 * このSSA形式の状態を表す列挙型
 	 */
 	enum tState {
-		ssSSA, //!< 有効な SSA 形式である
-		ssNonSSA, //!< phi関数の除去などでSSA性は失われた
-		ssCodeGenerated //!< すでにコードジェネレータにたいしてコードを生成した後である
+		ssSSA /*!< 有効な SSA 形式である */,
+		ssNonSSA /*!< phi関数の除去などでSSA性は失われた */,
+		ssCodeGenerated /*!< すでにコードジェネレータにたいしてコードを生成した後である */
 	};
 
 private:

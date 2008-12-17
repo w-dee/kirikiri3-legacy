@@ -51,15 +51,15 @@ struct tVMInsnInfo
 	 */
 	enum tInsnFlag
 	{
-		vifVoid =0, 	//!< V このオペランドは存在しない
-		vifRegister,	//!< R このオペランドはレジスタを表している
-		vifConstant,	//!< C このオペランドは定数を表している
-		vifNumber,		//!< N このオペランドは(すべての必須オペランドが終了し
-						//!<   た後に続く)追加オペランドの個数を表している
-		vifAddress,		//!< A このオペランドはアドレスを表している
-		vifParameter,	//!< A このオペランドは関数へのパラメータを表している
-		vifShared,		//!< S このオペランドは共有空間の変数を表している
-		vifOthers,		//!< O このオペランドはその他の何かを表している
+		vifVoid =0 		/*!< V このオペランドは存在しない */,
+		vifRegister		/*!< R このオペランドはレジスタを表している */,
+		vifConstant		/*!< C このオペランドは定数を表している */,
+		vifNumber		/*!< N このオペランドは(すべての必須オペランドが終了し */
+						/*!<   た後に続く)追加オペランドの個数を表している */,
+		vifAddress		/*!< A このオペランドはアドレスを表している */,
+		vifParameter	/*!< A このオペランドは関数へのパラメータを表している */,
+		vifShared		/*!< S このオペランドは共有空間の変数を表している */,
+		vifOthers		/*!< O このオペランドはその他の何かを表している */,
 	};
 
 	/**
@@ -67,10 +67,10 @@ struct tVMInsnInfo
 	 */
 	enum tInsnEffect
 	{
-		vieNonEffective, 	//!< N このオペコードは副作用を持たない
-		vieEffective,		//!< E このオペコードは副作用を持つ
-		vieVarying,			//!< V このオペコードはオペランドによっては副作用を持つ
-		vieAssertion		//!< A このオペコードはアサーションが有効な時のみに副作用を持つ
+		vieNonEffective 	/*!< N このオペコードは副作用を持たない */,
+		vieEffective		/*!< E このオペコードは副作用を持つ */,
+		vieVarying			/*!< V このオペコードはオペランドによっては副作用を持つ */,
+		vieAssertion		/*!< A このオペコードはアサーションが有効な時のみに副作用を持つ */
 	};
 
 	const char * Name;							//!< 命令名

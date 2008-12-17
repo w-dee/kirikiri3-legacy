@@ -233,7 +233,6 @@ tVariant tArrayInstance::remove(const tVariant & value, const tMethodArgument & 
 	// 配列中から value を === 演算子で探し、見つかれば削除し、valueを返す
 	// 見つからなければ default の値を返す
 	// 第２引数 = すべて削除するか (デフォルト = true)
-//	bool remove_all = args.HasArgument(1) ? args[1].operator bool() : true;
 	bool remove_all = args.Get(1, true);
 	bool any_removed = false;
 

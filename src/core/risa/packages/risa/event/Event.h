@@ -109,12 +109,12 @@ public:
 	 */
 	enum tPriority
 	{
-		epExclusive, //!< 排他的イベント
-		epNormal, //!< 通常イベント
-		epPaint, //!< ウィンドウペイントオブジェクト
-		epLow, //!< 低優先度イベント
-		epMin = epExclusive, //!< イベント優先度の最小値
-		epMax = epLow //!< イベント優先度の最大値
+		epExclusive /*!< 排他的イベント */,
+		epNormal /*!< 通常イベント */,
+		epPaint /*!< ウィンドウペイントオブジェクト */,
+		epLow /*!< 低優先度イベント */,
+		epMin = epExclusive /*!< イベント優先度の最小値 */,
+		epMax = epLow /*!< イベント優先度の最大値 */
 	};
 	static bool IsPriorityValid(tPriority prio) { return prio >= epMin && prio <= epMax; }
 		//!< 優先度が有効な値の範囲であるかどうか
@@ -235,9 +235,9 @@ public:
 	 */
 	enum tEventType
 	{
-		etDefault = 0, //!< デフォルトのイベントタイプ
-		etDiscardable = 1, //!< 破棄可能イベント
-		etSingle = 2 //!< シングルイベント
+		etDefault = 0 /*!< デフォルトのイベントタイプ */,
+		etDiscardable = 1 /*!< 破棄可能イベント */,
+		etSingle = 2 /*!< シングルイベント */
 	};
 
 	typedef gc_deque<tEventInfo *> tQueue; //!< キュー用コンテナの typedef

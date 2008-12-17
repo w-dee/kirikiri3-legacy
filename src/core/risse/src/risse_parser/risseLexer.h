@@ -67,9 +67,9 @@ class tLexer : public tLexerUtility
 		 */
 		enum			tSemicolonState
 		{
-			ssUnknown,		//!< 不明
-			ssSemicolon,	//!< セミコロンで文が終わってる
-			ssNewLine,		//!< 改行で文が終わってる
+			ssUnknown		/*!< 不明 */,
+			ssSemicolon		/*!< セミコロンで文が終わってる */,
+			ssNewLine		/*!< 改行で文が終わってる */,
 		} SemicolonState;
 
 		/**

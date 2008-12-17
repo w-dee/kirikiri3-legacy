@@ -54,7 +54,7 @@ tPrimitiveClassBase::tPrimitiveClassBase(const tString & name, tClassBase * supe
 	BindFunction(this, ss_construct,
 		&tPrimitiveClassBase::construct,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal)) );
+							tMemberAttribute(tMemberAttribute::ocFinal)) );
 }
 //---------------------------------------------------------------------------
 
@@ -86,15 +86,15 @@ RISSE_IMPL_CLASS_BEGIN(tPrimitiveClass, ss_Primitive, engine->ObjectClass)
 	BindFunction(this, ss_ovulate,
 		&tPrimitiveClass::ovulate,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal)) );
+							tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, ss_construct,
 		&tPrimitiveClass::construct,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal)) );
+							tMemberAttribute(tMemberAttribute::ocFinal)) );
 	BindFunction(this, mnString,
 		&tPrimitiveClass::toString,
 		tMemberAttribute(	tMemberAttribute(tMemberAttribute::mcConst)|
-								tMemberAttribute(tMemberAttribute::ocFinal)) );
+							tMemberAttribute(tMemberAttribute::ocFinal)) );
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

@@ -34,8 +34,8 @@ public:
 	enum tMutabilityControl
 	{
 		mcNone,
-		mcVar, //!< メンバは変更可能
-		mcConst, //!< 一度assignした値は変更不可
+		mcVar /*!< メンバは変更可能 */,
+		mcConst /*!< 一度assignした値は変更不可 */,
 	};
 
 	/**
@@ -44,8 +44,8 @@ public:
 	enum tOverrideControl
 	{
 		ocNone,
-		ocVirtual, //!< インスタンスごとに異なる値を持ち、サブクラスでオーバーライド可
-		ocFinal, //!< サブクラスでオーバーライド不可
+		ocVirtual /*!< インスタンスごとに異なる値を持ち、サブクラスでオーバーライド可 */,
+		ocFinal /*!< サブクラスでオーバーライド不可 */,
 	};
 
 	/**
@@ -54,8 +54,8 @@ public:
 	enum tPropertyControl
 	{
 		pcNone,
-		pcField, //!< 普通のメンバ
-		pcProperty, //!< 読み出しと書き込みにおいてゲッタとセッタの呼び出しを伴うメンバ
+		pcField /*!< 普通のメンバ */,
+		pcProperty /*!< 読み出しと書き込みにおいてゲッタとセッタの呼び出しを伴うメンバ */,
 	};
 
 	/**
@@ -64,10 +64,10 @@ public:
 	enum tAccessControl
 	{
 		acNone,
-		acPublic, //!< 公開メンバ
-		acInternal, //!< パッケージ外にexportできないメンバ
-		acProtected, //!< 同じクラスあるいは派生クラスからのみアクセス可能なメンバ
-		acPrivate, //!< 同じクラス内からのみアクセス可能なメンバ
+		acPublic /*!< 公開メンバ */,
+		acInternal /*!< パッケージ外にexportできないメンバ */,
+		acProtected /*!< 同じクラスあるいは派生クラスからのみアクセス可能なメンバ */,
+		acPrivate /*!< 同じクラス内からのみアクセス可能なメンバ */,
 	};
 
 private:

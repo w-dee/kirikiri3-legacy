@@ -35,13 +35,13 @@ public:
 	 */
 	enum tLevel
 	{
-		llDebug,	//!< デバッグに関する物
-		llInfo,		//!< 情報通知
-		llNotice,	//!< 通常状態だが大事な情報通知
-		llWarning,	//!< 警告
-		llError,	//!< 通常のエラー
-		llRecord,	//!< 記録すべき重要な情報
-		llCritical	//!< 致命的なエラー
+		llDebug		/*!< デバッグに関する物 */,
+		llInfo		/*!< 情報通知 */,
+		llNotice	/*!< 通常状態だが大事な情報通知 */,
+		llWarning	/*!< 警告 */,
+		llError		/*!< 通常のエラー */,
+		llRecord	/*!< 記録すべき重要な情報 */,
+		llCritical	/*!< 致命的なエラー */
 	};
 
 	/**

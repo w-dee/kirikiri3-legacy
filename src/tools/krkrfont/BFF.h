@@ -24,10 +24,10 @@ namespace Risa {
  */
 enum tBFFFileTags
 {
-	bftCharacteMap		= 0x4d524843,		//!< "CHRM" 文字マップ
-	bftKerningVector	= 0x564e524b,		//!< "KRNV" カーニングベクタ
-	bftBitmaps			= 0x504d5442,		//!< "BTMP" ビットマップ
-	bftNone				= 0					//!< 未定義
+	bftCharacteMap		= 0x4d524843		/*!< "CHRM" 文字マップ */,
+	bftKerningVector	= 0x564e524b		/*!< "KRNV" カーニングベクタ */,
+	bftBitmaps			= 0x504d5442		/*!< "BTMP" ビットマップ */,
+	bftNone				= 0					/*!< 未定義 */
 };
 //---------------------------------------------------------------------------
 

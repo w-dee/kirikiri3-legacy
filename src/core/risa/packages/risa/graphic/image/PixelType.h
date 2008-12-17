@@ -38,8 +38,8 @@ public:
 	 */
 	enum tFormat
 	{
-		pfGray8, //!< 8bpp グレースケール (risse_uint8)
-		pfARGB32, //!< 32bpp Alpha, R, G, B (もっとも一般的) (risa_gl::pixel)
+		pfGray8 /*!< 8bpp グレースケール (risse_uint8) */,
+		pfARGB32 /*!< 32bpp Alpha, R, G, B (もっとも一般的) (risa_gl::pixel) */,
 	};
 	static const int NumFormats = 2; //!< 形式の最大数
 

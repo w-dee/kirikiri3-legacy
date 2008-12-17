@@ -85,10 +85,10 @@ public:
 	 */
 	enum tStatementInsertPoint
 	{
-		sipHead,			//!< 先頭
-		sipAfterPhi,		//!< φ関数の直後
-		sipBeforeBranch,	//!< 分岐/ジャンプ文の直前
-		sipTail				//!< 最後
+		sipHead			/*!< 先頭 */,
+		sipAfterPhi		/*!< φ関数の直後 */,
+		sipBeforeBranch	/*!< 分岐/ジャンプ文の直前 */,
+		sipTail			/*!< 最後 */
 	};
 
 	/**

@@ -244,8 +244,8 @@ tVariant tObjectClass::getPublicMembers(
 	{
 		if(recursive)
 		{
-			// TODO: 再帰的な(親クラスも見に行く)enumuration
-			RISSE_ASSERT(!"recursive enumuration is not implemented yet");
+			// TODO: 再帰的な(親クラスも見に行く)enumeration
+			RISSE_ASSERT(!"recursive enumeration is not implemented yet");
 		}
 		else
 		{
@@ -277,7 +277,7 @@ tVariant tObjectClass::getPublicMembers(
 	else
 	{
 		// TODO: プリミティブ型での実装
-		RISSE_ASSERT(!"enumuration on primitive types is not implemented yet");
+		RISSE_ASSERT(!"enumeration on primitive types is not implemented yet");
 	}
 	return tVariant();
 }

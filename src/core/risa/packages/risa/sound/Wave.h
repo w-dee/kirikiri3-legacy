@@ -43,13 +43,13 @@ struct tPCMTypes
 {
 	enum tType
 	{
-		tunknown = -1, //!< 無効
-		ti8  = 0,		//!< 8bit integer linear PCM type
-		ti16,			//!< 16bit integer linear PCM type
-		ti24,			//!< 24bit integer linear PCM type
-		ti32,			//!< 32bit integer linear PCM type
-		tf32,			//!< 32bit float linear PCM type
-		tnum			//!< 有効な型の数
+		tunknown = -1	/*!< 無効 */,
+		ti8  = 0		/*!< 8bit integer linear PCM type */,
+		ti16			/*!< 16bit integer linear PCM type */,
+		ti24			/*!< 24bit integer linear PCM type */,
+		ti32			/*!< 32bit integer linear PCM type */,
+		tf32			/*!< 32bit float linear PCM type */,
+		tnum			/*!< 有効な型の数 */
 	};
 
 	/**

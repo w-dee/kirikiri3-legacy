@@ -50,10 +50,10 @@ public:
 	 */
 	enum tValueState
 	{
-		vsUnknown, //!< 値は設定されていない
-		vsConstant, //!< 値は設定され、Value の通りである
-		vsTypeConstant, //!< 値は複数の状態をとりうるが、型は決まっている(Valueの型がそれを表す)
-		vsVarying //!< 値も型も複数の状態を取りうる
+		vsUnknown /*!< 値は設定されていない */,
+		vsConstant /*!< 値は設定され、Value の通りである */,
+		vsTypeConstant /*!< 値は複数の状態をとりうるが、型は決まっている(Valueの型がそれを表す) */,
+		vsVarying /*!< 値も型も複数の状態を取りうる */
 	};
 private:
 	tValueState ValueState; //!< Valueの状態

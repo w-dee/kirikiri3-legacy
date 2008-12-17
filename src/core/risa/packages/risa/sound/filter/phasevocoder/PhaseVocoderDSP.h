@@ -70,9 +70,9 @@ public:
 	 */
 	enum tStatus
 	{
-		psNoError, //!< 問題なし
-		psInputNotEnough, //!< 入力がもうない (GetInputBufferで得たポインタに書いてから再試行せよ)
-		psOutputFull //!< 出力バッファがいっぱい (GetOutputBufferで得たポインタから読み出してから再試行せよ)
+		psNoError /*!< 問題なし */,
+		psInputNotEnough /*!< 入力がもうない (GetInputBufferで得たポインタに書いてから再試行せよ) */,
+		psOutputFull /*!< 出力バッファがいっぱい (GetOutputBufferで得たポインタから読み出してから再試行せよ) */
 	};
 
 public:

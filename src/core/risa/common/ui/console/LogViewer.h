@@ -52,8 +52,8 @@ class tLogScrollView : public wxPanel, public tLogReceiver
 	enum
 	{
 		ID_First = 100,
-		ID_Menu_Copy, //!< コピー
-		ID_Menu_SelectAll,  //!< すべて選選択
+		ID_Menu_Copy /*!< コピー */,
+		ID_Menu_SelectAll  /*!< すべて選選択 */,
 		ID_Last
 	};
 

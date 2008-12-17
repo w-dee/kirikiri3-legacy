@@ -83,10 +83,10 @@ public:
 	 */
 	enum tStatus
 	{
-		ssUnload, //!< data is not specified (tALSourceではこの状態は存在しない)
-		ssStop, //!< stopping
-		ssPlay, //!< playing
-		ssPause, //!< pausing
+		ssUnload /*!< data is not specified (tALSourceではこの状態は存在しない) */,
+		ssStop /*!< stopping */,
+		ssPlay /*!< playing */,
+		ssPause /*!< pausing */,
 	};
 };
 //---------------------------------------------------------------------------

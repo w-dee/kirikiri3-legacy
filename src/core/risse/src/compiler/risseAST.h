@@ -264,9 +264,9 @@ public:
 	// PrepareSSA で準備すべき情報のタイプ
 	enum tPrepareMode
 	{
-		pmRead, //!< 読み込み用
-		pmWrite, //!< 書き込み用
-		pmReadWrite, //!< 読み書き両用
+		pmRead /*!< 読み込み用 */,
+		pmWrite /*!< 書き込み用 */,
+		pmReadWrite /*!< 読み書き両用 */,
 	};
 
 protected:

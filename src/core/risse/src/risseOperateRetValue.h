@@ -26,12 +26,12 @@ public:
 	 */
 	enum tRetValue
 	{
-		rvNoError,					//!< エラー無し
-		rvMemberNotFound,			//!< メンバが見つからないエラー
-		rvMemberIsReadOnly,			//!< メンバは読み込み専用
-		rvMemberIsFinal,			//!< メンバはfinalなのでオーバーライドできない
-		rvPropertyCannotBeRead,		//!< プロパティは書き込み専用
-		rvPropertyCannotBeWritten,	//!< プロパティは読み込み専用
+		rvNoError					/*!< エラー無し */,
+		rvMemberNotFound			/*!< メンバが見つからないエラー */,
+		rvMemberIsReadOnly			/*!< メンバは読み込み専用 */,
+		rvMemberIsFinal				/*!< メンバはfinalなのでオーバーライドできない */,
+		rvPropertyCannotBeRead		/*!< プロパティは書き込み専用 */,
+		rvPropertyCannotBeWritten	/*!< プロパティは読み込み専用 */,
 	};
 
 	/**

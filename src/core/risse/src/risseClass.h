@@ -139,9 +139,9 @@ protected:
 	 */
 	enum tInstantiationType
 	{
-		itNormal, //!< 普通にインスタンス化可能
-		itPrimitive, //!< プリミティブ型用
-		itNoInstance //!< インスタンス化できない
+		itNormal /*!< 普通にインスタンス化可能 */,
+		itPrimitive /*!< プリミティブ型用 */,
+		itNoInstance /*!< インスタンス化できない */
 	};
 
 	/**

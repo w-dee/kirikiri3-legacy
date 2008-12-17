@@ -108,9 +108,9 @@ public: // public static members
 	 */
 	enum tSkipCommentResult
 	{
-		scrContinue,	//!< スクリプトはまだ続く
-		scrEnded,		//!< スクリプトは終わった
-		scrNotComment	//!< 実はコメントではなかった
+		scrContinue		/*!< スクリプトはまだ続く */,
+		scrEnded		/*!< スクリプトは終わった */,
+		scrNotComment	/*!< 実はコメントではなかった */
 	};
 
 	/**
@@ -137,9 +137,9 @@ public: // public static members
 	 */
 	enum tParseStringResult
 	{
-		psrNone, //!< (エラー)
-		psrDelimiter, //!< デリミタにぶつかった
-		psrEmExpr //!< \{ にぶつかった
+		psrNone /* (エラー) */,
+		psrDelimiter /* デリミタにぶつかった */,
+		psrEmExpr /* \{ にぶつかった */
 	};
 
 	/**

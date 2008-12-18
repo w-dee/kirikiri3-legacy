@@ -17,7 +17,7 @@
 /*! @note
 Risse 文字列について
 
-Risse 文字列は tStringBlock クラスで表される。
+Risse 文字列は tString クラスで表される。
 このクラスは、risse_char * 型の文字列を保持する。この文字列は \0 を含むこ
 とはできない。
 
@@ -27,12 +27,12 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ 構造
 
-	tStringBlock は以下の二つのメンバを持っている。
+	tString は以下の二つのメンバを持っている。
 
 	risse_char  *	Buffer;	// 文字列バッファ
 	risse_size		Length;	// 文字列長 (最後の \0 は含めない)
 
-	tStringBlock はこの二つのメンバを用い、「Bufferから始まるLength分の
+	tString はこの二つのメンバを用い、「Bufferから始まるLength分の
 	長さを持つ文字列」を表す。
 	長さのない (空の) 文字列の場合、Length は 0 になる (BufferがNULLになる
 	保証などはないので、Length が 0 であることをもって空文字列とすること)。
@@ -42,7 +42,7 @@ risse_char は 32bit サイズであることが求められる。
 
 	バッファは 最低でも (Length + 3) * sizeof(risse_char) + sizeof(risse_size)
 	を持つ。
-	tStringBlock が任意の文字列を元に作成される場合、
+	tString が任意の文字列を元に作成される場合、
 	(Length + 3) * sizeof(risse_char) + sizeof(size_t) の長さのバッファがま
 	ず確保され、文字列中の各文字は以下のように配置される。
 
@@ -55,32 +55,32 @@ risse_char は 32bit サイズであることが求められる。
 	hint が続く。
 	capacity は、バッファの長さがぴったりであれば Length と同じになる。
 
-	tStringBlock::Buffer は、最初の capacity や \0 ではなく、その次の
+	tString::Buffer は、最初の capacity や \0 ではなく、その次の
 	文字0(つまり文字列の先頭) を指すようになる。
 
-	cpacity の次の \0 は、 Buffer が他の tStringBlock と共有されている
+	cpacity の次の \0 は、 Buffer が他の tString と共有されている
 	場合に \0 ではなくなる。最後の \0 は、終端が \0 であることを期待してい
 	る C 言語系の関数に渡す際に NULL終端 を表す。
 
 ■ バッファの共有
 
-	tStringBlock のコピーコンストラクタや代入演算子は、バッファの中身は
+	tString のコピーコンストラクタや代入演算子は、バッファの中身は
 	コピーせず、Buffer と Length だけをコピーする。この際、バッファがすでに
 	共有されたことを表すため、Buffer[-1] が \0 でなければ、Buffer[-1] に
 	-1 を代入する。これはバッファが共有されている可能性を表す。
 
 ■ 部分文字列の共有
 
-	tStringBlock は、他の文字列の一部を指し示すことができる。
+	tString は、他の文字列の一部を指し示すことができる。
 
-	tStringBlock a が以下のバッファを持っている場合、
+	tString a が以下のバッファを持っている場合、
 
 	4 \0 文字0 文字1 文字2 文字3 \0 hint
 	    ↑
 	   Buffer
 	Length = 4
 
-	文字1 ～ 文字2 の２文字を表す tStringBlock b は以下のように表すこ
+	文字1 ～ 文字2 の２文字を表す tString b は以下のように表すこ
 	とができる。
 
 	4 -1 文字0 文字1 文字2 文字3 \0 hint
@@ -93,18 +93,18 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ バッファの共有の判定
 
-	tStringBlock が他の tStringBlock とバッファを共有している可能
+	tString が他の tString とバッファを共有している可能
 	性があるかどうかを判断するには、Buffer[-1] が \0 でないかどうかを見れば
 	よい。Buffer[-1] が 非 \0 であれはバッファは共有されている可能性がある。
 
-	tStringBlock は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
+	tString は文字列を共有する場合、Buffer[-1] が非 \0 の場合に
 	 -1 を代入するが、これによりバッファが共有されている可能性を表す。
 
-	tStringBlock は部分文字列を共有する場合、母文字列は Buffer[-1] が
+	tString は部分文字列を共有する場合、母文字列は Buffer[-1] が
 	非 \0の場合に -1 を代入するし、部分文字列は Buffer[-1] は必然的に \0 に
 	なる。これは、部分文字列が母文字列の先頭から共有しているならば、Buffer[-1]
 	は母文字列と同じ -1 になるし、部分文字列が母文字列の途中から共有している
-	ならば、Buffer[-1] は直前の文字を表し、tStringBlock は文字列中に
+	ならば、Buffer[-1] は直前の文字を表し、tString は文字列中に
 	\0 を含むことはないから、これは非 \0 となる。
 
 	これらは共有の可能性を表すだけである。可能性があっても実際は共有されてい
@@ -124,7 +124,7 @@ risse_char は 32bit サイズであることが求められる。
 
 ■ Independ
 
-	tStringBlock::Independ() メソッドは、文字列がそのバッファを共有
+	tString::Independ() メソッドは、文字列がそのバッファを共有
 	している可能性がある場合、新たにバッファを確保し、内容をコピーする。
 	これにより、バッファに何か変更を書き込んでも、他の文字列に影響が及ばない
 	ようにすることができる。
@@ -132,11 +132,11 @@ risse_char は 32bit サイズであることが求められる。
 	Independ は新たに確保したバッファの先頭は \0 にするが、元のバッファの
 	内容には手を加えない。元のバッファの内容は、さらに他の文字列から共有
 	されている可能性があるが、実際に共有されているのか、あるいはされていな
-	いのかは、tStringBlock が持っている情報からは判定できないからである。
+	いのかは、tString が持っている情報からは判定できないからである。
 
 ■ c_str()
 
-	tStringBlock::c_str() は、多くの C 言語系 API が期待するような、
+	tString::c_str() は、多くの C 言語系 API が期待するような、
 	NULL 終端文字列を返す。文字列が他の文字列の部分文字列を表している場合、
 	文字列の最後が \0 である保証はないが、そのような場合は、c_str() は新たに
 	バッファを確保し、最後が \0 で終了しているバッファを作り、それを返す。
@@ -153,7 +153,7 @@ risse_char は 32bit サイズであることが求められる。
 	入っていると考えることができるが、正しいハッシュが入っている保証はない。
 	あくまでハッシュ表検索時の「ヒント」として扱うべきである。
 
-	tStringBlock::GetHint() は、このヒント領域へのポインタを返す。
+	tString::GetHint() は、このヒント領域へのポインタを返す。
 	文字列が部分共有されている場合など、このヒント領域が存在しない場合は
 	このメソッドは NULL を返す。その場合はヒントは利用できない。
 
@@ -196,13 +196,13 @@ public:
  * 文字列ブロック
  * @note	スレッド保護無し
  */
-class tStringBlock : protected tStringData, public tCollectee
+class tString : protected tStringData, public tCollectee
 {
 public:
 	/**
 	 * デフォルトコンストラクタ
 	 */
-	tStringBlock()
+	tString()
 	{
 		Buffer = RISSE_STRING_EMPTY_BUFFER;
 		Length = 0;
@@ -221,7 +221,7 @@ public:
 	 * コピーコンストラクタ
 	 * @param ref	コピー元オブジェクト
 	 */
-	tStringBlock(const tStringBlock & ref)
+	tString(const tString & ref)
 	{
 		*this = ref;
 	}
@@ -237,14 +237,14 @@ public:
 	 *			(そのため、lengthにrisse_size_maxを指定すると offset 以降
 	 *			すべてを得ることができる)
 	 */
-	tStringBlock(const tStringBlock & ref,
+	tString(const tString & ref,
 		risse_size offset, risse_size length = risse_size_max);
 
 	/**
 	 * コンストラクタ(risse_char * から)
 	 * @param ref	元の文字列
 	 */
-	tStringBlock(const risse_char * ref)
+	tString(const risse_char * ref)
 	{
 		*this = ref;
 	}
@@ -255,14 +255,14 @@ public:
 	 * @param n		コードポイント数
 	 * @note	[ref, ref+n) の範囲には \0 がないこと
 	 */
-	tStringBlock(const risse_char * ref, risse_size n);
+	tString(const risse_char * ref, risse_size n);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	/**
 	 * コンストラクタ(wchar_t * から)
 	 * @param ref	元の文字列
 	 */
-	tStringBlock(const wchar_t *ref)
+	tString(const wchar_t *ref)
 	{
 		*this = ref;
 	}
@@ -270,14 +270,14 @@ public:
 
 //#ifdef RISSE_SUPPORT_WX
 // TODO: パフォーマンス的に問題になりそうならばこれを実装すること
-//	tStringBlock(const wxString & ref);
+//	tString(const wxString & ref);
 //#endif
 
 	/**
 	 * コンストラクタ(char * から)
 	 * @param ref	元の文字列
 	 */
-	tStringBlock(const char * ref)
+	tString(const char * ref)
 	{
 		*this = ref;
 	}
@@ -287,7 +287,7 @@ public:
 	 * @param msg	メッセージ
 	 * @param r1	メッセージ中の '%1' と置き換わる文字列
 	 */
-	tStringBlock(const tStringBlock &msg, const tStringBlock &r1);
+	tString(const tString &msg, const tString &r1);
 
 	/**
 	 * コンストラクタ(メッセージのビルド)
@@ -295,8 +295,8 @@ public:
 	 * @param r1	メッセージ中の '%1' と置き換わる文字列
 	 * @param r2	メッセージ中の '%2' と置き換わる文字列
 	 */
-	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
-					const tStringBlock &r2);
+	tString(const tString &msg, const tString &r1,
+					const tString &r2);
 
 	/**
 	 * コンストラクタ(メッセージのビルド)
@@ -305,8 +305,8 @@ public:
 	 * @param r2	メッセージ中の '%2' と置き換わる文字列
 	 * @param r3	メッセージ中の '%3' と置き換わる文字列
 	 */
-	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
-					const tStringBlock &r2, const tStringBlock &r3);
+	tString(const tString &msg, const tString &r1,
+					const tString &r2, const tString &r3);
 
 	/**
 	 * コンストラクタ(メッセージのビルド)
@@ -316,9 +316,9 @@ public:
 	 * @param r3	メッセージ中の '%3' と置き換わる文字列
 	 * @param r4	メッセージ中の '%4' と置き換わる文字列
 	 */
-	tStringBlock(const tStringBlock &msg, const tStringBlock &r1,
-					const tStringBlock &r2, const tStringBlock &r3,
-					const tStringBlock &r4);
+	tString(const tString &msg, const tString &r1,
+					const tString &r2, const tString &r3,
+					const tString &r4);
 
 	/**
 	 * デストラクタ(tHashTableがこれを呼ぶ)
@@ -334,7 +334,7 @@ public:
 	 * @param ref	コピー元オブジェクト
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator = (const tStringBlock & ref)
+	tString & operator = (const tString & ref)
 	{
 		if(ref.Buffer[-1] == 0)
 			ref.Buffer[-1] = MightBeShared; // 共有可能性フラグをたてる
@@ -348,14 +348,14 @@ public:
 	 * @param ref	元の文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator = (const risse_char * ref);
+	tString & operator = (const risse_char * ref);
 
 	/**
 	 * 代入演算子(risse_char から)
 	 * @param ref	元の文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator = (const risse_char ref);
+	tString & operator = (const risse_char ref);
 
 #ifdef RISSE_WCHAR_T_SIZE_IS_16BIT
 	/**
@@ -363,12 +363,12 @@ public:
 	 * @param ref	元の文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator = (const wchar_t *ref);
+	tString & operator = (const wchar_t *ref);
 #endif
 
 //#ifdef RISSE_SUPPORT_WX
 // TODO: パフォーマンス的に問題になりそうならばこれを実装すること
-//	tStringBlock & operator = (const wxString & ref);
+//	tString & operator = (const wxString & ref);
 //#endif
 
 	/**
@@ -376,20 +376,20 @@ public:
 	 * @param ref	元の文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator = (const char * ref);
+	tString & operator = (const char * ref);
 
 	/**
-	 * バッファをコピーし、新しい tStringBlock を返す
+	 * バッファをコピーし、新しい tString を返す
 	 * @param ref	コピー元オブジェクト
-	 * @return	新しい tStringBlock オブジェクト
+	 * @return	新しい tString オブジェクト
 	 * @note	このメソッドは、必ずバッファをコピーして返し、
 	 *			元の文字列 (この文字列) の共有状態などはいっさい
 	 *			変更しない。破壊を前提とした文字列を他の文字列
 	 *			から作成する場合などに効率的。
 	 */
-	tStringBlock MakeBufferCopy(const tStringBlock & ref) const
+	tString MakeBufferCopy(const tString & ref) const
 	{
-		return tStringBlock(Buffer, Length);
+		return tString(Buffer, Length);
 	}
 
 
@@ -452,7 +452,7 @@ public: // pointer
 
 	/**
 	 * C 言語スタイルのポインタを得る
-	 * @note	tStringBlock は内部に保持しているバッファの最後が \0 で
+	 * @note	tString は内部に保持しているバッファの最後が \0 で
 	 *			終わってない場合は、バッファを新たにコピーして \0 で終わらせ、その
 	 *			バッファのポインタを返す。また、空文字列の場合は NULL を返さずに
 	 *			"" へのポインタを返す。
@@ -474,7 +474,7 @@ public: // pointer
 	/**
 	 * 文字列バッファをコピーし、独立させる
 	 * @return	内部バッファ
-	 * @note	tStringBlock は一つのバッファを複数の文字列インスタンスが
+	 * @note	tString は一つのバッファを複数の文字列インスタンスが
 	 *			共有する場合があるが、このメソッドは共有を切り、文字列バッファを
 	 *			独立する。Risse の GC の特性上、その文字列がすでに独立しているかどうかを
 	 *			確実に知るすべはなく、このメソッドはかなりの確率でバッファをコピーするため、
@@ -619,14 +619,14 @@ public: // comparison
 	 * @param ref	比較するオブジェクト
 	 * @return	*this<refかどうか
 	 */
-	bool operator <  (const tStringBlock & ref) const;
+	bool operator <  (const tString & ref) const;
 
 	/**
 	 * > 演算子
 	 * @param ref	比較するオブジェクト
 	 * @return	*this>refかどうか
 	 */
-	bool operator >  (const tStringBlock & ref) const
+	bool operator >  (const tString & ref) const
 		{ return ref < *this; }
 
 	/**
@@ -634,7 +634,7 @@ public: // comparison
 	 * @param ref	比較するオブジェクト
 	 * @return	*this<=refかどうか
 	 */
-	bool operator <= (const tStringBlock & ref) const
+	bool operator <= (const tString & ref) const
 		{ return ! (*this > ref); }
 
 	/**
@@ -642,7 +642,7 @@ public: // comparison
 	 * @param ref	比較するオブジェクト
 	 * @return	*this>=refかどうか
 	 */
-	bool operator >= (const tStringBlock & ref) const
+	bool operator >= (const tString & ref) const
 		{ return ! (*this < ref); }
 
 	/**
@@ -650,7 +650,7 @@ public: // comparison
 	 * @param ref	比較するオブジェクト
 	 * @return	*this==refかどうか
 	 */
-	bool operator == (const tStringBlock & ref) const
+	bool operator == (const tString & ref) const
 	{
 		if(this == &ref) return true; // 同じポインタ
 		if(Length != ref.Length) return false; // 違う長さ
@@ -670,7 +670,7 @@ public: // comparison
 	 * @param ref	比較するオブジェクト
 	 * @return	*this!=refかどうか
 	 */
-	bool operator != (const tStringBlock & ref) const
+	bool operator != (const tString & ref) const
 		{ return ! (*this == ref); }
 
 	/**
@@ -702,7 +702,7 @@ public: // comparison
 	 * @param str	比較する文字列
 	 * @return	文字列が str で始まっていれば真、そうでなければ偽
 	 */
-	bool StartsWith(const tStringBlock & str) const
+	bool StartsWith(const tString & str) const
 	{ return InternalStartsWidth(str.Buffer, str.Length); }
 
 	/**
@@ -718,7 +718,7 @@ public: // comparison
 	 * @param str	比較する文字列
 	 * @return	文字列が str で終わっていれば真、そうでなければ偽
 	 */
-	bool EndsWith(const tStringBlock & str) const
+	bool EndsWith(const tString & str) const
 	{ return InternalEndsWidth(str.Buffer, str.Length); }
 
 	/**
@@ -763,7 +763,7 @@ public: // operators
 	 * @param ref	連結する文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator += (const tStringBlock & ref)
+	tString & operator += (const tString & ref)
 	{
 		if(Length == 0) { *this = ref; return *this; }
 		Append(ref.Buffer, ref.Length);
@@ -775,7 +775,7 @@ public: // operators
 	 * @param ref	連結する文字
 	 * @return	このオブジェクトへの参照
 	 */
-	tStringBlock & operator += (risse_char ref)
+	tString & operator += (risse_char ref)
 	{
 		if(ref == 0) { return *this; } // やることなし
 		if(Length == 0) { *this = ref; return *this; }
@@ -788,30 +788,30 @@ public: // operators
 	 * @param ref	連結する文字列
 	 * @return	新しく連結された文字列
 	 */
-	tStringBlock operator + (const tStringBlock & ref) const;
+	tString operator + (const tString & ref) const;
 
 	/**
 	 * 文字列の連結
 	 * @param ref	連結する文字列
 	 * @return	新しく連結された文字列
 	 */
-	tStringBlock operator + (const risse_char * ref) const;
+	tString operator + (const risse_char * ref) const;
 
 	/**
 	 * 文字の連結
 	 * @param ref	連結する文字
 	 * @return	新しく連結された文字列
 	 */
-	tStringBlock operator + (const risse_char ref) const
+	tString operator + (const risse_char ref) const
 	{
 		risse_char tmp[2];
 		tmp[0] = ref; tmp[1] = 0;
 		return *this + tmp;
 	}
 
-	// + 演算子 (risse_char * と tStringBlockの連結) を friend に
+	// + 演算子 (risse_char * と tStringの連結) を friend に
 	// (定義と実装は下の方)
-	friend tStringBlock operator +(const risse_char *lhs, const tStringBlock &rhs);
+	friend tString operator +(const risse_char *lhs, const tString &rhs);
 
 	/**
 	 * [] 演算子
@@ -849,7 +849,7 @@ public: // conversion
 	 *			整数型からの直接の構築や整数型の代入は定義されていない。
 	 *			整数型から文字列への変換はこのメソッドを使うと楽。
 	 */
-	static tStringBlock AsString(risse_int v);
+	static tString AsString(risse_int v);
 
 	/**
 	 * 数値を文字列に変換(64bit整数から)
@@ -859,7 +859,7 @@ public: // conversion
 	 *			整数型からの直接の構築や整数型の代入は定義されていない。
 	 *			整数型から文字列への変換はこのメソッドを使うと楽。
 	 */
-	static tStringBlock AsString(risse_int64 v);
+	static tString AsString(risse_int64 v);
 
 public: // other utilities
 	/**
@@ -869,15 +869,15 @@ public: // other utilities
 	 * @param replace_all	すべての一致を置き換えるかどうか
 	 * @return	置き換えられた文字列
 	 */
-	tStringBlock Replace(const tStringBlock &old_str,
-		const tStringBlock &new_str, bool replace_all = true) const;
+	tString Replace(const tString &old_str,
+		const tString &new_str, bool replace_all = true) const;
 
 	/**
 	 * 文字列の繰り返しを生成して返す
 	 * @param count	繰り返し回数
 	 * @return	繰り返された文字列
 	 */
-	tStringBlock Times(risse_size count);
+	tString Times(risse_size count);
 
 	/**
 	 * 文字列リテラルとして解釈できるようなエスケープを行う
@@ -889,13 +889,13 @@ public: // other utilities
 	 *			返値 は maxlen 付近で切られるが、maxlen ぴったりである保証はない。
 	 *			maxlen 付近で切られた場合の省略記号 '...' は、quote が true の場合のみ付く。
 	 */
-	tStringBlock Escape(risse_size maxlen = risse_size_max, bool quote = false) const;
+	tString Escape(risse_size maxlen = risse_size_max, bool quote = false) const;
 
 	/**
 	 * 値を再パース可能な文字列に変換する
 	 * @return	再パース可能な文字列
 	 */
-	tStringBlock AsTokenString() const
+	tString AsTokenString() const
 	{ return Escape(risse_size_max, true); }
 
 	/**
@@ -904,7 +904,7 @@ public: // other utilities
 	 *					省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	 * @return	人間が読み取り可能な文字列
 	 */
-	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
+	tString AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return Escape(maxlen, true); }
 
 	/**
@@ -928,7 +928,7 @@ public: // other utilities
 	class tSplitter
 	{
 		risse_size Current;
-		const tStringBlock & Ref;
+		const tString & Ref;
 		risse_char Delimiter;
 	public:
 		/**
@@ -936,7 +936,7 @@ public: // other utilities
 		 * @param ref	対象となる文字列
 		 * @param delim	デリミタ
 		 */
-		tSplitter(const tStringBlock & ref, risse_char delim):
+		tSplitter(const tString & ref, risse_char delim):
 			Current(0), Ref(ref), Delimiter(delim) {;}
 
 		/**
@@ -944,12 +944,12 @@ public: // other utilities
 		 * @param out	切り出された要素
 		 * @return	要素がもうない場合は false
 		 */
-		bool operator ()(tStringBlock & out)
+		bool operator ()(tString & out)
 		{
 			if(Ref.GetLength() + 1 == Current) return false; // 終わり
 			risse_size start = Current;
 			while(Current < Ref.GetLength() && Ref[Current] != Delimiter) Current ++;
-			out = tStringBlock(Ref, start, Current - start);
+			out = tString(Ref, start, Current - start);
 			Current ++;
 			return true;
 		}
@@ -973,8 +973,8 @@ public:
 	 *			などとすると参照から実体が作られて、それが帰ることになるので非効率的。
 	 *			あくまで const tString & の参照が求められている文脈でのみ使うこと。
 	 */
-	static const tStringBlock & GetEmptyString()
-		{ return *(const tStringBlock*)(&EmptyStringData); }
+	static const tString & GetEmptyString()
+		{ return *(const tString*)(&EmptyStringData); }
 
 };
 //---------------------------------------------------------------------------
@@ -987,11 +987,7 @@ public:
  * @param rhs	連結する文字列(右側)
  * @return	新しく連結された文字列
  */
-tStringBlock operator +(const risse_char *lhs, const tStringBlock &rhs);
-//---------------------------------------------------------------------------
-
-typedef tStringBlock tString; //!< いまのところ tString は tStringBlock と同じ
-
+tString operator +(const risse_char *lhs, const tString &rhs);
 //---------------------------------------------------------------------------
 } // namespace Risse
 

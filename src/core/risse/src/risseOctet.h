@@ -402,7 +402,7 @@ public: // utilities
 	 *					省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	 * @return	人間が読み取り可能な文字列
 	 */
-	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const;
+	tString AsHumanReadable(risse_size maxlen = risse_size_max) const;
 };
 //---------------------------------------------------------------------------
 
@@ -730,7 +730,7 @@ public: // utilities
 	 *					省略記号 '...' が付く(risse_size_maxの場合は無制限)
 	 * @return	人間が読み取り可能な文字列
 	 */
-	tStringBlock AsHumanReadable(risse_size maxlen = risse_size_max) const
+	tString AsHumanReadable(risse_size maxlen = risse_size_max) const
 	{ return GetBlock()->AsHumanReadable(maxlen); }
 
 };

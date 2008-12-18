@@ -153,7 +153,7 @@ public:
 	 * @return	結果
 	 */
 	tRetValue FuncCall(
-		tVariantBlock * ret,
+		tVariant * ret,
 		const tString & name, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & This = tVariant::GetNullObject());
@@ -168,7 +168,7 @@ public:
 	 * @return	結果
 	 */
 	tRetValue New(
-		tVariantBlock * ret,
+		tVariant * ret,
 		const tString & name, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & This = tVariant::GetNullObject());
@@ -272,7 +272,7 @@ public:
 	 * @param membername	メンバ名
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(const tString & membername);
+	tVariant Invoke(const tString & membername);
 
 	/**
 	 * (このオブジェクトのメンバに対する)単純な関数呼び出し		Invoke
@@ -280,7 +280,7 @@ public:
 	 * @param arg1			引数
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(
+	tVariant Invoke(
 		const tString & membername,
 		const tVariant & arg1);
 
@@ -291,7 +291,7 @@ public:
 	 * @param arg2			引数
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(
+	tVariant Invoke(
 		const tString & membername,
 		const tVariant & arg1,
 		const tVariant & arg2
@@ -305,7 +305,7 @@ public:
 	 * @param arg3			引数
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(
+	tVariant Invoke(
 		const tString & membername,
 		const tVariant & arg1,
 		const tVariant & arg2,

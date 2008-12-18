@@ -121,7 +121,7 @@ STDOUT.print "
 	template <typename CC, typename R #{argnum.append{|n|"typename T#{n}"}}>
 	void BindFunction(CC * _class, const tString & name,
 		R (*f)(#{argnum.join{|n|"T#{n}"}}), tMemberAttribute attribute = tMemberAttribute(),
-		const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+		const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 	{
 		_class->RegisterNormalMember(name,
 			tVariant(tNativeBindFunction<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
@@ -134,7 +134,7 @@ STDOUT.print "
 	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
 	void BindFunction(CC * _class, const tString & name,
 		R (IC::*f)(#{argnum.join{|n|"T#{n}"}}), tMemberAttribute attribute = tMemberAttribute(),
-		const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+		const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 	{
 		_class->RegisterNormalMember(name,
 			tVariant(tNativeBindFunction<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
@@ -147,7 +147,7 @@ STDOUT.print "
 	template <typename CC, typename IC, typename R #{argnum.append{|n|"typename T#{n}"}}>
 	void BindFunction(CC * _class, const tString & name,
 		R (IC::*f)(#{argnum.join{|n|"T#{n}"}}) const, tMemberAttribute attribute = tMemberAttribute(),
-		const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+		const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 	{
 		_class->RegisterNormalMember(name,
 			tVariant(tNativeBindFunction<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),

@@ -210,7 +210,7 @@ tClassBase::tRetValue tClassBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG
 
 
 //---------------------------------------------------------------------------
-void tClassBase::CallSuperClassMethod(tVariantBlock * ret,
+void tClassBase::CallSuperClassMethod(tVariant * ret,
 	const tString & name,risse_uint32 flags,
 	const tMethodArgument & args, const tVariant & This)
 {

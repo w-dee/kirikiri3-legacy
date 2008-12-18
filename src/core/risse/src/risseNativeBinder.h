@@ -772,11 +772,11 @@ template <typename CC, typename GR, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	GR (*getter)(), void (*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
@@ -790,7 +790,7 @@ template <typename CC, typename GR/*, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	GR (*getter)()/*, void (*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, GR, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
@@ -801,11 +801,11 @@ template <typename CC, typename GIC, typename SIC, typename GR, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	GR (GIC::*getter)(), void (SIC::*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
@@ -819,11 +819,11 @@ template <typename CC, typename GIC, typename SIC, typename GR, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	GR (GIC::*getter)() const, void (SIC::*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
@@ -837,7 +837,7 @@ template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename S
 void BindProperty(CC * _class, const tString & name,
 	GR (GIC::*getter)()/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, GIC, tObjectBase, GR, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
@@ -847,7 +847,7 @@ template <typename CC, typename GIC/*, typename SIC*/, typename GR/*, typename S
 void BindProperty(CC * _class, const tString & name,
 	GR (GIC::*getter)() const/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, GIC, tObjectBase, GR, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
@@ -859,11 +859,11 @@ template <typename CC, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	void (*getter)(const tNativePropGetInfo &), void (*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
@@ -879,11 +879,11 @@ template <typename CC>
 void BindProperty(CC * _class, const tString & name,
 	void (*getter)(const tNativePropGetInfo &), void (*setter)(const tNativePropSetInfo &),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (*)()>(getter) : NULL,
@@ -898,7 +898,7 @@ template <typename CC/*, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	void (*getter)(const tNativePropGetInfo &)/*, void (*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
@@ -909,11 +909,11 @@ template <typename CC, typename GIC, typename SIC, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	void (GIC::*getter)(const tNativePropGetInfo &), void (SIC::*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
@@ -927,11 +927,11 @@ template <typename CC, typename GIC, typename SIC, typename ST>
 void BindProperty(CC * _class, const tString & name,
 	void (GIC::*getter)(const tNativePropGetInfo &) const, void (SIC::*setter)(ST),
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	attribute.Set(tMemberAttribute::pcProperty);
 	_class->RegisterNormalMember(name,
-		tVariantBlock(
+		tVariant(
 			tNativeBindProperty<void (tObjectBase::*)()>::New(_class->GetRTTI()->GetScriptEngine(),
 				(tClassBase *)_class,
 				getter ? reinterpret_cast<void (tObjectBase::*)()>(getter) : NULL,
@@ -945,7 +945,7 @@ template <typename CC, typename GIC/*, typename SIC, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	void (GIC::*getter)(const tNativePropGetInfo &)/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, GIC, tObjectBase, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);
@@ -955,7 +955,7 @@ template <typename CC, typename GIC/*, typename SIC, typename ST*/>
 void BindProperty(CC * _class, const tString & name,
 	void (GIC::*getter)(const tNativePropGetInfo &) const/*, void (SIC::*setter)(ST)*/,
 	tMemberAttribute attribute = tMemberAttribute(),
-	const tVariantBlock * context = tVariant::GetDynamicContext(), bool is_members = true)
+	const tVariant * context = tVariant::GetDynamicContext(), bool is_members = true)
 {
 	BindProperty<CC, GIC, tObjectBase, const tVariant &>(
 		_class, name, getter, NULL, attribute, context, is_members);

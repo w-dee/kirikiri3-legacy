@@ -27,14 +27,14 @@ namespace Risse
 class tObjectInterface;
 class tPrimitiveClassBase;
 class tClassBase;
-class tVariantBlock;
+class tVariant;
 //---------------------------------------------------------------------------
 /**
  * バリアント型のデータ部
  */
 /*! @note
 
-tStringData, tVariantBlock::tObject, tOctetData の各先頭
+tStringData, tVariant::tObject, tOctetData の各先頭
 のメンバは必ず何かのポインタである。それらはメンバ Type とストレージを共有
 する。このメンバ Type と共有を行ってる書くポインタはこれらは実際にはそれぞれ
 tString, tObject, tOctetとして扱われるが、データメンバのレイ
@@ -49,7 +49,7 @@ tString, tObject, tOctetとして扱われるが、データメンバのレイ
 らばそそれをそのまま Type として扱い、そうでなければ下位2ビットを Type とし
 て扱っている。ここら辺は ruby の実装からヒントを得た物。
 
-tString, tVariantBlock::tObject, tOctet 内にある各の「本当の」ポインタを選る
+tString, tVariant::tObject, tOctet 内にある各の「本当の」ポインタを選る
 には、~0x03 との bit and をとればよい。
 
 tString の内部ポインタが指し示している場所は、文字列を保持しているバッ
@@ -61,7 +61,7 @@ tString の内部ポインタが指し示している場所は、文字列を保
 そのままデバッガなどで内容を表示できる。
 
 とりあえず tRiseVariant のサイズを抑えたいがための苦肉の策。こんなことをしな
-い方が速いかもしれないし、こうした方が速いかもしれない。 
+い方が速いかもしれないし、こうした方が速いかもしれない。
 
 tVariant はパフォーマンスの関係上、ILP32 システムでは 3 * 32bit, LP64 シス
 テムでは 2 * 64bit に収まるようにすること。
@@ -146,7 +146,7 @@ protected:
 	struct tObject
 	{
 		tObjectInterface * Intf; //!< オブジェクトインターフェースへのポインタ(下位の2ビットは常にObjectPointerBias)
-		const tVariantBlock * Context;
+		const tVariant * Context;
 						//!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
 		/**
@@ -286,20 +286,20 @@ protected:
 
 protected:
 	#define RV_SIZE_MAX(a, b) ((a)>(b)?(a):(b))
-	#define RV_STORAGE_SIZE \
-			RV_SIZE_MAX(sizeof(risse_ptruint),\
-			RV_SIZE_MAX(sizeof(tVoid),        \
-			RV_SIZE_MAX(sizeof(tInteger),     \
-			RV_SIZE_MAX(sizeof(tReal),        \
-			RV_SIZE_MAX(sizeof(tNull),        \
-			RV_SIZE_MAX(sizeof(tBoolean),     \
-			RV_SIZE_MAX(sizeof(tString),      \
-			RV_SIZE_MAX(sizeof(tOctet),       \
-			RV_SIZE_MAX(sizeof(tData),        \
-			RV_SIZE_MAX(sizeof(tObject),      \
-					4                         \
-			 ))))))))))
-			// ↑ 4 はダミー
+	enum ___dummy
+	{
+		RV_S0 = RV_SIZE_MAX(0,		sizeof(risse_ptruint)),
+		RV_S1 = RV_SIZE_MAX(RV_S0,  sizeof(tVoid)),
+		RV_S2 = RV_SIZE_MAX(RV_S1,	sizeof(tInteger)),
+		RV_S3 = RV_SIZE_MAX(RV_S2,	sizeof(tReal)),
+		RV_S4 = RV_SIZE_MAX(RV_S3,	sizeof(tNull)),
+		RV_S5 = RV_SIZE_MAX(RV_S4,	sizeof(tBoolean)),
+		RV_S6 = RV_SIZE_MAX(RV_S5,	sizeof(tString)),
+		RV_S7 = RV_SIZE_MAX(RV_S6,	sizeof(tOctet)),
+		RV_S8 = RV_SIZE_MAX(RV_S7,	sizeof(tData)),
+		RV_S9 = RV_SIZE_MAX(RV_S8,	sizeof(tObject)),
+		RV_STORAGE_SIZE = RV_S9
+	};
 
 
 	/**

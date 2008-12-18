@@ -18,8 +18,7 @@
 namespace Risse
 {
 //---------------------------------------------------------------------------
-class tVariantBlock;
-typedef tVariantBlock tVariant;
+class tVariant;
 class tStackFrameContext;
 //---------------------------------------------------------------------------
 /**

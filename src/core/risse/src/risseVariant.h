@@ -33,7 +33,7 @@ class tPrimitiveClassBase;
  * @note	tVariantData よりも高度な動作をここで定義する
  * @note	スレッド保護無し
  */
-class tVariantBlock : public tVariantData, public tOperateRetValue
+class tVariant : public tVariantData, public tOperateRetValue
 {
 private:
 	/**
@@ -93,9 +93,9 @@ private: // static オブジェクト
 	struct tStaticObject
 	{
 		risse_ptruint Intf; //!< オブジェクトインターフェースへのポインタ
-		const tVariantBlock * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
+		const tVariant * Context; //!< (Intfがメソッドオブジェクトやプロパティオブジェクトを
 						//!< 指しているとして)メソッドが動作するコンテキスト
-		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tVariantBlock *)];
+		char Storage[RV_STORAGE_SIZE - sizeof(risse_ptruint) - sizeof(const tVariant *)];
 			//!< 残り(0で埋める) パディングは問題にならないはず
 	};
 	static tStaticObject DynamicContext;
@@ -105,26 +105,26 @@ public: // static オブジェクト
 	 * void オブジェクトを得る
 	 * @return	void オブジェクトへのstaticなconst参照
 	 */
-	static const tVariantBlock & GetVoidObject()
+	static const tVariant & GetVoidObject()
 	{
-		return *reinterpret_cast<tVariantBlock*>(&VoidObject);
+		return *reinterpret_cast<tVariant*>(&VoidObject);
 	}
 
 	/**
 	 * null オブジェクトを得る
 	 * @return	null オブジェクトへのstaticなconst参照
 	 */
-	static const tVariantBlock & GetNullObject()
+	static const tVariant & GetNullObject()
 	{
-		return *reinterpret_cast<tVariantBlock*>(&NullObject);
+		return *reinterpret_cast<tVariant*>(&NullObject);
 	}
 
 	/**
 	 * DynamicContext オブジェクトを得る
 	 */
-	static const tVariantBlock * GetDynamicContext()
+	static const tVariant * GetDynamicContext()
 	{
-		return reinterpret_cast<tVariantBlock*>(&DynamicContext);
+		return reinterpret_cast<tVariant*>(&DynamicContext);
 	}
 
 public: // バリアントタイプ
@@ -194,7 +194,7 @@ public: // コンストラクタ/代入演算子
 	/**
 	 * デフォルトコンストラクタ(void型を作成)
 	 */
-	tVariantBlock()
+	tVariant()
 	{
 		Clear();
 	}
@@ -203,7 +203,7 @@ public: // コンストラクタ/代入演算子
 	 * コピーコンストラクタ
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock(const tVariantBlock & ref)
+	tVariant(const tVariant & ref)
 	{
 		* this = ref;
 	}
@@ -212,7 +212,7 @@ public: // コンストラクタ/代入演算子
 	 * 単純代入
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock & operator = (const tVariantBlock & ref)
+	tVariant & operator = (const tVariant & ref)
 	{
 		switch(ref.GetType())
 		{
@@ -244,7 +244,7 @@ private:
 	 *			3. const な tObjectInterface へのポインタを渡そうとした
 	 *			(非const な tObjectInterface * しか受け付けない)
 	 */
-	tVariantBlock(const void * ref);
+	tVariant(const void * ref);
 
 	/**
 	 * 代入演算子(const void * を代入)
@@ -252,7 +252,7 @@ private:
 	 * @note	tObjectInterface に変換できない任意のポインタを
 	 *			ここで引っかけるための代入演算子。
 	 *			ここで引っかかったた場合はコードを見直すこと。
-	 *			(tVariantBlock(const void * )も参照)
+	 *			(tVariant(const void * )も参照)
 	 */
 	void operator = (const void * ref);
 
@@ -261,7 +261,7 @@ public:
 	 * コンストラクタ(integer型を作成)
 	 * @param ref	元となる整数
 	 */
-	tVariantBlock(const risse_int64 ref)
+	tVariant(const risse_int64 ref)
 	{
 		* this = ref;
 	}
@@ -270,7 +270,7 @@ public:
 	 * 代入演算子(integer型を代入)
 	 * @param ref	元となる整数
 	 */
-	tVariantBlock & operator = (const risse_int64 ref)
+	tVariant & operator = (const risse_int64 ref)
 	{
 		Type = vtInteger;
 		AsInteger() = static_cast<risse_int64>(ref);
@@ -280,7 +280,7 @@ public:
 	 * コンストラクタ(integer型をrisse_size型から作成)
 	 * @param ref	元となる整数
 	 */
-	tVariantBlock(const risse_size ref)
+	tVariant(const risse_size ref)
 	{
 		* this = ref;
 	}
@@ -289,7 +289,7 @@ public:
 	 * 代入演算子(integer型をrisse_size型から代入)
 	 * @param ref	元となる整数
 	 */
-	tVariantBlock & operator = (const risse_size ref)
+	tVariant & operator = (const risse_size ref)
 	{
 		Type = vtInteger;
 		AsInteger() = static_cast<risse_int64>(ref);
@@ -300,7 +300,7 @@ public:
 	 * コンストラクタ(real型を作成)
 	 * @param ref	元となる実数
 	 */
-	tVariantBlock(const risse_real ref)
+	tVariant(const risse_real ref)
 	{
 		* this = ref;
 	}
@@ -309,7 +309,7 @@ public:
 	 * 代入演算子(real型を代入)
 	 * @param ref	元となる実数
 	 */
-	tVariantBlock & operator = (const risse_real ref)
+	tVariant & operator = (const risse_real ref)
 	{
 		Type = vtReal;
 		AsReal() = ref;
@@ -320,7 +320,7 @@ public:
 	 * コンストラクタ(bool型を作成)
 	 * @param ref	元となる真偽値
 	 */
-	tVariantBlock(const bool ref)
+	tVariant(const bool ref)
 	{
 		* this = ref;
 	}
@@ -329,7 +329,7 @@ public:
 	 * 代入演算子(bool型を代入)
 	 * @param ref	元となる真偽値
 	 */
-	tVariantBlock & operator = (const bool ref)
+	tVariant & operator = (const bool ref)
 	{
 		Type = vtBoolean;
 		AsBoolean().Value = ref;
@@ -340,7 +340,7 @@ public:
 	 * コンストラクタ(boolean型を作成)
 	 * @param ref	元となるtBoolean型オブジェクト
 	 */
-	tVariantBlock(const tBoolean & ref)
+	tVariant(const tBoolean & ref)
 	{
 		* this = ref;
 	}
@@ -349,7 +349,7 @@ public:
 	 * 代入演算子(bool型を代入)
 	 * @param ref	元となるtBoolean型オブジェクト
 	 */
-	tVariantBlock & operator = (const tBoolean & ref)
+	tVariant & operator = (const tBoolean & ref)
 	{
 		AsBoolean() = ref;
 		return *this;
@@ -359,7 +359,7 @@ public:
 	 * コンストラクタ(string型を作成)
 	 * @param ref	元となる文字列
 	 */
-	tVariantBlock(const tString & ref)
+	tVariant(const tString & ref)
 	{
 		* this = ref;
 	}
@@ -369,7 +369,7 @@ public:
 	 * @param ref	元となる文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tVariantBlock & operator = (const tString & ref)
+	tVariant & operator = (const tString & ref)
 	{
 		// Type の設定は必要なし
 		AsString() = ref;
@@ -380,7 +380,7 @@ public:
 	 * コンストラクタ(string型を作成)
 	 * @param ref	元となる文字列
 	 */
-	tVariantBlock(const risse_char * ref)
+	tVariant(const risse_char * ref)
 	{
 		* this = ref;
 	}
@@ -390,7 +390,7 @@ public:
 	 * @param ref	元となる文字列
 	 * @return	このオブジェクトへの参照
 	 */
-	tVariantBlock & operator = (const risse_char * ref)
+	tVariant & operator = (const risse_char * ref)
 	{
 		// Type の設定は必要なし
 		AsString() = tString(ref);
@@ -401,7 +401,7 @@ public:
 	 * コンストラクタ(octet型を作成)
 	 * @param ref	元となるオクテット列
 	 */
-	tVariantBlock(const tOctet & ref)
+	tVariant(const tOctet & ref)
 	{
 		* this = ref;
 	}
@@ -410,7 +410,7 @@ public:
 	 * 代入演算子(octet型を代入)
 	 * @param ref	元となるオクテット列
 	 */
-	tVariantBlock & operator = (const tOctet & ref)
+	tVariant & operator = (const tOctet & ref)
 	{
 		// Type の設定は必要なし
 		AsOctet() = ref;
@@ -421,7 +421,7 @@ public:
 	 * コンストラクタ(tObjectInterface*型より)
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock(tObjectInterface * ref)
+	tVariant(tObjectInterface * ref)
 	{
 		* this = ref;
 	}
@@ -431,7 +431,7 @@ public:
 	 * @param ref		元となるオブジェクト(メソッドオブジェクトかプロパティオブジェクトを表す)
 	 * @param context	そのメソッドやプロパティが実行されるべきコンテキストオブジェクトを表す
 	 */
-	tVariantBlock(tObjectInterface * ref, const tVariantBlock * context)
+	tVariant(tObjectInterface * ref, const tVariant * context)
 	{
 		Type = vtObject;
 		SetObjectIntf(ref);
@@ -444,7 +444,7 @@ public:
 	 * @param Class	クラスインスタンス
 	 * @param data	データ
 	 */
-	tVariantBlock(tPrimitiveClassBase * Class, void * data)
+	tVariant(tPrimitiveClassBase * Class, void * data)
 	{
 		Type = vtData;
 		RISSE_ASSERT(Class != NULL);
@@ -456,7 +456,7 @@ public:
 	 * 代入演算子(tObjectInterface*型を代入)
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock & operator = (tObjectInterface * ref)
+	tVariant & operator = (tObjectInterface * ref)
 	{
 		// これはちょっと特殊
 		Type = vtObject;
@@ -469,7 +469,7 @@ public:
 	 * コンストラクタ(tData型から)
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock(const tData & ref)
+	tVariant(const tData & ref)
 	{
 		* this = ref;
 	}
@@ -478,7 +478,7 @@ public:
 	 * 代入演算子(tData型を代入)
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock & operator = (const tData & ref)
+	tVariant & operator = (const tData & ref)
 	{
 		Type = vtData;
 		AsData() = ref;
@@ -489,7 +489,7 @@ public:
 	 * 代入演算子(tObject型を代入)
 	 * @param ref	元となるオブジェクト
 	 */
-	tVariantBlock & operator = (const tObject & ref)
+	tVariant & operator = (const tObject & ref)
 	{
 		Type = vtObject;
 		AsObject() = ref;
@@ -575,7 +575,7 @@ public: // Object関連
 	 *			チェックしないので注意すること。@n
 	 *			DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。
 	 */
-	void SetContext(const tVariantBlock * context)
+	void SetContext(const tVariant * context)
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		RISSE_ASSERT(context != NULL);
@@ -589,12 +589,12 @@ public: // Object関連
 	 *			オブジェクトを表している場合に用いる。このメソッドはvtがvtObjectかどうかを
 	 *			チェックしないので注意すること。@n
 	 *			DynamicContextを指定する場合はGetDynamicContext()の戻りを指定すること。@n
-	 *			このメソッドは const tVariantBlock * context を引数に取る版とちがい、
+	 *			このメソッドは const tVariant * context を引数に取る版とちがい、
 	 *			context がどうやら dynamic コンテキストらしい場合は自動的に
 	 *			GetDynamicContext() の戻りに変換する。そうでない場合は
-	 *			tVariantBlock を new してそのポインタを SetContext() で設定する。
+	 *			tVariant を new してそのポインタを SetContext() で設定する。
 	 */
-	void SetContext(const tVariantBlock &context);
+	void SetContext(const tVariant &context);
 
 	/**
 	 * コンテキストを取得する
@@ -602,7 +602,7 @@ public: // Object関連
 	 * @note	このメソッドはvtがvtObjectかどうかを
 	 *			チェックしないので注意すること
 	 */
-	const tVariantBlock * GetContext() const
+	const tVariant * GetContext() const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		return AsObject().Context;
@@ -638,7 +638,7 @@ public: // Object関連
 	 * @note	このメソッドはvtがvtObject以外の場合はなにもしない。コンテキストの上書きは、
 	 *			このオブジェクトのコンテキストが設定されいていない場合のみに発生する。
 	 */
-	void OverwriteContext(const tVariantBlock * context)
+	void OverwriteContext(const tVariant * context)
 	{
 		RISSE_ASSERT(context != NULL);
 		if(!HasContext()) SetContext(context);
@@ -653,7 +653,7 @@ public: // Object関連
 	 *			この値がコンテキストを持っていればそのコンテキストを返すが、そうでない場合は This を返す。
 	 *			ただし、フラグに ofUseClassMembersRule が指定されていた場合は常に This を返す
 	 */
-	const tVariantBlock & SelectContext(risse_uint32 flags, const tVariantBlock & This) const
+	const tVariant & SelectContext(risse_uint32 flags, const tVariant & This) const
 	{
 		RISSE_ASSERT(GetType() == vtObject); // チェックはしないとはいうものの一応ASSERTはする
 		if(!(flags & tOperateFlags::ofUseClassMembersRule))
@@ -955,7 +955,7 @@ public: // 演算子
 	 * @param This	このメソッドが実行されるべき"Thisオブジェクト"
 	 * @return	プロパティ取得の結果
 	 */
-	tVariantBlock GetPropertyDirect(tScriptEngine * engine, const tString & name,
+	tVariant GetPropertyDirect(tScriptEngine * engine, const tString & name,
 		risse_uint32 flags = 0,
 		const tVariant & This = tVariant::GetNullObject()) const
 	{
@@ -976,8 +976,8 @@ public: // 演算子
 		return tVariant();
 	}
 
-	tVariantBlock GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
-	tVariantBlock GetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
+	tVariant GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
+	tVariant GetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags = 0, const tVariant & This = tVariant::GetNullObject()) const ;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -989,7 +989,7 @@ public: // 演算子
 	 * @param This		このメソッドが実行されるべき"Thisオブジェクト"
 	 */
 	void SetPropertyDirect(tScriptEngine * engine, const tString & name, risse_uint32 flags,
-		const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const
+		const tVariant & value, const tVariant & This = tVariant::GetNullObject()) const
 	{
 		switch(GetType())
 		{
@@ -1007,8 +1007,8 @@ public: // 演算子
 		}
 	}
 
-	void SetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
-	void SetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags, const tVariantBlock & value, const tVariant & This = tVariant::GetNullObject()) const;
+	void SetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariant & value, const tVariant & This = tVariant::GetNullObject()) const;
+	void SetPropertyDirect_Object   (                        const tString & name, risse_uint32 flags, const tVariant & value, const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1016,7 +1016,7 @@ public: // 演算子
 	 * @param key	キー
 	 * @return	プロパティ取得の結果
 	 */
-	tVariantBlock IGet(const tVariantBlock & key) const
+	tVariant IGet(const tVariant & key) const
 	{
 		switch(GetType())
 		{
@@ -1033,15 +1033,15 @@ public: // 演算子
 		return tVariant();
 	}
 
-	tVariantBlock IGet_Void    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IGet_Data    (const tVariantBlock & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIGet, key); }
-	tVariantBlock IGet_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIGet, key); }
+	tVariant IGet_Void    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Integer (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Real    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Null    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Boolean (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_String  (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Octet   (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IGet_Data    (const tVariant & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIGet, key); }
+	tVariant IGet_Object  (const tVariant & key) const { return Invoke_Object(mnIGet, key); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1049,7 +1049,7 @@ public: // 演算子
 	 * @param key	キー
 	 * @return	削除されたキーの値(削除できなかった場合は普通void)
 	 */
-	tVariantBlock IDelete(const tVariantBlock & key) const
+	tVariant IDelete(const tVariant & key) const
 	{
 		switch(GetType())
 		{
@@ -1066,15 +1066,15 @@ public: // 演算子
 		return tVariant();
 	}
 
-	tVariantBlock IDelete_Void    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Integer (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Real    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Null    (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Boolean (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_String  (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Octet   (const tVariantBlock & key) const { return tVariant(); /* incomplete */ }
-	tVariantBlock IDelete_Data    (const tVariantBlock & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIDelete, key); }
-	tVariantBlock IDelete_Object  (const tVariantBlock & key) const { return Invoke_Object(mnIDelete, key); }
+	tVariant IDelete_Void    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Integer (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Real    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Null    (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Boolean (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_String  (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Octet   (const tVariant & key) const { return tVariant(); /* incomplete */ }
+	tVariant IDelete_Data    (const tVariant & key) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIDelete, key); }
+	tVariant IDelete_Object  (const tVariant & key) const { return Invoke_Object(mnIDelete, key); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1082,7 +1082,7 @@ public: // 演算子
 	 * @param key	キー
 	 * @param value	設定する値
 	 */
-	void ISet(const tVariantBlock & key, const tVariantBlock & value) const
+	void ISet(const tVariant & key, const tVariant & value) const
 	{
 		switch(GetType())
 		{
@@ -1098,15 +1098,15 @@ public: // 演算子
 		}
 	}
 
-	void ISet_Void    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Integer (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Real    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Null    (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Boolean (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_String  (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Octet   (const tVariantBlock & key, const tVariantBlock & value) const { return; /* incomplete */ }
-	void ISet_Data    (const tVariantBlock & key, const tVariantBlock & value) const { Invoke_Primitive(GetScriptEngine_Data(), mnISet, value, key); }
-	void ISet_Object  (const tVariantBlock & key, const tVariantBlock & value) const { Invoke_Object(mnISet, value, key);
+	void ISet_Void    (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Integer (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Real    (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Null    (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Boolean (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_String  (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Octet   (const tVariant & key, const tVariant & value) const { return; /* incomplete */ }
+	void ISet_Data    (const tVariant & key, const tVariant & value) const { Invoke_Primitive(GetScriptEngine_Data(), mnISet, value, key); }
+	void ISet_Object  (const tVariant & key, const tVariant & value) const { Invoke_Object(mnISet, value, key);
 		/* 注意!!! ISet がメソッド呼び出しに変換される場合、value が先に来て key が後に来る。これは将来的に
 		複数の key を使用可能にする可能性があるためである */ }
 
@@ -1175,7 +1175,7 @@ public: // 演算子
 	 * @param args		引数
 	 * @param This		このメソッドが実行されるべき"Thisオブジェクト"
 	 */
-	void FuncCall(tScriptEngine * engine, tVariantBlock * ret = NULL, risse_uint32 flags = 0,
+	void FuncCall(tScriptEngine * engine, tVariant * ret = NULL, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & This = tVariant::GetNullObject()) const;
 
@@ -1191,7 +1191,7 @@ public: // 演算子
 	 */
 	void FuncCall(
 		tScriptEngine * engine,
-		tVariantBlock * ret,
+		tVariant * ret,
 		const tString & name, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty(),
 		const tVariant & This = tVariant::GetNullObject()) const
@@ -1212,8 +1212,8 @@ public: // 演算子
 		}
 	}
 
-	void FuncCall_Primitive(tScriptEngine * engine, tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
-	void FuncCall_Object   (                        tVariantBlock * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
+	void FuncCall_Primitive(tScriptEngine * engine, tVariant * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
+	void FuncCall_Object   (                        tVariant * ret, const tString & name, risse_uint32 flags = 0, const tMethodArgument & args = tMethodArgument::Empty(), const tVariant & This = tVariant::GetNullObject()) const;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1222,7 +1222,7 @@ public: // 演算子
 	 * @param membername	メンバ名
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(tScriptEngine * engine,
+	tVariant Invoke(tScriptEngine * engine,
 		const tString & membername) const
 	{
 		switch(GetType())
@@ -1239,11 +1239,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername);
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername) const;
-	tVariantBlock Invoke_Object   (                        const tString & membername) const;
+	tVariant Invoke_Primitive(tScriptEngine * engine, const tString & membername) const;
+	tVariant Invoke_Object   (                        const tString & membername) const;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1253,7 +1253,7 @@ public: // 演算子
 	 * @param arg1			引数
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(
+	tVariant Invoke(
 		tScriptEngine * engine,
 		const tString & membername,
 		const tVariant & arg1) const
@@ -1272,11 +1272,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername,arg1);
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const;
-	tVariantBlock Invoke_Object   (                        const tString & membername,const tVariant & arg1) const;
+	tVariant Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const;
+	tVariant Invoke_Object   (                        const tString & membername,const tVariant & arg1) const;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1287,7 +1287,7 @@ public: // 演算子
 	 * @param arg2			引数
 	 * @return	戻り値
 	 */
-	tVariantBlock Invoke(
+	tVariant Invoke(
 		tScriptEngine * engine,
 		const tString & membername,
 		const tVariant & arg1,
@@ -1308,11 +1308,11 @@ public: // 演算子
 		case vtObject:
 			return Invoke_Object   (        membername,arg1,arg2);
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
-	tVariantBlock Invoke_Object   (                        const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
+	tVariant Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
+	tVariant Invoke_Object   (                        const tString & membername,const tVariant & arg1,const tVariant & arg2) const;
 
 public:
 	//-----------------------------------------------------------------------
@@ -1322,7 +1322,7 @@ public:
 	 * @param args	引数
 	 * @return	新しいインスタンス
 	 */
-	tVariantBlock New(risse_uint32 flags = 0,
+	tVariant New(risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty()) const // TODO: あれ、Thisは？
 	{
 		// Object 以外はクラスとしては機能しないため
@@ -1334,7 +1334,7 @@ public:
 		default:
 			ThrowCannotCreateInstanceFromNonClassObjectException(); break;
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
 	//-----------------------------------------------------------------------
@@ -1345,7 +1345,7 @@ public:
 	 * @param args	引数
 	 * @return	新しいインスタンス
 	 */
-	tVariantBlock New(
+	tVariant New(
 		const tString & name, risse_uint32 flags = 0,
 		const tMethodArgument & args = tMethodArgument::Empty()) const
 	{
@@ -1363,15 +1363,15 @@ public:
 		}
 	}
 
-	tVariantBlock New_Void    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Integer (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Real    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Null    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Boolean (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_String  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Octet   (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Data    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariantBlock(); /* incomplete */ }
-	tVariantBlock New_Object  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const;
+	tVariant New_Void    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Integer (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Real    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Null    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Boolean (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_String  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Octet   (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Data    (const tString & name, risse_uint32 flags, const tMethodArgument & args) const { return tVariant(); /* incomplete */ }
+	tVariant New_Object  (const tString & name, risse_uint32 flags, const tMethodArgument & args) const;
 
 
 	//-----------------------------------------------------------------------
@@ -1409,7 +1409,7 @@ public:
 	 * 単項 ~ 演算子		BitNot
 	 * @return	演算結果(通常、integerへのキャストのビットを反転させた物)
 	 */
-	tVariantBlock BitNot() const
+	tVariant BitNot() const
 	{
 		switch(GetType())
 		{
@@ -1423,10 +1423,10 @@ public:
 		case vtData:	return BitNot_Data     ();
 		case vtObject:	return BitNot_Object   ();
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock operator ~() const { return BitNot(); }
+	tVariant operator ~() const { return BitNot(); }
 
 	// 基本的にビットを反転させた物を返す。
 
@@ -1437,8 +1437,8 @@ public:
 	risse_int64   BitNot_Boolean  () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	risse_int64   BitNot_String   () const { ThrowIllegalOperationMethod(mnBitNot); return 0; }
 	tOctet        BitNot_Octet    () const { return ~AsOctet(); }
-	tVariantBlock BitNot_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitNot); }
-	tVariantBlock BitNot_Object   () const { return Invoke_Object(mnBitNot); }
+	tVariant BitNot_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitNot); }
+	tVariant BitNot_Object   () const { return Invoke_Object(mnBitNot); }
 
 	static int GuessTypeBitNot(tGuessType l)
 	{
@@ -1464,7 +1464,7 @@ public:
 	 * ++ 演算子			Inc
 	 * @return	演算結果(通常、+1 をした数値)
 	 */
-	tVariantBlock & Inc()
+	tVariant & Inc()
 	{
 		switch(GetType())
 		{
@@ -1481,18 +1481,18 @@ public:
 		return *this;
 	}
 
-	tVariantBlock & operator ++()    { /*前置*/ return Inc(); }
-	tVariantBlock   operator ++(int) { /*後置*/ tVariantBlock t = *this; Inc(); return t;}
+	tVariant & operator ++()    { /*前置*/ return Inc(); }
+	tVariant   operator ++(int) { /*後置*/ tVariant t = *this; Inc(); return t;}
 
-	tVariantBlock & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
-	tVariantBlock & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
-	tVariantBlock & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
-	tVariantBlock & Inc_Null     () { AddAssign((risse_int64)1); return *this; }
-	tVariantBlock & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
-	tVariantBlock & Inc_String   () { AddAssign((risse_int64)1); return *this; }
-	tVariantBlock & Inc_Octet    () { AddAssign((risse_int64)1); return *this; }
-	tVariantBlock & Inc_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnAdd, tVariantBlock((risse_int64)1)); return *this; }
-	tVariantBlock & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariantBlock((risse_int64)1)); return *this; }
+	tVariant & Inc_Void     () { *this = (risse_int64)1; /* void は 整数の 1になる */ return *this; }
+	tVariant & Inc_Integer  () { *this = AsInteger() + 1; return *this; }
+	tVariant & Inc_Real     () { *this = AsReal() + 1.0; return *this; }
+	tVariant & Inc_Null     () { AddAssign((risse_int64)1); return *this; }
+	tVariant & Inc_Boolean  () { AddAssign((risse_int64)1); return *this; }
+	tVariant & Inc_String   () { AddAssign((risse_int64)1); return *this; }
+	tVariant & Inc_Octet    () { AddAssign((risse_int64)1); return *this; }
+	tVariant & Inc_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnAdd, tVariant((risse_int64)1)); return *this; }
+	tVariant & Inc_Object   () { *this = Invoke_Object(mnAdd, tVariant((risse_int64)1)); return *this; }
 
 	static int GuessTypeInc(tGuessType l)
 	{
@@ -1518,7 +1518,7 @@ public:
 	 * -- 演算子			Dec
 	 * @return	演算結果(通常、-1 をした数値)
 	 */
-	tVariantBlock & Dec()
+	tVariant & Dec()
 	{
 		switch(GetType())
 		{
@@ -1535,18 +1535,18 @@ public:
 		return *this;
 	}
 
-	tVariantBlock & operator --()    { /*前置*/ return Dec(); }
-	tVariantBlock   operator --(int) { /*後置*/ tVariantBlock t = *this; Dec(); return t;}
+	tVariant & operator --()    { /*前置*/ return Dec(); }
+	tVariant   operator --(int) { /*後置*/ tVariant t = *this; Dec(); return t;}
 
-	tVariantBlock & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
-	tVariantBlock & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
-	tVariantBlock & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
-	tVariantBlock & Dec_Null     () { SubAssign((risse_int64)1); return *this; }
-	tVariantBlock & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
-	tVariantBlock & Dec_String   () { SubAssign((risse_int64)1); return *this; }
-	tVariantBlock & Dec_Octet    () { SubAssign((risse_int64)1); return *this; }
-	tVariantBlock & Dec_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnSub, tVariantBlock((risse_int64)1)); return *this; }
-	tVariantBlock & Dec_Object   () { *this = Invoke_Object(mnSub, tVariantBlock((risse_int64)1)); return *this; }
+	tVariant & Dec_Void     () { *this = (risse_int64)-1; /* void は 整数の -1になる */ return *this; }
+	tVariant & Dec_Integer  () { *this = AsInteger() - 1; return *this; }
+	tVariant & Dec_Real     () { *this = AsReal() - 1.0; return *this; }
+	tVariant & Dec_Null     () { SubAssign((risse_int64)1); return *this; }
+	tVariant & Dec_Boolean  () { SubAssign((risse_int64)1); return *this; }
+	tVariant & Dec_String   () { SubAssign((risse_int64)1); return *this; }
+	tVariant & Dec_Octet    () { SubAssign((risse_int64)1); return *this; }
+	tVariant & Dec_Data     () { *this = Invoke_Primitive(GetScriptEngine_Data(), mnSub, tVariant((risse_int64)1)); return *this; }
+	tVariant & Dec_Object   () { *this = Invoke_Object(mnSub, tVariant((risse_int64)1)); return *this; }
 
 	static int GuessTypeDec(tGuessType l)
 	{
@@ -1572,7 +1572,7 @@ public:
 	 * 単項 + 演算子		Plus
 	 * @return	演算結果(通常、数値へのキャスト)
 	 */
-	tVariantBlock Plus() const
+	tVariant Plus() const
 	{
 		switch(GetType())
 		{
@@ -1586,21 +1586,21 @@ public:
 		case vtData:	return Plus_Object   ();
 		case vtObject:	return Plus_Object   ();
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock operator +() const { return Plus(); }
+	tVariant operator +() const { return Plus(); }
 
-	tVariantBlock Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
-	tVariantBlock Plus_Integer  () const { return *this; }
-	tVariantBlock Plus_Real     () const { return *this; }
-	tVariantBlock Plus_Null     () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
-	tVariantBlock Plus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean() != false);
+	tVariant Plus_Void     () const { return (risse_int64)0; /* void は 整数の 0 */ }
+	tVariant Plus_Integer  () const { return *this; }
+	tVariant Plus_Real     () const { return *this; }
+	tVariant Plus_Null     () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
+	tVariant Plus_Boolean  () const { return (risse_int64)(CastToBoolean_Boolean() != false);
 	                                       /* boolean は 0 か 1 かに変換される */ }
-	tVariantBlock Plus_String   () const;
-	tVariantBlock Plus_Octet    () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
-	tVariantBlock Plus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnPlus); }
-	tVariantBlock Plus_Object   () const { return Invoke_Object(mnPlus); }
+	tVariant Plus_String   () const;
+	tVariant Plus_Octet    () const { ThrowIllegalOperationMethod(mnPlus); return *this; }
+	tVariant Plus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnPlus); }
+	tVariant Plus_Object   () const { return Invoke_Object(mnPlus); }
 
 	static int GuessTypePlus(tGuessType l)
 	{
@@ -1626,7 +1626,7 @@ public:
 	 * 単項 - 演算子		Minus
 	 * @return	演算結果(通常、符号が反転した物)
 	 */
-	tVariantBlock Minus() const
+	tVariant Minus() const
 	{
 		switch(GetType())
 		{
@@ -1640,20 +1640,20 @@ public:
 		case vtData:	return Minus_Data     ();
 		case vtObject:	return Minus_Object   ();
 		}
-		return tVariantBlock();
+		return tVariant();
 	}
 
-	tVariantBlock operator -() const { return Minus(); }
+	tVariant operator -() const { return Minus(); }
 
-	tVariantBlock Minus_Void     () const { return (risse_int64)0; }
-	tVariantBlock Minus_Integer  () const { return -AsInteger(); }
-	tVariantBlock Minus_Real     () const { return -AsReal(); }
-	tVariantBlock Minus_Null     () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
-	tVariantBlock Minus_Boolean  () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
-	tVariantBlock Minus_String   () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
-	tVariantBlock Minus_Octet    () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
-	tVariantBlock Minus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnMinus); }
-	tVariantBlock Minus_Object   () const { return Invoke_Object(mnMinus); }
+	tVariant Minus_Void     () const { return (risse_int64)0; }
+	tVariant Minus_Integer  () const { return -AsInteger(); }
+	tVariant Minus_Real     () const { return -AsReal(); }
+	tVariant Minus_Null     () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariant Minus_Boolean  () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariant Minus_String   () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariant Minus_Octet    () const { ThrowIllegalOperationMethod(mnMinus); return *this; }
+	tVariant Minus_Data     () const { return Invoke_Primitive(GetScriptEngine_Data(), mnMinus); }
+	tVariant Minus_Object   () const { return Invoke_Object(mnMinus); }
 
 	static int GuessTypeMinus(tGuessType l)
 	{
@@ -1682,29 +1682,29 @@ public:
 	 *			右辺は評価されない
 	 * @note	この演算子の戻り値は常に bool
 	 */
-	bool LogOr(const tVariantBlock & rhs) const
+	bool LogOr(const tVariant & rhs) const
 	{
 		return (bool)*this || (bool)rhs; // 短絡を行う
 	}
 
-	bool operator ||(const tVariantBlock & rhs) const { return LogOr(rhs); }
+	bool operator ||(const tVariant & rhs) const { return LogOr(rhs); }
 
-	bool LogOr_Void     (const tVariantBlock & rhs) const { return rhs.operator bool(); }
-	bool LogOr_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
-	bool LogOr_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
-	bool LogOr_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
-	bool LogOr_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
-	bool LogOr_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
-	bool LogOr_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
-	bool LogOr_Data     (const tVariantBlock & rhs) const { return CastToBoolean_Data   () || rhs.operator bool(); }
-	bool LogOr_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
+	bool LogOr_Void     (const tVariant & rhs) const { return rhs.operator bool(); }
+	bool LogOr_Integer  (const tVariant & rhs) const { return CastToBoolean_Integer() || rhs.operator bool(); }
+	bool LogOr_Real     (const tVariant & rhs) const { return CastToBoolean_Real   () || rhs.operator bool(); }
+	bool LogOr_Null     (const tVariant & rhs) const { return CastToBoolean_Null   () || rhs.operator bool(); }
+	bool LogOr_Boolean  (const tVariant & rhs) const { return CastToBoolean_Boolean() || rhs.operator bool(); }
+	bool LogOr_String   (const tVariant & rhs) const { return CastToBoolean_String () || rhs.operator bool(); }
+	bool LogOr_Octet    (const tVariant & rhs) const { return CastToBoolean_Octet  () || rhs.operator bool(); }
+	bool LogOr_Data     (const tVariant & rhs) const { return CastToBoolean_Data   () || rhs.operator bool(); }
+	bool LogOr_Object   (const tVariant & rhs) const { return CastToBoolean_Object () || rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	/**
 	 * ||= 演算子		LogOrAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & LogOrAssign(const tVariantBlock & rhs)
+	tVariant & LogOrAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LogOr(rhs);
@@ -1719,29 +1719,29 @@ public:
 	 *			右辺は評価されない
 	 * @note	この演算子の戻り値は常に bool
 	 */
-	bool LogAnd(const tVariantBlock & rhs) const
+	bool LogAnd(const tVariant & rhs) const
 	{
 		return (bool)*this && (bool)rhs; // 短絡を行う
 	}
 
-	bool operator &&(const tVariantBlock & rhs) const { return LogAnd(rhs); }
+	bool operator &&(const tVariant & rhs) const { return LogAnd(rhs); }
 
-	bool LogAnd_Void     (const tVariantBlock & rhs) const { return false; }
-	bool LogAnd_Integer  (const tVariantBlock & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
-	bool LogAnd_Real     (const tVariantBlock & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
-	bool LogAnd_Null     (const tVariantBlock & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
-	bool LogAnd_Boolean  (const tVariantBlock & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
-	bool LogAnd_String   (const tVariantBlock & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
-	bool LogAnd_Octet    (const tVariantBlock & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
-	bool LogAnd_Data     (const tVariantBlock & rhs) const { return CastToBoolean_Data   () && rhs.operator bool(); }
-	bool LogAnd_Object   (const tVariantBlock & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
+	bool LogAnd_Void     (const tVariant & rhs) const { return false; }
+	bool LogAnd_Integer  (const tVariant & rhs) const { return CastToBoolean_Integer() && rhs.operator bool(); }
+	bool LogAnd_Real     (const tVariant & rhs) const { return CastToBoolean_Real   () && rhs.operator bool(); }
+	bool LogAnd_Null     (const tVariant & rhs) const { return CastToBoolean_Null   () && rhs.operator bool(); }
+	bool LogAnd_Boolean  (const tVariant & rhs) const { return CastToBoolean_Boolean() && rhs.operator bool(); }
+	bool LogAnd_String   (const tVariant & rhs) const { return CastToBoolean_String () && rhs.operator bool(); }
+	bool LogAnd_Octet    (const tVariant & rhs) const { return CastToBoolean_Octet  () && rhs.operator bool(); }
+	bool LogAnd_Data     (const tVariant & rhs) const { return CastToBoolean_Data   () && rhs.operator bool(); }
+	bool LogAnd_Object   (const tVariant & rhs) const { return CastToBoolean_Object () && rhs.operator bool(); }
 
 	//-----------------------------------------------------------------------
 	/**
 	 * &&= 演算子		LogAndAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & LogAndAssign(const tVariantBlock & rhs)
+	tVariant & LogAndAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LogAnd(rhs);
@@ -1753,7 +1753,7 @@ public:
 	 * | 演算子		BitOr
 	 * @return	演算結果(通常、双方のintegerキャストのビット和)
 	 */
-	tVariantBlock BitOr(const tVariantBlock & rhs) const
+	tVariant BitOr(const tVariant & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1772,17 +1772,17 @@ public:
 		return (risse_int64)0;
 	}
 
-	tVariantBlock operator |(const tVariantBlock & rhs) const { return BitOr(rhs); }
+	tVariant operator |(const tVariant & rhs) const { return BitOr(rhs); }
 
-	tVariantBlock BitOr_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_String   (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitOr_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitOr, rhs); }
-	tVariantBlock BitOr_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitOr, rhs); }
+	tVariant BitOr_Void     (const tVariant & rhs) const;
+	tVariant BitOr_Integer  (const tVariant & rhs) const;
+	tVariant BitOr_Real     (const tVariant & rhs) const;
+	tVariant BitOr_Null     (const tVariant & rhs) const;
+	tVariant BitOr_Boolean  (const tVariant & rhs) const;
+	tVariant BitOr_String   (const tVariant & rhs) const;
+	tVariant BitOr_Octet    (const tVariant & rhs) const;
+	tVariant BitOr_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitOr, rhs); }
+	tVariant BitOr_Object   (const tVariant & rhs) const { return Invoke_Object(mnBitOr, rhs); }
 
 	static int GuessTypeBitOr(tGuessType l, tGuessType r)
 	{
@@ -1818,21 +1818,21 @@ public:
 	 * |= 演算子		BitOrAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & BitOrAssign(const tVariantBlock & rhs)
+	tVariant & BitOrAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitOr(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator |=(const tVariantBlock & rhs) { return BitOrAssign(rhs); }
+	tVariant & operator |=(const tVariant & rhs) { return BitOrAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
 	 * ^ 演算子		BitXor
 	 * @return	演算結果(通常、双方のintegerキャストのビット排他的論理和)
 	 */
-	tVariantBlock BitXor(const tVariantBlock & rhs) const
+	tVariant BitXor(const tVariant & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1851,17 +1851,17 @@ public:
 		return (risse_int64)0;
 	}
 
-	tVariantBlock operator ^(const tVariantBlock & rhs) const { return BitXor(rhs); }
+	tVariant operator ^(const tVariant & rhs) const { return BitXor(rhs); }
 
-	tVariantBlock BitXor_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_String   (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitXor_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitXor, rhs); }
-	tVariantBlock BitXor_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitXor, rhs); }
+	tVariant BitXor_Void     (const tVariant & rhs) const;
+	tVariant BitXor_Integer  (const tVariant & rhs) const;
+	tVariant BitXor_Real     (const tVariant & rhs) const;
+	tVariant BitXor_Null     (const tVariant & rhs) const;
+	tVariant BitXor_Boolean  (const tVariant & rhs) const;
+	tVariant BitXor_String   (const tVariant & rhs) const;
+	tVariant BitXor_Octet    (const tVariant & rhs) const;
+	tVariant BitXor_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitXor, rhs); }
+	tVariant BitXor_Object   (const tVariant & rhs) const { return Invoke_Object(mnBitXor, rhs); }
 
 	static int GuessTypeBitXor(tGuessType l, tGuessType r)
 	{
@@ -1897,21 +1897,21 @@ public:
 	 * ^= 演算子		BitXorAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & BitXorAssign(const tVariantBlock & rhs)
+	tVariant & BitXorAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitXor(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator ^=(const tVariantBlock & rhs) { return BitXorAssign(rhs); }
+	tVariant & operator ^=(const tVariant & rhs) { return BitXorAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
 	 * & 演算子		BitAnd
 	 * @return	演算結果(通常、双方のintegerキャストのビット論理積)
 	 */
-	tVariantBlock BitAnd(const tVariantBlock & rhs) const
+	tVariant BitAnd(const tVariant & rhs) const
 	{
 		// vtObject の場合は演算子がオーバーロードされている可能性があるため、
 		// 戻り値は integer ではないかもしれない。
@@ -1930,17 +1930,17 @@ public:
 		return (risse_int64)0;
 	}
 
-	tVariantBlock operator &(const tVariantBlock & rhs) const { return BitAnd(rhs); }
+	tVariant operator &(const tVariant & rhs) const { return BitAnd(rhs); }
 
-	tVariantBlock BitAnd_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_String   (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock BitAnd_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitAnd, rhs); }
-	tVariantBlock BitAnd_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
+	tVariant BitAnd_Void     (const tVariant & rhs) const;
+	tVariant BitAnd_Integer  (const tVariant & rhs) const;
+	tVariant BitAnd_Real     (const tVariant & rhs) const;
+	tVariant BitAnd_Null     (const tVariant & rhs) const;
+	tVariant BitAnd_Boolean  (const tVariant & rhs) const;
+	tVariant BitAnd_String   (const tVariant & rhs) const;
+	tVariant BitAnd_Octet    (const tVariant & rhs) const;
+	tVariant BitAnd_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnBitAnd, rhs); }
+	tVariant BitAnd_Object   (const tVariant & rhs) const { return Invoke_Object(mnBitAnd, rhs); }
 
 	static int GuessTypeBitAnd(tGuessType l, tGuessType r)
 	{
@@ -1976,14 +1976,14 @@ public:
 	 * &= 演算子		BitAndAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & BitAndAssign(const tVariantBlock & rhs)
+	tVariant & BitAndAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->BitAnd(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator &=(const tVariantBlock & rhs) { return BitAndAssign(rhs); }
+	tVariant & operator &=(const tVariant & rhs) { return BitAndAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -1991,7 +1991,7 @@ public:
 	 * @return	演算結果
 	 * @note	この演算子の戻り値は常に bool
 	 */
-	bool NotEqual(const tVariantBlock & rhs) const
+	bool NotEqual(const tVariant & rhs) const
 	{
 		// vtObject 以外は == 演算子の真偽を逆にした物である
 		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
@@ -2003,17 +2003,17 @@ public:
 		}
 	}
 
-	bool operator !=(const tVariantBlock & rhs) const { return NotEqual(rhs); }
+	bool operator !=(const tVariant & rhs) const { return NotEqual(rhs); }
 
-	bool NotEqual_Void     (const tVariantBlock & rhs) const { return !Equal_Void   (rhs); }
-	bool NotEqual_Integer  (const tVariantBlock & rhs) const { return !Equal_Integer(rhs); }
-	bool NotEqual_Real     (const tVariantBlock & rhs) const { return !Equal_Real   (rhs); }
-	bool NotEqual_Null     (const tVariantBlock & rhs) const { return !Equal_Null   (rhs); }
-	bool NotEqual_Boolean  (const tVariantBlock & rhs) const { return !Equal_Boolean(rhs); }
-	bool NotEqual_String   (const tVariantBlock & rhs) const { return !Equal_String (rhs); }
-	bool NotEqual_Octet    (const tVariantBlock & rhs) const { return !Equal_Octet  (rhs); }
-	bool NotEqual_Data     (const tVariantBlock & rhs) const { return !Equal_Data   (rhs); }
-	bool NotEqual_Object   (const tVariantBlock & rhs) const { return !Equal_Object (rhs); }
+	bool NotEqual_Void     (const tVariant & rhs) const { return !Equal_Void   (rhs); }
+	bool NotEqual_Integer  (const tVariant & rhs) const { return !Equal_Integer(rhs); }
+	bool NotEqual_Real     (const tVariant & rhs) const { return !Equal_Real   (rhs); }
+	bool NotEqual_Null     (const tVariant & rhs) const { return !Equal_Null   (rhs); }
+	bool NotEqual_Boolean  (const tVariant & rhs) const { return !Equal_Boolean(rhs); }
+	bool NotEqual_String   (const tVariant & rhs) const { return !Equal_String (rhs); }
+	bool NotEqual_Octet    (const tVariant & rhs) const { return !Equal_Octet  (rhs); }
+	bool NotEqual_Data     (const tVariant & rhs) const { return !Equal_Data   (rhs); }
+	bool NotEqual_Object   (const tVariant & rhs) const { return !Equal_Object (rhs); }
 
 	static int GuessTypeNotEqual(tGuessType l, tGuessType r)
 	{
@@ -2026,7 +2026,7 @@ public:
 	 * @return	演算結果
 	 * @note	この演算子の戻り値は常に bool
 	 */
-	tVariantBlock Equal(const tVariantBlock & rhs) const
+	tVariant Equal(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2043,17 +2043,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator ==(const tVariantBlock & rhs) const { return Equal(rhs); }
+	tVariant operator ==(const tVariant & rhs) const { return Equal(rhs); }
 
-	bool Equal_Void     (const tVariantBlock & rhs) const;
-	bool Equal_Integer  (const tVariantBlock & rhs) const;
-	bool Equal_Real     (const tVariantBlock & rhs) const;
-	bool Equal_Null     (const tVariantBlock & rhs) const;
-	bool Equal_Boolean  (const tVariantBlock & rhs) const;
-	bool Equal_String   (const tVariantBlock & rhs) const;
-	bool Equal_Octet    (const tVariantBlock & rhs) const;
-	bool Equal_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnEqual, rhs).CastToBoolean(); }
-	bool Equal_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnEqual, rhs).CastToBoolean(); }
+	bool Equal_Void     (const tVariant & rhs) const;
+	bool Equal_Integer  (const tVariant & rhs) const;
+	bool Equal_Real     (const tVariant & rhs) const;
+	bool Equal_Null     (const tVariant & rhs) const;
+	bool Equal_Boolean  (const tVariant & rhs) const;
+	bool Equal_String   (const tVariant & rhs) const;
+	bool Equal_Octet    (const tVariant & rhs) const;
+	bool Equal_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnEqual, rhs).CastToBoolean(); }
+	bool Equal_Object   (const tVariant & rhs) const { return Invoke_Object(mnEqual, rhs).CastToBoolean(); }
 
 	static int GuessTypeEqual(tGuessType l, tGuessType r)
 	{
@@ -2071,7 +2071,7 @@ public:
 	 * @return	演算結果
 	 * @note	この演算子の戻り値は常に bool
 	 */
-	bool DiscNotEqual(const tVariantBlock & rhs) const
+	bool DiscNotEqual(const tVariant & rhs) const
 	{
 		// vtObject 以外は === 演算子の真偽を逆にした物である
 		// vtObject の場合はオブジェクトによって振る舞いが異なる(ように定義できる)
@@ -2083,15 +2083,15 @@ public:
 		}
 	}
 
-	bool DiscNotEqual_Void     (const tVariantBlock & rhs) const { return !DiscEqual_Void   (rhs); }
-	bool DiscNotEqual_Integer  (const tVariantBlock & rhs) const { return !DiscEqual_Integer(rhs); }
-	bool DiscNotEqual_Real     (const tVariantBlock & rhs) const { return !DiscEqual_Real   (rhs); }
-	bool DiscNotEqual_Null     (const tVariantBlock & rhs) const { return !DiscEqual_Null   (rhs); }
-	bool DiscNotEqual_Boolean  (const tVariantBlock & rhs) const { return !DiscEqual_Boolean(rhs); }
-	bool DiscNotEqual_String   (const tVariantBlock & rhs) const { return !DiscEqual_String (rhs); }
-	bool DiscNotEqual_Octet    (const tVariantBlock & rhs) const { return !DiscEqual_Octet  (rhs); }
-	bool DiscNotEqual_Data     (const tVariantBlock & rhs) const { return !DiscEqual_Data   (rhs); }
-	bool DiscNotEqual_Object   (const tVariantBlock & rhs) const { return !DiscEqual_Object (rhs); }
+	bool DiscNotEqual_Void     (const tVariant & rhs) const { return !DiscEqual_Void   (rhs); }
+	bool DiscNotEqual_Integer  (const tVariant & rhs) const { return !DiscEqual_Integer(rhs); }
+	bool DiscNotEqual_Real     (const tVariant & rhs) const { return !DiscEqual_Real   (rhs); }
+	bool DiscNotEqual_Null     (const tVariant & rhs) const { return !DiscEqual_Null   (rhs); }
+	bool DiscNotEqual_Boolean  (const tVariant & rhs) const { return !DiscEqual_Boolean(rhs); }
+	bool DiscNotEqual_String   (const tVariant & rhs) const { return !DiscEqual_String (rhs); }
+	bool DiscNotEqual_Octet    (const tVariant & rhs) const { return !DiscEqual_Octet  (rhs); }
+	bool DiscNotEqual_Data     (const tVariant & rhs) const { return !DiscEqual_Data   (rhs); }
+	bool DiscNotEqual_Object   (const tVariant & rhs) const { return !DiscEqual_Object (rhs); }
 
 	static int GuessTypeDiscNotEqual(tGuessType l, tGuessType r)
 	{
@@ -2104,7 +2104,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	識別の結果、同一ならば真、そうでなければ偽
 	 */
-	bool DiscEqual(const tVariantBlock & rhs) const
+	bool DiscEqual(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2121,23 +2121,23 @@ public:
 		return false;
 	}
 
-	bool DiscEqual_Void     (const tVariantBlock & rhs) const
+	bool DiscEqual_Void     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtVoid; }
-	bool DiscEqual_Integer  (const tVariantBlock & rhs) const
+	bool DiscEqual_Integer  (const tVariant & rhs) const
 			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
-	bool DiscEqual_Real     (const tVariantBlock & rhs) const
+	bool DiscEqual_Real     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtReal && rhs.AsReal() == AsReal(); }
-	bool DiscEqual_Null     (const tVariantBlock & rhs) const
+	bool DiscEqual_Null     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtNull; }
-	bool DiscEqual_Boolean  (const tVariantBlock & rhs) const
+	bool DiscEqual_Boolean  (const tVariant & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
-	bool DiscEqual_String   (const tVariantBlock & rhs) const
+	bool DiscEqual_String   (const tVariant & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
-	bool DiscEqual_Octet    (const tVariantBlock & rhs) const
+	bool DiscEqual_Octet    (const tVariant & rhs) const
 			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
-	bool DiscEqual_Data     (const tVariantBlock & rhs) const
+	bool DiscEqual_Data     (const tVariant & rhs) const
 			{ return Invoke_Primitive(GetScriptEngine_Data(), mnDiscEqual, rhs).CastToBoolean(); }
-	bool DiscEqual_Object   (const tVariantBlock & rhs) const
+	bool DiscEqual_Object   (const tVariant & rhs) const
 			{ return Invoke_Object(mnDiscEqual, rhs).CastToBoolean(); }
 
 	static int GuessTypeDiscEqual(tGuessType l, tGuessType r)
@@ -2159,7 +2159,7 @@ public:
 	 *			オブジェクト型の場合、インスタンスのポインタが同一があることで
 	 *			真とみなす。
 	 */
-	bool StrictEqual(const tVariantBlock & rhs) const
+	bool StrictEqual(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2176,22 +2176,22 @@ public:
 		return false;
 	}
 
-	bool StrictEqual_Void     (const tVariantBlock & rhs) const
+	bool StrictEqual_Void     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtVoid; }
-	bool StrictEqual_Integer  (const tVariantBlock & rhs) const
+	bool StrictEqual_Integer  (const tVariant & rhs) const
 			{ return rhs.GetType() == vtInteger && rhs.AsInteger() == AsInteger(); }
-	bool StrictEqual_Real     (const tVariantBlock & rhs) const;
-	bool StrictEqual_Null     (const tVariantBlock & rhs) const
+	bool StrictEqual_Real     (const tVariant & rhs) const;
+	bool StrictEqual_Null     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtNull; }
-	bool StrictEqual_Boolean  (const tVariantBlock & rhs) const
+	bool StrictEqual_Boolean  (const tVariant & rhs) const
 			{ return rhs.GetType() == vtBoolean && rhs.CastToBoolean_Boolean() == CastToBoolean_Boolean(); }
-	bool StrictEqual_String   (const tVariantBlock & rhs) const
+	bool StrictEqual_String   (const tVariant & rhs) const
 			{ return rhs.GetType() == vtString && rhs.AsString() == AsString(); }
-	bool StrictEqual_Octet    (const tVariantBlock & rhs) const
+	bool StrictEqual_Octet    (const tVariant & rhs) const
 			{ return rhs.GetType() == vtOctet && rhs.AsOctet() == AsOctet(); }
-	bool StrictEqual_Data     (const tVariantBlock & rhs) const
+	bool StrictEqual_Data     (const tVariant & rhs) const
 			{ return rhs.GetType() == vtData && rhs.AsData().StrictEqual(AsData()); }
-	bool StrictEqual_Object   (const tVariantBlock & rhs) const
+	bool StrictEqual_Object   (const tVariant & rhs) const
 			{ return rhs.GetType() == vtObject && rhs.AsObject().StrictEqual(AsObject()); }
 
 	//-----------------------------------------------------------------------
@@ -2201,7 +2201,7 @@ public:
 	 * @return	同定の結果、同一ならば真、そうでなければ偽。
 	 *			Dictionary のキーの比較に用いられる。
 	 */
-	bool Identify(const tVariantBlock & rhs) const
+	bool Identify(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2218,15 +2218,15 @@ public:
 		return false;
 	}
 
-	bool Identify_Void     (const tVariantBlock & rhs) const { return StrictEqual_Void     (rhs); }
-	bool Identify_Integer  (const tVariantBlock & rhs) const { return StrictEqual_Integer  (rhs); }
-	bool Identify_Real     (const tVariantBlock & rhs) const { return StrictEqual_Real     (rhs); }
-	bool Identify_Null     (const tVariantBlock & rhs) const { return StrictEqual_Null     (rhs); }
-	bool Identify_String   (const tVariantBlock & rhs) const { return StrictEqual_String   (rhs); }
-	bool Identify_Octet    (const tVariantBlock & rhs) const { return StrictEqual_Octet    (rhs); }
-	bool Identify_Boolean  (const tVariantBlock & rhs) const { return StrictEqual_Boolean  (rhs); }
-	bool Identify_Data     (const tVariantBlock & rhs) const;
-	bool Identify_Object   (const tVariantBlock & rhs) const;
+	bool Identify_Void     (const tVariant & rhs) const { return StrictEqual_Void     (rhs); }
+	bool Identify_Integer  (const tVariant & rhs) const { return StrictEqual_Integer  (rhs); }
+	bool Identify_Real     (const tVariant & rhs) const { return StrictEqual_Real     (rhs); }
+	bool Identify_Null     (const tVariant & rhs) const { return StrictEqual_Null     (rhs); }
+	bool Identify_String   (const tVariant & rhs) const { return StrictEqual_String   (rhs); }
+	bool Identify_Octet    (const tVariant & rhs) const { return StrictEqual_Octet    (rhs); }
+	bool Identify_Boolean  (const tVariant & rhs) const { return StrictEqual_Boolean  (rhs); }
+	bool Identify_Data     (const tVariant & rhs) const;
+	bool Identify_Object   (const tVariant & rhs) const;
 
 	//-----------------------------------------------------------------------
 	/**
@@ -2234,7 +2234,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	*this < rhs ならば真
 	 */
-	bool Lesser(const tVariantBlock & rhs) const
+	bool Lesser(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2251,17 +2251,17 @@ public:
 		return false;
 	}
 
-	bool operator < (const tVariantBlock & rhs) const { return Lesser(rhs); }
+	bool operator < (const tVariant & rhs) const { return Lesser(rhs); }
 
-	bool Lesser_Void     (const tVariantBlock & rhs) const;
-	bool Lesser_Integer  (const tVariantBlock & rhs) const;
-	bool Lesser_Real     (const tVariantBlock & rhs) const;
-	bool Lesser_Null     (const tVariantBlock & rhs) const;
-	bool Lesser_Boolean  (const tVariantBlock & rhs) const;
-	bool Lesser_String   (const tVariantBlock & rhs) const;
-	bool Lesser_Octet    (const tVariantBlock & rhs) const;
-	bool Lesser_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesser, rhs); }
-	bool Lesser_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesser, rhs); }
+	bool Lesser_Void     (const tVariant & rhs) const;
+	bool Lesser_Integer  (const tVariant & rhs) const;
+	bool Lesser_Real     (const tVariant & rhs) const;
+	bool Lesser_Null     (const tVariant & rhs) const;
+	bool Lesser_Boolean  (const tVariant & rhs) const;
+	bool Lesser_String   (const tVariant & rhs) const;
+	bool Lesser_Octet    (const tVariant & rhs) const;
+	bool Lesser_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesser, rhs); }
+	bool Lesser_Object   (const tVariant & rhs) const { return Invoke_Object(mnLesser, rhs); }
 
 	static int GuessTypeLesser(tGuessType l, tGuessType r)
 	{
@@ -2298,7 +2298,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	*this > rhs ならば真
 	 */
-	bool Greater(const tVariantBlock & rhs) const
+	bool Greater(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2315,17 +2315,17 @@ public:
 		return false;
 	}
 
-	bool operator > (const tVariantBlock & rhs) const { return Greater(rhs); }
+	bool operator > (const tVariant & rhs) const { return Greater(rhs); }
 
-	bool Greater_Void     (const tVariantBlock & rhs) const;
-	bool Greater_Integer  (const tVariantBlock & rhs) const;
-	bool Greater_Real     (const tVariantBlock & rhs) const;
-	bool Greater_Null     (const tVariantBlock & rhs) const;
-	bool Greater_Boolean  (const tVariantBlock & rhs) const;
-	bool Greater_String   (const tVariantBlock & rhs) const;
-	bool Greater_Octet    (const tVariantBlock & rhs) const;
-	bool Greater_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreater, rhs); }
-	bool Greater_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreater, rhs); }
+	bool Greater_Void     (const tVariant & rhs) const;
+	bool Greater_Integer  (const tVariant & rhs) const;
+	bool Greater_Real     (const tVariant & rhs) const;
+	bool Greater_Null     (const tVariant & rhs) const;
+	bool Greater_Boolean  (const tVariant & rhs) const;
+	bool Greater_String   (const tVariant & rhs) const;
+	bool Greater_Octet    (const tVariant & rhs) const;
+	bool Greater_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreater, rhs); }
+	bool Greater_Object   (const tVariant & rhs) const { return Invoke_Object(mnGreater, rhs); }
 
 	static int GuessTypeGreater(tGuessType l, tGuessType r)
 	{
@@ -2362,7 +2362,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	*this < rhs ならば真
 	 */
-	bool LesserOrEqual(const tVariantBlock & rhs) const
+	bool LesserOrEqual(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2379,17 +2379,17 @@ public:
 		return false;
 	}
 
-	bool operator <= (const tVariantBlock & rhs) const { return LesserOrEqual(rhs); }
+	bool operator <= (const tVariant & rhs) const { return LesserOrEqual(rhs); }
 
-	bool LesserOrEqual_Void     (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Integer  (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Real     (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Null     (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Boolean  (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_String   (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Octet    (const tVariantBlock & rhs) const;
-	bool LesserOrEqual_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesserOrEqual, rhs); }
-	bool LesserOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
+	bool LesserOrEqual_Void     (const tVariant & rhs) const;
+	bool LesserOrEqual_Integer  (const tVariant & rhs) const;
+	bool LesserOrEqual_Real     (const tVariant & rhs) const;
+	bool LesserOrEqual_Null     (const tVariant & rhs) const;
+	bool LesserOrEqual_Boolean  (const tVariant & rhs) const;
+	bool LesserOrEqual_String   (const tVariant & rhs) const;
+	bool LesserOrEqual_Octet    (const tVariant & rhs) const;
+	bool LesserOrEqual_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLesserOrEqual, rhs); }
+	bool LesserOrEqual_Object   (const tVariant & rhs) const { return Invoke_Object(mnLesserOrEqual, rhs); }
 
 
 	static int GuessTypeLesserOrEqual(tGuessType l, tGuessType r)
@@ -2427,7 +2427,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	*this < rhs ならば真
 	 */
-	bool GreaterOrEqual(const tVariantBlock & rhs) const
+	bool GreaterOrEqual(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2444,17 +2444,17 @@ public:
 		return false;
 	}
 
-	bool operator >= (const tVariantBlock & rhs) const { return GreaterOrEqual(rhs); }
+	bool operator >= (const tVariant & rhs) const { return GreaterOrEqual(rhs); }
 
-	bool GreaterOrEqual_Void     (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Integer  (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Real     (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Null     (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_String   (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Octet    (const tVariantBlock & rhs) const;
-	bool GreaterOrEqual_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreaterOrEqual, rhs); }
-	bool GreaterOrEqual_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
+	bool GreaterOrEqual_Void     (const tVariant & rhs) const;
+	bool GreaterOrEqual_Integer  (const tVariant & rhs) const;
+	bool GreaterOrEqual_Real     (const tVariant & rhs) const;
+	bool GreaterOrEqual_Null     (const tVariant & rhs) const;
+	bool GreaterOrEqual_Boolean  (const tVariant & rhs) const;
+	bool GreaterOrEqual_String   (const tVariant & rhs) const;
+	bool GreaterOrEqual_Octet    (const tVariant & rhs) const;
+	bool GreaterOrEqual_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnGreaterOrEqual, rhs); }
+	bool GreaterOrEqual_Object   (const tVariant & rhs) const { return Invoke_Object(mnGreaterOrEqual, rhs); }
 
 	static int GuessTypeGreaterOrEqual(tGuessType l, tGuessType r)
 	{
@@ -2493,7 +2493,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integer だとは限らない
 	 */
-	tVariantBlock RBitShift(const tVariantBlock & rhs) const
+	tVariant RBitShift(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2510,15 +2510,15 @@ public:
 		return false;
 	}
 
-	tVariantBlock RBitShift_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_String   (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock RBitShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRBitShift, rhs); }
-	tVariantBlock RBitShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
+	tVariant RBitShift_Void     (const tVariant & rhs) const;
+	tVariant RBitShift_Integer  (const tVariant & rhs) const;
+	tVariant RBitShift_Real     (const tVariant & rhs) const;
+	tVariant RBitShift_Null     (const tVariant & rhs) const;
+	tVariant RBitShift_Boolean  (const tVariant & rhs) const;
+	tVariant RBitShift_String   (const tVariant & rhs) const;
+	tVariant RBitShift_Octet    (const tVariant & rhs) const;
+	tVariant RBitShift_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRBitShift, rhs); }
+	tVariant RBitShift_Object   (const tVariant & rhs) const { return Invoke_Object(mnRBitShift, rhs); }
 
 	static int GuessTypeRBitShift(tGuessType l, tGuessType r)
 	{
@@ -2554,7 +2554,7 @@ public:
 	 * >>>= 演算子		RBitShiftAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & RBitShiftAssign(const tVariantBlock & rhs)
+	tVariant & RBitShiftAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->RBitShift(rhs);
@@ -2571,7 +2571,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integer だとは限らない
 	 */
-	tVariantBlock LShift(const tVariantBlock & rhs) const
+	tVariant LShift(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2588,17 +2588,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator << (const tVariantBlock & rhs) const { return LShift(rhs); }
+	tVariant operator << (const tVariant & rhs) const { return LShift(rhs); }
 
-	tVariantBlock LShift_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_String   (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock LShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLShift, rhs); }
-	tVariantBlock LShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnLShift, rhs); }
+	tVariant LShift_Void     (const tVariant & rhs) const;
+	tVariant LShift_Integer  (const tVariant & rhs) const;
+	tVariant LShift_Real     (const tVariant & rhs) const;
+	tVariant LShift_Null     (const tVariant & rhs) const;
+	tVariant LShift_Boolean  (const tVariant & rhs) const;
+	tVariant LShift_String   (const tVariant & rhs) const;
+	tVariant LShift_Octet    (const tVariant & rhs) const;
+	tVariant LShift_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnLShift, rhs); }
+	tVariant LShift_Object   (const tVariant & rhs) const { return Invoke_Object(mnLShift, rhs); }
 
 	static int GuessTypeLShift(tGuessType l, tGuessType r)
 	{
@@ -2634,14 +2634,14 @@ public:
 	 * <<= 演算子		LShiftAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & LShiftAssign(const tVariantBlock & rhs)
+	tVariant & LShiftAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->LShift(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator <<=(const tVariantBlock & rhs) { return LShiftAssign(rhs); }
+	tVariant & operator <<=(const tVariant & rhs) { return LShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -2651,7 +2651,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integer だとは限らない
 	 */
-	tVariantBlock RShift(const tVariantBlock & rhs) const
+	tVariant RShift(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2668,17 +2668,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator >> (const tVariantBlock & rhs) const { return RShift(rhs); }
+	tVariant operator >> (const tVariant & rhs) const { return RShift(rhs); }
 
-	tVariantBlock RShift_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_String   (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock RShift_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRShift, rhs); }
-	tVariantBlock RShift_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnRShift, rhs); }
+	tVariant RShift_Void     (const tVariant & rhs) const;
+	tVariant RShift_Integer  (const tVariant & rhs) const;
+	tVariant RShift_Real     (const tVariant & rhs) const;
+	tVariant RShift_Null     (const tVariant & rhs) const;
+	tVariant RShift_Boolean  (const tVariant & rhs) const;
+	tVariant RShift_String   (const tVariant & rhs) const;
+	tVariant RShift_Octet    (const tVariant & rhs) const;
+	tVariant RShift_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnRShift, rhs); }
+	tVariant RShift_Object   (const tVariant & rhs) const { return Invoke_Object(mnRShift, rhs); }
 
 	static int GuessTypeRShift(tGuessType l, tGuessType r)
 	{
@@ -2714,14 +2714,14 @@ public:
 	 * >>= 演算子		RShiftAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & RShiftAssign(const tVariantBlock & rhs)
+	tVariant & RShiftAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->RShift(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator >>=(const tVariantBlock & rhs) { return RShiftAssign(rhs); }
+	tVariant & operator >>=(const tVariant & rhs) { return RShiftAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -2731,7 +2731,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integer だとは限らない
 	 */
-	tVariantBlock Mod(const tVariantBlock & rhs) const
+	tVariant Mod(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2748,17 +2748,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator % (const tVariantBlock & rhs) const { return Mod(rhs); }
+	tVariant operator % (const tVariant & rhs) const { return Mod(rhs); }
 
-	tVariantBlock Mod_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Mod_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMod, rhs); }
-	tVariantBlock Mod_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMod, rhs); }
+	tVariant Mod_Void     (const tVariant & rhs) const;
+	tVariant Mod_Integer  (const tVariant & rhs) const;
+	tVariant Mod_Real     (const tVariant & rhs) const;
+	tVariant Mod_Null     (const tVariant & rhs) const;
+	tVariant Mod_Boolean  (const tVariant & rhs) const;
+	tVariant Mod_String   (const tVariant & rhs) const;
+	tVariant Mod_Octet    (const tVariant & rhs) const;
+	tVariant Mod_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMod, rhs); }
+	tVariant Mod_Object   (const tVariant & rhs) const { return Invoke_Object(mnMod, rhs); }
 
 	static int GuessTypeMod(tGuessType l, tGuessType r)
 	{
@@ -2794,14 +2794,14 @@ public:
 	 * %= 演算子		ModAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & ModAssign(const tVariantBlock & rhs)
+	tVariant & ModAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Mod(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator %=(const tVariantBlock & rhs) { return ModAssign(rhs); }
+	tVariant & operator %=(const tVariant & rhs) { return ModAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -2811,7 +2811,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が real だとは限らない
 	 */
-	tVariantBlock Div(const tVariantBlock & rhs) const
+	tVariant Div(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2828,17 +2828,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator / (const tVariantBlock & rhs) const { return Div(rhs); }
+	tVariant operator / (const tVariant & rhs) const { return Div(rhs); }
 
-	tVariantBlock Div_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Div_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Div_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnDiv, rhs); }
-	tVariantBlock Div_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnDiv, rhs); }
+	tVariant Div_Void     (const tVariant & rhs) const;
+	tVariant Div_Integer  (const tVariant & rhs) const;
+	tVariant Div_Real     (const tVariant & rhs) const;
+	tVariant Div_Null     (const tVariant & rhs) const;
+	tVariant Div_Boolean  (const tVariant & rhs) const;
+	tVariant Div_String   (const tVariant & rhs) const;
+	tVariant Div_Octet    (const tVariant & rhs) const;
+	tVariant Div_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnDiv, rhs); }
+	tVariant Div_Object   (const tVariant & rhs) const { return Invoke_Object(mnDiv, rhs); }
 
 	static int GuessTypeDiv(tGuessType l, tGuessType r)
 	{
@@ -2874,14 +2874,14 @@ public:
 	 * /= 演算子		DivAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & DivAssign(const tVariantBlock & rhs)
+	tVariant & DivAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Div(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator /=(const tVariantBlock & rhs) { return DivAssign(rhs); }
+	tVariant & operator /=(const tVariant & rhs) { return DivAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -2891,7 +2891,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integer だとは限らない
 	 */
-	tVariantBlock Idiv(const tVariantBlock & rhs) const
+	tVariant Idiv(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2908,15 +2908,15 @@ public:
 		return false;
 	}
 
-	tVariantBlock Idiv_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Idiv_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIdiv, rhs); }
-	tVariantBlock Idiv_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnIdiv, rhs); }
+	tVariant Idiv_Void     (const tVariant & rhs) const;
+	tVariant Idiv_Integer  (const tVariant & rhs) const;
+	tVariant Idiv_Real     (const tVariant & rhs) const;
+	tVariant Idiv_Null     (const tVariant & rhs) const;
+	tVariant Idiv_Boolean  (const tVariant & rhs) const;
+	tVariant Idiv_String   (const tVariant & rhs) const;
+	tVariant Idiv_Octet    (const tVariant & rhs) const;
+	tVariant Idiv_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnIdiv, rhs); }
+	tVariant Idiv_Object   (const tVariant & rhs) const { return Invoke_Object(mnIdiv, rhs); }
 
 	static int GuessTypeIdiv(tGuessType l, tGuessType r)
 	{
@@ -2952,7 +2952,7 @@ public:
 	 * \= 演算子		IdivAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & IdivAssign(const tVariantBlock & rhs)
+	tVariant & IdivAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Idiv(rhs);
@@ -2969,7 +2969,7 @@ public:
 	 * @note	オブジェクトが演算子をオーバーロードしている可能性もあるので
 	 *			戻り値が integerやreal だとは限らない
 	 */
-	tVariantBlock Mul(const tVariantBlock & rhs) const
+	tVariant Mul(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -2986,17 +2986,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator * (const tVariantBlock & rhs) const { return Mul(rhs); }
+	tVariant operator * (const tVariant & rhs) const { return Mul(rhs); }
 
-	tVariantBlock Mul_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Mul_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMul, rhs); }
-	tVariantBlock Mul_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnMul, rhs); }
+	tVariant Mul_Void     (const tVariant & rhs) const;
+	tVariant Mul_Integer  (const tVariant & rhs) const;
+	tVariant Mul_Real     (const tVariant & rhs) const;
+	tVariant Mul_Null     (const tVariant & rhs) const;
+	tVariant Mul_Boolean  (const tVariant & rhs) const;
+	tVariant Mul_String   (const tVariant & rhs) const;
+	tVariant Mul_Octet    (const tVariant & rhs) const;
+	tVariant Mul_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnMul, rhs); }
+	tVariant Mul_Object   (const tVariant & rhs) const { return Invoke_Object(mnMul, rhs); }
 
 	static int GuessTypeMul(tGuessType l, tGuessType r)
 	{
@@ -3031,14 +3031,14 @@ public:
 	 * *= 演算子		MulAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & MulAssign(const tVariantBlock & rhs)
+	tVariant & MulAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Mul(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator *=(const tVariantBlock & rhs) { return MulAssign(rhs); }
+	tVariant & operator *=(const tVariant & rhs) { return MulAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -3046,7 +3046,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	左辺に右辺を加算した物
 	 */
-	tVariantBlock Add(const tVariantBlock & rhs) const
+	tVariant Add(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -3063,17 +3063,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator + (const tVariantBlock & rhs) const { return Add(rhs); }
+	tVariant operator + (const tVariant & rhs) const { return Add(rhs); }
 
-	tVariantBlock Add_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Add_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Add_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnAdd, rhs); }
-	tVariantBlock Add_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnAdd, rhs); }
+	tVariant Add_Void     (const tVariant & rhs) const;
+	tVariant Add_Integer  (const tVariant & rhs) const;
+	tVariant Add_Real     (const tVariant & rhs) const;
+	tVariant Add_Null     (const tVariant & rhs) const;
+	tVariant Add_Boolean  (const tVariant & rhs) const;
+	tVariant Add_String   (const tVariant & rhs) const;
+	tVariant Add_Octet    (const tVariant & rhs) const;
+	tVariant Add_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnAdd, rhs); }
+	tVariant Add_Object   (const tVariant & rhs) const { return Invoke_Object(mnAdd, rhs); }
 
 	static int GuessTypeAdd(tGuessType l, tGuessType r)
 	{
@@ -3109,14 +3109,14 @@ public:
 	 * += 演算子		AddAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & AddAssign(const tVariantBlock & rhs)
+	tVariant & AddAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Add(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator +=(const tVariantBlock & rhs) { return AddAssign(rhs); }
+	tVariant & operator +=(const tVariant & rhs) { return AddAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -3124,7 +3124,7 @@ public:
 	 * @param rhs	右辺
 	 * @return	左辺から右辺を減算した物
 	 */
-	tVariantBlock Sub(const tVariantBlock & rhs) const
+	tVariant Sub(const tVariant & rhs) const
 	{
 		switch(GetType())
 		{
@@ -3141,17 +3141,17 @@ public:
 		return false;
 	}
 
-	tVariantBlock operator - (const tVariantBlock & rhs) const { return Sub(rhs); }
+	tVariant operator - (const tVariant & rhs) const { return Sub(rhs); }
 
-	tVariantBlock Sub_Void     (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Integer  (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Real     (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Null     (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Boolean  (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_String   (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Octet    (const tVariantBlock & rhs) const;
-	tVariantBlock Sub_Data     (const tVariantBlock & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnSub, rhs); }
-	tVariantBlock Sub_Object   (const tVariantBlock & rhs) const { return Invoke_Object(mnSub, rhs); }
+	tVariant Sub_Void     (const tVariant & rhs) const;
+	tVariant Sub_Integer  (const tVariant & rhs) const;
+	tVariant Sub_Real     (const tVariant & rhs) const;
+	tVariant Sub_Null     (const tVariant & rhs) const;
+	tVariant Sub_Boolean  (const tVariant & rhs) const;
+	tVariant Sub_String   (const tVariant & rhs) const;
+	tVariant Sub_Octet    (const tVariant & rhs) const;
+	tVariant Sub_Data     (const tVariant & rhs) const { return Invoke_Primitive(GetScriptEngine_Data(), mnSub, rhs); }
+	tVariant Sub_Object   (const tVariant & rhs) const { return Invoke_Object(mnSub, rhs); }
 
 	static int GuessTypeSub(tGuessType l, tGuessType r)
 	{
@@ -3187,14 +3187,14 @@ public:
 	 * -= 演算子		SubAssign
 	 * @return	演算後の*thisへの参照
 	 */
-	tVariantBlock & SubAssign(const tVariantBlock & rhs)
+	tVariant & SubAssign(const tVariant & rhs)
 	{
 		// TODO: より効率的な実装
 		*this = this->Sub(rhs);
 		return *this;
 	}
 
-	tVariantBlock & operator -=(const tVariantBlock & rhs) { return SubAssign(rhs); }
+	tVariant & operator -=(const tVariant & rhs) { return SubAssign(rhs); }
 
 	//-----------------------------------------------------------------------
 	/**
@@ -3203,7 +3203,7 @@ public:
 	 * @param rhs		右辺
 	 * @return	左辺が右辺で示したクラスのインスタンスならば真
 	 */
-	bool InstanceOf(tScriptEngine * engine, const tVariantBlock & rhs) const;
+	bool InstanceOf(tScriptEngine * engine, const tVariant & rhs) const;
 
 
 public: // キャスト
@@ -3756,7 +3756,7 @@ public: // ユーティリティ
 	 *			プリミティブクラスに対してはこれは使用しないこと。
 	 *			メンバは強制的に上書きされる(属性チェックなどはスルー)
 	 */
-	void RegisterMember(const tString & name, const tVariantBlock & value,
+	void RegisterMember(const tString & name, const tVariant & value,
 		tMemberAttribute attrib = tMemberAttribute::GetDefault(),
 		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
 
@@ -3766,7 +3766,7 @@ public: // ユーティリティ
 	 * @param value	値
 	 * @note	RegisterMember へのショートカット
 	 */
-	void RegisterFinalConstMember(const tString & name, const tVariantBlock & value,
+	void RegisterFinalConstMember(const tString & name, const tVariant & value,
 		risse_uint32 flags = tOperateFlags::ofUseClassMembersRule) const;
 
 	/**
@@ -3774,7 +3774,7 @@ public: // ユーティリティ
 	 */
 	void prtsizes() const
 	{
-		fprintf(stderr, "tVariantBlock: %d\n", (int)sizeof(tVariantBlock));
+		fprintf(stderr, "tVariant: %d\n", (int)sizeof(tVariant));
 		fprintf(stderr, "Storage: %d\n", (int)sizeof(Storage));
 		fprintf(stderr, "risse_ptruint: %d\n", (int)sizeof(risse_ptruint));
 		fprintf(stderr, "tString: %d\n", (int)sizeof(tString));
@@ -3789,8 +3789,6 @@ public: // ユーティリティ
 	}
 
 };
-//---------------------------------------------------------------------------
-typedef tVariantBlock tVariant;
 //---------------------------------------------------------------------------
 
 

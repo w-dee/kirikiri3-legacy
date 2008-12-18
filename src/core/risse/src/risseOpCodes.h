@@ -111,8 +111,7 @@ extern const tVMInsnInfo VMInsnInfo[];
 
 
 
-class tVariantBlock;
-typedef tVariantBlock tVariant;
+class tVariant;
 //---------------------------------------------------------------------------
 /**
  * VMコード用イテレータ

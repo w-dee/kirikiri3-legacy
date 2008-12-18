@@ -35,8 +35,7 @@ void ThrowBadBlockArgumentCount(risse_size passed, risse_size expected);
 //---------------------------------------------------------------------------
 
 
-class tVariantBlock;
-typedef tVariantBlock tVariant;
+class tVariant;
 class tMethodArgument;
 
 

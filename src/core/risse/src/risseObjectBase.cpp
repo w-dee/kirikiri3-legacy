@@ -447,7 +447,7 @@ tObjectBase::tRetValue tObjectBase::Delete(const tString & name, tOperateFlags f
 
 //---------------------------------------------------------------------------
 tObjectBase::tRetValue tObjectBase::FuncCall(
-		tVariantBlock * ret,
+		tVariant * ret,
 		const tString & name, risse_uint32 flags,
 		const tMethodArgument & args,
 		const tVariant & This)
@@ -475,7 +475,7 @@ tObjectBase::tRetValue tObjectBase::FuncCall(
 
 //---------------------------------------------------------------------------
 tObjectBase::tRetValue tObjectBase::New(
-		tVariantBlock * ret,
+		tVariant * ret,
 		const tString & name, risse_uint32 flags,
 		const tMethodArgument & args,
 		const tVariant & This)

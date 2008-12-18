@@ -51,7 +51,7 @@ RISSE_DEFINE_SOURCE_ID(8265,43737,22162,17503,41631,46790,57901,27164);
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::ThrowCannotCreateInstanceFromNonClassObjectException()
+void tVariant::ThrowCannotCreateInstanceFromNonClassObjectException()
 {
 	tInstantiationExceptionClass::ThrowCannotCreateInstanceFromNonClassObject();
 }
@@ -59,7 +59,7 @@ void tVariantBlock::ThrowCannotCreateInstanceFromNonClassObjectException()
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::ThrowBadContextException()
+void tVariant::ThrowBadContextException()
 {
 	tBadContextExceptionClass::Throw();
 }
@@ -67,7 +67,7 @@ void tVariantBlock::ThrowBadContextException()
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::ThrowNoSuchMemberException(const tString &name)
+void tVariant::ThrowNoSuchMemberException(const tString &name)
 {
 	tNoSuchMemberExceptionClass::Throw(name);
 }
@@ -75,7 +75,7 @@ void tVariantBlock::ThrowNoSuchMemberException(const tString &name)
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::ThrowIllegalArgumentClassException(const tString & class_name)
+void tVariant::ThrowIllegalArgumentClassException(const tString & class_name)
 {
 	tIllegalArgumentClassExceptionClass::ThrowSpecifyInstanceOfClass(class_name);
 }
@@ -83,7 +83,7 @@ void tVariantBlock::ThrowIllegalArgumentClassException(const tString & class_nam
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::ThrowIllegalOperationMethod(const tString & method_name) const
+void tVariant::ThrowIllegalOperationMethod(const tString & method_name) const
 {
 	tIllegalArgumentClassExceptionClass::ThrowIllegalOperationMethod(
 			GetClassName() + ss_doubleColon + (method_name));
@@ -93,9 +93,9 @@ void tVariantBlock::ThrowIllegalOperationMethod(const tString & method_name) con
 
 //---------------------------------------------------------------------------
 // voidオブジェクトへのconst参照を保持するオブジェクト
-// これのバイナリレイアウトはtVariantBlockと同一でなければならない
-tVariantBlock::tStaticPrimitive tVariantBlock::VoidObject = {
-	tVariantBlock::vtVoid,
+// これのバイナリレイアウトはtVariantと同一でなければならない
+tVariant::tStaticPrimitive tVariant::VoidObject = {
+	tVariant::vtVoid,
 	{}
 };
 //---------------------------------------------------------------------------
@@ -103,9 +103,9 @@ tVariantBlock::tStaticPrimitive tVariantBlock::VoidObject = {
 
 //---------------------------------------------------------------------------
 // nullオブジェクトへのconst参照を保持するオブジェクト
-// これのバイナリレイアウトはtVariantBlockと同一でなければならない
-tVariantBlock::tStaticPrimitive tVariantBlock::NullObject = {
-	tVariantBlock::vtNull,
+// これのバイナリレイアウトはtVariantと同一でなければならない
+tVariant::tStaticPrimitive tVariant::NullObject = {
+	tVariant::vtNull,
 	{}
 };
 //---------------------------------------------------------------------------
@@ -113,10 +113,10 @@ tVariantBlock::tStaticPrimitive tVariantBlock::NullObject = {
 
 //---------------------------------------------------------------------------
 // DynamicContextオブジェクトへのconst参照を保持するオブジェクト
-// これのバイナリレイアウトはtVariantBlockと同一でなければならない
+// これのバイナリレイアウトはtVariantと同一でなければならない
 static tIdentifyObject DynamicContextObject;
-tVariantBlock::tStaticObject tVariantBlock::DynamicContext = {
-	reinterpret_cast<risse_ptruint>(&DynamicContextObject) + tVariantBlock::ObjectPointerBias, NULL,
+tVariant::tStaticObject tVariant::DynamicContext = {
+	reinterpret_cast<risse_ptruint>(&DynamicContextObject) + tVariant::ObjectPointerBias, NULL,
 	{}
 };
 //---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ static tIdentifyObject DummyDataClass;
 
 
 //---------------------------------------------------------------------------
-tScriptEngine * tVariantBlock::GetScriptEngine_Data() const
+tScriptEngine * tVariant::GetScriptEngine_Data() const
 {
 	RISSE_ASSERT(GetType() == vtData);
 	return GetDataClassInstance()->GetRTTI()->GetScriptEngine();
@@ -138,7 +138,7 @@ tScriptEngine * tVariantBlock::GetScriptEngine_Data() const
 
 
 //---------------------------------------------------------------------------
-tScriptEngine * tVariantBlock::GetScriptEngine_Object() const
+tScriptEngine * tVariant::GetScriptEngine_Object() const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	return GetObjectInterface()->GetRTTI()->GetScriptEngine();
@@ -147,7 +147,7 @@ tScriptEngine * tVariantBlock::GetScriptEngine_Object() const
 
 
 //---------------------------------------------------------------------------
-const risse_char * tVariantBlock::GetTypeString(tType type)
+const risse_char * tVariant::GetTypeString(tType type)
 {
 	switch(type)
 	{
@@ -167,7 +167,7 @@ const risse_char * tVariantBlock::GetTypeString(tType type)
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetTypeTag(tType type)
+void tVariant::SetTypeTag(tType type)
 {
 	switch(type)
 	{
@@ -189,7 +189,7 @@ void tVariantBlock::SetTypeTag(tType type)
 
 
 //---------------------------------------------------------------------------
-const risse_char * tVariantBlock::GetGuessTypeString(tGuessType type)
+const risse_char * tVariant::GetGuessTypeString(tGuessType type)
 {
 	switch(type)
 	{
@@ -214,7 +214,7 @@ const risse_char * tVariantBlock::GetGuessTypeString(tGuessType type)
 
 
 //---------------------------------------------------------------------------
-inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * engine) const
+inline tPrimitiveClassBase * tVariant::GetPrimitiveClass(tScriptEngine * engine) const
 {
 	tPrimitiveClassBase * Class = NULL;
 	switch(GetType())
@@ -236,7 +236,7 @@ inline tPrimitiveClassBase * tVariantBlock::GetPrimitiveClass(tScriptEngine * en
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetContext(const tVariantBlock &context)
+void tVariant::SetContext(const tVariant &context)
 {
 	const tVariant * context_ptr;
 	if(context.GetType() == tVariant::vtObject)
@@ -256,8 +256,8 @@ void tVariantBlock::SetContext(const tVariantBlock &context)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock::tRetValue
-	tVariantBlock::OperateForMember(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
+tVariant::tRetValue
+	tVariant::OperateForMember(tScriptEngine * engine, RISSE_OBJECTINTERFACE_OPERATE_IMPL_ARG)
 {
 	switch(GetType())
 	{
@@ -291,7 +291,7 @@ tVariantBlock::tRetValue
 				// TODO: Data 型の場合ってこれ必要？Data型の場合は Object と同じく mutable
 				// だけれども………
 				if(!result->HasContext() && !(flags & tOperateFlags::ofUseClassMembersRule))
-					result->SetContext(new tVariantBlock(*this));
+					result->SetContext(new tVariant(*this));
 			}
 			return rv;
 		}
@@ -310,29 +310,29 @@ tVariantBlock::tRetValue
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariant & This) const
+tVariant tVariant::GetPropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags, const tVariant & This) const
 {
-	tVariantBlock result;
+	tVariant result;
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDGet, &result, name,
 				flags | tOperateFlags::ofUseClassMembersRule,
 					// ↑動作コンテキストは常に *this なのでゲートウェイのコンテキストは用いない
 					// また、ゲートウェイの members の中から探す
 				tMethodArgument::Empty(), *this); // 動作コンテキストは常に *this
 	// コンテキストを設定する
-	// ここの長ったらしい説明は tVariantBlock::OperateForMember() 内を参照
+	// ここの長ったらしい説明は tVariant::OperateForMember() 内を参照
 	if(!result.HasContext() && !(flags & tOperateFlags::ofUseClassMembersRule))
-		result.SetContext(new tVariantBlock(*this));
+		result.SetContext(new tVariant(*this));
 	return result;
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::GetPropertyDirect_Object  (const tString & name, risse_uint32 flags, const tVariant & This) const
+tVariant tVariant::GetPropertyDirect_Object  (const tString & name, risse_uint32 flags, const tVariant & This) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
-	tVariantBlock ret;
+	tVariant ret;
 	intf->Do(ocDGet, &ret, name,
 		flags, tMethodArgument::Empty(),
 		SelectContext(flags, This)
@@ -343,8 +343,8 @@ tVariantBlock tVariantBlock::GetPropertyDirect_Object  (const tString & name, ri
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetPropertyDirect_Primitive(tScriptEngine * engine,
-	const tString & name, risse_uint32 flags, const tVariantBlock & value,
+void tVariant::SetPropertyDirect_Primitive(tScriptEngine * engine,
+	const tString & name, risse_uint32 flags, const tVariant & value,
 	const tVariant & This) const
 {
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDSet, NULL, name,
@@ -357,8 +357,8 @@ void tVariantBlock::SetPropertyDirect_Primitive(tScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetPropertyDirect_Object  (const tString & name,
-		risse_uint32 flags, const tVariantBlock & value,
+void tVariant::SetPropertyDirect_Object  (const tString & name,
+		risse_uint32 flags, const tVariant & value,
 		const tVariant & This) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
@@ -372,7 +372,7 @@ void tVariantBlock::SetPropertyDirect_Object  (const tString & name,
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::DeletePropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags) const
+void tVariant::DeletePropertyDirect_Primitive(tScriptEngine * engine, const tString & name, risse_uint32 flags) const
 {
 	GetPrimitiveClass(engine)->GetGateway().Do(engine, ocDDelete, NULL, name,
 				flags | tOperateFlags::ofUseClassMembersRule,
@@ -384,7 +384,7 @@ void tVariantBlock::DeletePropertyDirect_Primitive(tScriptEngine * engine, const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::DeletePropertyDirect_Object   (const tString & name, risse_uint32 flags) const
+void tVariant::DeletePropertyDirect_Object   (const tString & name, risse_uint32 flags) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
@@ -397,7 +397,7 @@ void tVariantBlock::DeletePropertyDirect_Object   (const tString & name, risse_u
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetAttributeDirect_Object  (const tString & key, risse_uint32 attrib) const
+void tVariant::SetAttributeDirect_Object  (const tString & key, risse_uint32 attrib) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
@@ -410,7 +410,7 @@ void tVariantBlock::SetAttributeDirect_Object  (const tString & key, risse_uint3
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::FuncCall(tScriptEngine * engine, tVariantBlock * ret, risse_uint32 flags,
+void tVariant::FuncCall(tScriptEngine * engine, tVariant * ret, risse_uint32 flags,
 	const tMethodArgument & args,
 	const tVariant & This) const
 {
@@ -433,8 +433,8 @@ void tVariantBlock::FuncCall(tScriptEngine * engine, tVariantBlock * ret, risse_
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::FuncCall_Primitive(tScriptEngine * engine, 
-	tVariantBlock * ret, const tString & name,
+void tVariant::FuncCall_Primitive(tScriptEngine * engine,
+	tVariant * ret, const tString & name,
 	risse_uint32 flags, const tMethodArgument & args,
 	const tVariant & This) const
 {
@@ -449,8 +449,8 @@ void tVariantBlock::FuncCall_Primitive(tScriptEngine * engine,
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::FuncCall_Object  (
-	tVariantBlock * ret, const tString & name, risse_uint32 flags,
+void tVariant::FuncCall_Object  (
+	tVariant * ret, const tString & name, risse_uint32 flags,
 	const tMethodArgument & args, const tVariant & This) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
@@ -464,9 +464,9 @@ void tVariantBlock::FuncCall_Object  (
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tString & membername) const
+tVariant tVariant::Invoke_Primitive(tScriptEngine * engine, const tString & membername) const
 {
-	tVariantBlock ret;
+	tVariant ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
 		tOperateFlags::ofUseClassMembersRule,
@@ -479,13 +479,13 @@ tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tStr
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername) const
+tVariant tVariant::Invoke_Object   (const tString & membername) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
-	tVariantBlock ret;
+	tVariant ret;
 	intf->Do(ocFuncCall, &ret, membername,
-		0, 
+		0,
 		tMethodArgument::Empty(),
 		*this
 		);
@@ -495,9 +495,9 @@ tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername) const
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const
+tVariant tVariant::Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1) const
 {
-	tVariantBlock ret;
+	tVariant ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
 		tOperateFlags::ofUseClassMembersRule,
@@ -510,13 +510,13 @@ tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tStr
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername,const tVariant & arg1) const
+tVariant tVariant::Invoke_Object   (const tString & membername,const tVariant & arg1) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
-	tVariantBlock ret;
+	tVariant ret;
 	intf->Do(ocFuncCall, &ret, membername,
-		0, 
+		0,
 		tMethodArgument::New(arg1),
 		*this
 		);
@@ -526,9 +526,9 @@ tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername,const t
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const
+tVariant tVariant::Invoke_Primitive(tScriptEngine * engine, const tString & membername,const tVariant & arg1,const tVariant & arg2) const
 {
-	tVariantBlock ret;
+	tVariant ret;
 	GetPrimitiveClass(engine)->GetGateway().
 		Do(engine, ocFuncCall, &ret, membername,
 		tOperateFlags::ofUseClassMembersRule,
@@ -541,13 +541,13 @@ tVariantBlock tVariantBlock::Invoke_Primitive(tScriptEngine * engine, const tStr
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername,const tVariant & arg1,const tVariant & arg2) const
+tVariant tVariant::Invoke_Object   (const tString & membername,const tVariant & arg1,const tVariant & arg2) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
-	tVariantBlock ret;
+	tVariant ret;
 	intf->Do(ocFuncCall, &ret, membername,
-		0, 
+		0,
 		tMethodArgument::New(arg1, arg2),
 		*this
 		);
@@ -557,12 +557,12 @@ tVariantBlock tVariantBlock::Invoke_Object   (const tString & membername,const t
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::New_Object  (const tString & name,
+tVariant tVariant::New_Object  (const tString & name,
 	risse_uint32 flags, const tMethodArgument & args) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	tObjectInterface * intf = GetObjectInterface();
-	tVariantBlock ret;
+	tVariant ret;
 	intf->Do(ocNew, &ret, name,
 		flags,
 		args,
@@ -574,9 +574,9 @@ tVariantBlock tVariantBlock::New_Object  (const tString & name,
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Plus_String   () const
+tVariant tVariant::Plus_String   () const
 {
-	tVariantBlock val;
+	tVariant val;
 	const risse_char *p = AsString().c_str();
 	if(tLexerUtility::ParseNumber(p, val))
 	{
@@ -593,7 +593,7 @@ tVariantBlock tVariantBlock::Plus_String   () const
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -607,13 +607,13 @@ tVariantBlock tVariantBlock::BitOr_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Void     (tGuessType r)
+int tVariant::GuessTypeBitOr_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -635,7 +635,7 @@ int tVariantBlock::GuessTypeBitOr_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -649,13 +649,13 @@ tVariantBlock tVariantBlock::BitOr_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Integer     (tGuessType r)
+int tVariant::GuessTypeBitOr_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -677,7 +677,7 @@ int tVariantBlock::GuessTypeBitOr_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -691,13 +691,13 @@ tVariantBlock tVariantBlock::BitOr_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Real     (tGuessType r)
+int tVariant::GuessTypeBitOr_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -719,7 +719,7 @@ int tVariantBlock::GuessTypeBitOr_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 }
@@ -727,7 +727,7 @@ tVariantBlock tVariantBlock::BitOr_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Null     (tGuessType r)
+int tVariant::GuessTypeBitOr_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -749,7 +749,7 @@ int tVariantBlock::GuessTypeBitOr_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_String   (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -764,13 +764,13 @@ tVariantBlock tVariantBlock::BitOr_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_String     (tGuessType r)
+int tVariant::GuessTypeBitOr_String     (tGuessType r)
 {
 	switch(r)
 	{
@@ -792,7 +792,7 @@ int tVariantBlock::GuessTypeBitOr_String     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -807,13 +807,13 @@ tVariantBlock tVariantBlock::BitOr_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Octet     (tGuessType r)
+int tVariant::GuessTypeBitOr_Octet     (tGuessType r)
 {
 	switch(r)
 	{
@@ -835,7 +835,7 @@ int tVariantBlock::GuessTypeBitOr_Octet     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitOr_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::BitOr_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -850,13 +850,13 @@ tVariantBlock tVariantBlock::BitOr_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitOr);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitOr_Boolean     (tGuessType r)
+int tVariant::GuessTypeBitOr_Boolean     (tGuessType r)
 {
 	switch(r)
 	{
@@ -878,7 +878,7 @@ int tVariantBlock::GuessTypeBitOr_Boolean     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -892,13 +892,13 @@ tVariantBlock tVariantBlock::BitXor_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Void     (tGuessType r)
+int tVariant::GuessTypeBitXor_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -920,7 +920,7 @@ int tVariantBlock::GuessTypeBitXor_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -934,13 +934,13 @@ tVariantBlock tVariantBlock::BitXor_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Integer     (tGuessType r)
+int tVariant::GuessTypeBitXor_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -962,7 +962,7 @@ int tVariantBlock::GuessTypeBitXor_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -976,13 +976,13 @@ tVariantBlock tVariantBlock::BitXor_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Real     (tGuessType r)
+int tVariant::GuessTypeBitXor_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1004,7 +1004,7 @@ int tVariantBlock::GuessTypeBitXor_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 }
@@ -1012,7 +1012,7 @@ tVariantBlock tVariantBlock::BitXor_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Null     (tGuessType r)
+int tVariant::GuessTypeBitXor_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1034,7 +1034,7 @@ int tVariantBlock::GuessTypeBitXor_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_String   (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1049,13 +1049,13 @@ tVariantBlock tVariantBlock::BitXor_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_String     (tGuessType r)
+int tVariant::GuessTypeBitXor_String     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1077,7 +1077,7 @@ int tVariantBlock::GuessTypeBitXor_String     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1092,13 +1092,13 @@ tVariantBlock tVariantBlock::BitXor_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Octet     (tGuessType r)
+int tVariant::GuessTypeBitXor_Octet     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1120,7 +1120,7 @@ int tVariantBlock::GuessTypeBitXor_Octet     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitXor_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::BitXor_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1135,13 +1135,13 @@ tVariantBlock tVariantBlock::BitXor_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitXor);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitXor_Boolean     (tGuessType r)
+int tVariant::GuessTypeBitXor_Boolean     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1163,7 +1163,7 @@ int tVariantBlock::GuessTypeBitXor_Boolean     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1177,13 +1177,13 @@ tVariantBlock tVariantBlock::BitAnd_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Void     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1205,7 +1205,7 @@ int tVariantBlock::GuessTypeBitAnd_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1219,13 +1219,13 @@ tVariantBlock tVariantBlock::BitAnd_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Integer     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1247,7 +1247,7 @@ int tVariantBlock::GuessTypeBitAnd_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1261,13 +1261,13 @@ tVariantBlock tVariantBlock::BitAnd_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Real     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1289,7 +1289,7 @@ int tVariantBlock::GuessTypeBitAnd_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 }
@@ -1297,7 +1297,7 @@ tVariantBlock tVariantBlock::BitAnd_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Null     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1319,7 +1319,7 @@ int tVariantBlock::GuessTypeBitAnd_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_String   (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1334,13 +1334,13 @@ tVariantBlock tVariantBlock::BitAnd_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_String     (tGuessType r)
+int tVariant::GuessTypeBitAnd_String     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1362,7 +1362,7 @@ int tVariantBlock::GuessTypeBitAnd_String     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1377,13 +1377,13 @@ tVariantBlock tVariantBlock::BitAnd_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Octet     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Octet     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1405,7 +1405,7 @@ int tVariantBlock::GuessTypeBitAnd_Octet     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::BitAnd_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::BitAnd_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1420,13 +1420,13 @@ tVariantBlock tVariantBlock::BitAnd_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnBitAnd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeBitAnd_Boolean     (tGuessType r)
+int tVariant::GuessTypeBitAnd_Boolean     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1448,7 +1448,7 @@ int tVariantBlock::GuessTypeBitAnd_Boolean     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Void     (const tVariantBlock & rhs) const
+bool tVariant::Equal_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1468,7 +1468,7 @@ bool tVariantBlock::Equal_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Integer  (const tVariantBlock & rhs) const
+bool tVariant::Equal_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1488,7 +1488,7 @@ bool tVariantBlock::Equal_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Real     (const tVariantBlock & rhs) const
+bool tVariant::Equal_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1508,7 +1508,7 @@ bool tVariantBlock::Equal_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Null     (const tVariantBlock & rhs) const
+bool tVariant::Equal_Null     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1528,7 +1528,7 @@ bool tVariantBlock::Equal_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_String   (const tVariantBlock & rhs) const
+bool tVariant::Equal_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1548,7 +1548,7 @@ bool tVariantBlock::Equal_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Octet    (const tVariantBlock & rhs) const
+bool tVariant::Equal_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1568,7 +1568,7 @@ bool tVariantBlock::Equal_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Equal_Boolean  (const tVariantBlock & rhs) const
+bool tVariant::Equal_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1588,12 +1588,12 @@ bool tVariantBlock::Equal_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
+bool tVariant::StrictEqual_Real     (const tVariant & rhs) const
 {
 	// Real::identify メソッドの実装はこれがつかわれるので、
 	// hash プロパティと齟齬が生じないようにすること。
 	// このソースファイルの
-	// tVariantBlock::GetHash_Real() も参照のこと。
+	// tVariant::GetHash_Real() も参照のこと。
 
 	// Real の符合、クラスも厳密に同じかどうかを見る
 	if(rhs.GetType() != vtReal) return false;
@@ -1614,7 +1614,7 @@ bool tVariantBlock::StrictEqual_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Identify_Data   (const tVariantBlock & rhs) const
+bool tVariant::Identify_Data   (const tVariant & rhs) const
 {
 	return Invoke_Primitive(GetScriptEngine_Data(), ss_identify, rhs).CastToBoolean();
 }
@@ -1622,7 +1622,7 @@ bool tVariantBlock::Identify_Data   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Identify_Object   (const tVariantBlock & rhs) const
+bool tVariant::Identify_Object   (const tVariant & rhs) const
 {
 	return Invoke_Object(ss_identify, rhs).CastToBoolean();
 }
@@ -1630,7 +1630,7 @@ bool tVariantBlock::Identify_Object   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Void     (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1650,7 +1650,7 @@ bool tVariantBlock::Lesser_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Void     (tGuessType r)
+int tVariant::GuessTypeLesser_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1672,7 +1672,7 @@ int tVariantBlock::GuessTypeLesser_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Integer  (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1692,7 +1692,7 @@ bool tVariantBlock::Lesser_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Integer     (tGuessType r)
+int tVariant::GuessTypeLesser_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1714,7 +1714,7 @@ int tVariantBlock::GuessTypeLesser_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Real     (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1734,7 +1734,7 @@ bool tVariantBlock::Lesser_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Real     (tGuessType r)
+int tVariant::GuessTypeLesser_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1756,7 +1756,7 @@ int tVariantBlock::GuessTypeLesser_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Null     (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesser);
 }
@@ -1764,7 +1764,7 @@ bool tVariantBlock::Lesser_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Null     (tGuessType r)
+int tVariant::GuessTypeLesser_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1786,7 +1786,7 @@ int tVariantBlock::GuessTypeLesser_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_String   (const tVariantBlock & rhs) const
+bool tVariant::Lesser_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1806,7 +1806,7 @@ bool tVariantBlock::Lesser_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_String    (tGuessType r)
+int tVariant::GuessTypeLesser_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -1828,7 +1828,7 @@ int tVariantBlock::GuessTypeLesser_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Octet    (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1848,7 +1848,7 @@ bool tVariantBlock::Lesser_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Octet    (tGuessType r)
+int tVariant::GuessTypeLesser_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -1870,7 +1870,7 @@ int tVariantBlock::GuessTypeLesser_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Lesser_Boolean  (const tVariantBlock & rhs) const
+bool tVariant::Lesser_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1890,7 +1890,7 @@ bool tVariantBlock::Lesser_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLesser_Boolean   (tGuessType r)
+int tVariant::GuessTypeLesser_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -1912,7 +1912,7 @@ int tVariantBlock::GuessTypeLesser_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Void     (const tVariantBlock & rhs) const
+bool tVariant::Greater_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1932,7 +1932,7 @@ bool tVariantBlock::Greater_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Void     (tGuessType r)
+int tVariant::GuessTypeGreater_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1954,7 +1954,7 @@ int tVariantBlock::GuessTypeGreater_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Integer  (const tVariantBlock & rhs) const
+bool tVariant::Greater_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -1974,7 +1974,7 @@ bool tVariantBlock::Greater_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Integer     (tGuessType r)
+int tVariant::GuessTypeGreater_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -1996,7 +1996,7 @@ int tVariantBlock::GuessTypeGreater_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Real     (const tVariantBlock & rhs) const
+bool tVariant::Greater_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2016,7 +2016,7 @@ bool tVariantBlock::Greater_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Real     (tGuessType r)
+int tVariant::GuessTypeGreater_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2038,7 +2038,7 @@ int tVariantBlock::GuessTypeGreater_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Null     (const tVariantBlock & rhs) const
+bool tVariant::Greater_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreater);
 }
@@ -2046,7 +2046,7 @@ bool tVariantBlock::Greater_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Null     (tGuessType r)
+int tVariant::GuessTypeGreater_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2068,7 +2068,7 @@ int tVariantBlock::GuessTypeGreater_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_String   (const tVariantBlock & rhs) const
+bool tVariant::Greater_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2088,7 +2088,7 @@ bool tVariantBlock::Greater_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_String    (tGuessType r)
+int tVariant::GuessTypeGreater_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2110,7 +2110,7 @@ int tVariantBlock::GuessTypeGreater_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Octet    (const tVariantBlock & rhs) const
+bool tVariant::Greater_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2130,7 +2130,7 @@ bool tVariantBlock::Greater_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Octet    (tGuessType r)
+int tVariant::GuessTypeGreater_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2152,7 +2152,7 @@ int tVariantBlock::GuessTypeGreater_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::Greater_Boolean  (const tVariantBlock & rhs) const
+bool tVariant::Greater_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2172,7 +2172,7 @@ bool tVariantBlock::Greater_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeGreater_Boolean   (tGuessType r)
+int tVariant::GuessTypeGreater_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -2194,7 +2194,7 @@ int tVariantBlock::GuessTypeGreater_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Void     (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2214,7 +2214,7 @@ bool tVariantBlock::LesserOrEqual_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Integer  (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2234,7 +2234,7 @@ bool tVariantBlock::LesserOrEqual_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Real     (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2254,7 +2254,7 @@ bool tVariantBlock::LesserOrEqual_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Null     (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnLesserOrEqual);
 }
@@ -2262,7 +2262,7 @@ bool tVariantBlock::LesserOrEqual_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_String   (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2282,7 +2282,7 @@ bool tVariantBlock::LesserOrEqual_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Octet    (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2302,7 +2302,7 @@ bool tVariantBlock::LesserOrEqual_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::LesserOrEqual_Boolean  (const tVariantBlock & rhs) const
+bool tVariant::LesserOrEqual_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2322,7 +2322,7 @@ bool tVariantBlock::LesserOrEqual_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Void     (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2342,7 +2342,7 @@ bool tVariantBlock::GreaterOrEqual_Void     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Integer  (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2362,7 +2362,7 @@ bool tVariantBlock::GreaterOrEqual_Integer  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Real     (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2382,7 +2382,7 @@ bool tVariantBlock::GreaterOrEqual_Real     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Null     (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE_B(mnGreaterOrEqual);
 }
@@ -2390,7 +2390,7 @@ bool tVariantBlock::GreaterOrEqual_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_String   (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2410,7 +2410,7 @@ bool tVariantBlock::GreaterOrEqual_String   (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Octet    (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2430,7 +2430,7 @@ bool tVariantBlock::GreaterOrEqual_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const
+bool tVariant::GreaterOrEqual_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2450,7 +2450,7 @@ bool tVariantBlock::GreaterOrEqual_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2464,13 +2464,13 @@ tVariantBlock tVariantBlock::RBitShift_Void     (const tVariantBlock & rhs) cons
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Void     (tGuessType r)
+int tVariant::GuessTypeRBitShift_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2492,7 +2492,7 @@ int tVariantBlock::GuessTypeRBitShift_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2506,13 +2506,13 @@ tVariantBlock tVariantBlock::RBitShift_Integer  (const tVariantBlock & rhs) cons
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Integer     (tGuessType r)
+int tVariant::GuessTypeRBitShift_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2534,7 +2534,7 @@ int tVariantBlock::GuessTypeRBitShift_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2548,13 +2548,13 @@ tVariantBlock tVariantBlock::RBitShift_Real     (const tVariantBlock & rhs) cons
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Real     (tGuessType r)
+int tVariant::GuessTypeRBitShift_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2576,7 +2576,7 @@ int tVariantBlock::GuessTypeRBitShift_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 }
@@ -2584,7 +2584,7 @@ tVariantBlock tVariantBlock::RBitShift_Null     (const tVariantBlock & rhs) cons
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Null     (tGuessType r)
+int tVariant::GuessTypeRBitShift_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2606,7 +2606,7 @@ int tVariantBlock::GuessTypeRBitShift_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_String   (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2621,13 +2621,13 @@ tVariantBlock tVariantBlock::RBitShift_String   (const tVariantBlock & rhs) cons
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_String    (tGuessType r)
+int tVariant::GuessTypeRBitShift_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2649,7 +2649,7 @@ int tVariantBlock::GuessTypeRBitShift_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2664,13 +2664,13 @@ tVariantBlock tVariantBlock::RBitShift_Octet    (const tVariantBlock & rhs) cons
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Octet    (tGuessType r)
+int tVariant::GuessTypeRBitShift_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2692,7 +2692,7 @@ int tVariantBlock::GuessTypeRBitShift_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RBitShift_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::RBitShift_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2707,13 +2707,13 @@ tVariantBlock tVariantBlock::RBitShift_Boolean  (const tVariantBlock & rhs) cons
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRBitShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRBitShift_Boolean   (tGuessType r)
+int tVariant::GuessTypeRBitShift_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -2735,7 +2735,7 @@ int tVariantBlock::GuessTypeRBitShift_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2749,13 +2749,13 @@ tVariantBlock tVariantBlock::LShift_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Void     (tGuessType r)
+int tVariant::GuessTypeLShift_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2777,7 +2777,7 @@ int tVariantBlock::GuessTypeLShift_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2791,13 +2791,13 @@ tVariantBlock tVariantBlock::LShift_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Integer     (tGuessType r)
+int tVariant::GuessTypeLShift_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2819,7 +2819,7 @@ int tVariantBlock::GuessTypeLShift_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2833,13 +2833,13 @@ tVariantBlock tVariantBlock::LShift_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Real     (tGuessType r)
+int tVariant::GuessTypeLShift_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2861,7 +2861,7 @@ int tVariantBlock::GuessTypeLShift_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 }
@@ -2869,7 +2869,7 @@ tVariantBlock tVariantBlock::LShift_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Null     (tGuessType r)
+int tVariant::GuessTypeLShift_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -2891,7 +2891,7 @@ int tVariantBlock::GuessTypeLShift_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_String   (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2906,13 +2906,13 @@ tVariantBlock tVariantBlock::LShift_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_String    (tGuessType r)
+int tVariant::GuessTypeLShift_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2934,7 +2934,7 @@ int tVariantBlock::GuessTypeLShift_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2949,13 +2949,13 @@ tVariantBlock tVariantBlock::LShift_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Octet    (tGuessType r)
+int tVariant::GuessTypeLShift_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -2977,7 +2977,7 @@ int tVariantBlock::GuessTypeLShift_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::LShift_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::LShift_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -2992,13 +2992,13 @@ tVariantBlock tVariantBlock::LShift_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnLShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeLShift_Boolean   (tGuessType r)
+int tVariant::GuessTypeLShift_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -3020,7 +3020,7 @@ int tVariantBlock::GuessTypeLShift_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3034,13 +3034,13 @@ tVariantBlock tVariantBlock::RShift_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Void     (tGuessType r)
+int tVariant::GuessTypeRShift_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3062,7 +3062,7 @@ int tVariantBlock::GuessTypeRShift_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3076,13 +3076,13 @@ tVariantBlock tVariantBlock::RShift_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Integer     (tGuessType r)
+int tVariant::GuessTypeRShift_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3104,7 +3104,7 @@ int tVariantBlock::GuessTypeRShift_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3118,13 +3118,13 @@ tVariantBlock tVariantBlock::RShift_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Real     (tGuessType r)
+int tVariant::GuessTypeRShift_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3146,7 +3146,7 @@ int tVariantBlock::GuessTypeRShift_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 }
@@ -3154,7 +3154,7 @@ tVariantBlock tVariantBlock::RShift_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Null     (tGuessType r)
+int tVariant::GuessTypeRShift_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3176,7 +3176,7 @@ int tVariantBlock::GuessTypeRShift_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_String   (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3191,13 +3191,13 @@ tVariantBlock tVariantBlock::RShift_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_String    (tGuessType r)
+int tVariant::GuessTypeRShift_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3219,7 +3219,7 @@ int tVariantBlock::GuessTypeRShift_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3234,13 +3234,13 @@ tVariantBlock tVariantBlock::RShift_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Octet    (tGuessType r)
+int tVariant::GuessTypeRShift_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3262,7 +3262,7 @@ int tVariantBlock::GuessTypeRShift_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::RShift_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::RShift_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3277,13 +3277,13 @@ tVariantBlock tVariantBlock::RShift_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnRShift);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeRShift_Boolean   (tGuessType r)
+int tVariant::GuessTypeRShift_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -3305,7 +3305,7 @@ int tVariantBlock::GuessTypeRShift_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Void     (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
@@ -3320,7 +3320,7 @@ tVariantBlock tVariantBlock::Mod_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -3330,7 +3330,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Void     (tGuessType r)
+int tVariant::GuessTypeMod_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3352,12 +3352,12 @@ int tVariantBlock::GuessTypeMod_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Integer  (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
 	{
-	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariantBlock();
+	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariant();
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
@@ -3367,7 +3367,7 @@ tVariantBlock tVariantBlock::Mod_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -3377,7 +3377,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Integer     (tGuessType r)
+int tVariant::GuessTypeMod_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3399,12 +3399,12 @@ int tVariantBlock::GuessTypeMod_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Real     (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
 	{
-	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariantBlock();
+	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariant();
 	case vtInteger:	rhs_value = rhs.AsInteger();			goto do_div;
 	case vtReal:	rhs_value = (risse_int64)rhs.AsReal();	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
@@ -3414,7 +3414,7 @@ tVariantBlock tVariantBlock::Mod_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -3424,7 +3424,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Real     (tGuessType r)
+int tVariant::GuessTypeMod_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3446,7 +3446,7 @@ int tVariantBlock::GuessTypeMod_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 }
@@ -3454,7 +3454,7 @@ tVariantBlock tVariantBlock::Mod_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Null     (tGuessType r)
+int tVariant::GuessTypeMod_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3476,7 +3476,7 @@ int tVariantBlock::GuessTypeMod_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3491,13 +3491,13 @@ tVariantBlock tVariantBlock::Mod_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_String    (tGuessType r)
+int tVariant::GuessTypeMod_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3519,7 +3519,7 @@ int tVariantBlock::GuessTypeMod_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3534,13 +3534,13 @@ tVariantBlock tVariantBlock::Mod_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Octet    (tGuessType r)
+int tVariant::GuessTypeMod_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3562,7 +3562,7 @@ int tVariantBlock::GuessTypeMod_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mod_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Mod_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3577,13 +3577,13 @@ tVariantBlock tVariantBlock::Mod_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMod);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMod_Boolean   (tGuessType r)
+int tVariant::GuessTypeMod_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -3605,7 +3605,7 @@ int tVariantBlock::GuessTypeMod_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3619,13 +3619,13 @@ tVariantBlock tVariantBlock::Div_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Void     (tGuessType r)
+int tVariant::GuessTypeDiv_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3647,7 +3647,7 @@ int tVariantBlock::GuessTypeDiv_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3661,13 +3661,13 @@ tVariantBlock tVariantBlock::Div_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Integer     (tGuessType r)
+int tVariant::GuessTypeDiv_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3689,7 +3689,7 @@ int tVariantBlock::GuessTypeDiv_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3703,13 +3703,13 @@ tVariantBlock tVariantBlock::Div_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Real     (tGuessType r)
+int tVariant::GuessTypeDiv_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3731,7 +3731,7 @@ int tVariantBlock::GuessTypeDiv_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 }
@@ -3739,7 +3739,7 @@ tVariantBlock tVariantBlock::Div_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Null     (tGuessType r)
+int tVariant::GuessTypeDiv_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3761,7 +3761,7 @@ int tVariantBlock::GuessTypeDiv_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Div_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3776,13 +3776,13 @@ tVariantBlock tVariantBlock::Div_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_String    (tGuessType r)
+int tVariant::GuessTypeDiv_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3804,7 +3804,7 @@ int tVariantBlock::GuessTypeDiv_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3819,13 +3819,13 @@ tVariantBlock tVariantBlock::Div_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Octet    (tGuessType r)
+int tVariant::GuessTypeDiv_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -3847,7 +3847,7 @@ int tVariantBlock::GuessTypeDiv_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Div_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Div_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -3862,13 +3862,13 @@ tVariantBlock tVariantBlock::Div_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnDiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeDiv_Boolean   (tGuessType r)
+int tVariant::GuessTypeDiv_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -3890,7 +3890,7 @@ int tVariantBlock::GuessTypeDiv_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Void     (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
@@ -3905,7 +3905,7 @@ tVariantBlock tVariantBlock::Idiv_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -3915,7 +3915,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Void     (tGuessType r)
+int tVariant::GuessTypeIdiv_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3937,12 +3937,12 @@ int tVariantBlock::GuessTypeIdiv_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Integer  (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
 	{
-	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariantBlock();
+	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariant();
 	case vtInteger:	rhs_value = rhs.AsInteger();						goto do_div;
 	case vtReal:	rhs_value = static_cast<risse_int64>(rhs.AsReal());	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
@@ -3952,7 +3952,7 @@ tVariantBlock tVariantBlock::Idiv_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -3962,7 +3962,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Integer     (tGuessType r)
+int tVariant::GuessTypeIdiv_Integer     (tGuessType r)
 {
 	switch(r)
 	{
@@ -3984,12 +3984,12 @@ int tVariantBlock::GuessTypeIdiv_Integer     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Real     (const tVariant & rhs) const
 {
 	risse_int64 rhs_value;
 	switch(rhs.GetType())
 	{
-	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariantBlock();
+	case vtVoid:	tArithmeticExceptionClass::ThrowDivideByZeroException(); return tVariant();
 	case vtInteger:	rhs_value = rhs.AsInteger();			goto do_div;
 	case vtReal:	rhs_value = (risse_int64)rhs.AsReal();	goto do_div;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
@@ -3999,7 +3999,7 @@ tVariantBlock tVariantBlock::Idiv_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 
 do_div:
 	if(rhs_value == 0) tArithmeticExceptionClass::ThrowDivideByZeroException();
@@ -4009,7 +4009,7 @@ do_div:
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Real     (tGuessType r)
+int tVariant::GuessTypeIdiv_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4031,7 +4031,7 @@ int tVariantBlock::GuessTypeIdiv_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 }
@@ -4039,7 +4039,7 @@ tVariantBlock tVariantBlock::Idiv_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Null     (tGuessType r)
+int tVariant::GuessTypeIdiv_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4061,7 +4061,7 @@ int tVariantBlock::GuessTypeIdiv_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4076,13 +4076,13 @@ tVariantBlock tVariantBlock::Idiv_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_String    (tGuessType r)
+int tVariant::GuessTypeIdiv_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -4104,7 +4104,7 @@ int tVariantBlock::GuessTypeIdiv_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4119,13 +4119,13 @@ tVariantBlock tVariantBlock::Idiv_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Octet    (tGuessType r)
+int tVariant::GuessTypeIdiv_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -4147,7 +4147,7 @@ int tVariantBlock::GuessTypeIdiv_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Idiv_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Idiv_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4162,13 +4162,13 @@ tVariantBlock tVariantBlock::Idiv_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnIdiv);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeIdiv_Boolean   (tGuessType r)
+int tVariant::GuessTypeIdiv_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4190,7 +4190,7 @@ int tVariantBlock::GuessTypeIdiv_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4204,13 +4204,13 @@ tVariantBlock tVariantBlock::Mul_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Void     (tGuessType r)
+int tVariant::GuessTypeMul_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4232,7 +4232,7 @@ int tVariantBlock::GuessTypeMul_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4246,13 +4246,13 @@ tVariantBlock tVariantBlock::Mul_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Integer   (tGuessType r)
+int tVariant::GuessTypeMul_Integer   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4274,7 +4274,7 @@ int tVariantBlock::GuessTypeMul_Integer   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4288,13 +4288,13 @@ tVariantBlock tVariantBlock::Mul_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Real   (tGuessType r)
+int tVariant::GuessTypeMul_Real   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4316,7 +4316,7 @@ int tVariantBlock::GuessTypeMul_Real   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 }
@@ -4324,7 +4324,7 @@ tVariantBlock tVariantBlock::Mul_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Null   (tGuessType r)
+int tVariant::GuessTypeMul_Null   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4346,7 +4346,7 @@ int tVariantBlock::GuessTypeMul_Null   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4361,13 +4361,13 @@ tVariantBlock tVariantBlock::Mul_String   (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_String   (tGuessType r)
+int tVariant::GuessTypeMul_String   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4389,7 +4389,7 @@ int tVariantBlock::GuessTypeMul_String   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4404,13 +4404,13 @@ tVariantBlock tVariantBlock::Mul_Octet    (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Octet   (tGuessType r)
+int tVariant::GuessTypeMul_Octet   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4432,7 +4432,7 @@ int tVariantBlock::GuessTypeMul_Octet   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Mul_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Mul_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4447,13 +4447,13 @@ tVariantBlock tVariantBlock::Mul_Boolean  (const tVariantBlock & rhs) const
 	case vtObject:
 		RISSE_THROW_ILLEGAL_ARG_TYPE(mnMul);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeMul_Boolean   (tGuessType r)
+int tVariant::GuessTypeMul_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4475,11 +4475,11 @@ int tVariantBlock::GuessTypeMul_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
-	case vtVoid:	return tVariantBlock(); // void + void = void かなぁ
+	case vtVoid:	return tVariant(); // void + void = void かなぁ
 	case vtInteger:	return rhs; // void + integer
 	case vtReal:	return rhs;
 	case vtNull:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
@@ -4489,13 +4489,13 @@ tVariantBlock tVariantBlock::Add_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Void     (tGuessType r)
+int tVariant::GuessTypeAdd_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4517,7 +4517,7 @@ int tVariantBlock::GuessTypeAdd_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4531,13 +4531,13 @@ tVariantBlock tVariantBlock::Add_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Integer  (tGuessType r)
+int tVariant::GuessTypeAdd_Integer  (tGuessType r)
 {
 	switch(r)
 	{
@@ -4559,7 +4559,7 @@ int tVariantBlock::GuessTypeAdd_Integer  (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4573,13 +4573,13 @@ tVariantBlock tVariantBlock::Add_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Real     (tGuessType r)
+int tVariant::GuessTypeAdd_Real     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4601,7 +4601,7 @@ int tVariantBlock::GuessTypeAdd_Real     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 }
@@ -4609,7 +4609,7 @@ tVariantBlock tVariantBlock::Add_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Null     (tGuessType r)
+int tVariant::GuessTypeAdd_Null     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4631,7 +4631,7 @@ int tVariantBlock::GuessTypeAdd_Null     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Add_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4645,13 +4645,13 @@ tVariantBlock tVariantBlock::Add_String   (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_String    (tGuessType r)
+int tVariant::GuessTypeAdd_String    (tGuessType r)
 {
 	switch(r)
 	{
@@ -4673,7 +4673,7 @@ int tVariantBlock::GuessTypeAdd_String    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Octet    (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4687,13 +4687,13 @@ tVariantBlock tVariantBlock::Add_Octet    (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Octet    (tGuessType r)
+int tVariant::GuessTypeAdd_Octet    (tGuessType r)
 {
 	switch(r)
 	{
@@ -4715,7 +4715,7 @@ int tVariantBlock::GuessTypeAdd_Octet    (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Add_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Add_Boolean  (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnAdd);
 }
@@ -4723,7 +4723,7 @@ tVariantBlock tVariantBlock::Add_Boolean  (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeAdd_Boolean  (tGuessType r)
+int tVariant::GuessTypeAdd_Boolean  (tGuessType r)
 {
 	switch(r)
 	{
@@ -4745,7 +4745,7 @@ int tVariantBlock::GuessTypeAdd_Boolean  (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Void     (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Void     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4759,13 +4759,13 @@ tVariantBlock tVariantBlock::Sub_Void     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Void     (tGuessType r)
+int tVariant::GuessTypeSub_Void     (tGuessType r)
 {
 	switch(r)
 	{
@@ -4787,7 +4787,7 @@ int tVariantBlock::GuessTypeSub_Void     (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Integer  (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Integer  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4801,13 +4801,13 @@ tVariantBlock tVariantBlock::Sub_Integer  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Integer   (tGuessType r)
+int tVariant::GuessTypeSub_Integer   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4829,7 +4829,7 @@ int tVariantBlock::GuessTypeSub_Integer   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Real     (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Real     (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4843,13 +4843,13 @@ tVariantBlock tVariantBlock::Sub_Real     (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Real   (tGuessType r)
+int tVariant::GuessTypeSub_Real   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4871,7 +4871,7 @@ int tVariantBlock::GuessTypeSub_Real   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Null     (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Null     (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 }
@@ -4879,7 +4879,7 @@ tVariantBlock tVariantBlock::Sub_Null     (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Null   (tGuessType r)
+int tVariant::GuessTypeSub_Null   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4901,7 +4901,7 @@ int tVariantBlock::GuessTypeSub_Null   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Octet    (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Octet    (const tVariant & rhs) const
 {
 	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 }
@@ -4909,7 +4909,7 @@ tVariantBlock tVariantBlock::Sub_Octet    (const tVariantBlock & rhs) const
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Octet   (tGuessType r)
+int tVariant::GuessTypeSub_Octet   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4931,7 +4931,7 @@ int tVariantBlock::GuessTypeSub_Octet   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_String   (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_String   (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4946,13 +4946,13 @@ tVariantBlock tVariantBlock::Sub_String   (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_String   (tGuessType r)
+int tVariant::GuessTypeSub_String   (tGuessType r)
 {
 	switch(r)
 	{
@@ -4974,7 +4974,7 @@ int tVariantBlock::GuessTypeSub_String   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock tVariantBlock::Sub_Boolean  (const tVariantBlock & rhs) const
+tVariant tVariant::Sub_Boolean  (const tVariant & rhs) const
 {
 	switch(rhs.GetType())
 	{
@@ -4988,13 +4988,13 @@ tVariantBlock tVariantBlock::Sub_Boolean  (const tVariantBlock & rhs) const
 	case vtData:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	case vtObject:	RISSE_THROW_ILLEGAL_ARG_TYPE(mnSub);
 	}
-	return tVariantBlock();
+	return tVariant();
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-int tVariantBlock::GuessTypeSub_Boolean   (tGuessType r)
+int tVariant::GuessTypeSub_Boolean   (tGuessType r)
 {
 	switch(r)
 	{
@@ -5016,14 +5016,14 @@ int tVariantBlock::GuessTypeSub_Boolean   (tGuessType r)
 
 
 //---------------------------------------------------------------------------
-bool tVariantBlock::InstanceOf(tScriptEngine * engine, const tVariantBlock & rhs) const
+bool tVariant::InstanceOf(tScriptEngine * engine, const tVariant & rhs) const
 {
 	// this の class を得る
 	tVariant Class = GetPropertyDirect(engine, ss_class, tOperateFlags::ofInstanceMemberOnly, *this);
 
 	RISSE_ASSERT(Class.GetType() == vtObject);
 
-	tVariantBlock ret;
+	tVariant ret;
 	Class.GetObjectInterface()->Do(ocInstanceOf, &ret, tString::GetEmptyString(), 0,
 			tMethodArgument::New(rhs), Class);
 	return ret.operator bool();
@@ -5032,9 +5032,9 @@ bool tVariantBlock::InstanceOf(tScriptEngine * engine, const tVariantBlock & rhs
 
 
 //---------------------------------------------------------------------------
-risse_int64 tVariantBlock::CastToInteger_String   () const
+risse_int64 tVariant::CastToInteger_String   () const
 {
-	tVariantBlock val;
+	tVariant val;
 	const risse_char *p = AsString().c_str();
 	if(tLexerUtility::ParseNumber(p, val))
 	{
@@ -5051,7 +5051,7 @@ risse_int64 tVariantBlock::CastToInteger_String   () const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Integer  () const
+tString tVariant::CastToString_Integer  () const
 {
 	risse_char buf[40];
 	::Risse::int64_to_str(AsInteger(), buf);
@@ -5061,7 +5061,7 @@ tString tVariantBlock::CastToString_Integer  () const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Real     () const
+tString tVariant::CastToString_Real     () const
 {
 	risse_int32 cls = GetFPClass(AsReal());
 
@@ -5099,7 +5099,7 @@ tString tVariantBlock::CastToString_Real     () const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::CastToString_Boolean  () const
+tString tVariant::CastToString_Boolean  () const
 {
 	return CastToBoolean_Boolean()?
 		RISSE_WS("true"):
@@ -5109,7 +5109,7 @@ tString tVariantBlock::CastToString_Boolean  () const
 
 
 //---------------------------------------------------------------------------
-tOctet tVariantBlock::CastToOctet_String   () const
+tOctet tVariant::CastToOctet_String   () const
 {
 	// String -> Octet 変換
 	// 暗黙のこの変換においては、UTF-8 形式にて octet 列に変換を行う
@@ -5121,7 +5121,7 @@ tOctet tVariantBlock::CastToOctet_String   () const
 
 
 //---------------------------------------------------------------------------
-tVariantBlock::tSynchronizer::tSynchronizer(const tVariant & object)
+tVariant::tSynchronizer::tSynchronizer(const tVariant & object)
 {
 	// この ASSERT は、 tObjectInterface::tSynchronizer のサイズが
 	// Synchronizer のサイズ以下であることを保証する。
@@ -5133,7 +5133,7 @@ tVariantBlock::tSynchronizer::tSynchronizer(const tVariant & object)
 	// vtObject 以外の場合はロックを行わない。
 	// ロックオブジェクトを Synchronizer の場所に作成する
 	tObjectInterface *intf;
-	if(object.GetType() == tVariantBlock::vtObject)
+	if(object.GetType() == tVariant::vtObject)
 		intf = object.GetObjectInterface();
 	else
 		intf = NULL;
@@ -5145,7 +5145,7 @@ tVariantBlock::tSynchronizer::tSynchronizer(const tVariant & object)
 
 
 //---------------------------------------------------------------------------
-tVariantBlock::tSynchronizer::~tSynchronizer()
+tVariant::tSynchronizer::~tSynchronizer()
 {
 	// ロックオブジェクトを消滅させる
 	(reinterpret_cast<tObjectInterface::tSynchronizer*>(Synchronizer))->~tSynchronizer();
@@ -5154,7 +5154,7 @@ tVariantBlock::tSynchronizer::~tSynchronizer()
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHint_Data     () const
+risse_uint32 tVariant::GetHint_Data     () const
 {
 	return static_cast<risse_uint32>(
 		GetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hint).CastToInteger());
@@ -5163,7 +5163,7 @@ risse_uint32 tVariantBlock::GetHint_Data     () const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHint_Object   () const
+risse_uint32 tVariant::GetHint_Object   () const
 {
 	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hint).CastToInteger());
 }
@@ -5171,7 +5171,7 @@ risse_uint32 tVariantBlock::GetHint_Object   () const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetHint_Data     (risse_uint32 hint) const
+void tVariant::SetHint_Data     (risse_uint32 hint) const
 {
 	SetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hint, 0, (risse_int64)hint);
 }
@@ -5179,7 +5179,7 @@ void tVariantBlock::SetHint_Data     (risse_uint32 hint) const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::SetHint_Object   (risse_uint32 hint) const
+void tVariant::SetHint_Object   (risse_uint32 hint) const
 {
 	SetPropertyDirect_Object(ss_hint, 0, (risse_int64)hint);
 }
@@ -5187,7 +5187,7 @@ void tVariantBlock::SetHint_Object   (risse_uint32 hint) const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHash_Integer  () const
+risse_uint32 tVariant::GetHash_Integer  () const
 {
 	// ビット列を適当にハッシュして返す
 	risse_uint64 iv = static_cast<risse_uint64>(AsInteger());
@@ -5209,9 +5209,9 @@ risse_uint32 tVariantBlock::GetHash_Integer  () const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHash_Real     () const
+risse_uint32 tVariant::GetHash_Real     () const
 {
-	// tVariantBlock::StrictEqual_Real() も参照すること。
+	// tVariant::StrictEqual_Real() も参照すること。
 
 	risse_real v =     AsReal();
 	risse_uint32 cls = GetFPClass(v);
@@ -5252,7 +5252,7 @@ risse_uint32 tVariantBlock::GetHash_Real     () const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHash_Data     () const
+risse_uint32 tVariant::GetHash_Data     () const
 {
 	return static_cast<risse_uint32>(
 		GetPropertyDirect_Primitive(GetScriptEngine_Data(), ss_hash).CastToInteger());
@@ -5261,7 +5261,7 @@ risse_uint32 tVariantBlock::GetHash_Data     () const
 
 
 //---------------------------------------------------------------------------
-risse_uint32 tVariantBlock::GetHash_Object   () const
+risse_uint32 tVariant::GetHash_Object   () const
 {
 	return static_cast<risse_uint32>(GetPropertyDirect_Object(ss_hash).CastToInteger());
 }
@@ -5269,7 +5269,7 @@ risse_uint32 tVariantBlock::GetHash_Object   () const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::AsHumanReadable_Void     (risse_size maxlen) const
+tString tVariant::AsHumanReadable_Void     (risse_size maxlen) const
 {
 	return RISSE_WS("void");
 }
@@ -5277,7 +5277,7 @@ tString tVariantBlock::AsHumanReadable_Void     (risse_size maxlen) const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::AsHumanReadable_Null     (risse_size maxlen) const
+tString tVariant::AsHumanReadable_Null     (risse_size maxlen) const
 {
 	return RISSE_WS("null");
 }
@@ -5285,7 +5285,7 @@ tString tVariantBlock::AsHumanReadable_Null     (risse_size maxlen) const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::AddTrace(const tScriptBlockInstance * sb, risse_size pos) const
+void tVariant::AddTrace(const tScriptBlockInstance * sb, risse_size pos) const
 {
 	if(sb != NULL && pos != risse_size_max)
 	{
@@ -5302,7 +5302,7 @@ void tVariantBlock::AddTrace(const tScriptBlockInstance * sb, risse_size pos) co
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::PrependMessage(const tString & message) const
+void tVariant::PrependMessage(const tString & message) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	SetPropertyDirect_Object(ss_message, 0,
@@ -5312,7 +5312,7 @@ void tVariantBlock::PrependMessage(const tString & message) const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::AssertClass(tClassBase * cls) const
+void tVariant::AssertClass(tClassBase * cls) const
 {
 	// CheckClass も同じ構造をしているので、修正の際はよく見比べること。
 	if(GetType() == vtObject)
@@ -5330,7 +5330,7 @@ void tVariantBlock::AssertClass(tClassBase * cls) const
 
 
 //---------------------------------------------------------------------------
-tString tVariantBlock::GetClassName(bool * got) const
+tString tVariant::GetClassName(bool * got) const
 {
 	// class.name を得る
 	tType type = GetType();
@@ -5399,7 +5399,7 @@ tString tVariantBlock::GetClassName(bool * got) const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::DebugDump() const
+void tVariant::DebugDump() const
 {
 	if(GetType() == tVariant::vtObject)
 	{
@@ -5438,13 +5438,13 @@ void tVariantBlock::DebugDump() const
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::RegisterMember(const tString & name, const tVariantBlock & value,
+void tVariant::RegisterMember(const tString & name, const tVariant & value,
 	tMemberAttribute attrib, risse_uint32 flags) const
 {
 	RISSE_ASSERT(GetType() == vtObject);
 	SetPropertyDirect_Object(name,
 		flags|tOperateFlags::ofMemberEnsure|
-			(risse_uint32)(tMemberAttribute::GetDefault()), 
+			(risse_uint32)(tMemberAttribute::GetDefault()),
 		value);
 	SetAttributeDirect_Object(name, (risse_uint32)attrib);
 }
@@ -5452,8 +5452,8 @@ void tVariantBlock::RegisterMember(const tString & name, const tVariantBlock & v
 
 
 //---------------------------------------------------------------------------
-void tVariantBlock::RegisterFinalConstMember(const tString & name,
-	const tVariantBlock & value, risse_uint32 flags) const
+void tVariant::RegisterFinalConstMember(const tString & name,
+	const tVariant & value, risse_uint32 flags) const
 {
 	RegisterMember(name, value,
 		tMemberAttribute::GetDefault()

@@ -117,7 +117,7 @@ public:
 	 * @param This	メソッドが実行されるべき"Thisオブジェクト"
 	 */
 	void CallSuperClassMethod(
-		tVariantBlock * ret, const tString & name,
+		tVariant * ret, const tString & name,
 		risse_uint32 flags, const tMethodArgument & args, const tVariant & This);
 
 protected:

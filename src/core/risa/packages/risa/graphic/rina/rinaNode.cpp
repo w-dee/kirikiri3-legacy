@@ -15,10 +15,10 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaNode.h"
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
-#include "risse/include/risseNativeBinder.h"
-#include "risse/include/risseObjectClass.h"
-#include "risse/include/risseStaticStrings.h"
-#include "risse/include/risseExceptionClass.h"
+#include "risseNativeBinder.h"
+#include "risseObjectClass.h"
+#include "risseStaticStrings.h"
+#include "risseExceptionClass.h"
 #include "risa/common/RisseEngine.h"
 
 

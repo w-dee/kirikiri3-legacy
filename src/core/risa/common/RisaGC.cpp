@@ -13,7 +13,7 @@
 #include "risa/prec.h"
 #include "risa/common/RisaGC.h"
 
-#include "risse/include/risseGC.h"
+#include "risseGC.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(13921,35495,35132,18542,18346,21061,47449,62904);

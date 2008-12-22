@@ -13,7 +13,7 @@
 #ifndef _RISAExceptionH_
 #define _RISAExceptionH_
 
-#include "risse/include/risseExceptionClass.h"
+#include "risseExceptionClass.h"
 #include "risa/common/UnhandledException.h"
 
 namespace Risa {

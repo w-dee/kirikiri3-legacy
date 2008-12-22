@@ -21,7 +21,7 @@ Risseの実装を再利用する
 
 
 
-#include "risse/include/risseThread.h"
+#include "risseThread.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

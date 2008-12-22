@@ -17,7 +17,7 @@
 
 #include "risa/packages/risa/graphic/rina/rinaNode.h"
 #include "risa/packages/risa/graphic/rina/rinaGraph.h"
-#include "risse/include/risseArrayClass.h"
+#include "risseArrayClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

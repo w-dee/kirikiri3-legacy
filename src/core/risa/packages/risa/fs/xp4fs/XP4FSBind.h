@@ -17,7 +17,7 @@
 
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/xp4fs/XP4FS.h"
-#include "risse/include/risseNative.h"
+#include "risseNative.h"
 #include "base/utils/Singleton.h"
 
 namespace Risa {

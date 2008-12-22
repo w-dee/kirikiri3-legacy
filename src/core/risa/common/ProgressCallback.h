@@ -13,7 +13,7 @@
 #ifndef PROGRESSCALLBACK_H
 #define PROGRESSCALLBACK_H
 
-#include "risse/include/risseVariant.h"
+#include "risseVariant.h"
 
 namespace Risa
 {

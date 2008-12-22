@@ -55,7 +55,7 @@ TODO: 使用例をここに書く
 #include <stdlib.h>
 #include <string.h>
 #include <typeinfo>
-#include "risse/include/risseGC.h"
+#include "risseGC.h"
 #include "risa/common/RisaThread.h"
 
 #define HAVE_CXXABI_H

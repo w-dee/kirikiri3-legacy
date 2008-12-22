@@ -15,7 +15,7 @@
 #define RISA_MATHALGOLITHMS_H
 
 #include <math.h>
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 
 #ifdef RISA_USE_SSE
 	#include "risa/common/opt_sse/MathAlgorithms_SSE.h"

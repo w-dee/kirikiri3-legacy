@@ -15,8 +15,8 @@
 
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/common/RisaThread.h"
-#include "risse/include/risseWCString.h"
-#include "risse/include/builtin/stream/risseStreamClass.h"
+#include "risseWCString.h"
+#include "builtin/stream/risseStreamClass.h"
 #include <wx/file.h>
 
 namespace Risa {

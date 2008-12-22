@@ -11,7 +11,7 @@
 //! @brief Waveフォーマットコンバータのコア関数
 //---------------------------------------------------------------------------
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 #include "risa/common/opt_sse/xmmlib.h"
 #include "risa/common/opt_sse/MathAlgorithms_SSE.h"

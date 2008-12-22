@@ -13,7 +13,7 @@
 #include "risa/prec.h"
 #include "risa/common/RisaThread.h"
 #include "risa/common/RisseEngine.h"
-#include "risse/include/risseExceptionClass.h"
+#include "risseExceptionClass.h"
 #include "risa/packages/risa/log/Log.h"
 
 namespace Risa {

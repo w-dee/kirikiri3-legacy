@@ -14,12 +14,12 @@
 	// for pre-compiled headers
 	// 頻繁に使うヘッダはこの中にかいてください
 	#include <wx/wx.h>
-	#include "risse/include/risseString.h"
-	#include "risse/include/risseScriptEngine.h"
-	#include "risse/include/risseGC.h"
-	#include "risse/include/risseTypes.h"
-	#include "risse/include/risseVariant.h"
-	#include "risse/include/risseStringTemplate.h"
+	#include "risseString.h"
+	#include "risseScriptEngine.h"
+	#include "risseGC.h"
+	#include "risseTypes.h"
+	#include "risseVariant.h"
+	#include "risseStringTemplate.h"
 	#include "risa/common/Singleton.h"
 	#include "risa/common/RingBuffer.h"
 	#include "risa/common/RisaThread.h"

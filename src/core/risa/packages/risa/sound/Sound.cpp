@@ -13,8 +13,8 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/sound/Sound.h"
 #include "risa/packages/risa/sound/filter/BasicWaveFilter.h"
-#include "risse/include/risseStaticStrings.h"
-#include "risse/include/risseArrayClass.h"
+#include "risseStaticStrings.h"
+#include "risseArrayClass.h"
 #include "risa/packages/risa/fs/FSManager.h"
 
 

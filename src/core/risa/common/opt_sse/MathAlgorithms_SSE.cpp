@@ -12,7 +12,7 @@
  * 数学関数群
  */
 //---------------------------------------------------------------------------
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 
 #include <math.h>

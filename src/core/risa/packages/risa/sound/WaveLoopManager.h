@@ -15,10 +15,11 @@
 #define WaveLoopManagerH
 //---------------------------------------------------------------------------
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 #include "risa/common/RisaThread.h"
 #include "risa/packages/risa/sound/WaveFilter.h"
 #include "risa/packages/risa/sound/WaveDecoder.h"
+#include "risa/common/RisaGC.h"
 #include <vector>
 #include <string>
 
@@ -246,7 +247,7 @@ private:
 	risse_int ShortCrossFadeHalfSamples;
 		//!< SmoothTimeHalf in sample unit
 
-	bool Looping; 
+	bool Looping;
 		//!< ループ再生しているときは真 (ただしこれはループ情報を読み込んでいない場合の設定で、
 		//   ループ情報を読み込んでいる場合はこの設定に従わない
 

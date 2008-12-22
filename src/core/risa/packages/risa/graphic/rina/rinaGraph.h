@@ -16,7 +16,7 @@
 #define RINAGRAPH_H
 
 #include "risa/common/RisaThread.h"
-#include "risse/include/risseClass.h"
+#include "risseClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 //! @brief Phase Vocoder のCPUごとの最適化
 //---------------------------------------------------------------------------
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 #include <math.h>
 #include "risa/common/MathAlgorithms.h"

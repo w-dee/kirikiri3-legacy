@@ -13,7 +13,7 @@
 #ifndef REALFFT_H
 #define REALFFT_H
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 
 /*
 	Based on

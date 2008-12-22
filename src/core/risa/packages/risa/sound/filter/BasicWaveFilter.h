@@ -15,9 +15,9 @@
 #define BasicWaveFilterH
 
 #include "risa/packages/risa/sound/WaveFilter.h"
-#include "risse/include/risseNativeBinder.h"
-#include "risse/include/risseClass.h"
-#include "risse/include/risseObjectBase.h"
+#include "risseNativeBinder.h"
+#include "risseClass.h"
+#include "risseObjectBase.h"
 #include "risa/common/RisseEngine.h"
 
 namespace Risa {

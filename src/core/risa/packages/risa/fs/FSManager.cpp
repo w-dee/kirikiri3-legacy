@@ -14,7 +14,7 @@
 #include "risa/packages/risa/fs/FSManager.h"
 #include "risa/packages/risa/fs/osfs/OSFS.h"
 #include "risa/packages/risa/fs/FileSystem.h"
-#include "risse/include/builtin/stream/risseStreamClass.h"
+#include "builtin/stream/risseStreamClass.h"
 
 
 namespace Risa {

@@ -16,7 +16,7 @@
 #if 0
 #include "base/fs/common/FSManagerBind.h"
 #include "base/fs/pathfs/PathFS.h"
-#include "risse/include/risseNative.h"
+#include "risseNative.h"
 
 
 namespace Risa {

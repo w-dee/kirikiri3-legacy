@@ -17,7 +17,6 @@
 
 #include "risa/prec.h"
 #include <algorithm>
-#include "risa/common/RisaGC.h"
 #include "risa/packages/risa/sound/WaveLoopManager.h"
 
 
@@ -351,7 +350,7 @@ bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &writte
 					risse_uint8 *src2 = NULL;
 
 					risse_int alloc_size =
-						(before_count + after_count) * 
+						(before_count + after_count) *
 							FileInfo->GetSampleGranuleSize();
 					CrossFadeSamples = (risse_uint8*)MallocAtomicCollectee(alloc_size);
 					src1 = (risse_uint8*)MallocAtomicCollectee(alloc_size*2);
@@ -482,7 +481,7 @@ bool tWaveLoopManager::Render(void *dest, risse_uint samples, risse_uint &writte
 				ClearCrossFadeInformation();
 			}
 		}
-	}	// while 
+	}	// while
 	return written == samples;
 }
 //---------------------------------------------------------------------------
@@ -1248,7 +1247,7 @@ bool tWaveLoopManager::ReadInformation(char * p)
 	{
 		// sli v2.0+
 		if(strncmp(p, "#2.00", 5) > 0)
-			return false; // version mismatch 
+			return false; // version mismatch
 
 		while(true)
 		{

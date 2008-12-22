@@ -14,7 +14,7 @@
 #define TEXTSTREAMH
 
 
-#include "risse/include/risseScriptEngine.h"
+#include "risseScriptEngine.h"
 #include "risa/common/Singleton.h"
 #include "risa/common/RisseEngine.h"
 

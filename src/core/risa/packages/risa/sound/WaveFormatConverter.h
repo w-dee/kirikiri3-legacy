@@ -16,7 +16,7 @@
 //---------------------------------------------------------------------------
 
 #include "risa/packages/risa/sound/Wave.h"
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

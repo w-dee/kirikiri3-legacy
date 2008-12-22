@@ -3,6 +3,12 @@
 TOP_DIR=../../..
 include $(TOP_DIR)/Makefile_filenames
 
+
+# この変数を定義すると、risse ディレクトリの下に include ディレクトリを作らない。
+# risse-config の出力するインストールディレクトリは src ディレクトリそのままになる。
+# include ディレクトリを作りたい場合はこの定義をコメントアウトすること。
+RISSE_NO_COPY_INCLUDES = 1
+
 #----------------------------#
 
 # プログラムID (プログラムやライブラリのbasenameとなる)
@@ -230,7 +236,11 @@ src/builtin/date/risseDateParser.cpp src/builtin/date/risseDateParser.inc: \
 
 # 設定ファイルを書き出す
 
+ifdef RISSE_NO_COPY_INCLUDES
+Risse_INCLUDE_DIR := $(shell pwd)/src
+else
 Risse_INCLUDE_DIR := $(shell pwd)/include
+endif
 
 # risse-config を作成する。
 
@@ -252,6 +262,8 @@ BIN_DEPS += $(Risse_BIN_OUTPUT_DIR)/risse-config
 #----------------------------#
 
 # ヘッダファイルを集めてコピーする
+ifndef RISSE_NO_COPY_INCLUDES
+
 RISSE_HEADER_FILES := $(filter-out ./prec.h,$(shell sh -c "cd src; find . -name '*.h'") $(shell sh -c "cd src; find . -name '*.inc'"))
 RISSE_HEADER_DESTS := $(subst ./,include/,$(RISSE_HEADER_FILES))
 
@@ -261,6 +273,7 @@ include/% :: src/%
 
 BIN_DEPS += $(RISSE_HEADER_DESTS)
 
+endif
 
 #----------------------------#
 include $(TOP_DIR)/Makefile_common

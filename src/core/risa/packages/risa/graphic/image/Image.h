@@ -16,7 +16,7 @@
 #include "risa/common/RisaGC.h"
 #include "risa/packages/risa/graphic/image/ImageBuffer.h"
 #include "risa/common/RisseEngine.h"
-#include "risse/include/risseDictionaryClass.h"
+#include "risseDictionaryClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

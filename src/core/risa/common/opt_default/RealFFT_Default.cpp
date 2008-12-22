@@ -10,7 +10,7 @@
 //! @file
 //! @brief 実数離散フーリエ変換
 //---------------------------------------------------------------------------
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 
 /*

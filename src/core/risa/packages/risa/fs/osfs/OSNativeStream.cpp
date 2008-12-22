@@ -13,8 +13,8 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/fs/osfs/OSFS.h"
 #include "risa/common/RisaException.h"
-#include "risse/include/risseExceptionClass.h"
-#include "risse/include/risseStaticStrings.h"
+#include "risseExceptionClass.h"
+#include "risseStaticStrings.h"
 #include <wx/filename.h>
 #include <wx/dir.h>
 

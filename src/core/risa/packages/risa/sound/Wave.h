@@ -14,7 +14,7 @@
 #define WaveH
 
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 
 
 namespace Risa {

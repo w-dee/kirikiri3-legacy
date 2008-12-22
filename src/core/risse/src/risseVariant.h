@@ -15,7 +15,6 @@
 
 #include "risseVariantData.h"
 #include "risseMethod.h"
-#include "risseOperateRetValue.h"
 #include "risseObjectInterfaceArg.h"
 #include "risseOpCodes.h"
 #include "risseMemberAttribute.h"
@@ -33,7 +32,7 @@ class tPrimitiveClassBase;
  * @note	tVariantData よりも高度な動作をここで定義する
  * @note	スレッド保護無し
  */
-class tVariant : public tVariantData, public tOperateRetValue
+class tVariant : public tVariantData
 {
 private:
 	/**

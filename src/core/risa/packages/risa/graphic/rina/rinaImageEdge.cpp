@@ -17,9 +17,9 @@
 #include "risa/prec.h"
 #include "risa/packages/risa/graphic/rina/rinaImageEdge.h"
 #include "risa/common/RisaThread.h"
-#include "risse/include/risseNativeBinder.h"
-#include "risse/include/risseObjectClass.h"
-#include "risse/include/risseStaticStrings.h"
+#include "risseNativeBinder.h"
+#include "risseObjectClass.h"
+#include "risseStaticStrings.h"
 #include "risa/common/RisseEngine.h"
 
 

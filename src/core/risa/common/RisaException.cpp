@@ -11,7 +11,7 @@
 //! @brief Risaで内部的に用いている例外クラスの管理など
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
-#include "risse/include/risseStaticStrings.h"
+#include "risseStaticStrings.h"
 #include "risa/common/RisaException.h"
 
 

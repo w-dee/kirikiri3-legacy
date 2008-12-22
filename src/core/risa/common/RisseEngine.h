@@ -13,17 +13,17 @@
 #ifndef ENGINEH
 #define ENGINEH
 
-#include "risse/include/risseScriptEngine.h"
+#include "risseScriptEngine.h"
 #include "risa/common/Singleton.h"
-#include "risse/include/risseObjectBase.h"
-#include "risse/include/risseNativeBinder.h"
-#include "risse/include/risseStaticStrings.h"
-#include "risse/include/risseStringTemplate.h"
-#include "risse/include/risseClass.h"
-#include "risse/include/risseModule.h"
-#include "risse/include/risseObjectClass.h"
-#include "risse/include/risseExceptionClass.h"
-#include "risse/include/builtin/risseBuiltinPackageInitializer.h"
+#include "risseObjectBase.h"
+#include "risseNativeBinder.h"
+#include "risseStaticStrings.h"
+#include "risseStringTemplate.h"
+#include "risseClass.h"
+#include "risseModule.h"
+#include "risseObjectClass.h"
+#include "risseExceptionClass.h"
+#include "builtin/risseBuiltinPackageInitializer.h"
 
 
 namespace Risa {

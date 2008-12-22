@@ -14,7 +14,7 @@
 /*
 	and
 
-	the original copyiright:
+	the original copyright:
 */
 
 
@@ -43,7 +43,7 @@
 #ifndef _XMMLIB_H_INCLUDED
 #define _XMMLIB_H_INCLUDED
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 #include <malloc.h>
 

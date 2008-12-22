@@ -22,7 +22,7 @@
 #include "risa/common/RisaThread.h"
 #include "risa/common/Singleton.h"
 #include "risa/packages/risa/event/Event.h"
-#include "risse/include/risseNativeBinder.h"
+#include "risseNativeBinder.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

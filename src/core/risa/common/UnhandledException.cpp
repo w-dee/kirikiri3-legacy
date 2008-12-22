@@ -18,7 +18,7 @@
 #include "risa/packages/risa/event/Event.h"
 #include "risa/packages/risa/log/Log.h"
 #include "risa/common/ui/editor/ScriptEditor.h"
-#include "risse/include/risseStaticStrings.h"
+#include "risseStaticStrings.h"
 
 
 namespace Risa {

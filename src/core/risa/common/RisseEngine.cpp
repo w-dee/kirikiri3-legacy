@@ -13,9 +13,9 @@
 #include "risa/prec.h"
 #include "risa/common/RisseEngine.h"
 #include "risa/packages/risa/log/Log.h"
-#include "risse/include/risseObjectBase.h"
+#include "risseObjectBase.h"
 #include "risa/packages/risa/fs/FSManager.h"
-#include "risse/include/risseExceptionClass.h"
+#include "risseExceptionClass.h"
 
 namespace Risa {
 RISSE_DEFINE_SOURCE_ID(50344,48369,3431,18494,14208,60463,45295,19784);

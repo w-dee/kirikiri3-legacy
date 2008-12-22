@@ -16,9 +16,9 @@
 #include "risa/packages/risa/graphic/rina/rinaGraph.h"
 #include "risa/common/RisaThread.h"
 #include "risa/common/RisseEngine.h"
-#include "risse/include/risseNativeBinder.h"
-#include "risse/include/risseObjectClass.h"
-#include "risse/include/risseStaticStrings.h"
+#include "risseNativeBinder.h"
+#include "risseObjectClass.h"
+#include "risseStaticStrings.h"
 
 
 namespace Risa {

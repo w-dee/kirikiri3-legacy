@@ -19,7 +19,7 @@
 #include "risseAssert.h"
 #include "risseString.h"
 #include "risseOctet.h"
-
+#include "risseOperateRetValue.h"
 
 namespace Risse
 {
@@ -55,7 +55,7 @@ tString, tVariant::tObject, tOctet 内にある各の「本当の」ポインタ
 tString の内部ポインタが指し示している場所は、文字列を保持しているバッ
 ファである。RisseではUTF-32文字列を対象とするため、このポインタが 32bit境界
 にそろわないことはない。デバッガなどでそのまま UTF-32 文字列を表示したい用
-途がある。tString の Type の条件は 0x04 以上かつ下位2ビットが00
+途がある。tString の Type の条件は 0x10 以上かつ下位2ビットが00
 であるため、内部ポインタの値と本来指し示しているポインタは同じになる。これに
 より、内部ポインタが指し示すポインタがそのまま文字列バッファのポインタとなり、
 そのままデバッガなどで内容を表示できる。
@@ -75,7 +75,7 @@ GCによりマークし続けられてしまう。そのため、void や intege
 スレッド保護はない。
 */
 //---------------------------------------------------------------------------
-class tVariantData : public tCollectee
+class tVariantData : public tCollectee, public tOperateRetValue
 {
 protected:
 

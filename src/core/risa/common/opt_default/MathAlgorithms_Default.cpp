@@ -11,7 +11,7 @@
 //! @brief 数学関数群
 //---------------------------------------------------------------------------
 #include <stdlib.h>
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 
 

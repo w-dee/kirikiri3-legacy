@@ -12,7 +12,7 @@
 //---------------------------------------------------------------------------
 #include "risa/prec.h"
 #include "risa/common/RisaException.h"
-#include "risse/include/risseExceptionClass.h"
+#include "risseExceptionClass.h"
 #include "risa/packages/risa/stdio/StandardIO.h"
 
 namespace Risa {

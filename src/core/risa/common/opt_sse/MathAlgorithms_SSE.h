@@ -15,7 +15,7 @@
 
 #include <math.h>
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 #include "risa/common/opt_sse/xmmlib.h"
 
 

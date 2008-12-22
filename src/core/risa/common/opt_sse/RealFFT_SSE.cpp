@@ -10,14 +10,14 @@
 //! @file
 //! @brief 実数離散フーリエ変換
 //---------------------------------------------------------------------------
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 #include "risa/common/opt_sse/xmmlib.h"
 
 /*
 	and
 
-	the original copyiright:
+	the original copyright:
 */
 
 /********************************************************************
@@ -47,7 +47,7 @@ namespace Risa {
 STIN void cft1st(int n, float * RISSE_RESTRICT a, float * RISSE_RESTRICT w)
 {
 	int		j, k1, k2;
-	
+
 	__m128	XMM0, XMM1, XMM2, XMM3, XMM4, XMM5;
 //#pragma warning(disable : 592)
 	XMM0	 = _mm_loadl_pi(XMM0, (__m64*)(a   ));
@@ -492,7 +492,7 @@ STIN void bitrv2(int n, int * RISSE_RESTRICT ip, float * RISSE_RESTRICT a)
 {
 	int j, j1, k, k1, l, m, m2;
 	float xr, xi, yr, yi;
-	
+
 	ip[0] = 0;
 	l = n;
 	m = 1;
@@ -564,7 +564,7 @@ STIN void bitrv2(int n, int * RISSE_RESTRICT ip, float * RISSE_RESTRICT a)
 STIN void cftfsub(int n, float * RISSE_RESTRICT a, float * RISSE_RESTRICT w)
 {
 	int j, j1, j2, j3, l;
-	
+
 	l = 2;
 	if (n > 8) {
 		cft1st(n, a, w);
@@ -654,7 +654,7 @@ STIN void cftfsub(int n, float * RISSE_RESTRICT a, float * RISSE_RESTRICT w)
 STIN void rftfsub(int n, float * RISSE_RESTRICT a, int nc, float * RISSE_RESTRICT c)
 {
 	int		j, k, kk, ks, m;
-	
+
 	m	 = n >> 1;
 	ks	 = 2 * nc / m;
 	kk	 = 0;
@@ -722,7 +722,7 @@ STIN void cftbsub(int n, float * RISSE_RESTRICT a, float * RISSE_RESTRICT w)
 	void cftmdl(int n, int l, float * RISSE_RESTRICT a, float * RISSE_RESTRICT w);
 	int j, j1, j2, j3, l;
 	float x0r, x0i;
-	
+
 	l = 2;
 	if (n > 8) {
 		cft1st(n, a, w);
@@ -830,7 +830,7 @@ static void rftbsub(int n, float * RISSE_RESTRICT a, int nc, float * RISSE_RESTR
 {
 	int j, k, kk, ks, m;
 	float wkr, wki, xr, xi, yr, yi;
-	
+
 	a[1] = -a[1];
 	m = n >> 1;
 	ks = 2 * nc / m;
@@ -864,7 +864,7 @@ void makewt(int nw, int * RISSE_RESTRICT ip, float * RISSE_RESTRICT w)
 	void bitrv2(int n, int * RISSE_RESTRICT ip, float * RISSE_RESTRICT a);
 	int j, nwh;
 	float delta, x, y;
-	
+
 	ip[0] = nw;
 	ip[1] = 1;
 	if (nw > 2) {
@@ -893,7 +893,7 @@ void makect(int nc, int *ip, float *c)
 {
 	int j, nch;
 	float delta;
-	
+
 	ip[1] = nc;
 	if (nc > 1) {
 		nch = nc >> 1;

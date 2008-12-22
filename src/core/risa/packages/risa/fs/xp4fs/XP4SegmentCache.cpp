@@ -16,7 +16,7 @@
 */
 
 #include "risa/prec.h"
-#include "risse/include/risseUtils.h"
+#include "risseUtils.h"
 #include "base/fs/xp4fs/XP4FS.h"
 #include "base/fs/xp4fs/XP4Archive.h"
 #include "base/fs/xp4fs/XP4SegmentCache.h"

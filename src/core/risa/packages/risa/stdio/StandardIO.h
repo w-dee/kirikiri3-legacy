@@ -16,9 +16,9 @@
 #include "risa/common/RisaThread.h"
 #include "risa/common/RisaGC.h"
 #include "risa/common/RisseEngine.h"
-#include "risse/include/builtin/stream/risseStreamClass.h"
-#include "risse/include/risseClass.h"
-#include "risse/include/risseObjectClass.h"
+#include "builtin/stream/risseStreamClass.h"
+#include "risseClass.h"
+#include "risseObjectClass.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------

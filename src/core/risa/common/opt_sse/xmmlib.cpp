@@ -14,7 +14,7 @@
 /*
 	and
 
-	the original copyiright:
+	the original copyright:
 */
 
 
@@ -41,7 +41,7 @@
 	 http://homepage3.nifty.com/blacksword/
 */
 
-#include "risse/include/risseTypes.h"
+#include "risseTypes.h"
 using namespace Risse;
 #include <stdio.h>
 #include <stdlib.h>

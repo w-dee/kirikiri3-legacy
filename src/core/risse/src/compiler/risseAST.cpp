@@ -840,7 +840,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 		tASTNode_Array * package_array = new tASTNode_Array(PackageList->GetPosition());
 		for(risse_size i = 0; i < PackageList->GetChildCount(); i++)
 		{
-			tASTNode_ImportAs * import_as = 
+			tASTNode_ImportAs * import_as =
 				static_cast<tASTNode_ImportAs *>(PackageList->GetChildAt(i));
 			RISSE_ASSERT(import_as != NULL);
 			RISSE_ASSERT(import_as->GetAs() == NULL); // as の指定はないはず
@@ -867,7 +867,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 			tASTNode_Dict * dic = new tASTNode_Dict(IdList->GetPosition());
 			for(risse_size i = 0; i < IdList->GetChildCount(); i++)
 			{
-				tASTNode_ImportAs * import_as = 
+				tASTNode_ImportAs * import_as =
 					static_cast<tASTNode_ImportAs *>(IdList->GetChildAt(i));
 				// name は子が1個だけのはず(上でチェック済み)
 				tASTNode * name_node =
@@ -907,7 +907,7 @@ tSSAVariable * tASTNode_Import::DoReadSSA(tSSAForm *form, void * param) const
 		tASTNode_Array * package_array = new tASTNode_Array(PackageList->GetPosition());
 		for(risse_size i = 0; i < PackageList->GetChildCount(); i++)
 		{
-			tASTNode_ImportAs * import_as = 
+			tASTNode_ImportAs * import_as =
 				static_cast<tASTNode_ImportAs *>(PackageList->GetChildAt(i));
 			RISSE_ASSERT(import_as != NULL);
 			tASTNode_ImportLoc * import_loc =
@@ -1604,7 +1604,7 @@ tSSAVariable * tASTNode_Unary::DoReadSSA(
 			{
 			case autString:		oc = ocString;	rettype = tVariant::vtString;		break;
 			case autBoolean:	oc = ocBoolean;	rettype = tVariant::vtBoolean;		break;
-			case autReal:		oc = ocReal;	rettype = tVariant::vtReal;		break;
+			case autReal:		oc = ocReal;	rettype = tVariant::vtReal;			break;
 			case autInteger:	oc = ocInteger;	rettype = tVariant::vtInteger;		break;
 			case autOctet:		oc = ocOctet;	rettype = tVariant::vtOctet;		break;
 			default: oc = ocNoOperation;
@@ -2062,7 +2062,7 @@ void * tASTNode_Array::PrepareSSA(tSSAForm *form, tPrepareMode mode) const
 {
 	// この数値を超える量の インデックス用数値定数はここでは作成しない
 	// (大量のインデックス用定数が変数領域を埋め尽くすのを避けるため)
-	const risse_size max_prepare_index = 4; 
+	const risse_size max_prepare_index = 4;
 
 	// 配列の要素それぞれに対してprepareを行う
 	tPrepareSSA * data = new tPrepareSSA();
@@ -2462,7 +2462,7 @@ tSSAVariable * tASTNode_If::DoReadSSA(
 			tSSAForm *form, void * param) const
 {
 	// if文を作成
-	tSSAVariable * res = 
+	tSSAVariable * res =
 		InternalDoReadSSA(form, GetPosition(), RISSE_WS("if"), Condition,
 			True, False, true);
 
@@ -3724,7 +3724,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 		tSSAVariable * param_var = NULL;
 
 		// パラメータ内容の取得
-		tSSAStatement * assignparam_stmt = 
+		tSSAStatement * assignparam_stmt =
 			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(i);
 
@@ -3791,7 +3791,7 @@ tSSAVariable * tASTNode_FuncDecl::GenerateFuncDecl(tSSAForm *form,
 		tSSAVariable * param_var = NULL;
 
 		// パラメータ内容の取得
-		tSSAStatement * assignparam_stmt = 
+		tSSAStatement * assignparam_stmt =
 			new_form->AddStatement(GetPosition(), ocAssignBlockParam, &param_var);
 		assignparam_stmt->SetIndex(i);
 
@@ -3896,7 +3896,7 @@ tSSAVariable * tASTNode_PropDecl::GeneratePropertyDecl(tSSAForm *form) const
 	}
 	else
 	{
-		getter_var = 
+		getter_var =
 			form->AddConstantValueStatement(GetPosition(), tVariant::GetNullObject());
 	}
 
@@ -3916,7 +3916,7 @@ tSSAVariable * tASTNode_PropDecl::GeneratePropertyDecl(tSSAForm *form) const
 
 		// パラメータ内容の取得
 		tSSAVariable * param_var = NULL;
-		tSSAStatement * assignparam_stmt = 
+		tSSAStatement * assignparam_stmt =
 			new_form->AddStatement(GetPosition(), ocAssignParam, &param_var);
 		assignparam_stmt->SetIndex(0);
 
@@ -3937,7 +3937,7 @@ tSSAVariable * tASTNode_PropDecl::GeneratePropertyDecl(tSSAForm *form) const
 	}
 	else
 	{
-		setter_var = 
+		setter_var =
 			form->AddConstantValueStatement(GetPosition(), tVariant::GetNullObject());
 	}
 

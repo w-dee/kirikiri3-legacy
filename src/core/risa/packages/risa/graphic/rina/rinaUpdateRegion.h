@@ -10,12 +10,13 @@
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief RINA 更新矩形領域管理の実装 
+//! @brief RINA 更新矩形領域管理の実装
 //---------------------------------------------------------------------------
 #ifndef RINAUPDATEREGION_H
 #define RINAUPDATEREGION_H
 
 #include "risa/packages/risa/graphic/rina/rinaRectangle.h"
+#include <algorithm>
 
 namespace Risa {
 //---------------------------------------------------------------------------

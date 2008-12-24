@@ -84,7 +84,7 @@ protected:
 	 */
 	struct tVoid
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 0 固定
+		risse_ptruint Type; //!< バリアントタイプ: 4 固定
 		risse_ptruint Ptr; //!< 何らかのポインタ
 	};
 
@@ -93,7 +93,7 @@ protected:
 	 */
 	struct tInteger
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 1 固定
+		risse_ptruint Type; //!< バリアントタイプ: 5 固定
 		// ここに パディングが入っている場合アリ
 		risse_int64  Value; //!< 値
 	};
@@ -103,7 +103,7 @@ protected:
 	 */
 	struct tReal
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 2 固定
+		risse_ptruint Type; //!< バリアントタイプ: 6 固定
 		// ここに パディングが入っている場合アリ
 		risse_real Value; //!< 値
 	};
@@ -122,7 +122,7 @@ protected:
 	 */
 	struct tNull
 	{
-		risse_ptruint Type; //!< バリアントタイプ: 3 固定
+		risse_ptruint Type; //!< バリアントタイプ: 7 固定
 		risse_ptruint Ptr; //!< 何らかのポインタ
 	};
 
@@ -289,7 +289,7 @@ protected:
 	enum ___dummy
 	{
 		RV_S0 = RV_SIZE_MAX(0,		sizeof(risse_ptruint)),
-		RV_S1 = RV_SIZE_MAX(RV_S0,  sizeof(tVoid)),
+		RV_S1 = RV_SIZE_MAX(RV_S0,	sizeof(tVoid)),
 		RV_S2 = RV_SIZE_MAX(RV_S1,	sizeof(tInteger)),
 		RV_S3 = RV_SIZE_MAX(RV_S2,	sizeof(tReal)),
 		RV_S4 = RV_SIZE_MAX(RV_S3,	sizeof(tNull)),

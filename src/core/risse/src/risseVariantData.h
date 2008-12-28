@@ -36,7 +36,7 @@ class tVariant;
 
 tStringData, tVariant::tObject, tOctetData の各先頭
 のメンバは必ず何かのポインタである。それらはメンバ Type とストレージを共有
-する。このメンバ Type と共有を行ってる書くポインタはこれらは実際にはそれぞれ
+する。このメンバ Type と共有を行ってる各ポインタはこれらは実際にはそれぞれ
 tString, tObject, tOctetとして扱われるが、データメンバのレイ
 アウトは同一である。
 
@@ -63,7 +63,7 @@ tString の内部ポインタが指し示している場所は、文字列を保
 とりあえず tRiseVariant のサイズを抑えたいがための苦肉の策。こんなことをしな
 い方が速いかもしれないし、こうした方が速いかもしれない。
 
-tVariant はパフォーマンスの関係上、ILP32 システムでは 3 * 32bit, LP64 シス
+tVariant はパフォーマンスの関係上、ILP32 システムでは 4 * 32bit, LP64 シス
 テムでは 2 * 64bit に収まるようにすること。
 
 tVariantData::tVoid や tVariantData::tNull, tVariantData::tBoolean

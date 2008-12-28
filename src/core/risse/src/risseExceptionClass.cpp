@@ -1353,7 +1353,7 @@ void tIllegalArgumentExceptionClass::ThrowInvalidDateString(tScriptEngine * engi
 {
 	tTemporaryException * e =
 		new tTemporaryException(ss_risse, ss_IllegalArgumentException,
-			tString(RISSE_WS_TR("can not parse the string; invalid date string")));
+			tString(RISSE_WS_TR("cannot parse the string; invalid date string")));
 	if(engine) e->ThrowConverted(engine); else throw e;
 }
 //---------------------------------------------------------------------------

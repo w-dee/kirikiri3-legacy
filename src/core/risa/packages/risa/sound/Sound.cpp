@@ -201,7 +201,7 @@ void tSoundInstance::Open(const tString & filename)
 						last_filter = filter;
 				}
 				RISA_PREPEND_EXCEPTION_MESSAGE_END(engine,
-						tString(RISSE_WS_TR("Failed to connect filter index %1: "),
+						tString(RISSE_WS_TR("failed to connect filter index %1: "),
 							tString::AsString((risse_int64)i)))
 			}
 		}

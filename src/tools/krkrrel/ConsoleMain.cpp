@@ -167,8 +167,8 @@ bool wxKrkrReleaserConsoleApp::OnInit()
 	wxString appdir = appfilename.GetPath(wxPATH_GET_VOLUME|wxPATH_GET_SEPARATOR);
 
 	locale.Init(wxLANGUAGE_DEFAULT);
-	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale")); 
-	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale")); 
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("locale"));
+	locale.AddCatalogLookupPathPrefix(appdir + wxT("../share/locale"));
 
 	// メッセージカタログを追加する
 	locale.AddCatalog(wxT("krkrrel"));
@@ -291,7 +291,7 @@ int wxKrkrReleaserConsoleApp::OnRun()
 					{
 						tXP4MetadataReaderArchive arc(*i);
 						std::vector<tXP4WriterInputFile> filelist;
-						for(std::vector<tXP4MetadataReaderStorageItem>::const_iterator 
+						for(std::vector<tXP4MetadataReaderStorageItem>::const_iterator
 								j = arc.GetItemVector().begin(); j != arc.GetItemVector().end(); j++)
 							filelist.push_back(tXP4WriterInputFile(*j));
 						wxPrintf(wxT("archive %s\n"), i->c_str());
@@ -434,7 +434,7 @@ void wxKrkrReleaserConsoleApp::LoadClassList(const wxString & filename,
 	wxTextFile file(filename);
 
 	if(!file.Open())
-		throw wxString::Format(_("can not load class file '%s'"), filename.c_str());
+		throw wxString::Format(_("cannot load class file '%s'"), filename.c_str());
 
 	wxString str;
 	for ( str = file.GetFirstLine(); !file.Eof(); str = file.GetNextLine() )

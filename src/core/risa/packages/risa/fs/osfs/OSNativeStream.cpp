@@ -52,7 +52,7 @@ void tOSNativeStreamInstance::initialize(const tString & path, risse_uint32 flag
 	{
 		delete Internal; Internal = NULL;
 		tIOExceptionClass::Throw(
-			tString(RISSE_WS_TR("can not open file %1"), path));
+			tString(RISSE_WS_TR("cannot open file %1"), path));
 	}
 
 	// 名前を

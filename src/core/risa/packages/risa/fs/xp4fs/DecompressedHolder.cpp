@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(47081,32049,45767,18248,53175,52305,56890,58573);
 
 //---------------------------------------------------------------------------
 tDecompressedHolder::tDecompressedHolder(tDecompressedHolder::tMethod method,
-		const risse_uint8 * indata, risse_size insize, 
+		const risse_uint8 * indata, risse_size insize,
 		risse_size uncomp_size)
 {
 	Size = 0;
@@ -36,7 +36,7 @@ tDecompressedHolder::tDecompressedHolder(tDecompressedHolder::tMethod method,
 
 //---------------------------------------------------------------------------
 tDecompressedHolder::tDecompressedHolder(tMethod method,
-		tBinaryStream * instream, risse_size insize, 
+		tBinaryStream * instream, risse_size insize,
 		risse_size uncomp_size)
 {
 	Size = 0;
@@ -64,7 +64,7 @@ tDecompressedHolder::~tDecompressedHolder()
 
 
 //---------------------------------------------------------------------------
-void tDecompressedHolder::Decompress(tDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize, 
+void tDecompressedHolder::Decompress(tDecompressedHolder::tMethod method, const risse_uint8 * indata, risse_size insize,
 		risse_size uncomp_size)
 {
 	// すでにメモリブロックが割り当てられていた場合はメモリブロックを解放
@@ -83,7 +83,7 @@ void tDecompressedHolder::Decompress(tDecompressedHolder::tMethod method, const 
 	int result = uncompress( (unsigned char*)Data, &destlen,
 			(unsigned char*)indata, insize);
 	if(result != Z_OK || destlen != Size)
-		eRisaException::Throw(RISSE_WS_TR("Decompression failed. Data may be corrupted."));
+		eRisaException::Throw(RISSE_WS_TR("decompression failed, data may be corrupted"));
 }
 //---------------------------------------------------------------------------
 

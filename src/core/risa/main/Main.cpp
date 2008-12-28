@@ -223,7 +223,7 @@ bool tApplication::OnInit()
 	}
 	catch(const tVariant * e)
 	{
-		wxFprintf(stderr, wxT("tVariant exception caught : %s (%s)\n"),
+		wxFprintf(stderr, wxT("tVariant exception caught: %s (%s)\n"),
 			e->operator tString().AsWxString().c_str(),
 			e->GetClassName().AsWxString().c_str());
 		return false;

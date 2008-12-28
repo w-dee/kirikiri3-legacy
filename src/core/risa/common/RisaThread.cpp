@@ -44,13 +44,13 @@ void tThread::CallExecute()
 	catch(const tVariant * e)
 	{
 		// 例外を受け取った
-		tLogger::Log(tString(RISSE_WS_TR("Abnormal thread abortion due to unhandled exception : %1 (%2)"),
+		tLogger::Log(tString(RISSE_WS_TR("Abnormal thread abortion due to unhandled exception: %1 (%2)"),
 			e->operator tString(), e->GetClassName()), tLogger::llCritical);
 	}
 	catch(...)
 	{
 		// 例外を受け取った
-		tLogger::Log(tString(RISSE_WS_TR("Abnormal thread abortion due to unhandled exception : unknown exception")),
+		tLogger::Log(tString(RISSE_WS_TR("Abnormal thread abortion due to unhandled exception: unknown exception")),
 				tLogger::llCritical);
 	}
 }

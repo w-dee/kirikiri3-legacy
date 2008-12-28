@@ -365,7 +365,7 @@ void tEventQueueInstance::Loop()
 {
 	if(IsMainThreadQueue)
 		tEventQueueExceptionClass::Throw(
-					RISSE_WS_TR("Use this method for non-main queue"));
+					RISSE_WS_TR("use this method for non-main queue"));
 	for(;;)
 	{
 		risse_uint64 tick = tTickCount::instance()->Get();
@@ -386,7 +386,7 @@ void tEventQueueInstance::QuitLoop()
 {
 	if(IsMainThreadQueue)
 		tEventQueueExceptionClass::Throw(
-					RISSE_WS_TR("Use this method for non-main queue"));
+					RISSE_WS_TR("use this method for non-main queue"));
 	PostEvent(new tEventInfo(0, this), etDefault); // this が source のイベントは特殊なイベント
 }
 //---------------------------------------------------------------------------

@@ -85,7 +85,7 @@ void tOpenAL::ThrowIfError(const risse_char * message)
 	ALCenum err = alGetError();
 	if(err == AL_NO_ERROR) return ; // エラーはなにも起きていない
 	const ALCchar *msg = alcGetString(Device, err);
-	tSoundExceptionClass::Throw(tString(RISSE_WS_TR("OpenAL error in %1 : %2"),
+	tSoundExceptionClass::Throw(tString(RISSE_WS_TR("OpenAL error in %1: %2"),
 		tString(message),
 		tString(wxString(msg, wxConvUTF8))));
 }

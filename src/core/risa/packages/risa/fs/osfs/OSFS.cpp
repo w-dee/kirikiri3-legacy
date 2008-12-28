@@ -107,7 +107,7 @@ size_t tOSFSInstance::walkAt(const tString & dirname,
 	if(!wxFileName::DirExists(native_name)
 		|| !dir.Open(native_name))
 			tIOExceptionClass::Throw(tString(
-				RISSE_WS_TR("can not open directory '%1'"), native_name.c_str()));
+				RISSE_WS_TR("cannot open directory '%1'"), native_name.c_str()));
 
 	// ファイルを列挙
 	cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES);
@@ -176,7 +176,7 @@ void tOSFSInstance::removeFile(const tString & filename)
 
 	if(!::wxRemoveFile(native_name))
 		tIOExceptionClass::Throw(tString(
-				RISSE_WS_TR("can not remove file '%1'"), native_name.c_str()));
+				RISSE_WS_TR("cannot remove file '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
@@ -197,7 +197,7 @@ void tOSFSInstance::removeDirectory(const tString & dirname, const tMethodArgume
 
 	if(!::wxRmdir(native_name))
 		tIOExceptionClass::Throw(tString(
-			RISSE_WS_TR("can not remove directory '%1'"), native_name.c_str()));
+			RISSE_WS_TR("cannot remove directory '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
@@ -212,7 +212,7 @@ void tOSFSInstance::createDirectory(const tString & dirname)
 
 	if(!wxFileName::Mkdir(native_name, 0777, 0))
 		tIOExceptionClass::Throw(tString(
-			RISSE_WS_TR("can not create directory '%1'"), native_name.c_str()));
+			RISSE_WS_TR("cannot create directory '%1'"), native_name.c_str()));
 }
 //---------------------------------------------------------------------------
 
@@ -238,12 +238,12 @@ tObjectInterface * tOSFSInstance::stat(const tString & filename)
 	wxFileName filename_obj(native_name);
 
 	if(!filename_obj.GetTimes(&struc.ATime, &struc.MTime, &struc.CTime))
-		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("cannot stat file '%s'"), native_name.c_str())));
 
 	// サイズを取得
 	wxFile file;
 	if(!file.Open(native_name))
-		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("can not stat file '%s'"), native_name.c_str())));
+		tIOExceptionClass::Throw(tString(wxString::Format(RISSE_WS_TR("cannot stat file '%s'"), native_name.c_str())));
 
 	struc.Size = file.Length();
 */

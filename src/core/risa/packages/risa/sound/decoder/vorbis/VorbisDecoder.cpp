@@ -44,7 +44,7 @@ tOggVorbisDecoder::tOggVorbisDecoder(const tString & filename) :
 	try
 	{
 		if(!Open())
-			tSoundExceptionClass::Throw(tString(RISSE_WS_TR("can not open file '%1' : invalid format"),
+			tSoundExceptionClass::Throw(tString(RISSE_WS_TR("cannot open file '%1': invalid format"),
 				filename));
 	}
 	catch(...)

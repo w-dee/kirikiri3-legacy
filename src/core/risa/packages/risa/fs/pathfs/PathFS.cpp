@@ -93,7 +93,7 @@ bool tPathFS::DirectoryExists(const tString & dirname)
 //---------------------------------------------------------------------------
 void tPathFS::RemoveFile(const tString & filename)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ void tPathFS::RemoveFile(const tString & filename)
 //---------------------------------------------------------------------------
 void tPathFS::RemoveDirectory(const tString & dirname, bool recursive)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ void tPathFS::RemoveDirectory(const tString & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tPathFS::CreateDirectory(const tString & dirname, bool recursive)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 

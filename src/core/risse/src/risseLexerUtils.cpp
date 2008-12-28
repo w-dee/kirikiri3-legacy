@@ -156,7 +156,7 @@ tLexerUtility::tSkipCommentResult
 	{
 		// block comment; skip to the next '*' '/'
 		ptr += 2;
-		if(*ptr == 0) tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed comment found"));
+		if(*ptr == 0) tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed comment found"));
 		risse_int level = 0;
 		for(;;)
 		{
@@ -214,7 +214,7 @@ bool tLexerUtility::StringMatch(const risse_char * & ptr, const risse_char *wrd,
 //---------------------------------------------------------------------------
 tLexerUtility::tParseStringResult
 	tLexerUtility::ParseString(
-		const risse_char * & ptr, 
+		const risse_char * & ptr,
 		tString &val,
 		risse_char delim, bool embexpmode)
 {
@@ -345,7 +345,7 @@ tLexerUtility::tParseStringResult
 	if(status == psrNone)
 	{
 		// error
-		tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed string literal"));
+		tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed string literal"));
 	}
 
 	str.Fit();
@@ -564,7 +564,7 @@ bool tLexerUtility::ParseNonDecimalReal(
 
 
 //---------------------------------------------------------------------------
-bool tLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val, 
+bool tLexerUtility::ParseNonDecimalInteger(const risse_char *ptr, risse_int64 &val,
 	risse_int (*validdigits)(risse_char ch), risse_int basebits)
 {
 	risse_int64 v = 0;
@@ -793,13 +793,13 @@ bool tLexerUtility::ParseOctet(const risse_char * & ptr, tOctet &val)
 	{
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed octet literal"));
 
 		// コメントをスキップ
 		switch(SkipComment(ptr))
 		{
 		case scrEnded:
-			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed octet literal"));
 		case scrContinue:
 		case scrNotComment:
 			;
@@ -807,7 +807,7 @@ bool tLexerUtility::ParseOctet(const risse_char * & ptr, tOctet &val)
 
 		// 空白をスキップ
 		if(!SkipSpace(ptr))
-			tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+			tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed octet literal"));
 
 		// 次の一文字へのポインタを得る
 		const risse_char *next = ptr;
@@ -865,7 +865,7 @@ bool tLexerUtility::ParseOctet(const risse_char * & ptr, tOctet &val)
 	}
 
 	// error
-	tCompileExceptionClass::Throw(RISSE_WS_TR("Unclosed octet literal"));
+	tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed octet literal"));
 
 	return false;
 }
@@ -927,7 +927,7 @@ bool tLexerUtility::ParseRegExp(const risse_char * & ptr, tString &pat, tString 
 	if(!ok)
 	{
 		// error
-		tCompileExceptionClass::Throw("Unclosed regular expression literal");
+		tCompileExceptionClass::Throw(RISSE_WS_TR("unclosed regular expression literal"));
 	}
 
 	pat = str;

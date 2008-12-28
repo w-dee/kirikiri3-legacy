@@ -168,7 +168,7 @@ size_t tXP4FS::GetFileListAt(const tString & dirname,
 	if(idx == static_cast<risse_size>(-1))
 	{
 		// なかった、つまりディレクトリが存在しない
-		eRisaException::Throw(RISSE_WS_TR("can not open directory"));
+		eRisaException::Throw(RISSE_WS_TR("cannot open directory"));
 	}
 
 	// idx から検索を開始する
@@ -231,7 +231,7 @@ bool tXP4FS::DirectoryExists(const tString & dirname)
 //---------------------------------------------------------------------------
 void tXP4FS::RemoveFile(const tString & filename)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not delete file (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot delete file (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@ void tXP4FS::RemoveFile(const tString & filename)
 //---------------------------------------------------------------------------
 void tXP4FS::RemoveDirectory(const tString & dirname, bool recursive)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not delete directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot delete directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 
@@ -247,7 +247,7 @@ void tXP4FS::RemoveDirectory(const tString & dirname, bool recursive)
 //---------------------------------------------------------------------------
 void tXP4FS::CreateDirectory(const tString & dirname, bool recursive)
 {
-	eRisaException::Throw(RISSE_WS_TR("can not make directory (filesystem is read-only)"));
+	eRisaException::Throw(RISSE_WS_TR("cannot make directory (filesystem is read-only)"));
 }
 //---------------------------------------------------------------------------
 

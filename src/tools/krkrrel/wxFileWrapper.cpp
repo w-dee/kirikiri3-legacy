@@ -59,7 +59,7 @@ void wxFileEx::Create(const wxChar* filename, bool overwrite, int access)
 	if(!inherited::Create(filename, overwrite, access))
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("can not create file '%s'"), filename));
+				_("cannot create file '%s'"), filename));
 	FileName = filename;
 }
 //---------------------------------------------------------------------------
@@ -123,11 +123,11 @@ void wxFileEx::RaiseOpenError(const wxChar * filename, wxFile::OpenMode mode)
 	if(mode == wxFile::read)
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("can not open file '%s' for reading"), filename));
+				_("cannot open file '%s' for reading"), filename));
 	else
 		RAISE_EXCEPTION(
 			wxString::Format(
-				_("can not open file '%s' for writing"), filename));
+				_("cannot open file '%s' for writing"), filename));
 }
 //---------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ void wxFileEx::RaiseOpenError(const wxChar * filename, wxFile::OpenMode mode)
  */
 void wxFileEx::Align(wxFileOffset alignbytes, unsigned int padding)
 {
-	wxFileOffset padbytes = 
+	wxFileOffset padbytes =
 		alignbytes - (Tell() % alignbytes);
 	if(padbytes >= alignbytes) padbytes -= alignbytes;
 

@@ -147,7 +147,7 @@ tTextReadStream::tTextReadStream(const tString & name, const tString & modestr)
 
 		// 現時点でサポートをしているのは UTF-8 の読み込みのみ
 		if(enc != eUTF8)
-			eRisaException::Throw(RISSE_WS_TR("can not read text file: unknown or unsupported encoding in text file %1"), FileName);
+			eRisaException::Throw(RISSE_WS_TR("cannot read text file: unknown or unsupported encoding in text file %1"), FileName);
 	}
 	catch(...)
 	{
@@ -270,7 +270,7 @@ void tTextReadStream::ReadBuffer()
 		{
 			// 変換に失敗
 			BufferRemain = 0;
-			eRisaException::Throw(RISSE_WS_TR("can not read text file: invalid UTF-8 charater in file %1"), FileName);
+			eRisaException::Throw(RISSE_WS_TR("cannot read text file: invalid UTF-8 charater in file %1"), FileName);
 		}
 
 		// この関数ではバッファをすべて満たすことは保証しなくてよいので、ここで帰る
@@ -398,7 +398,7 @@ void tTextWriteStream::Write(const tString & targ)
 	}
 
 	// エラーの場合
-	eRisaException::Throw(RISSE_WS_TR("can not write text file: failed to convert to UTF-8 charater"));
+	eRisaException::Throw(RISSE_WS_TR("cannot write text file: failed to convert to UTF-8 charater"));
 }
 //---------------------------------------------------------------------------
 

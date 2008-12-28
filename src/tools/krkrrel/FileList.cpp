@@ -158,12 +158,12 @@ static void InternalGetFileListAt(iRisaProgressCallback * callback,
 		|| !dir_obj.Open(dir)) // wxmsw の実装を見ているとwxDir::Openは絶対に失敗しないみたいなんだけど
 	{
 		// ディレクトリのオープンに失敗したとき
-		throw wxString::Format(_("can not open directory '%s'"), dir.c_str());
+		throw wxString::Format(_("cannot open directory '%s'"), dir.c_str());
 	}
 	if(dir_obj.Traverse(trav,
 					wxEmptyString, wxDIR_DEFAULT & (~wxDIR_HIDDEN)) == static_cast<size_t>(-1))
 	{
-		throw wxString::Format(_("can not read directory '%s'"), dir.c_str());
+		throw wxString::Format(_("cannot read directory '%s'"), dir.c_str());
 	}
 
 	// ファイルを追加
@@ -267,7 +267,7 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 				patterns[pattern_count].type = tPattern::asis,       flags |= wxRE_ICASE;
 			else
 				continue; // unknown; skip
-	
+
 			if(!patterns[pattern_count].regex.Compile(pat.c_str() + 2, flags))
 				throw wxString::Format(_("error in regular expression '%s'"), pat.c_str() );
 			pattern_count ++;
@@ -314,7 +314,7 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 			else
 			{
 				i->SetFlags(
-					(i->GetFlags() & 
+					(i->GetFlags() &
 						~(RISA__XP4_FILE_EXCLUDED|RISA__XP4_FILE_COMPRESSED)
 					) | flags); // フラグを設定
 				i++;
@@ -473,7 +473,7 @@ void DeleteArchiveSet(const wxString & archivename)
 		if(wxFileName(*i).FileExists())
 		{
 			if(!wxRemoveFile(*i))
-				throw wxString(_("can not remove file '%s'"), i->c_str());
+				throw wxString(_("cannot remove file '%s'"), i->c_str());
 		}
 	}
 }

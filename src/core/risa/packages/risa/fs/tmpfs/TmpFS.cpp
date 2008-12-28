@@ -485,7 +485,7 @@ void tTmpFSInstance::removeDirectory(const tString & dirname,
 		if(node->HasSubNode()) tIOExceptionClass::Throw(RISSE_WS_TR("specified directory is not empty"));
 
 		// root ノードは消すことはできない
-		if(node == Root) tIOExceptionClass::Throw(RISSE_WS_TR("can not remove file system root directory"));
+		if(node == Root) tIOExceptionClass::Throw(RISSE_WS_TR("cannot remove file system root directory"));
 	}
 	else
 	{

@@ -122,7 +122,7 @@ void tFileSystemManager::Mount(const tString & point,
 		{
 			// 再チェック
 			tFileSystemExceptionClass::Throw(
-				tString(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is not directory"), path));
+				tString(RISSE_WS_TR("cannot mount filesystem: the mount point '%1' is not directory"), path));
 		}
 	}
 
@@ -131,7 +131,7 @@ void tFileSystemManager::Mount(const tString & point,
 	if(item)
 	{
 		// ファイルシステムが見つかったのでそこにはマウントできない
-		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not mount filesystem: the mount point '%1' is already mounted"), path));
+		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("cannot mount filesystem: the mount point '%1' is already mounted"), path));
 	}
 
 	// マウントポイントを追加
@@ -419,7 +419,7 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 	{
 		// fs 内のパスが空文字列ということは、ファイルシステムのルートを
 		// 削除しようとしていると言うこと
-		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not remove mount point '%1'"),
+		tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("cannot remove mount point '%1'"),
 			fullpath));
 	}
 
@@ -430,7 +430,7 @@ void tFileSystemManager::RemoveDirectory(const tString & dirname, bool recursive
 		for(; !i.End(); ++i)
 		{
 			if(i.GetKey().StartsWith(fullpath))
-				tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("can not remove mount point '%1'"),
+				tFileSystemExceptionClass::Throw(tString(RISSE_WS_TR("cannot remove mount point '%1'"),
 					i.GetKey()));
 		}
 	}

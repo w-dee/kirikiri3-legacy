@@ -2,7 +2,7 @@
 /*
 	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
-	Copyright (C) 2000-2008 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2009 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 
@@ -44,7 +44,7 @@ tNarrowTextProviderNode::tNarrowTextProviderNode(tGraph * graph) :
 //---------------------------------------------------------------------------
 void tNarrowTextProviderNode::SetCaption(const char * caption)
 {
-	volatile tGraphLocker lock(*this); 
+	volatile tGraphLocker lock(*this);
 
 	risse_size length_was = strlen(Caption);
 

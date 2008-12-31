@@ -2,7 +2,7 @@
 /*
 	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
-	Copyright (C) 2000-2008 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2009 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 
@@ -43,7 +43,7 @@ tWideTextProviderNode::tWideTextProviderNode(tGraph * graph) :
 //---------------------------------------------------------------------------
 void tWideTextProviderNode::SetCaption(const tString & caption)
 {
-	volatile tGraphLocker lock(*this); 
+	volatile tGraphLocker lock(*this);
 
 	// キャプションが変わると前の長さと新しい長さのどちらか長い方分までが更新される
 	risse_size length_was = Caption.GetLength();

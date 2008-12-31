@@ -2,7 +2,7 @@
 /*
 	Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
 	 stands for "Risa Is a Stagecraft Architecture"
-	Copyright (C) 2000-2008 W.Dee <dee@kikyou.info> and contributors
+	Copyright (C) 2000-2009 W.Dee <dee@kikyou.info> and contributors
 
 	See details of license at "license.txt"
 
@@ -84,6 +84,20 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tObjectInterface * tNodeInstance::get_inputs()
+{
+	return &GetInputPinArrayInstance();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tObjectInterface * tNodeInstance::get_outputs()
+{
+	return &GetOutputPinArrayInstance();
+}
+//---------------------------------------------------------------------------
 
 
 
@@ -92,8 +106,10 @@ void tNodeInstance::initialize(const tVariant & graph, const tNativeCallInfo &in
 
 
 //---------------------------------------------------------------------------
-RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'G','r','a','p','h'>()), engine->ObjectClass)
+RISSE_IMPL_CLASS_BEGIN(tNodeClass, (tSS<'N','o','d','e'>()), engine->ObjectClass)
 	RISSE_BIND_CONSTRUCTORS
+	BindProperty(this, tSS<'i','n','p','u','t','s'>(), &tNodeInstance::get_inputs);
+	BindProperty(this, tSS<'o','u','t','p','u','t','s'>(), &tNodeInstance::get_outputs);
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

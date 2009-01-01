@@ -102,7 +102,6 @@ def t(cnt)
 		{
 			static tStringData data;
 			static risse_char string[#{cnt}+3];
-		public:
 			operator const tString & ()
 			{ return *reinterpret_cast<const tString *>(&data); }
 		};

@@ -62,7 +62,7 @@ EOS
 	# static string への実体の externとエイリアスを書き出す
 	defs.each_index do |index|
 		item = defs[index]
-		file.puts("extern tStringData data_#{item[:id]};")
+		file.puts("extern const tStringData &data_#{item[:id]};")
 		file.puts("static const tString & #{item[:id]} = "+
 			"*reinterpret_cast<const tString *>(&data_#{item[:id]});"+
 			" //!< (static string) #{item[:def_comment]}")
@@ -85,10 +85,9 @@ EOS
 	file.puts "// static strings の文字列領域"
 	file.puts "// この領域は tString の文字列ポインタが指す先と"
 	file.puts "// 同じレイアウトになっている"
-	file.puts "// tSS の data がそもそも tStringData であり"
-	file.puts "// それと重複するものをここで定義しており冗長に見えるが"
 	file.puts "// ヘッダ側に tSS の実装(長ったらしいテンプレート)"
-	file.puts "// を見せたくなかったのでこうしている"
+	file.puts "// を見せたくなかったので、ヘッダとして提供する側には"
+	file.puts "// tSS<> を使っていない"
 
 	defs.each_index do |index|
 		item = defs[index]
@@ -96,7 +95,7 @@ EOS
 
 		item = defs[index]
 		name = item[:string]
-		file.print "tStringData data_#{item[:id]} = { "
+		file.print "const tStringData &data_#{item[:id]} = "
 		file.print "tSS<"
 		chars = ''
 		name.each_byte do |byte|
@@ -104,8 +103,7 @@ EOS
 			chars << "#{byte.chr.dump.gsub(/^"/,"'").gsub(/"$/,"'")}"
 		end
 		file.print chars
-		file.print ">::data.Buffer"
-		file.print ",#{item[:string].length} };"
+		file.print ">::data;"
 		file.puts " /* #{item[:def_comment]} */"
 	end
 

@@ -77,8 +77,8 @@ public:
 				tXP4MetadataReaderStorageItem(
 						inarchivename,
 						flags,
-						(flags & RISA__XP4_FILE_STATE_MASK) ==
-								RISA__XP4_FILE_STATE_DELETED ?
+						(flags & RISA_XP4_FILE_STATE_MASK) ==
+								RISA_XP4_FILE_STATE_DELETED ?
 							-1 : wxFileEx(basedirname + inputname).Length(),
 						time),
 				InputName(inputname),

@@ -120,7 +120,7 @@ tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 
 	// info チャンクから情報を読み取る
 	Flags = ReadI16LEFromMem(chunk + 0);
-	Flags &=~ RISA__XP4_FILE_MARKED; // MARKED はクリア
+	Flags &=~ RISA_XP4_FILE_MARKED; // MARKED はクリア
 	InArchiveName = wxT("/") + wxString(reinterpret_cast<const char *>(chunk + 2), wxConvUTF8);
 
 	// time チャンクを探す
@@ -146,7 +146,7 @@ tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			throw wxString(_("chunk 'time' not found"));
 	}
 
@@ -171,7 +171,7 @@ tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			throw wxString(_("chunk 'Segm' not found"));
 	}
 
@@ -185,7 +185,7 @@ tXP4MetadataReaderStorageItem::tXP4MetadataReaderStorageItem(
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			throw wxString(_("hash chunk not found"));
 	}
 }
@@ -253,8 +253,8 @@ tXP4MetadataReaderArchive::tXP4MetadataReaderArchive(const wxString & filename)
 		file.Close(); // 必要な情報は読み終わったのでファイルを閉じる
 
 		// 圧縮が行われている場合は展開を行う
-		if((flags & RISA__XP4_INDEX_ENCODE_METHOD_MASK) ==
-			RISA__XP4_INDEX_ENCODE_ZLIB)
+		if((flags & RISA_XP4_INDEX_ENCODE_METHOD_MASK) ==
+			RISA_XP4_INDEX_ENCODE_ZLIB)
 		{
 			// 圧縮が行われている
 			unsigned long input_size = compressed_index_size;

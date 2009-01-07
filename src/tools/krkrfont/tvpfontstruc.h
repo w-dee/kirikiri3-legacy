@@ -41,18 +41,18 @@ struct tFont
 //---------------------------------------------------------------------------
 // font ralated constants
 //---------------------------------------------------------------------------
-#define RISA__TF_ITALIC    0x0100
-#define RISA__TF_BOLD      0x0200
-#define RISA__TF_UNDERLINE 0x0400
-#define RISA__TF_STRIKEOUT 0x0800
+#define RISA_TF_ITALIC    0x0100
+#define RISA_TF_BOLD      0x0200
+#define RISA_TF_UNDERLINE 0x0400
+#define RISA_TF_STRIKEOUT 0x0800
 
 
 //---------------------------------------------------------------------------
-#define RISA__FSF_FIXEDPITCH   1      // fsfFixedPitch
-#define RISA__FSF_SAMECHARSET  2      // fsfSameCharSet
-#define RISA__FSF_NOVERTICAL   4      // fsfNoVertical
-#define RISA__FSF_OUTLINEONLY  8      // fsfOutLineOnly
-#define RISA__FSF_USEFONTFACE  0x100  // fsfUseFontFace
+#define RISA_FSF_FIXEDPITCH   1      // fsfFixedPitch
+#define RISA_FSF_SAMECHARSET  2      // fsfSameCharSet
+#define RISA_FSF_NOVERTICAL   4      // fsfNoVertical
+#define RISA_FSF_OUTLINEONLY  8      // fsfOutLineOnly
+#define RISA_FSF_USEFONTFACE  0x100  // fsfUseFontFace
 
 /*]*/
 

@@ -143,20 +143,20 @@ void wxMainDialog::UpdateFaceIndex()
 		risse_int face_index = FaceNameChoice->GetSelection();
 		if(face_index < 0) face_index = 0;
 		risse_uint32 options =
-			RISA__GET_FACE_INDEX_FROM_OPTIONS(face_index);
+			RISA_GET_FACE_INDEX_FROM_OPTIONS(face_index);
 		if(BoldCheckBox->GetValue())
-			options |= RISA__TF_BOLD;
+			options |= RISA_TF_BOLD;
 		if(!AntialiasedCheckBox->GetValue())
-			options |= RISA__FACE_OPTIONS_NO_ANTIALIASING;
+			options |= RISA_FACE_OPTIONS_NO_ANTIALIASING;
 		if(NoHintingCheckBox->GetValue())
-			options |= RISA__FACE_OPTIONS_NO_HINTING;
+			options |= RISA_FACE_OPTIONS_NO_HINTING;
 		if(ForceAutoHintingCheckBox->GetValue())
-			options |= RISA__FACE_OPTIONS_FORCE_AUTO_HINTING;
+			options |= RISA_FACE_OPTIONS_FORCE_AUTO_HINTING;
 		if(SelectFileRadioButton->GetValue())
 		{
 			// ファイルによる指定
 			Face = new tFreeTypeFace(
-				SelectFileEdit->GetLabel(), options | RISA__FACE_OPTIONS_FILE);
+				SelectFileEdit->GetLabel(), options | RISA_FACE_OPTIONS_FILE);
 		}
 		else
 		{

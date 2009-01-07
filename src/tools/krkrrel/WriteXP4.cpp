@@ -25,9 +25,9 @@
 	・ファイルマジック定数が違う(当たり前といえば当たり前)
 	・ファイル名が UTF-8 として記録されている
 	・PEXP3 のような PE との結合はサポートしない
-	・ステート RISA__XP4_FILE_STATE_DELETED を持つ
+	・ステート RISA_XP4_FILE_STATE_DELETED を持つ
 	  (パッチによりファイルが削除されたことを示す)
-	・データ保護フラグ (RISA__XP3_FILE_PROTECTED) を持たない
+	・データ保護フラグ (RISA_XP3_FILE_PROTECTED) を持たない
 	  (非常に初期の、良識のある展開ツール作者は、このフラグの存在の
 	  意図をくみ、それなりの対応をしてくれたのだが………あまり意味がない)
 
@@ -59,12 +59,12 @@ namespace Risa {
  *			されたバイト数ぶんだけ進んでいる保証はない (出力ファイル側は
  *			コピーされた分だけ進んでいる)
  */
-#define RISA__COPY_BUF_SIZE 65536
+#define RISA_COPY_BUF_SIZE 65536
 static wxFileOffset CopyFile(iRisaProgressCallback * callback,
 	wxFileEx & src, wxFileEx & dest, wxFileOffset size)
 {
 	wxFileOffset copied = 0;
-	unsigned char *buf = new unsigned char [RISA__COPY_BUF_SIZE];
+	unsigned char *buf = new unsigned char [RISA_COPY_BUF_SIZE];
 	if(callback) callback->OnProgress(0);
 	try
 	{
@@ -72,7 +72,7 @@ static wxFileOffset CopyFile(iRisaProgressCallback * callback,
 		while(left > 0)
 		{
 			unsigned long one_size =
-				left > RISA__COPY_BUF_SIZE ? RISA__COPY_BUF_SIZE:left;
+				left > RISA_COPY_BUF_SIZE ? RISA_COPY_BUF_SIZE:left;
 			one_size = src.Read(buf, one_size);
 			if(one_size == 0) break;
 			one_size = dest.wxFile::Write(buf, one_size);
@@ -237,7 +237,7 @@ void tXP4WriterSegment::WriteMetaData(wxMemoryBuffer & buf)
 	buf.AppendData(&i32, sizeof(i32));
 	// Flags
 	buf.AppendByte(
-		IsCompressed ? RISA__XP4_SEGM_ENCODE_ZLIB : RISA__XP4_SEGM_ENCODE_RAW);
+		IsCompressed ? RISA_XP4_SEGM_ENCODE_ZLIB : RISA_XP4_SEGM_ENCODE_RAW);
 	// Offset
 	i64 = wxUINT64_SWAP_ON_BE(Offset);
 	buf.AppendData(&i64, sizeof(i64));
@@ -300,7 +300,7 @@ tXP4WriterStorage::tXP4WriterStorage(
  */
 void tXP4WriterStorage::MakeHash(iRisaProgressCallback * callback)
 {
-	if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+	if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 	{
 		if(!Hash.GetHasHash())
 		{
@@ -325,11 +325,11 @@ void tXP4WriterStorage::WriteBody(
 		// このストレージアイテムが他のストレージアイテムを参照している場合は
 		// body として書き込む物は何もない
 
-	if((Flags & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED) return;
+	if((Flags & RISA_XP4_FILE_STATE_MASK) == RISA_XP4_FILE_STATE_DELETED) return;
 		// このストレージが「削除」を表す場合は何もしない
 
 	// セグメントを作成する
-	if(Flags & RISA__XP4_FILE_COMPRESSED)
+	if(Flags & RISA_XP4_FILE_COMPRESSED)
 	{
 		// ファイルは圧縮されている
 		// ZLIB はシークを苦手とするので、COMPRESS_SPLIT_UNIT ごとに
@@ -385,7 +385,7 @@ void tXP4WriterStorage::WriteMetaData(wxMemoryBuffer & buf)
 	wxUint16 i16;
 	wxUint32 i32;
 
-	if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+	if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 	{
 		// 「削除」されたファイルではない場合
 		wxMemoryBuffer segmentsbuf;
@@ -797,7 +797,7 @@ void tXP4Writer::MakeArchive()
 		agg2.OnProgress(0);
 
 		// deleted か？
-		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED)
+		if((i->GetFlags() & RISA_XP4_FILE_STATE_MASK) == RISA_XP4_FILE_STATE_DELETED)
 		{
 			// 削除されたファイル
 			// 削除ファイルは無条件に 一番最初のボリュームに追加する

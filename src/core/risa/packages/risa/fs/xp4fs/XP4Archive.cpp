@@ -123,9 +123,9 @@ tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 
 	// info チャンクから情報を読み取る
 	Flags = ReadI16LEFromMem(chunk + 0);
-	Flags &=~ RISA__XP4_FILE_MARKED; // MARKED はクリア
+	Flags &=~ RISA_XP4_FILE_MARKED; // MARKED はクリア
 	inarchivename = tString(wxString(static_cast<const char *>(chunk + 2), wxConvUTF8));
-	deleted = (Flags & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED ;
+	deleted = (Flags & RISA_XP4_FILE_STATE_MASK) == RISA_XP4_FILE_STATE_DELETED ;
 
 	// time チャンクを探す
 	static unsigned char chunkname_time[] = { 't', 'i', 'm', 'e' };
@@ -150,7 +150,7 @@ tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			eRisaException::Throw(RISSE_WS_TR("chunk 'time' not found"));
 	}
 
@@ -187,7 +187,7 @@ tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			eRisaException::Throw(RISSE_WS_TR("chunk 'Segm' not found"));
 	}
 
@@ -202,7 +202,7 @@ tXP4Archive::tFile::tFile(tXP4Archive *owner, const unsigned char * meta,
 	}
 	else
 	{
-		if((Flags & RISA__XP4_FILE_STATE_MASK) != RISA__XP4_FILE_STATE_DELETED)
+		if((Flags & RISA_XP4_FILE_STATE_MASK) != RISA_XP4_FILE_STATE_DELETED)
 			eRisaException::Throw(RISSE_WS_TR("hash chunk not found"));
 	}
 }
@@ -269,8 +269,8 @@ tXP4Archive::tXP4Archive(const tString & filename, iMapCallback & callback)
 	stream->ReadBuffer(compressed_index, compressed_index_size);
 
 	// 圧縮が行われている場合は展開を行う
-	if((flags & RISA__XP4_INDEX_ENCODE_METHOD_MASK) ==
-		RISA__XP4_INDEX_ENCODE_ZLIB)
+	if((flags & RISA_XP4_INDEX_ENCODE_METHOD_MASK) ==
+		RISA_XP4_INDEX_ENCODE_ZLIB)
 	{
 		// 圧縮が行われている
 		unsigned long input_size = compressed_index_size;

@@ -42,18 +42,18 @@ tBaseFreeTypeFontDriver::~tBaseFreeTypeFontDriver()
 /**
  * FreeType フォントドライバで使用可能なフォントを列挙する
  * @param dest		格納先配列 (配列はクリアされる)
- * @param flags		列挙フラグ (tvpfontstruc.h の RISA__FSF_XXXXX 定数の bitor )
+ * @param flags		列挙フラグ (tvpfontstruc.h の RISA_FSF_XXXXX 定数の bitor )
  * @param encoding	エンコーディング (wxFontEncoding)
  * @note	encoding を文字列から変換するには wxFontMapper::CharsetToEncoding を
  *			使うことができる。
- *			flags に指定できるのは、RISA__FSF_FIXEDPITCH 、 RISA__FSF_NOVERTICAL のみ。
+ *			flags に指定できるのは、RISA_FSF_FIXEDPITCH 、 RISA_FSF_NOVERTICAL のみ。
  */
 void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 		risse_uint32 flags, wxFontEncoding encoding)
 {
 	dest.Clear();
 
-	flags |= RISA__FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
+	flags |= RISA_FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
 	if ( ! FcInit() ) {
 		wxString msg(_("FcInit failed"));
 		throw msg;
@@ -62,7 +62,7 @@ void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 	FcObjectSet *os = FcObjectSetBuild( FC_FAMILY, (char*)0 );
 	FcPattern *pat = FcPatternCreate();
 
-	if(flags & RISA__FSF_FIXEDPITCH)
+	if(flags & RISA_FSF_FIXEDPITCH)
 	{
 		// fixed pitch only ?
 		FcPatternAddInteger( pat, FC_SPACING, 90 );
@@ -74,13 +74,13 @@ void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 		// TODO 
 	}
 
-	if(flags & RISA__FSF_NOVERTICAL)
+	if(flags & RISA_FSF_NOVERTICAL)
 	{
 		// not to list vertical fonts up ?
 		FcPatternAddBool( pat, FC_VERTICAL_LAYOUT, FcTrue );
 	}
 
-	if(flags & RISA__FSF_OUTLINEONLY)
+	if(flags & RISA_FSF_OUTLINEONLY)
 	{
 		FcPatternAddBool( pat, FC_OUTLINE, FcTrue );
 	}

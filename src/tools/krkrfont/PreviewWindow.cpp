@@ -19,8 +19,8 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-#define RISA__PREVIEW_MARGIN_RATIO 0.5
-#define RISA__PREVIEW_MARGIN_MIN   1
+#define RISA_PREVIEW_MARGIN_RATIO 0.5
+#define RISA_PREVIEW_MARGIN_MIN   1
 
 //---------------------------------------------------------------------------
 /**
@@ -209,11 +209,11 @@ wxCoord wxPreviewScrolledWindow::OnGetLineHeight(size_t n) const
  */
 risse_uint wxPreviewScrolledWindow::GetMargin() const
 {
-	if(!FACE) return RISA__PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
+	if(!FACE) return RISA_PREVIEW_MARGIN_MIN; // FACE が NULL の場合は特に意味のない値を返す
 	risse_size size = FACE->GetHeight();
-	size *= (int)(RISA__PREVIEW_MARGIN_RATIO * 256);
+	size *= (int)(RISA_PREVIEW_MARGIN_RATIO * 256);
 	size /= 256;
-	if(size < RISA__PREVIEW_MARGIN_MIN) size = RISA__PREVIEW_MARGIN_MIN;
+	if(size < RISA_PREVIEW_MARGIN_MIN) size = RISA_PREVIEW_MARGIN_MIN;
 	return size * Magnify;
 
 }

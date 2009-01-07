@@ -37,10 +37,10 @@ RISSE_DEFINE_SOURCE_ID(17161,14775,60981,18892,4009,20341,33502,766);
 
 
 // WAVEFORMATEXTENSIBLE で使用されている GUID
-static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM[16] =
+static risse_uint8 RISA_GUID_KSDATAFORMAT_SUBTYPE_PCM[16] =
 { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
   0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 };
-static risse_uint8 RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
+static risse_uint8 RISA_GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT[16] =
 { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
   0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 };
 
@@ -232,16 +232,16 @@ bool tRIFFWaveDecoder::Open()
 
 		risse_uint8 guid[16];
 		if(16 != Stream.Read(guid, 16)) return false;
-		if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
+		if(!memcmp(guid, RISA_GUID_KSDATAFORMAT_SUBTYPE_PCM, 16))
 			is_float = false;
-		else if(!memcmp(guid, RISA__GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
+		else if(!memcmp(guid, RISA_GUID_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 16))
 			is_float = true;
 		else
 			return false;
 	}
 	else
 	{
-		if(bits_per_sample & 0x07) return false; // not integer multiplyed by 8
+		if(bits_per_sample & 0x07) return false; // not integer multiplied by 8
 
 		if(FileInfo.Channels == 4)
 			FileInfo.SpeakerConfig = 0;

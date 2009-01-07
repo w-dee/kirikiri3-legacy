@@ -77,12 +77,12 @@ public:
 //---------------------------------------------------------------------------
 // Face を開くときのオプションなど
 //---------------------------------------------------------------------------
-#define	RISA__GET_FACE_INDEX_FROM_OPTIONS(x) ((x) & 0xff) //!< オプション整数からFaceインデックスを取り出すマクロ
-#define	RISA__FACE_OPTIONS_FACE_INDEX(x) ((x) & 0xff) //!< Faceインデックスをオプション整数に変換するマクロ
-#define	RISA__FACE_OPTIONS_FILE 0x00010000 //!< フォント名ではなくてファイル名によるフォントの指定を行う
-#define RISA__FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
-#define RISA__FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
-#define RISA__FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
+#define	RISA_GET_FACE_INDEX_FROM_OPTIONS(x) ((x) & 0xff) //!< オプション整数からFaceインデックスを取り出すマクロ
+#define	RISA_FACE_OPTIONS_FACE_INDEX(x) ((x) & 0xff) //!< Faceインデックスをオプション整数に変換するマクロ
+#define	RISA_FACE_OPTIONS_FILE 0x00010000 //!< フォント名ではなくてファイル名によるフォントの指定を行う
+#define RISA_FACE_OPTIONS_NO_HINTING 0x00020000 //!< ヒンティングを行わない
+#define RISA_FACE_OPTIONS_FORCE_AUTO_HINTING 0x00020000 //!< 強制的に auto hinting を行う
+#define RISA_FACE_OPTIONS_NO_ANTIALIASING 0x00040000 //!< アンチエイリアスを行わない
 
 //---------------------------------------------------------------------------
 } // namespace Risa

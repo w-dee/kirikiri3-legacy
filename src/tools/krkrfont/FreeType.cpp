@@ -69,7 +69,7 @@ private:
 /**
  * コンストラクタ
  * @param fontname	フォント名
- * @param options	オプション(RISA__TF_XXXX 定数かRISA__FACE_OPTIONS_XXXX定数の組み合わせ)
+ * @param options	オプション(RISA_TF_XXXX 定数かRISA_FACE_OPTIONS_XXXX定数の組み合わせ)
  */
 tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, risse_uint32 options)
 {
@@ -125,7 +125,7 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, risse_uint32 o
 
 
 		// FreeType エンジンでファイルを開こうとしてみる
-		risse_uint index = RISA__GET_FACE_INDEX_FROM_OPTIONS(options);
+		risse_uint index = RISA_GET_FACE_INDEX_FROM_OPTIONS(options);
 		if(!OpenFaceByIndex(index, Face))
 		{
 			// フォントを開けなかった
@@ -274,7 +274,7 @@ tFreeTypeFace::tFreeTypeFace(const wxString &fontname, risse_uint32 options)
 
 
 	// フォントを開く
-	if(options & RISA__FACE_OPTIONS_FILE)
+	if(options & RISA_FACE_OPTIONS_FILE)
 	{
 		// ファイルを開く
 		Face = new tGenericFreeTypeFace(fontname, options);
@@ -429,7 +429,7 @@ tGlyphBitmap * tFreeTypeFace::GetGlyphFromCharcode(risse_char code)
 	if(FTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
 	{
 		FT_Render_Mode mode;
-		if(!(Options & RISA__FACE_OPTIONS_NO_ANTIALIASING))
+		if(!(Options & RISA_FACE_OPTIONS_NO_ANTIALIASING))
 			mode = FT_RENDER_MODE_NORMAL;
 		else
 			mode = FT_RENDER_MODE_MONO;
@@ -558,15 +558,15 @@ bool tFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 
 	// グリフスロットに文字を読み込む
 	FT_Int32 load_glyph_flag = 0;
-	if(!(Options & RISA__FACE_OPTIONS_NO_ANTIALIASING))
+	if(!(Options & RISA_FACE_OPTIONS_NO_ANTIALIASING))
 		load_glyph_flag |= FT_LOAD_NO_BITMAP;
 	else
 		load_glyph_flag |= FT_LOAD_TARGET_MONO;
 			// note: ビットマップフォントを読み込みたくない場合は FT_LOAD_NO_BITMAP を指定
 
-	if(Options & RISA__FACE_OPTIONS_NO_HINTING)
+	if(Options & RISA_FACE_OPTIONS_NO_HINTING)
 		load_glyph_flag |= FT_LOAD_NO_HINTING;
-	if(Options & RISA__FACE_OPTIONS_FORCE_AUTO_HINTING)
+	if(Options & RISA_FACE_OPTIONS_FORCE_AUTO_HINTING)
 		load_glyph_flag |= FT_LOAD_FORCE_AUTOHINT;
 
 	FT_Error err;
@@ -575,7 +575,7 @@ bool tFreeTypeFace::LoadGlyphSlotFromCharcode(risse_char code)
 	if(err) return false;
 
 	// フォントの変形を行う
-	if(Options & RISA__TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
+	if(Options & RISA_TF_BOLD) FT_GlyphSlot_Embolden(FTFace->glyph);
 
 	return true;
 }

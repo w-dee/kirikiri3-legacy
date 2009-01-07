@@ -52,7 +52,7 @@ tBinaryStream * tXP4StreamCache::GetStream(void * pointer, const tString & name)
 	volatile tCriticalSection::tLocker cs_holder(CS);
 
 	// linear search wiil be enough here because the 
-	// RISA__MAX_ARCHIVE_Stream_CACHE is relatively small
+	// RISA_MAX_ARCHIVE_Stream_CACHE is relatively small
 	for(risse_int i =0; i < MAX_ITEM; i++)
 	{
 		tItem *item = Pool + i;

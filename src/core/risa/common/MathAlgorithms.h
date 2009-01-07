@@ -61,14 +61,14 @@ static inline float VFast_arctan2(float y, float x)
 
 
 //---------------------------------------------------------------------------
-/**
- * sincos の高速版 (1x float, C言語版)
- * @note	原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf 
- */
 static inline float VFast_atan2_madd(float a, float b, float c) { return a*b+c; }
 static inline float VFast_atan2_nmsub(float a, float b, float c) { return -(a*b-c); }
 static inline float VFast_atan2_round(float a) { return (a>0)?(int)(a+0.5):(int)(a-0.5); }
 
+/**
+ * sincos の高速版 (1x float, C言語版)
+ * @note	原典: http://arxiv.org/PS_cache/cs/pdf/0406/0406049.pdf
+ */
 static inline void VFast_sincos(float v, float &sin, float &cos)
 {
 	const float  ss1 =  1.5707963235  ;

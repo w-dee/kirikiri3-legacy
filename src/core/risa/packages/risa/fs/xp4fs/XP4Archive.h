@@ -60,8 +60,8 @@ public:
 		risse_uint64 StoreOffset; //!< (実際に格納されている)オフセット
 		risse_uint64 StoreSize; //!< (実際に格納されている)サイズ  無圧縮の場合は Size と同じ
 		bool IsCompressed() const
-			{ return (Flags & RISA__XP4_SEGM_ENCODE_METHOD_MASK) !=
-				RISA__XP4_SEGM_ENCODE_RAW; } //!< セグメントが圧縮されている場合に真
+			{ return (Flags & RISA_XP4_SEGM_ENCODE_METHOD_MASK) !=
+				RISA_XP4_SEGM_ENCODE_RAW; } //!< セグメントが圧縮されている場合に真
 	};
 
 	/**

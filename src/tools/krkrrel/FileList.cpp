@@ -240,15 +240,15 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 		patterns = new tPattern[pattern.GetCount()];
 
 #ifdef wxHAS_REGEX_ADVANCED
-	#define RISA__XP4_RULE_RE wxRE_ADVANCED
+	#define RISA_XP4_RULE_RE wxRE_ADVANCED
 #else
-	#define RISA__XP4_RULE_RE wxRE_DEFAULT
+	#define RISA_XP4_RULE_RE wxRE_DEFAULT
 #endif
 
 		for(size_t i = 0; i < pattern.GetCount(); i++)
 		{
 			const wxString & pat = pattern[i];
-			int flags = RISA__XP4_RULE_RE;
+			int flags = RISA_XP4_RULE_RE;
 			if     (pat.StartsWith(wxT("e:"))) // exlucde, case sens
 				patterns[pattern_count].type = tPattern::exclude;
 			else if(pat.StartsWith(wxT("E:"))) // exlucde, case ignore
@@ -290,23 +290,23 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 					switch(patterns[j].type)
 					{
 					case tPattern::exclude:
-						flags |=   RISA__XP4_FILE_EXCLUDED;
+						flags |=   RISA_XP4_FILE_EXCLUDED;
 						break;
 					case tPattern::include:
-						flags &= ~ RISA__XP4_FILE_EXCLUDED;
+						flags &= ~ RISA_XP4_FILE_EXCLUDED;
 						break;
 					case tPattern::compress:
-						flags |=   RISA__XP4_FILE_COMPRESSED;
+						flags |=   RISA_XP4_FILE_COMPRESSED;
 						break;
 					case tPattern::asis:
-						flags &= ~ RISA__XP4_FILE_COMPRESSED;
+						flags &= ~ RISA_XP4_FILE_COMPRESSED;
 						break;
 					}
 				}
 			}
 
 			// 情報を格納
-			if(flags & RISA__XP4_FILE_EXCLUDED)
+			if(flags & RISA_XP4_FILE_EXCLUDED)
 			{
 				// 削除の場合
 				i = dest.erase(i);
@@ -315,7 +315,7 @@ void XP4ClassifyFiles(iRisaProgressCallback * callback,
 			{
 				i->SetFlags(
 					(i->GetFlags() &
-						~(RISA__XP4_FILE_EXCLUDED|RISA__XP4_FILE_COMPRESSED)
+						~(RISA_XP4_FILE_EXCLUDED|RISA_XP4_FILE_COMPRESSED)
 					) | flags); // フラグを設定
 				i++;
 			}
@@ -380,7 +380,7 @@ void ApplyXP4StorageNameMap(
 		if(callback) callback->OnProgress((i - input.begin()) * 100 / input.size());
 		std::map<wxString, tXP4MetadataReaderStorageItem>::iterator mi;
 		mi = map.find(i->GetInArchiveName());
-		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_DELETED)
+		if((i->GetFlags() & RISA_XP4_FILE_STATE_MASK) == RISA_XP4_FILE_STATE_DELETED)
 		{
 			// 削除フラグがたっている
 			if(mi != map.end()) map.erase(mi); // アイテムを削除する
@@ -392,8 +392,8 @@ void ApplyXP4StorageNameMap(
 
 			// 追加する
 			tXP4MetadataReaderStorageItem item(*i);
-			item.SetFlags((item.GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) |
-									RISA__XP4_FILE_STATE_NONE);
+			item.SetFlags((item.GetFlags() & ~ RISA_XP4_FILE_STATE_MASK) |
+									RISA_XP4_FILE_STATE_NONE);
 											// 状態をクリア
 			map.insert(std::pair<wxString, tXP4MetadataReaderStorageItem>
 				(i->GetInArchiveName(), item));
@@ -604,32 +604,32 @@ void CompareXP4StorageNameMap(
 			if(modified)
 			{
 				// 置き換えるべきファイルとしてマークする
-				i->SetFlags((i->GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) | RISA__XP4_FILE_STATE_MODIFIED);
+				i->SetFlags((i->GetFlags() & ~ RISA_XP4_FILE_STATE_MASK) | RISA_XP4_FILE_STATE_MODIFIED);
 			}
 			// mi にもフラグを設定する
-			mi->second.SetFlags(mi->second.GetFlags() | RISA__XP4_FILE_MARKED);
+			mi->second.SetFlags(mi->second.GetFlags() | RISA_XP4_FILE_MARKED);
 		}
 		else
 		{
 			// i が存在しない
 			// 追加すべきファイルとしてマークする
-			i->SetFlags((i->GetFlags() & ~ RISA__XP4_FILE_STATE_MASK) | RISA__XP4_FILE_STATE_ADDED);
+			i->SetFlags((i->GetFlags() & ~ RISA_XP4_FILE_STATE_MASK) | RISA_XP4_FILE_STATE_ADDED);
 		}
 	}
 
 	// 今度は arc のアイテムごとに処理をする
-	// arc のうち、RISA__XP4_FILE_MARKED のフラグがついていないファイルは
+	// arc のうち、RISA_XP4_FILE_MARKED のフラグがついていないファイルは
 	// ターゲットディレクトリに存在せず、削除されたファイルである
 	size_t arc_index = 0;
 	for(std::map<wxString, tXP4MetadataReaderStorageItem>::iterator i = arc.begin();
 		i != arc.end(); i++, arc_index++)
 	{
 		if(callback) callback->OnProgress((arc_index + ref_size) * 100 / (ref_size + arc_size));
-		if(!(i->second.GetFlags() & RISA__XP4_FILE_MARKED))
+		if(!(i->second.GetFlags() & RISA_XP4_FILE_MARKED))
 		{
 			// マークされていない
 			// ref に「削除」として追加する
-			ref.push_back(tXP4WriterInputFile(i->first, RISA__XP4_FILE_STATE_DELETED));
+			ref.push_back(tXP4WriterInputFile(i->first, RISA_XP4_FILE_STATE_DELETED));
 		}
 	}
 
@@ -637,7 +637,7 @@ void CompareXP4StorageNameMap(
 	for(std::vector<tXP4WriterInputFile>::iterator i = ref.begin();
 		i != ref.end(); )
 	{
-		if((i->GetFlags() & RISA__XP4_FILE_STATE_MASK) == RISA__XP4_FILE_STATE_NONE)
+		if((i->GetFlags() & RISA_XP4_FILE_STATE_MASK) == RISA_XP4_FILE_STATE_NONE)
 			i = ref.erase(i);
 		else
 			i++;

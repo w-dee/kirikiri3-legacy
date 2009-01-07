@@ -467,13 +467,13 @@ void wxKrkrReleaserConsoleApp::ListArchiveItems(
 		// M 変更
 		//   そのまま
 		// のマークが付く
-		switch(i->GetFlags() & RISA__XP4_FILE_STATE_MASK)
+		switch(i->GetFlags() & RISA_XP4_FILE_STATE_MASK)
 		{
-		case RISA__XP4_FILE_STATE_ADDED:
+		case RISA_XP4_FILE_STATE_ADDED:
 			wxPrintf(wxT(" A ")); break;
-		case RISA__XP4_FILE_STATE_DELETED:
+		case RISA_XP4_FILE_STATE_DELETED:
 			wxPrintf(wxT(" D ")); break;
-		case RISA__XP4_FILE_STATE_MODIFIED:
+		case RISA_XP4_FILE_STATE_MODIFIED:
 			wxPrintf(wxT(" M ")); break;
 		default:
 			wxPrintf(wxT("   ")); break;

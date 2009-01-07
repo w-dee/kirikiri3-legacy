@@ -26,8 +26,8 @@
 namespace Risa {
 //---------------------------------------------------------------------------
 
-#define RISA__TT_TABLE_ttcf  (('t' << 0) + ('t' << 8) + ('c' << 16) + ('f' << 24))
-#define RISA__TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
+#define RISA_TT_TABLE_ttcf  (('t' << 0) + ('t' << 8) + ('c' << 16) + ('f' << 24))
+#define RISA_TT_TABLE_name  (('n' << 0) + ('a' << 8) + ('m' << 16) + ('e' << 24))
 
 //---------------------------------------------------------------------------
 /**
@@ -81,7 +81,7 @@ tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 		// 'name' タグの内容を取得しようとすることでチェックする
 		// (name タグは GetFontData が扱うような TrueType/OpenType フォントには
 		//  必ず入っている)
-		DWORD result = GetFontData(DC, RISA__TT_TABLE_name, 0, NULL, 0);
+		DWORD result = GetFontData(DC, RISA_TT_TABLE_name, 0, NULL, 0);
 		if(result == GDI_ERROR)
 		{
 			// エラー; GetFontData では扱えなかった
@@ -96,7 +96,7 @@ tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 		name_content_ft = new unsigned char [name_content_size]; // メモリを確保
 
 		//- name タグの内容をメモリに読み込む
-		result = GetFontData(DC, RISA__TT_TABLE_name, 0, name_content, name_content_size);
+		result = GetFontData(DC, RISA_TT_TABLE_name, 0, name_content, name_content_size);
 		if(result == GDI_ERROR)
 		{
 			// エラー; メモリに読み込むことが出来なかった
@@ -115,11 +115,11 @@ tNativeFreeTypeFace::tNativeFreeTypeFace(const wxString &fontname,
 		//- ファイル全体の情報を得ることが出来る。
 		//- 参照 : microsoft.public.win32.programmer.gdi GetFontData and TTC fonts
 		unsigned char buf[4];
-		result = GetFontData(DC, RISA__TT_TABLE_ttcf, 0, &buf, 1);
+		result = GetFontData(DC, RISA_TT_TABLE_ttcf, 0, &buf, 1);
 		if(result == 1)
 		{
 			// TTC ファイルだと思われる
-			result = GetFontData(DC, RISA__TT_TABLE_ttcf, 0, NULL, 0);
+			result = GetFontData(DC, RISA_TT_TABLE_ttcf, 0, NULL, 0);
 			IsTTC = true;
 		}
 		else
@@ -309,7 +309,7 @@ unsigned long tNativeFreeTypeFace::IoFunc(
 		tNativeFreeTypeFace * _this =
 			static_cast<tNativeFreeTypeFace*>(stream->descriptor.pointer);
 		DWORD result = GetFontData(_this->DC, 
-				_this->IsTTC ? RISA__TT_TABLE_ttcf : 0,
+				_this->IsTTC ? RISA_TT_TABLE_ttcf : 0,
 				offset, buffer, count);
 		if(result == GDI_ERROR)
 		{

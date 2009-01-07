@@ -27,14 +27,14 @@ namespace Risa {
 //---------------------------------------------------------------------------
 // 使用する hash アルゴリズムに関する定義
 //---------------------------------------------------------------------------
-#define RISA__XP4_HASH_INIT						sha1_init
-#define RISA__XP4_HASH_DO_PROCESS					sha1_process
-#define RISA__XP4_HASH_DONE						sha1_done
-#define RISA__XP4_HASH_DESC						sha1_desc
-#define RISA__XP4_HASH_METHOD_STRING				"SHA1"
-#define RISA__XP4_HASH_METHOD_INTERNAL_STRING		"sha1"
-#define RISA__XP4_HASH_METHOD_CHUNK_NAME			{ 's', 'h', 'a', '1' }
-#define RISA__XP4_HASH_SIZE						20
+#define RISA_XP4_HASH_INIT						sha1_init
+#define RISA_XP4_HASH_DO_PROCESS					sha1_process
+#define RISA_XP4_HASH_DONE						sha1_done
+#define RISA_XP4_HASH_DESC						sha1_desc
+#define RISA_XP4_HASH_METHOD_STRING				"SHA1"
+#define RISA_XP4_HASH_METHOD_INTERNAL_STRING		"sha1"
+#define RISA_XP4_HASH_METHOD_CHUNK_NAME			{ 's', 'h', 'a', '1' }
+#define RISA_XP4_HASH_SIZE						20
 //---------------------------------------------------------------------------
 
 
@@ -43,10 +43,10 @@ namespace Risa {
 //---------------------------------------------------------------------------
 class tXP4Hash
 {
-	unsigned char Hash[RISA__XP4_HASH_SIZE];
+	unsigned char Hash[RISA_XP4_HASH_SIZE];
 	bool HasHash;
 public:
-	tXP4Hash() { HasHash = false; memset(Hash, 0, RISA__XP4_HASH_SIZE); }
+	tXP4Hash() { HasHash = false; memset(Hash, 0, RISA_XP4_HASH_SIZE); }
 
 	operator unsigned char *() { return Hash; }
 	bool operator < (const tXP4Hash & rhs) const
@@ -62,11 +62,11 @@ public:
 	{
 		return !(operator ==(rhs));
 	}
-	void SetHash(const unsigned char hash[RISA__XP4_HASH_SIZE])
-		{ memcpy(Hash, hash, RISA__XP4_HASH_SIZE); HasHash = true; }
+	void SetHash(const unsigned char hash[RISA_XP4_HASH_SIZE])
+		{ memcpy(Hash, hash, RISA_XP4_HASH_SIZE); HasHash = true; }
 	bool GetHasHash() const { return HasHash; }
-	void SetHasHash(bool has = true) { HasHash = has; if(!has) memset(Hash, 0, RISA__XP4_HASH_SIZE); }
-	static size_t GetSize() { return RISA__XP4_HASH_SIZE; }
+	void SetHasHash(bool has = true) { HasHash = has; if(!has) memset(Hash, 0, RISA_XP4_HASH_SIZE); }
+	static size_t GetSize() { return RISA_XP4_HASH_SIZE; }
 	void Make(iRisaProgressCallback * callback, const wxString &filename);
 	void Print() const;
 	static /* const */ unsigned  char * GetHashChunkName();

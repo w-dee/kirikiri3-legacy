@@ -27,14 +27,14 @@ namespace Risa {
  */
 void tXP4Hash::Make(iRisaProgressCallback * callback, const wxString &filename)
 {
-	if(find_hash(RISA__XP4_HASH_METHOD_INTERNAL_STRING) == -1)
+	if(find_hash(RISA_XP4_HASH_METHOD_INTERNAL_STRING) == -1)
 	{
-		int errnum = register_hash(&RISA__XP4_HASH_DESC);
+		int errnum = register_hash(&RISA_XP4_HASH_DESC);
 		if(errnum != CRYPT_OK) throw wxString(error_to_string(errnum), wxConvUTF8);
 	}
 
 	hash_state st;
-	RISA__XP4_HASH_INIT(&st);
+	RISA_XP4_HASH_INIT(&st);
 
 	wxFileEx file(filename);
 
@@ -46,12 +46,12 @@ void tXP4Hash::Make(iRisaProgressCallback * callback, const wxString &filename)
 		unsigned long onesize = 
 			left > sizeof(buf) ? sizeof(buf) : static_cast<unsigned long>(left);
 		file.ReadBuffer(buf, onesize);
-		RISA__XP4_HASH_DO_PROCESS(&st, buf, onesize);
+		RISA_XP4_HASH_DO_PROCESS(&st, buf, onesize);
 		left -= onesize;
 		if(callback) callback->OnProgress(static_cast<int>((size - left) * 100 / size));
 	}
 
-	RISA__XP4_HASH_DONE(&st, Hash);
+	RISA_XP4_HASH_DONE(&st, Hash);
 }
 //---------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ void tXP4Hash::Make(iRisaProgressCallback * callback, const wxString &filename)
  */
 void tXP4Hash::Print() const
 {
-	for(size_t i = 0; i < RISA__XP4_HASH_SIZE; i++)
+	for(size_t i = 0; i < RISA_XP4_HASH_SIZE; i++)
 		wxPrintf(wxT("%02x"), static_cast<int>(Hash[i]));
 }
 //---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void tXP4Hash::Print() const
  */
 /* const */ unsigned  char *  tXP4Hash::GetHashChunkName()
 {
-	static unsigned char hash_name[] = RISA__XP4_HASH_METHOD_CHUNK_NAME;
+	static unsigned char hash_name[] = RISA_XP4_HASH_METHOD_CHUNK_NAME;
 	return hash_name;
 }
 //---------------------------------------------------------------------------

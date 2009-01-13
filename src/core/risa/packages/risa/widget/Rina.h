@@ -95,8 +95,6 @@ class tRina : public wxControl, public tRisaWindowBahavior<tRina, tRinaInstance>
 {
 	typedef wxControl inherited;
 
-	tImageInstance * TestImage; //!< テスト用イメージ
-
 public:
 	/**
 	 * コンストラクタ
@@ -156,6 +154,7 @@ public:
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tVariant & parent, const tVariant & graph, const tNativeCallInfo &info);
+	tVariant get_node();
 };
 //---------------------------------------------------------------------------
 

@@ -183,7 +183,7 @@ void tQueueBuilder::Build(tNodeInstance * node)
 		// 先頭、すなわち最長距離が最も小さいノードから処理を行う
 		tBuildQueueMap::iterator i = BuildQueueMap.begin();
 		i->first->BuildQueue(*this);
-			// この間に PushNextBuildQueueNode() が呼ばれる可能性があることに注意
+			// この間に Push() が呼ばれる可能性があることに注意
 		BuildQueueMap.erase(i); // Map の場合は insert 後もイテレータは有効なのでここでeraseは可
 	}
 

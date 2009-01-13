@@ -148,12 +148,6 @@ tRina::tRina(tRinaInstance * instance, wxWindow * parent) :
 	inherited(parent, -1, wxDefaultPosition, wxDefaultSize, wxNO_BORDER),
 	tBehavior(this, instance)
 {
-	TestImage =
-			tClassHolder<tImageClass>::instance()->GetClass()->Invoke(ss_new).
-				ExpectAndGetObjectInterface(
-				tClassHolder<tImageClass>::instance()->GetClass()
-				);
-	TestImage->Load(RISSE_WS("/root/media/jpegFullColor.jpg"));
 }
 //---------------------------------------------------------------------------
 
@@ -172,6 +166,7 @@ tRina::~tRina()
 //---------------------------------------------------------------------------
 void tRina::OnPaint(wxPaintEvent& event)
 {
+/*
 	wxPaintDC dc(this);
 
 	const tImageBuffer::tDescriptor & desc = TestImage->GetDescriptor();
@@ -182,6 +177,7 @@ void tRina::OnPaint(wxPaintEvent& event)
 			(guchar*)pointer.Buffer, pointer.Pitch);
 
 	pointer.Release();
+*/
 }
 //---------------------------------------------------------------------------
 
@@ -259,6 +255,13 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+tVariant tRinaInstance::get_node()
+{
+	return RinaWidgetNode;
+}
+//---------------------------------------------------------------------------
+
 
 
 
@@ -277,9 +280,8 @@ void tRinaInstance::initialize(const tVariant & parent, const tVariant & graph, 
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tRinaClass, (tSS<'R','i','n','a'>()),
 		tClassHolder<tWindowClass>::instance()->GetClass())
-	BindFunction(this, ss_ovulate, &tRinaClass::ovulate);
-	BindFunction(this, ss_construct, &tRinaInstance::construct);
-	BindFunction(this, ss_initialize, &tRinaInstance::initialize);
+	RISSE_BIND_CONSTRUCTORS
+	BindProperty(this, tSS<'n','o','d','e'>(), &tRinaInstance::get_node);
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

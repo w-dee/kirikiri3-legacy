@@ -199,6 +199,18 @@ void tInputPinInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tInputPinInstance::connect(const tVariant & output_pin)
+{
+	tOutputPinInstance * instance =
+		output_pin.ExpectAndGetObjectInterface(
+				tClassHolder<tOutputPinClass>::instance()->GetClass());
+	Connect(instance);
+}
+//---------------------------------------------------------------------------
+
+
+
 
 
 
@@ -208,6 +220,7 @@ RISSE_IMPL_CLASS_BEGIN(tInputPinClass,
 		(tSS<'I','n','p','u','t','P','i','n'>()),
 		tClassHolder<tPinClass>::instance()->GetClass())
 	RISSE_BIND_CONSTRUCTORS
+	BindFunction(this, tSS<'c','o','n','n','e','c','t'>(), &tInputPinInstance::connect);
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 
@@ -291,8 +304,6 @@ void tOutputPinInstance::Disconnect(tInputPinInstance * input_pin)
 //---------------------------------------------------------------------------
 
 
-
-
 //---------------------------------------------------------------------------
 void tOutputPinInstance::construct()
 {
@@ -309,9 +320,6 @@ void tOutputPinInstance::initialize(const tNativeCallInfo &info)
 	info.InitializeSuperClass();
 }
 //---------------------------------------------------------------------------
-
-
-
 
 
 
@@ -344,6 +352,80 @@ template class tClassRegisterer<
 
 
 
+//---------------------------------------------------------------------------
+void tPinArrayInstance::construct()
+{
+	// デフォルトでは何もしない
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tPinArrayInstance::initialize(const tVariant & node, const tNativeCallInfo &info)
+{
+	volatile tSynchronizer sync(this); // sync
+
+	SetNodeInstance(node.ExpectAndGetObjectInterface(
+		tClassHolder<tNodeClass>::instance()->GetClass()));
+
+	info.InitializeSuperClass();
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+tVariant tPinArrayInstance::iget(risse_offset ofs_index)
+{
+	volatile tSynchronizer sync(this); // sync
+	volatile tNodeInstance::tGraphLocker holder(NodeInstance);
+
+	tPinInstance * instance = Get(ofs_index);
+	if(instance == NULL) return tVariant();
+	return instance;
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+size_t tPinArrayInstance::get_length()
+{
+	volatile tSynchronizer sync(this); // sync
+	volatile tNodeInstance::tGraphLocker holder(NodeInstance);
+
+	return GetCount();
+}
+//---------------------------------------------------------------------------
+
+
+
+
+//---------------------------------------------------------------------------
+RISSE_IMPL_CLASS_BEGIN(tPinArrayClass,
+		(tSS<'P','i','n','A','r','r','a','y'>()),
+		engine->ObjectClass)
+	RISSE_BIND_CONSTRUCTORS
+	BindFunction(this, mnIGet, &tPinArrayInstance::iget);
+	BindProperty(this, ss_length, &tPinArrayInstance::get_length);
+RISSE_IMPL_CLASS_END()
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+/**
+ * PinArray クラスレジストラ
+ */
+template class tClassRegisterer<
+	tSS<'r','i','s','a','.','g','r','a','p','h','i','c','.','r','i','n','a'>,
+	tPinArrayClass>;
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------------------------
 void tInputPinArrayInstance::construct()
@@ -358,10 +440,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterface(
-		tClassHolder<tNodeClass>::instance()->GetClass()));
-
-	info.InitializeSuperClass();
+	info.InitializeSuperClass(tMethodArgument::New(node));
 }
 //---------------------------------------------------------------------------
 
@@ -371,7 +450,7 @@ void tInputPinArrayInstance::initialize(const tVariant & node, const tNativeCall
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tInputPinArrayClass,
 		(tSS<'I','n','p','u','t','P','i','n','A','r','r','a','y'>()),
-		engine->ObjectClass)
+		tClassHolder<tPinArrayClass>::instance()->GetClass())
 	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
@@ -411,13 +490,15 @@ void tOneInputPinArrayInstance::initialize(const tVariant & node, const tVariant
 {
 	volatile tSynchronizer sync(this); // sync
 
-	// ピンを設定する
-	PinInstance = pin.ExpectAndGetObjectInterface(
-			tClassHolder<tInputPinClass>::instance()->GetClass());
-
 	// 親クラスの同名メソッドを呼び出す
 	// 引数はそのまま渡す
 	info.InitializeSuperClass(info.args);
+
+	// ピンを設定する
+	PinInstance = pin.ExpectAndGetObjectInterface(
+			tClassHolder<tInputPinClass>::instance()->GetClass());
+	PinInstance->SetNodeInstance(GetNodeInstance());
+
 }
 //---------------------------------------------------------------------------
 
@@ -468,10 +549,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 {
 	volatile tSynchronizer sync(this); // sync
 
-	SetNodeInstance(node.ExpectAndGetObjectInterface(
-		tClassHolder<tNodeClass>::instance()->GetClass()));
-
-	info.InitializeSuperClass();
+	info.InitializeSuperClass(tMethodArgument::New(node));
 }
 //---------------------------------------------------------------------------
 
@@ -482,7 +560,7 @@ void tOutputPinArrayInstance::initialize(const tVariant & node, const tNativeCal
 //---------------------------------------------------------------------------
 RISSE_IMPL_CLASS_BEGIN(tOutputPinArrayClass,
 		(tSS<'O','u','t','p','u','t','P','i','n','A','r','r','a','y'>()),
-		engine->ObjectClass)
+		tClassHolder<tPinArrayClass>::instance()->GetClass())
 	RISSE_BIND_CONSTRUCTORS
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
@@ -524,13 +602,14 @@ void tOneOutputPinArrayInstance::initialize(const tVariant & node, const tVarian
 {
 	volatile tSynchronizer sync(this); // sync
 
-	// ピンを設定する
-	PinInstance = pin.ExpectAndGetObjectInterface(
-			tClassHolder<tOutputPinClass>::instance()->GetClass());
-
 	// 親クラスの同名メソッドを呼び出す
 	// 引数はそのまま渡す
 	info.InitializeSuperClass(info.args);
+
+	// ピンを設定する
+	PinInstance = pin.ExpectAndGetObjectInterface(
+			tClassHolder<tOutputPinClass>::instance()->GetClass());
+	PinInstance->SetNodeInstance(GetNodeInstance());
 }
 //---------------------------------------------------------------------------
 

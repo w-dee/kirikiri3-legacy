@@ -41,7 +41,8 @@ protected:
 	{
 	public:
 		tGraphLocker(const tPinInstance * _this) :
-			tObjectInterface::tSynchronizer(_this->GetNodeInstance()->GetGraphInstance()) {;}
+			tObjectInterface::tSynchronizer(
+					_this->GetNodeInstance()->GetGraphInstance()) {;}
 	};
 
 protected:
@@ -73,8 +74,10 @@ public:
 	/**
 	 * このピンを保有しているノードを得る
 	 * @return	このピンを保有しているノード
+	 * @note	DEBUGビルドではノードがアタッチされてないときに
+	 * 			呼ぶとAssertion failureとなる
 	 */
-	tNodeInstance * GetNodeInstance() const { return NodeInstance; }
+	tNodeInstance * GetNodeInstance() const { RISSE_ASSERT(NodeInstance); return NodeInstance; }
 
 	/**
 	 * このピンがサポートするタイプの一覧を得る
@@ -235,6 +238,7 @@ public: // 公開インターフェース
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
+	void connect(const tVariant & output_pin);
 };
 //---------------------------------------------------------------------------
 
@@ -335,8 +339,6 @@ RISSE_DEFINE_CLASS_END()
 
 
 
-// TODO: InputPinArray と OutputPinArray のスーパークラスの PinArray クラスは作るべき?
-
 class tNodeInstance;
 //---------------------------------------------------------------------------
 /**
@@ -346,12 +348,8 @@ class tNodeInstance;
  *			されていることを確実にするために、各メソッドにはグラフがロックされている
  *			かどうかの ASSERT を挿入することを強く推奨する。
  */
-template <typename PINTYPE>
-class tPinArray
+class tPinArrayInstance: public tObjectBase
 {
-public:
-	typedef tPolymorphic inherited;
-
 private:
 	tNodeInstance * NodeInstance; //!< このピン配列を保持しているノードインスタンス
 
@@ -366,18 +364,18 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	tPinArray() { NodeInstance = NULL; }
+	tPinArrayInstance() { NodeInstance = NULL; }
 
 	/**
 	 * デストラクタ(おそらく呼ばれない)
 	 */
-	virtual ~tPinArray() {}
+	virtual ~tPinArrayInstance() {}
 
 	/**
 	 * このピン配列を保持しているノードインスタンスを得る
 	 * @return	このピン配列を保持しているノードインスタンス
 	 */
-	tNodeInstance * GetNodeInstance() const { return NodeInstance; }
+	tNodeInstance * GetNodeInstance() const { RISSE_ASSERT(NodeInstance); return NodeInstance; }
 
 	/**
 	 * ピンの数を得る
@@ -419,12 +417,26 @@ public:
 		RISSE_ASSERT_CS_LOCKED(*GetNodeInstance()->GetGraphInstance()->GetCS());
 		/* TODO: 例外 */
 	}
+
+public: // Risse用メソッドなど
+	void construct();
+	void initialize(const tVariant & node, const tNativeCallInfo &info);
+	tVariant iget(risse_offset ofs_index);
+	size_t get_length();
 };
 //---------------------------------------------------------------------------
 
 
 
 
+
+//---------------------------------------------------------------------------
+/**
+ * ピン配列クラス
+ */
+RISSE_DEFINE_CLASS_BEGIN(tPinArrayClass, tClassBase, tPinArrayInstance, itNoInstance)
+RISSE_DEFINE_CLASS_END()
+//---------------------------------------------------------------------------
 
 
 
@@ -439,10 +451,10 @@ public:
  *			そのため、そのクラス名に反して、入力ピンを持たないノードの入力ピン配列に使うことができる。
  *			また、すべての InputPinArray の基底クラスである。
  */
-class tInputPinArrayInstance : public tPinArray<tInputPinInstance>, public tObjectBase
+class tInputPinArrayInstance : public tPinArrayInstance
 {
 public:
-	typedef tObjectBase inherited;
+	typedef tPinArrayInstance inherited;
 
 public:
 	typedef tInputPinInstance tPinType;
@@ -590,10 +602,10 @@ RISSE_DEFINE_CLASS_END()
  *			そのため、そのクラス名に反して、出力ピンを持たないノードの出力ピン配列に使うことができる。
  *			また、すべての OutputPinArray の基底クラスである。
  */
-class tOutputPinArrayInstance : public tPinArray<tOutputPinInstance>, public tObjectBase
+class tOutputPinArrayInstance : public tPinArrayInstance
 {
 public:
-	typedef tObjectBase inherited;
+	typedef tPinArrayInstance inherited;
 
 public:
 	typedef tOutputPinInstance tPinType;

@@ -41,6 +41,9 @@ Linux*)
 		-DGC_LINUX_THREADS -D_REENTRANT \
 		-include gc.h              \
 		"
+	# Ubuntu Intrepid 対策。これがないとvfwprintfの再定義でエラーになる
+	includes="$includes -U_FORTIFY_SOURCE"
+	# ライブラリ
 	libs="$libs \
 		-L$prefix_gc/lib     -lgc \
 		"

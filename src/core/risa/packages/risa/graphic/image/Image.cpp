@@ -301,14 +301,20 @@ RISSE_IMPL_CLASS_BEGIN(tImageClass, (tSS<'I','m','a','g','e'>()),
 		engine->ObjectClass)
 	RISSE_BIND_CONSTRUCTORS
 	BindFunction(this, ss_dispose, &tImageInstance::dispose);
-	BindProperty(this, tSS<'h','a','s','B','u','f','f','e','r'>(), &tImageInstance::get_hasBuffer);
-	BindFunction(this, tSS<'a','l','l','o','c','a','t','e'>(), &tImageInstance::allocate);
-	BindFunction(this, tSS<'d','e','a','l','l','o','c','a','t','e'>(), &tImageInstance::deallocate);
-	BindFunction(this, tSS<'i','n','d','e','p','e','n','d'>(), &tImageInstance::independ);
+	BindProperty(this, tSS<'h','a','s','B','u','f','f','e','r'>(),
+		&tImageInstance::get_hasBuffer);
+	BindFunction(this, tSS<'a','l','l','o','c','a','t','e'>(),
+		&tImageInstance::allocate);
+	BindFunction(this, tSS<'d','e','a','l','l','o','c','a','t','e'>(),
+		&tImageInstance::deallocate);
+	BindFunction(this, tSS<'i','n','d','e','p','e','n','d'>(),
+		&tImageInstance::independ);
 	BindFunction(this, tSS<'l','o','a','d'>(), &tImageInstance::load);
 	BindFunction(this, tSS<'s','a','v','e'>(), &tImageInstance::save);
-	BindFunction(this, tSS<'g','e','t','A','R','G','B','3','2'>(), &tImageInstance::getARGB32);
-	BindFunction(this, tSS<'s','e','t','A','R','G','B','3','2'>(), &tImageInstance::setARGB32);
+	BindFunction(this, tSS<'g','e','t','A','R','G','B','3','2'>(),
+		&tImageInstance::getARGB32);
+	BindFunction(this, tSS<'s','e','t','A','R','G','B','3','2'>(),
+		&tImageInstance::setARGB32);
 RISSE_IMPL_CLASS_END()
 //---------------------------------------------------------------------------
 

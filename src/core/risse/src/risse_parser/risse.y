@@ -670,6 +670,7 @@ if_head
 	: "if" onl "(" {BI} onl
 	  expr_with_comma onl
 	  ")" {EI} onl block_or_statement		{ $$ = N(If)(@1.first, $6, $11); }
+;
 
 if
 	: if_head								{ $$ = $1; }
@@ -677,6 +678,7 @@ if
 	   "else" onl
 	  block_or_statement					{ $$ = $1; C(If, $$)->SetFalse($4); }
 /* この規則は if_head とシフト・還元競合を起こす */
+;
 
 /* a break statement */
 break
@@ -795,6 +797,7 @@ try
 	  "finally" onl block_or_statement			{ $$ = N(Try)(@1.first); C(Try, $$)->SetBody($3);
 												  C(Try, $$)->SetFinally($6);  $$->SetPosition(@1.first); }
 	/* この構文はシフト・還元競合を２つ起こす */
+;
 
 catch_list
 	: catch 									{ $$ = N(Try)(@1.first); C(Try, $$)->AddChild($1); }

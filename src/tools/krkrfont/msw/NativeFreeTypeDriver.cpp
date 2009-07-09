@@ -44,7 +44,7 @@ namespace Risa {
 /**
  * tBaseFreeTypeFontDriver::EnumerateFonts で内部的に使われるクラス
  */
-class tFreeTypeFontEnumeraterHelper
+class tFreeTypeFontEnumeratorHelper
 {
 private:
 	wxArrayString & Dest; //!< 格納先配列
@@ -53,9 +53,9 @@ private:
 	wxString PrevFontName; //!< 直前に列挙したフォント名(重複をはじくために使う)
 
 public:
-	tFreeTypeFontEnumeraterHelper(wxArrayString & dest,
+	tFreeTypeFontEnumeratorHelper(wxArrayString & dest,
 		risse_uint32 Flags, wxFontEncoding encoding);
-	~tFreeTypeFontEnumeraterHelper();
+	~tFreeTypeFontEnumeratorHelper();
 
 	void DoEnumerate();
 
@@ -79,7 +79,7 @@ private:
  * @param encoding	エンコーディング (wxFontEncoding)
  * @param dest		格納先配列 (配列はクリアされる)
  */
-tFreeTypeFontEnumeraterHelper::tFreeTypeFontEnumeraterHelper(wxArrayString & dest,
+tFreeTypeFontEnumeratorHelper::tFreeTypeFontEnumeratorHelper(wxArrayString & dest,
 	risse_uint32 flags, wxFontEncoding encoding ) :
 		 Dest(dest), Flags(flags), Encoding(encoding)
 {
@@ -91,7 +91,7 @@ tFreeTypeFontEnumeraterHelper::tFreeTypeFontEnumeraterHelper(wxArrayString & des
 /**
  * デストラクタ
  */
-tFreeTypeFontEnumeraterHelper::~tFreeTypeFontEnumeraterHelper()
+tFreeTypeFontEnumeratorHelper::~tFreeTypeFontEnumeratorHelper()
 {
 }
 //---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ tFreeTypeFontEnumeraterHelper::~tFreeTypeFontEnumeraterHelper()
 /**
  * フォントを列挙する
  */
-void tFreeTypeFontEnumeraterHelper::DoEnumerate()
+void tFreeTypeFontEnumeratorHelper::DoEnumerate()
 {
 	HDC refdc = GetDC(NULL); // ディスプレイの DC を参照元 DC として取得
 	try
@@ -145,14 +145,14 @@ void tFreeTypeFontEnumeraterHelper::DoEnumerate()
  * @param dwStyle	DWORD style
  * @param lParam	User-defined data
  */
-int CALLBACK tFreeTypeFontEnumeraterHelper::CallbackProc(
+int CALLBACK tFreeTypeFontEnumeratorHelper::CallbackProc(
 			ENUMLOGFONTEX *lpelfe,    // pointer to logical-font data
 			NEWTEXTMETRICEX *lpntme,  // pointer to physical-font data
 			int FontType,             // type of font
 			LPARAM lParam  )
 {
-	tFreeTypeFontEnumeraterHelper * _this =
-		reinterpret_cast<tFreeTypeFontEnumeraterHelper*>(lParam);
+	tFreeTypeFontEnumeratorHelper * _this =
+		reinterpret_cast<tFreeTypeFontEnumeratorHelper*>(lParam);
 
 	if(_this->Flags & RISA_FSF_FIXEDPITCH)
 	{
@@ -232,7 +232,7 @@ void tBaseFreeTypeFontDriver::EnumerateFonts(wxArrayString & dest,
 
 	flags |= RISA_FSF_OUTLINEONLY; // 常に(FreeTypeで使用可能な)アウトラインフォントのみを列挙する
 
-	tFreeTypeFontEnumeraterHelper helper(dest, flags, encoding);
+	tFreeTypeFontEnumeratorHelper helper(dest, flags, encoding);
 	helper.DoEnumerate(); // 列挙を行う
 }
 //---------------------------------------------------------------------------

@@ -480,8 +480,7 @@ void tSSAStatement::CreateVariableInterferenceGraph(gc_map<const tSSAVariable *,
 void tSSAStatement::OptimizeAtStatementLevel(gc_map<risse_size, tSSAStatement *> &statements)
 {
 	// コピー伝播
-	if(Code == ocPhi && Used.size() == 1 ||
-		Code == ocAssign)
+	if((Code == ocPhi && Used.size() == 1) || Code == ocAssign)
 	{
 		// 引数が一個の phi あるいは単純コピーの場合
 		// コピー伝播を行う

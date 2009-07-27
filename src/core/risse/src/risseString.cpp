@@ -563,9 +563,9 @@ tString tString::Escape(risse_size maxlen, bool quote) const
 		default:
 			if(hexflag)
 			{
-				if(p[i] >= RISSE_WC('a') && p[i] <= RISSE_WC('f') ||
-					p[i] >= RISSE_WC('A') && p[i] <= RISSE_WC('F') ||
-						p[i] >= RISSE_WC('0') && p[i] <= RISSE_WC('9') )
+				if((p[i] >= RISSE_WC('a') && p[i] <= RISSE_WC('f')) ||
+					(p[i] >= RISSE_WC('A') && p[i] <= RISSE_WC('F')) ||
+						(p[i] >= RISSE_WC('0') && p[i] <= RISSE_WC('9')) )
 				{
 					risse_char buf[4];
 					buf[0] = RISSE_WC('\\');

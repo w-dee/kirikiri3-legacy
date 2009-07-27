@@ -304,8 +304,8 @@ static bool inline iswdigit_nc(risse_char ch)
 static bool inline iswalpha_nc(risse_char ch)
 {
 	return
-		ch >= 'a' && ch <= 'z' ||
-		ch >= 'A' && ch <= 'Z' ||
+		(ch >= 'a' && ch <= 'z') ||
+		(ch >= 'A' && ch <= 'Z') ||
 		ch >= 0x80;
 }
 //---------------------------------------------------------------------------

@@ -320,7 +320,7 @@ tObjectBase::tRetValue tObjectBase::Write(const tString & name, tOperateFlags fl
 	// tOperateFlags::ofUseClassMembersRule もつける
 	// ofFinalOnly をつけるのは flags に ofMemberEnsure がくっついているときだけ
 	tOperateFlags class_search_base_flags =
-			flags & ~(tOperateFlags::ofFinalOnly) |
+			(flags & ~(tOperateFlags::ofFinalOnly)) |
 			(
 				flags.Has(tOperateFlags::ofMemberEnsure) ?
 						(tOperateFlags::ofFinalOnly|tOperateFlags::ofUseClassMembersRule) :

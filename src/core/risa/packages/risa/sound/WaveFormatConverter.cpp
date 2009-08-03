@@ -65,7 +65,7 @@ static void PCMConvertLoop(void * RISSE_RESTRICT dest, const void * RISSE_RESTRI
  * int16→float32のテンプレート特化 (よくつかう)
  */
 template <>
-static void PCMConvertLoop<tPCMTypes::f32, tPCMTypes::i16>
+void PCMConvertLoop<tPCMTypes::f32, tPCMTypes::i16>
 				(void * dest, const void * src, size_t numsamples)
 {
 	PCMConvertLoopInt16ToFloat32(dest, src, numsamples);
@@ -78,7 +78,7 @@ static void PCMConvertLoop<tPCMTypes::f32, tPCMTypes::i16>
  * float32→int16のテンプレート特化 (よくつかう)
  */
 template <>
-static void PCMConvertLoop<tPCMTypes::i16, tPCMTypes::f32>
+void PCMConvertLoop<tPCMTypes::i16, tPCMTypes::f32>
 				(void * dest, const void * src, size_t numsamples)
 {
 	PCMConvertLoopFloat32ToInt16(dest, src, numsamples);

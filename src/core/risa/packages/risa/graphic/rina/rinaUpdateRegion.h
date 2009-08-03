@@ -78,7 +78,7 @@ private:
 		unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1)
 	{
 		RISSE_ASSERT(x0 < 8 && y0 < 32 && x1 < 8 && y1 < 32);
-		RISSE_ASSERT(x0 <= x1 && y0 <= y1 || x0 == 7 && y0 == 31 && x1 == 0 && y1 == 0);
+		RISSE_ASSERT((x0 <= x1 && y0 <= y1) || (x0 == 7 && y0 == 31 && x1 == 0 && y1 == 0));
 		return
 			(x0 << (5+3+5)) +
 			(y0 << (  3+5)) +

@@ -73,10 +73,10 @@ exit_first_find_loop:
 	// この時点では、cx が ccx に達したか、あるいは連続してないか、あるいは
 	//  topとbottomが違うセルが見つかったかのどれかである
 	// rect のメンバを設定する
-	rect.Left   = (cx_start << CellSizeShift) + (X0(row[cx_start])      << 2);
-	rect.Top    = (cy       << CellSizeShift) +  Y0(row[cx_start]);
-	rect.Right  = (cx       << CellSizeShift) + (X1(row[cx      ]) + 1) << 2;
-	rect.Bottom = (cy       << CellSizeShift) +  Y1(row[cx      ]) + 1;
+	rect.Left   = (cx_start << CellSizeShift) +  (X0(row[cx_start])      << 2);
+	rect.Top    = (cy       << CellSizeShift) +   Y0(row[cx_start]);
+	rect.Right  = (cx       << CellSizeShift) + ((X1(row[cx      ]) + 1) << 2);
+	rect.Bottom = (cy       << CellSizeShift) +   Y1(row[cx      ]) + 1;
 
 	// 横方向は4ピクセル単位の精度しかない。
 	// したがって場合によっては右端がWidthを越えるので補正する

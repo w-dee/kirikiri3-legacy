@@ -179,8 +179,8 @@ bool tALBuffer::Render(risse_uint8 * & render_buffer, size_t & render_buffer_siz
 		if(format.Frequency != ALFrequency)
 			cont = false; // 周波数が変わった
 		else if(
-			ALFormat == AL_FORMAT_STEREO16 && format.Channels != 2 ||
-			ALFormat == AL_FORMAT_MONO16   && format.Channels != 1)
+			(ALFormat == AL_FORMAT_STEREO16 && format.Channels != 2) ||
+			(ALFormat == AL_FORMAT_MONO16   && format.Channels != 1))
 			cont = false; // チャンネル数が変わった
 
 		tPCMTypes::tType filter_pcm_type = tPCMTypes::tunknown;

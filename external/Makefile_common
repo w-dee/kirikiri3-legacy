@@ -8,8 +8,11 @@ build_lib: build_completed
 
 copy_completed: Makefile
 	rm -rf src_temp
-	svn export src src_temp || cp -pR src src_temp
-	if [ "x`ls src_temp`" = "x" ]; then rm -rf src_temp; cp -pR src src_temp; fi
+	svn export src src_temp || true
+	if [ ! -d src_temp ]; then \
+		rm -rf src_temp && mkdir src_temp && (cd src; tar cf - . --exclude .svn) | (cd src_temp; tar xf -) || true; \
+	fi
+	if [ ! -d src_temp ]; then echo "directory copy failed. ensure installing svn command."; fi
 	touch copy_completed
 
 build_completed: Makefile copy_completed

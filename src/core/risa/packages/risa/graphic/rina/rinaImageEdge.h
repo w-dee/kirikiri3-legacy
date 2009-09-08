@@ -58,13 +58,11 @@ private:
 public:
 	/**
 	 * コンストラクタ
-	 * @param parent	親キューノード
-	 * @param index		親キューノード内でのインデックス
 	 * @param area		要求範囲
 	 */
-	tImageRenderRequest(tQueueNode * parent, risse_size index,
+	tImageRenderRequest(
 		const tTexturePolygonList & area) :
-		inherited(parent, index), Area(area) {;}
+		Area(area) {;}
 
 	/**
 	 * 要求範囲を得る
@@ -260,7 +258,7 @@ RISSE_DEFINE_CLASS_END()
 
 
 
-
+class tImageBuffer;
 //---------------------------------------------------------------------------
 /**
  * ラスタ画像用のコマンドキュー
@@ -284,7 +282,7 @@ public: //!< サブクラスでオーバーライドして使う物
 	 * 画像を得る
 	 * @return	画像
 	 */
-	virtual const tString & GetImageBufferNoAddRef() = 0;
+	virtual tImageBuffer & GetImageBufferNoAddRef() = 0;
 
 	/**
 	 * 画像のオフセットを得る

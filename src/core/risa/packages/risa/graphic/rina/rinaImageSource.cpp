@@ -57,6 +57,17 @@ tOutputPinArrayInstance & tImageSourceNodeInstance::GetOutputPinArrayInstance()
 
 
 //---------------------------------------------------------------------------
+void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
+{
+	// キューノードを作成する
+	// 子ノードがある場合は子ノードをpushするが、ImageSourceに子ノードはないので
+	// それは行わない。
+
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tImageSourceNodeInstance::construct()
 {
 	// 入力ピンインスタンスを作成

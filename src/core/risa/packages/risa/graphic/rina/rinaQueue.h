@@ -45,71 +45,13 @@ public:
 	typedef tPolymorphic inherited;
 private:
 
-	tQueueNode * Parent; //!< 親キューノード
-	risse_size Index; //!< 親キューノード内でのインデックス
-
 public:
 	/**
 	 * コンストラクタ
-	 * @param parent	親キューノード
-	 * @param index		親キューノード内でのインデックス
 	 */
-	tRenderRequest(tQueueNode * parent, risse_size index) : Parent(parent), Index(index) {;}
-
-	/**
-	 * 親キューノードを得る
-	 * @return	親キューノード
-	 */
-	tQueueNode * GetParent() const { return Parent; }
-
-	/**
-	 * 親キューノード内でのインデックスを得る
-	 * @return	親キューノード内でのインデックス
-	 */
-	risse_size GetIndex() const { return Index; }
+	tRenderRequest() {;}
 };
 //---------------------------------------------------------------------------
-
-
-//---------------------------------------------------------------------------
-/**
- * 子ノードの情報
- */
-class tQueueNodeChild : public tCollectee
-{
-	typedef tCollectee inherited;
-
-	tQueueNode * Child; //!< 子キューノード
-	const tRenderRequest * RenderRequest; //!< 子キューノードが保持していたレンダリング要求の情報
-
-public:
-	/**
-	 * デフォルトコンストラクタ
-	 */
-	tQueueNodeChild() : Child(NULL), RenderRequest(NULL) {;}
-
-	/**
-	 * コンストラクタ
-	 * @param child		子キューノード
-	 * @param request	子キューノードが保持していたレンダリング要求の情報
-	 */
-	tQueueNodeChild(tQueueNode * child, const tRenderRequest * request = NULL) :
-		Child(child), RenderRequest(request) {;}
-
-	/**
-	 * 子キューノードを得る
-	 * @return	子キューノード
-	 */
-	tQueueNode * GetChild() const { return Child; }
-
-	/**
-	 * 子キューノードが保持していたレンダリング要求の情報を得る
-	 * @return	子キューノードが保持していたレンダリング要求の情報
-	 */
-	const tRenderRequest * GetRenderRequest() const { return RenderRequest; }
-};
-//---------------------------------------------------------------------------
-
 
 
 class tQueue;
@@ -124,8 +66,8 @@ public:
 private:
 
 protected:
-	typedef gc_vector<tQueueNodeChild> tChildren; //!< 子ノードの配列のtypedef
-	typedef gc_vector<const tRenderRequest*> tParents; //!< レンダリング要求(親ノード)の配列のtypedef
+	typedef gc_vector<tQueueNode*> tChildren; //!< 子ノードの配列のtypedef
+	typedef gc_vector<tQueueNode*> tParents; //!< レンダリング要求(親ノード)の配列のtypedef
 	tChildren Children; //!< 子ノード
 	tParents Parents; //!< 親ノード
 
@@ -135,9 +77,8 @@ protected:
 public:
 	/**
 	 * コンストラクタ
-	 * @param request	レンダリング要求
 	 */
-	tQueueNode(const tRenderRequest * request);
+	tQueueNode();
 
 	/**
 	 * デストラクタ (おそらく呼ばれない)
@@ -155,15 +96,14 @@ public:
 	 * ノードの親とレンダリング要求を追加する
 	 * @param parent	親
 	 */
-	void AddParent(const tRenderRequest * request);
+	void AddParent(tQueueNode * child);
 
-protected:
+private:
 	/**
 	 * ノードの子を追加する
 	 * @param child		子
-	 * @param request	レンダリング要求
 	 */
-	void AddChild(tQueueNode * child, const tRenderRequest * request);
+	void AddChild(tQueueNode * child);
 
 protected: //!< サブクラスでオーバーライドして使う物
 

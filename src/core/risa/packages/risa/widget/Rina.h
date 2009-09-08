@@ -60,6 +60,13 @@ public: // サブクラスで実装すべき物
 	 */
 	virtual tOutputPinArrayInstance & GetOutputPinArrayInstance();
 
+public:
+	/**
+	 * コマンドキューの組み立てを行う
+	 * @param builder	キュービルダーオブジェクト
+	 */
+	virtual void BuildQueue(tQueueBuilder & builder);
+
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
@@ -150,6 +157,12 @@ public:
 	 * デストラクタ(おそらく呼ばれない)
 	 */
 	virtual ~tRinaInstance() {;}
+
+	/**
+	 * RinaWidgetNode クラスのインスタンスを得る
+	 * @return RinaWidgetNode クラスのインスタンス
+	 */
+	tRinaWidgetNodeInstance * GetRinaWidgetNodeInstance() { return RinaWidgetNode; }
 
 public: // Risse用メソッドなど
 	void construct();

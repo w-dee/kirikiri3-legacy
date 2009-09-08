@@ -23,12 +23,10 @@ RISSE_DEFINE_SOURCE_ID(19972,63368,40219,19790,30879,4075,829,3560);
 
 
 //---------------------------------------------------------------------------
-tQueueNode::tQueueNode(const tRenderRequest * request)
+tQueueNode::tQueueNode()
 {
 	WaitingChildren = 0;
 	WaitingParents = 0;
-
-	if(request) AddParent(request);
 }
 //---------------------------------------------------------------------------
 
@@ -77,9 +75,9 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::AddParent(const tRenderRequest * request)
+void tQueueNode::AddParent(tQueueNode * parent)
 {
-	request->GetParent()->AddChild(this, request);
+	parent->AddChild(this);
 	Parents.push_back(request);
 	WaitingParents ++;
 }
@@ -87,13 +85,12 @@ void tQueueNode::AddParent(const tRenderRequest * request)
 
 
 //---------------------------------------------------------------------------
-void tQueueNode::AddChild(tQueueNode * child, const tRenderRequest * request)
+void tQueueNode::AddChild(tQueueNode * child)
 {
 	// 注意: もし child が指定されたインデックスに登録されなかった場合は
 	// そこは NULL になることを期待している実装があることに注意すること
-	risse_size index = request->GetIndex();
-	if(Children.size() <= index) Children.resize(index + 1);
-	Children[index] = tQueueNodeChild(child, request);
+	// XXX: ↑ この説明はナンダ？
+	Children.push_back(child);
 	WaitingChildren++;
 }
 //---------------------------------------------------------------------------

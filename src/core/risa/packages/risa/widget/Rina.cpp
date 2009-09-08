@@ -53,6 +53,40 @@ tOutputPinArrayInstance & tRinaWidgetNodeInstance::GetOutputPinArrayInstance()
 
 
 //---------------------------------------------------------------------------
+void tRinaWidgetNodeInstance::BuildQueue(tQueueBuilder & builder)
+{
+	// キューを組み立てる
+	// 入力ピンのレンダリング要求に更新領域を設定する
+	// TODO: ちゃんとした更新領域の設定
+
+	// まずtTexturePolygon作成
+	tTexturePolygon poly = {
+			{ 100.0f - 0.5f, 0.0f   - 0.5f },
+			{ 0.0f   - 0.5f, 0.0f   - 0.5f },
+			{ 0.0f   - 0.5f, 100.0f - 0.5f },
+			false
+	};
+
+	// tTexturePolygonList 作成
+	tTexturePolygonList poly_list;
+	poly_list.push_back(poly);
+
+	// レンダリング要求の作成
+	tRenderRequest * req = new tImageRenderRequest(poly_list);
+
+	// レンダリング要求を入力ピンに設定する
+	InputPinInstance->ClearRenderRequests();
+	InputPinInstance->AddRenderRequest(req);
+
+	// キューノードを作成する TODO
+
+	// 子ノードをbuilderにpushする
+	builder.Push(InputPinInstance->GetNodeInstance());
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
 void tRinaWidgetNodeInstance::construct()
 {
 	// 入力ピンインスタンスを作成
@@ -166,7 +200,7 @@ tRina::~tRina()
 //---------------------------------------------------------------------------
 void tRina::OnPaint(wxPaintEvent& event)
 {
-/*
+#if 0
 	wxPaintDC dc(this);
 
 	const tImageBuffer::tDescriptor & desc = TestImage->GetDescriptor();
@@ -177,7 +211,36 @@ void tRina::OnPaint(wxPaintEvent& event)
 			(guchar*)pointer.Buffer, pointer.Pitch);
 
 	pointer.Release();
-*/
+#endif
+
+	// キュービルダーを作成する
+	tRinaWidgetNodeInstance * node =
+				GetInternal()->GetInstance()->GetRinaWidgetNodeInstance();
+	tGraphInstance * graph = node->GetGraphInstance();
+	tQueueBuilder builder(graph);
+
+	// キューノードを作成
+	builder.Build(node);
+
+	// 描画処理を実行
+	tQueueNode * root = builder.GetRootQueueNode();
+	tQueue queue;
+	queue.Process(root);
+
+	// ルートキューノードから画像バッファを取り出し、描画
+	tImageQueueNode * image_queue = DownCast<tImageQueueNode*>(root);
+	const tImageBuffer::tDescriptor & buffer_desc =
+			image_queue->GetImageBufferNoAddRef().GetDescriptor();
+	const tImageBuffer::tBufferPointer & buffer_pointer =
+			image_queue->GetImageBufferNoAddRef().GetBufferPointer();
+
+	wxPaintDC dc(this);
+
+	gdk_draw_rgb_32_image(dc.m_window, dc.m_penGC, 0, 0,
+			buffer_desc.Width, buffer_desc.Height, GDK_RGB_DITHER_NONE,
+			(guchar*)buffer_pointer.Buffer, buffer_pointer.Pitch);
+
+	buffer_pointer.Release();
 }
 //---------------------------------------------------------------------------
 

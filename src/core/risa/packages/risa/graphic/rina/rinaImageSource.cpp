@@ -30,6 +30,71 @@ RISSE_DEFINE_SOURCE_ID(7573,48746,61484,31356,16289,41410,60513,41447);
 
 
 
+
+//---------------------------------------------------------------------------
+/**
+ * イメージソースのラスタ画像用のコマンドキュー
+ */
+class tImageSourceQueueNode : public tImageQueueNode
+{
+public:
+	typedef tImageQueueNode inherited;
+private:
+
+	tImageBuffer & ImageBuffer; //!< 親キューノードに返すイメージバッファ
+
+public:
+	/**
+	 * コンストラクタ
+	 * @param	im		親キューノードに返すイメージバッファ
+	 */
+	tImageSourceQueueNode(tImageBuffer & im) :
+		inherited(), ImageBuffer(im) {;}
+
+public: //!< サブクラスでオーバーライドして使う物
+	/**
+	 * 画像を得る
+	 * @return	画像
+	 */
+	virtual tImageBuffer & GetImageBufferNoAddRef()
+	{
+		return ImageBuffer;
+	}
+
+	/**
+	 * 画像のオフセットを得る
+	 * @return	オフセット
+	 * GetImageBufferNoAddRef() で得られた画像の左上が、
+	 * 要求された座標系におけるどの点なのかを表す。
+	 */
+	virtual t2DPoint GetOffset()
+	{
+		return t2DPoint(0, 0);
+	}
+
+protected: //!< サブクラスでオーバーライドして使う物
+	/**
+	 * ノードの処理の最初に行う処理
+	 */
+	virtual void BeginProcess() {;}
+
+	/**
+	 * ノードの処理の最後に行う処理
+	 */
+	virtual void EndProcess() {;}
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tImageSourceNodeInstance::tImageSourceNodeInstance()
 {
@@ -63,6 +128,33 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 	// 子ノードがある場合は子ノードをpushするが、ImageSourceに子ノードはないので
 	// それは行わない。
 
+	// 出力ピンをたどり、親ノードの入力ピンに設定されているレンダリング要求を確認する
+	{
+		tEnumerableIterator it(tVariant(OutputPinInstance->GetInputPins()));
+		while(it.Next())
+		{
+			tRenderRequest * req = it.GetValue().
+				ExpectAndGetObjectInterface(
+					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest();
+			// ここでreqをつかってごにょごにょ処理をする
+		}
+	}
+
+	// キューノードを作成する
+	tImageQueueNode *q = new tImageQueueNode(ImageBuffer);
+
+	// ノードの親を関連付ける
+	{
+		tEnumerableIterator it(tVariant(OutputPinInstance->GetInputPins()));
+		while(it.Next())
+		{
+			tQueueNode * par = it.GetValue().
+				ExpectAndGetObjectInterface(
+					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest().GetParentQueueNode();
+			// ここでreqをつかってごにょごにょ処理をする
+			q->AddParent(par);
+		}
+	}
 }
 //---------------------------------------------------------------------------
 

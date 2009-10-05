@@ -58,11 +58,12 @@ private:
 public:
 	/**
 	 * コンストラクタ
+	 * @param parent	子ノードが作る子キューノードが親にすべきキューノード
 	 * @param area		要求範囲
 	 */
-	tImageRenderRequest(
+	tImageRenderRequest(tQueueNode * queuenode,
 		const tTexturePolygonList & area) :
-		Area(area) {;}
+		inherited(parent), Area(area) {;}
 
 	/**
 	 * 要求範囲を得る
@@ -89,7 +90,7 @@ private:
 public:
 	/**
 	 * コンストラクタ
-	 * @param parent	親キューノード
+	 * @param parent	子ノードが作る子キューノードが親にすべきキューノード
 	 * @param index		親キューノード内でのインデックス
 	 * @param area		要求エリア情報
 	 * @param xforms	変形情報
@@ -272,10 +273,9 @@ private:
 public:
 	/**
 	 * コンストラクタ
-	 * @param request	レンダリング要求
 	 */
-	tImageQueueNode(const tImageRenderRequest * request) :
-		inherited(request) {;}
+	tImageQueueNode() :
+		inherited() {;}
 
 public: //!< サブクラスでオーバーライドして使う物
 	/**

@@ -136,14 +136,7 @@ private:
 
 	tIdRegistry::tRenderGeneration RenderGeneration; //!< 最新の情報が設定されたレンダリング世代
 
-public:
-	/**
-	 * 親ノードから子ノードへのレンダリング要求の配列のtypedef
-	 */
-	typedef gc_vector<const tRenderRequest*> tRenderRequests;
-
-private:
-	tRenderRequests RenderRequests; //!< 親ノードから子ノードへのレンダリング要求の配列
+	tRenderRequest * RenderRequest; //!< 親ノードから子ノードへのレンダリング要求
 
 public:
 	/**
@@ -199,21 +192,16 @@ public:
 	virtual void InternalConnect(tOutputPinInstance * output_pin);
 
 	/**
-	 * 親ノードから子ノードへのレンダリング要求の配列を得る
-	 * return		親ノードから子ノードへのレンダリング要求の配列
+	 * 親ノードから子ノードへのレンダリング要求を得る
+	 * return		親ノードから子ノードへのレンダリング要求
 	 */
-	const tRenderRequests & GetRenderRequests() const { return RenderRequests; }
+	const tRenderRequest & GetRenderRequest() const { return RenderRequest; }
 
 	/**
-	 * 親ノードから子ノードへのレンダリング要求の配列をクリアする
-	 */
-	void ClearRenderRequests() { RenderRequests.clear(); }
-
-	/**
-	 * 親ノードから子ノードへのレンダリング要求の配列にアイテムを追加する
+	 * 親ノードから子ノードへのレンダリング要求を設定する
 	 * @param req	要求データ
 	 */
-	void AddRenderRequest(const tRenderRequest * req) { RenderRequests.push_back(req); }
+	void SetRenderRequest(const tRenderRequest * req) { RenderRequest = req; }
 
 protected:
 	/**

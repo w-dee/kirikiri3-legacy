@@ -74,11 +74,11 @@ void tRinaWidgetNodeInstance::BuildQueue(tQueueBuilder & builder)
 	// レンダリング要求の作成
 	tRenderRequest * req = new tImageRenderRequest(poly_list);
 
-	// レンダリング要求を入力ピンに設定する
-	InputPinInstance->ClearRenderRequests();
-	InputPinInstance->AddRenderRequest(req);
-
 	// キューノードを作成する TODO
+	/* tQueueNode * queue = new ... */
+
+	// レンダリング要求を入力ピンに設定する
+	InputPinInstance->SetRenderRequest(queue, req);
 
 	// 子ノードをbuilderにpushする
 	builder.Push(InputPinInstance->GetNodeInstance());

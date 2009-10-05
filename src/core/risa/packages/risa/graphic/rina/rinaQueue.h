@@ -44,12 +44,20 @@ class tRenderRequest : public tPolymorphic
 public:
 	typedef tPolymorphic inherited;
 private:
-
+	tQueueNode * ParentQueueNode; //!< 子ノードが作る子キューノードが親にすべきキューノード
 public:
 	/**
 	 * コンストラクタ
+	 * @param parent	子ノードが作る子キューノードが親にすべきキューノード
 	 */
-	tRenderRequest() {;}
+	tRenderRequest(tQueueNode *parent) : ParentQueueNode(parent) {;}
+
+	/**
+	 * 子ノードが作る子キューノードが親にすべきキューノードを得る
+	 * @return		子ノードが作る子キューノードが親にすべきキューノード
+	 */
+	tQueueNode * GetParentQueueNode() const { return ParentQueueNode; }
+
 };
 //---------------------------------------------------------------------------
 
@@ -93,10 +101,10 @@ public:
 	void Process(tQueue * queue, bool is_begin);
 
 	/**
-	 * ノードの親とレンダリング要求を追加する
+	 * ノードの親を追加する
 	 * @param parent	親
 	 */
-	void AddParent(tQueueNode * child);
+	void AddParent(tQueueNode * parent);
 
 private:
 	/**

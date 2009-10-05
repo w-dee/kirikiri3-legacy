@@ -38,6 +38,8 @@ class tImageSourceNodeInstance : public tNodeInstance
 	tOutputPinArrayInstance * OutputPinArrayInstance; //!< 出力ピン配列インスタンス
 	tImageOutputPinInstance * OutputPinInstance; //!< 出力ピンインスタンス
 
+	tImageBuffer ImageBuffer; //!< イメージバッファ
+
 public:
 	/**
 	 * コンストラクタ

@@ -26,6 +26,52 @@ RISSE_DEFINE_SOURCE_ID(58627,32079,6056,17748,10429,30722,59446,14940);
 
 
 
+
+//---------------------------------------------------------------------------
+/**
+ * Rina widget用のコマンドキューノード
+ */
+class tRinaWidgetQueueNode : public tQueueNode, public Risa::tSubmorph<tRinaWidgetQueueNode>
+{
+public:
+	typedef tQueueNode inherited;
+private:
+
+public:
+	/**
+	 * コンストラクタ
+	 */
+	tRinaWidgetQueueNode() :
+		inherited() {;}
+
+protected: //!< サブクラスでオーバーライドして使う物
+
+	/**
+	 * ノードの処理の最初に行う処理
+	 */
+	virtual void BeginProcess() = 0;
+
+	/**
+	 * ノードの処理の最後に行う処理
+	 */
+	virtual void EndProcess()
+	{
+		// TODO: ここに描画処理を
+	}
+
+};
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 tRinaWidgetNodeInstance::tRinaWidgetNodeInstance()
 {
@@ -71,14 +117,14 @@ void tRinaWidgetNodeInstance::BuildQueue(tQueueBuilder & builder)
 	tTexturePolygonList poly_list;
 	poly_list.push_back(poly);
 
-	// レンダリング要求の作成
-	tRenderRequest * req = new tImageRenderRequest(poly_list);
-
 	// キューノードを作成する TODO
-	/* tQueueNode * queue = new ... */
+	tQueueNode * queue = new tRinaWidgetQueueNode();
+
+	// レンダリング要求の作成
+	tRenderRequest * req = new tImageRenderRequest(queue, poly_list);
 
 	// レンダリング要求を入力ピンに設定する
-	InputPinInstance->SetRenderRequest(queue, req);
+	InputPinInstance->SetRenderRequest(req);
 
 	// 子ノードをbuilderにpushする
 	builder.Push(InputPinInstance->GetNodeInstance());

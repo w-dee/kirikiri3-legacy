@@ -465,6 +465,15 @@ public:
 	 * 「無効なUTF-8文字列です」例外を発生
 	 */
 	static void ThrowInvalidUTF8String() RISSE_NORETURN { ThrowInvalidUTF8String(NULL); }
+	/**
+	 * 「UTF-32文字が範囲を越えています」例外を発生
+	 * @param engine	スクリプトエンジンインスタンス
+	 */
+	static void ThrowUTF32OutOfRange(tScriptEngine * engine) RISSE_NORETURN;
+	/**
+	 * 「UTF-32文字が範囲を越えています」例外を発生
+	 */
+	static void ThrowUTF32OutOfRange() RISSE_NORETURN { ThrowUTF32OutOfRange(NULL); }
 RISSE_DEFINE_CLASS_END()
 //---------------------------------------------------------------------------
 

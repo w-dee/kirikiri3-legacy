@@ -744,6 +744,17 @@ void tCharConversionExceptionClass::ThrowInvalidUTF8String(tScriptEngine * engin
 //---------------------------------------------------------------------------
 
 
+//---------------------------------------------------------------------------
+void tCharConversionExceptionClass::ThrowUTF32OutOfRange(tScriptEngine * engine)
+{
+	tTemporaryException * e =
+		new tTemporaryException(ss_risse, ss_CharConversionException,
+			tString(RISSE_WS_TR("UTF-32 code out of range")));
+	if(engine) e->ThrowConverted(engine); else throw e;
+}
+//---------------------------------------------------------------------------
+
+
 
 
 

@@ -22,7 +22,7 @@ RISSE_DEFINE_SOURCE_ID(45632,47818,10920,18335,63117,13582,59145,24628);
 
 
 //---------------------------------------------------------------------------
-risse_char tStringData::EmptyBuffer[3] = { tString::MightBeShared, 0, 0 };
+risse_char tStringData::EmptyBuffer[3] = { tStringData::MightBeShared, 0, 0 };
 //---------------------------------------------------------------------------
 
 
@@ -428,6 +428,7 @@ tString tString::operator + (const risse_char * ref) const
 char * tString::AsNarrowString(risse_size * out_size) const
 {
 	risse_size out_sz = ConvertCharToUtf8String(NULL, Buffer, Length);
+	if(out_sz == risse_size_max) tCharConversionExceptionClass::ThrowUTF32OutOfRange();
 	char * outbuf = new (PointerFreeGC) char[out_sz+1];
 	ConvertCharToUtf8String(outbuf, Buffer, Length);
 	outbuf[out_sz] = '\0';

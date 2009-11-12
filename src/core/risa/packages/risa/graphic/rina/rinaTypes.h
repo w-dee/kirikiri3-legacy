@@ -34,6 +34,13 @@ struct t2DPointBase
 
 	tValue X; //!< x または u
 	tValue Y; //!< y または v
+
+	/**
+	 * コンストラクタ
+	 * @param x		x または u
+	 * @param y		y または v
+	 */
+	t2DPointBase(VALUE_TYPE x, VALUE_TYPE y) : X(x), Y(y) {;}
 };
 //---------------------------------------------------------------------------
 /**
@@ -92,6 +99,21 @@ struct tTexturePolygon : public tCollectee
 {
 	t2DPointF Vertices[3]; //!< 頂点
 	bool IsTriangle; //!< 真の場合3角形、偽の場合4角形
+	/**
+	 * コンストラクタ
+	 * @param v0			頂点0
+	 * @param v1			頂点1
+	 * @param v2			頂点2
+	 * @param is_triangle	真の場合3角形、偽の場合4角形
+	 */
+	tTexturePolygon(const t2DPointF & v0, const t2DPointF & v1, const t2DPointF & v2,
+				bool is_triangle = true)
+	{
+		Vertices[0] = v0;
+		Vertices[1] = v1;
+		Vertives[2] = v2;
+		IsTriangle = is_triangle;
+	}
 };
 //---------------------------------------------------------------------------
 

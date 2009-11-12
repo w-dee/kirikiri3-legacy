@@ -219,9 +219,9 @@ int strbufcmp(const risse_char *s1, const risse_char *s2, risse_size n);
 		{ return wcsncpy(d, s, len); }
 	static inline risse_char *strcat(risse_char *d, const risse_char *s)
 		{ return wcscat(d, s); }
-	static inline risse_char *strstr(const risse_char *s1, const risse_char *s2)
+	static inline const risse_char *strstr(const risse_char *s1, const risse_char *s2)
 		{ return wcsstr(s1, s2); }
-	static inline risse_char *strchr(const risse_char *s, int c)
+	static inline const risse_char *strchr(const risse_char *s, int c)
 		{ return wcschr(s, c); }
 	static inline double strtod(const risse_char *nptr, risse_char **endptr)
 		{ return wcstod(nptr, endptr); }

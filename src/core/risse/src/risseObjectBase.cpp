@@ -643,7 +643,7 @@ tObjectBase::tRetValue tObjectBase::Operate(RISSE_OBJECTINTERFACE_OPERATE_IMPL_A
 		return New(result, name, flags, args, This);
 
 	case ocDSetAttrib:
-		// set member attrubute
+		// set member attribute
 		return SetAttribute(name, flags);
 
 	case ocInstanceOf:

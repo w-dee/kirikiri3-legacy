@@ -111,7 +111,7 @@ struct tTexturePolygon : public tCollectee
 	{
 		Vertices[0] = v0;
 		Vertices[1] = v1;
-		Vertives[2] = v2;
+		Vertices[2] = v2;
 		IsTriangle = is_triangle;
 	}
 };

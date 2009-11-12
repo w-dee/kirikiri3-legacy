@@ -32,7 +32,7 @@ RISSE_DEFINE_SOURCE_ID(18367,25403,3163,16422,1923,3893,57628,424);
 /**
  * Risseスクリプト用スレッドを実装するクラス
  */
-class tScriptThread : protected tThread
+class tScriptThread : public tThread
 {
 	//TODO: 正しくスレッドの状態をハンドリングすること
 	tThreadInstance * Owner; //!< オーナー

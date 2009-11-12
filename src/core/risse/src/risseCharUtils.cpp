@@ -461,7 +461,7 @@ static risse_int CharToUtf8(risse_char in, char * out)
 		}
 		return 5;
 	}
-	else if(in < (1<<31))
+	else if(!(in & (1<<31)))
 	{
 		if(out)
 		{

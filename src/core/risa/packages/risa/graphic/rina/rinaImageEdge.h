@@ -61,7 +61,7 @@ public:
 	 * @param parent	子ノードが作る子キューノードが親にすべきキューノード
 	 * @param area		要求範囲
 	 */
-	tImageRenderRequest(tQueueNode * queuenode,
+	tImageRenderRequest(tQueueNode * parent,
 		const tTexturePolygonList & area) :
 		inherited(parent), Area(area) {;}
 
@@ -91,14 +91,13 @@ public:
 	/**
 	 * コンストラクタ
 	 * @param parent	子ノードが作る子キューノードが親にすべきキューノード
-	 * @param index		親キューノード内でのインデックス
 	 * @param area		要求エリア情報
 	 * @param xforms	変形情報
 	 */
-	tImageMixerRenderRequest(tQueueNode * parent, risse_size index,
+	tImageMixerRenderRequest(tQueueNode * parent,
 		const tTexturePolygonList & area,
 		const tPolygonXformList & xforms) :
-		inherited(parent, index, area), Xforms(xforms) {;}
+		inherited(parent, area), Xforms(xforms) {;}
 
 	/**
 	 * 変形情報を得る

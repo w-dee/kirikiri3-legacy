@@ -136,7 +136,7 @@ private:
 
 	tIdRegistry::tRenderGeneration RenderGeneration; //!< 最新の情報が設定されたレンダリング世代
 
-	tRenderRequest * RenderRequest; //!< 親ノードから子ノードへのレンダリング要求
+	const tRenderRequest * RenderRequest; //!< 親ノードから子ノードへのレンダリング要求
 
 public:
 	/**
@@ -195,7 +195,7 @@ public:
 	 * 親ノードから子ノードへのレンダリング要求を得る
 	 * return		親ノードから子ノードへのレンダリング要求
 	 */
-	const tRenderRequest & GetRenderRequest() const { return RenderRequest; }
+	const tRenderRequest * GetRenderRequest() const { return RenderRequest; }
 
 	/**
 	 * 親ノードから子ノードへのレンダリング要求を設定する

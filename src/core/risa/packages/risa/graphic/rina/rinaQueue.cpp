@@ -43,7 +43,7 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 		// それが 0 になった子は(依存関係が解決された子は)キューに push する。
 		for(tChildren::iterator i = Children.begin(); i != Children.end(); i++)
 		{
-			tQueueNode * child = i->GetChild();
+			tQueueNode * child = (*i);
 			if(child)
 				if(-- child->WaitingParents == 0) // TODO: アトミックなデクリメント
 					queue->Push(child, true);
@@ -64,7 +64,7 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 		// それが 0 になった親は(依存関係が解決された親は)キューに push する。
 		for(tParents::iterator i = Parents.begin(); i != Parents.end(); i++)
 		{
-			tQueueNode * parent = (*i)->GetParent();
+			tQueueNode * parent = (*i);
 			RISSE_ASSERT(parent != NULL);
 			if(-- parent->WaitingChildren == 0) // TODO: アトミックなデクリメント
 				queue->Push(parent, false);
@@ -78,7 +78,7 @@ void tQueueNode::Process(tQueue * queue, bool is_begin)
 void tQueueNode::AddParent(tQueueNode * parent)
 {
 	parent->AddChild(this);
-	Parents.push_back(request);
+	Parents.push_back(parent);
 	WaitingParents ++;
 }
 //---------------------------------------------------------------------------

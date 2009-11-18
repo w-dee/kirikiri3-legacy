@@ -31,6 +31,10 @@ RISSE_DEFINE_SOURCE_ID(7573,48746,61484,31356,16289,41410,60513,41447);
 
 
 
+
+
+
+
 //---------------------------------------------------------------------------
 /**
  * イメージソースのラスタ画像用のコマンドキュー
@@ -69,7 +73,9 @@ public: //!< サブクラスでオーバーライドして使う物
 	 */
 	virtual t2DPoint GetOffset()
 	{
-		return t2DPoint(0, 0);
+		t2DPoint zero;
+		zero.X = zero.Y = 0;
+		return zero;
 	}
 
 protected: //!< サブクラスでオーバーライドして使う物
@@ -133,7 +139,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 		tEnumerableIterator it(tVariant(OutputPinInstance->GetInputPins()));
 		while(it.Next())
 		{
-			tRenderRequest * req = it.GetValue().
+			const tRenderRequest * req = it.GetValue().
 				ExpectAndGetObjectInterface(
 					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest();
 			// ここでreqをつかってごにょごにょ処理をする
@@ -141,7 +147,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 	}
 
 	// キューノードを作成する
-	tImageQueueNode *q = new tImageQueueNode(ImageBuffer);
+	tImageQueueNode *q = new tImageSourceQueueNode(*ImageBuffer);
 
 	// ノードの親を関連付ける
 	{
@@ -150,7 +156,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 		{
 			tQueueNode * par = it.GetValue().
 				ExpectAndGetObjectInterface(
-					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest().GetParentQueueNode();
+					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest()->GetParentQueueNode();
 			// ここでreqをつかってごにょごにょ処理をする
 			q->AddParent(par);
 		}

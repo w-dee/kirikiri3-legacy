@@ -20,6 +20,7 @@
 #include "risa/packages/risa/graphic/rina/rinaTypes.h"
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
 #include "risa/packages/risa/graphic/rina/rinaImageEdge.h"
+#include "risa/packages/risa/graphic/image/ImageBuffer.h"
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -38,7 +39,7 @@ class tImageSourceNodeInstance : public tNodeInstance
 	tOutputPinArrayInstance * OutputPinArrayInstance; //!< 出力ピン配列インスタンス
 	tImageOutputPinInstance * OutputPinInstance; //!< 出力ピンインスタンス
 
-	tImageBuffer ImageBuffer; //!< イメージバッファ
+	tImageBuffer * ImageBuffer; //!< イメージバッファ
 
 public:
 	/**

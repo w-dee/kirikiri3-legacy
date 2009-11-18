@@ -106,6 +106,12 @@ public:
 	 */
 	void AddParent(tQueueNode * parent);
 
+	/**
+	 * 最初の子ノードを得る
+	 * @return	最初の子ノード
+	 */
+	tQueueNode * GetFirstChildNode() const { RISSE_ASSERT(Children.size() == 1); return Children[0]; }
+
 private:
 	/**
 	 * ノードの子を追加する

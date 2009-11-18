@@ -49,15 +49,12 @@ protected: //!< サブクラスでオーバーライドして使う物
 	/**
 	 * ノードの処理の最初に行う処理
 	 */
-	virtual void BeginProcess() = 0;
+	virtual void BeginProcess() {}
 
 	/**
 	 * ノードの処理の最後に行う処理
 	 */
-	virtual void EndProcess()
-	{
-		// TODO: ここに描画処理を
-	}
+	virtual void EndProcess() {}
 
 };
 //---------------------------------------------------------------------------
@@ -106,19 +103,19 @@ void tRinaWidgetNodeInstance::BuildQueue(tQueueBuilder & builder)
 	// TODO: ちゃんとした更新領域の設定
 
 	// まずtTexturePolygon作成
-	tTexturePolygon poly = {
-			{ 100.0f - 0.5f, 0.0f   - 0.5f },
-			{ 0.0f   - 0.5f, 0.0f   - 0.5f },
-			{ 0.0f   - 0.5f, 100.0f - 0.5f },
-			false
-	};
+	t2DPointF v0	=	{ 100.0f - 0.5f, 0.0f   - 0.5f };
+	t2DPointF v1	=	{ 0.0f   - 0.5f, 0.0f   - 0.5f };
+	t2DPointF v2	=	{ 0.0f   - 0.5f, 100.0f - 0.5f };
+
+	tTexturePolygon poly(v0, v1, v2, false);
 
 	// tTexturePolygonList 作成
 	tTexturePolygonList poly_list;
 	poly_list.push_back(poly);
 
-	// キューノードを作成する TODO
+	// キューノードを作成する
 	tQueueNode * queue = new tRinaWidgetQueueNode();
+	builder.SetRootQueueNode(queue);
 
 	// レンダリング要求の作成
 	tRenderRequest * req = new tImageRenderRequest(queue, poly_list);
@@ -269,7 +266,7 @@ void tRina::OnPaint(wxPaintEvent& event)
 	builder.Build(node);
 
 	// 描画処理を実行
-	tQueueNode * root = builder.GetRootQueueNode();
+	tQueueNode * root = builder.GetRootQueueNode()->GetFirstChildNode();
 	tQueue queue;
 	queue.Process(root);
 

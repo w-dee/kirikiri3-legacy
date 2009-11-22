@@ -135,6 +135,10 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 	// 子ノードがある場合は子ノードをpushするが、ImageSourceに子ノードはないので
 	// それは行わない。
 
+#if 0
+	// ImageSource では、親ノードの入力ピンにどういうレンダリング要求が設定されて
+	// いても単に画像を親ノードに渡すだけなのでここは何もしない。
+
 	// 出力ピンをたどり、親ノードの入力ピンに設定されているレンダリング要求を確認する
 	{
 		tEnumerableIterator it(tVariant(OutputPinInstance->GetInputPins()));
@@ -146,7 +150,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 			// ここでreqをつかってごにょごにょ処理をする
 		}
 	}
-
+#endif
 	// キューノードを作成する
 	tImageQueueNode *q = new tImageSourceQueueNode(ImageBuffer);
 

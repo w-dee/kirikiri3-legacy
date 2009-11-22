@@ -158,7 +158,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 			tQueueNode * par = it.GetValue().
 				ExpectAndGetObjectInterface(
 					tClassHolder<tInputPinClass>::instance()->GetClass())->GetRenderRequest()->GetParentQueueNode();
-			// ここでreqをつかってごにょごにょ処理をする
+			// ここでparをつかってごにょごにょ処理をする
 			q->AddParent(par);
 		}
 	}

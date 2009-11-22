@@ -214,7 +214,13 @@ void tImageSourceNodeInstance::initialize(const tNativeCallInfo &info)
 //---------------------------------------------------------------------------
 
 
-
+//---------------------------------------------------------------------------
+void tImageSourceNodeInstance::assignImage(const Risse::tVariant & src)
+{
+	AssignImageInstance(src.ExpectAndGetObjectInterface(
+		tClassHolder<tImageClass>::instance()->GetClass()));
+}
+//---------------------------------------------------------------------------
 
 
 

@@ -84,6 +84,7 @@ public: // その他のメソッドなど
 public: // Risse用メソッドなど
 	void construct();
 	void initialize(const tNativeCallInfo &info);
+	void assignImage(const tVariant & src);
 };
 //---------------------------------------------------------------------------
 

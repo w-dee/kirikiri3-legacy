@@ -21,6 +21,8 @@
 #include "risa/packages/risa/graphic/rina/rinaPin.h"
 #include "risa/packages/risa/graphic/rina/rinaImageEdge.h"
 #include "risa/packages/risa/graphic/image/ImageBuffer.h"
+#include "risa/packages/risa/graphic/image/Image.h"
+
 
 namespace Risa {
 //---------------------------------------------------------------------------
@@ -39,7 +41,7 @@ class tImageSourceNodeInstance : public tNodeInstance
 	tOutputPinArrayInstance * OutputPinArrayInstance; //!< 出力ピン配列インスタンス
 	tImageOutputPinInstance * OutputPinInstance; //!< 出力ピンインスタンス
 
-	tImageBuffer * ImageBuffer; //!< イメージバッファ
+	tGCReferencePtr<tImageBuffer> * ImageBuffer; //!< イメージバッファ
 
 public:
 	/**
@@ -71,6 +73,13 @@ public:
 	 * @param builder	キュービルダーオブジェクト
 	 */
 	virtual void BuildQueue(tQueueBuilder & builder);
+
+public: // その他のメソッドなど
+	/**
+	 * Image クラスのインスタンスに保持されている画像を割り当てる
+	 * @param instance		Imageクラスのインスタンス
+	 */
+	void AssignImageInstance(tImageInstance * instance);
 
 public: // Risse用メソッドなど
 	void construct();

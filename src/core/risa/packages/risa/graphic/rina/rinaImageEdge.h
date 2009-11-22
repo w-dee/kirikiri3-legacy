@@ -281,7 +281,7 @@ public: //!< サブクラスでオーバーライドして使う物
 	 * 画像を得る
 	 * @return	画像
 	 */
-	virtual tImageBuffer & GetImageBufferNoAddRef() = 0;
+	virtual tGCReferencePtr<tImageBuffer> * GetImageBuffer() = 0;
 
 	/**
 	 * 画像のオフセットを得る

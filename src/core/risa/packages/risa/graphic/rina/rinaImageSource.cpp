@@ -45,14 +45,14 @@ public:
 	typedef tImageQueueNode inherited;
 private:
 
-	tImageBuffer & ImageBuffer; //!< 親キューノードに返すイメージバッファ
+	tGCReferencePtr<tImageBuffer> * ImageBuffer; //!< 親キューノードに返すイメージバッファ
 
 public:
 	/**
 	 * コンストラクタ
 	 * @param	im		親キューノードに返すイメージバッファ
 	 */
-	tImageSourceQueueNode(tImageBuffer & im) :
+	tImageSourceQueueNode(tGCReferencePtr<tImageBuffer> * im) :
 		inherited(), ImageBuffer(im) {;}
 
 public: //!< サブクラスでオーバーライドして使う物
@@ -60,7 +60,7 @@ public: //!< サブクラスでオーバーライドして使う物
 	 * 画像を得る
 	 * @return	画像
 	 */
-	virtual tImageBuffer & GetImageBufferNoAddRef()
+	virtual tGCReferencePtr<tImageBuffer> * GetImageBuffer()
 	{
 		return ImageBuffer;
 	}
@@ -107,6 +107,7 @@ tImageSourceNodeInstance::tImageSourceNodeInstance()
 	InputPinArrayInstance = NULL;
 	OutputPinArrayInstance = NULL;
 	OutputPinInstance = NULL;
+	ImageBuffer = new tGCReferencePtr<tImageBuffer>;
 }
 //---------------------------------------------------------------------------
 
@@ -147,7 +148,7 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 	}
 
 	// キューノードを作成する
-	tImageQueueNode *q = new tImageSourceQueueNode(*ImageBuffer);
+	tImageQueueNode *q = new tImageSourceQueueNode(ImageBuffer);
 
 	// ノードの親を関連付ける
 	{
@@ -161,6 +162,17 @@ void tImageSourceNodeInstance::BuildQueue(tQueueBuilder & builder)
 			q->AddParent(par);
 		}
 	}
+}
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+void tImageSourceNodeInstance::AssignImageInstance(tImageInstance * instance)
+{
+	// クローンを行う。つまり、これ以降に元画像が変更されてもこのノードの画像には影響しない。
+	tImageBuffer * ref = instance->GetBuffer();
+	ImageBuffer->set(ref->Clone());
+	ref->Release();
 }
 //---------------------------------------------------------------------------
 

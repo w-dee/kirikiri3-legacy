@@ -273,9 +273,9 @@ void tRina::OnPaint(wxPaintEvent& event)
 	// ルートキューノードから画像バッファを取り出し、描画
 	tImageQueueNode * image_queue = DownCast<tImageQueueNode*>(root);
 	const tImageBuffer::tDescriptor & buffer_desc =
-			image_queue->GetImageBufferNoAddRef().GetDescriptor();
+			image_queue->GetImageBuffer()->get_noaddref()->GetDescriptor();
 	const tImageBuffer::tBufferPointer & buffer_pointer =
-			image_queue->GetImageBufferNoAddRef().GetBufferPointer();
+			image_queue->GetImageBuffer()->get_noaddref()->GetBufferPointer();
 
 	wxPaintDC dc(this);
 

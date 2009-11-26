@@ -164,20 +164,23 @@ ifeq (unix,$(PLATFORM))
 # $(BIN)-binを呼ぶようにする。
 # 
 # TODO: Linux以外のラッパスクリプト
- $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
+ $(BIN)-bin : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
 	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
 	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN)-bin $(LIBS) $(DEFAULT_LIBS)
+	$(POST_LINK_COMMAND)
+
+ $(BIN) : $(BIN)-bin
 	@echo '#!/bin/sh -e' > $(BIN)
 	@echo 'bindir=`dirname $$0`' >> $(BIN)
 	@echo '$(LD_LIBRARY_PATH_ENV_NAME)=$$bindir:$$$(LD_LIBRARY_PATH_ENV_NAME) \
            exec $$bindir/$(notdir $(BIN))-bin $$@' >> $(BIN)
 	@chmod a+x $(BIN)
 
-
 else	# $(PLATFORM) != unix
  $(BIN) : $(BIN_DEPS) $(PREC_H_NAME).gch $(OBJS) $(MESSAGE_OBJECTS)
 	if [ ! -d $(dir $(BIN)) ]; then mkdir -p $(dir $(BIN)) ; fi
 	$(CXX) $(LDFLAGS) $(OBJS) -o $(BIN) $(LIBS) $(DEFAULT_LIBS)
+	$(POST_LINK_COMMAND)
 
 endif	# $(PLATFORM)
 

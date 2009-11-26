@@ -20,11 +20,10 @@ CPPFILES=Main.cpp
 
 OBJS =  $(CPPFILES:.cpp=.o) $(addsuffix /subsys.o,$(SUBSYS_DIRS))
 
-BIN_DEPS = make_var_and_etc
+POST_LINK_COMMAND=mkdir -p $(BUILD_OUT_DIR)/var;mkdir -p $(BUILD_OUT_DIR)/etc
 
-make_var_and_etc:
-	mkdir -p $(BUILD_OUT_DIR)/var
-	mkdir -p $(BUILD_OUT_DIR)/etc
+
+
 
 #----------------------------#
 
